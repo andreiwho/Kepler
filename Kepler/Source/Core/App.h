@@ -2,6 +2,9 @@
 #include "Core/Types.h"
 #include "Platform/Window.h"
 #include "Platform/PlatformEvent.h"
+#include "Core/Malloc.h"
+
+#include "Renderer/RenderDevice.h"
 
 #include <string>
 #include <vector>
@@ -37,7 +40,8 @@ namespace Kepler
 
 	private:
 		TWindow* MainWindow{};
+		TRef<TRenderDevice> RenderDevice{};
 	};
 
-	extern std::shared_ptr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
+	extern TRef<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
 }

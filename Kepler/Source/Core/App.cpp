@@ -21,6 +21,7 @@ namespace Kepler
 		KEPLER_INFO("LogApp", "Starting application initialization");
 
 		MainWindow = CHECKED(CHECKED(TPlatform::Get())->CreatePlatformWindow(1280, 720, "Kepler"));
+		RenderDevice = CHECKED(TRenderDevice::CreateRenderDevice(ERenderAPI::Default));
 	}
 
 	TApplication::~TApplication()
@@ -32,8 +33,10 @@ namespace Kepler
 	{
 		KEPLER_INFO("LogApp", "Application Run called...");
 
+		// Begin main loop
 		if (TPlatform* Platform = TPlatform::Get())
 		{
+			Platform->RegisterPlatformEventListener(this);
 			while (Platform->HasActiveMainWindow())
 			{
 				Platform->Update();

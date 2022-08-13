@@ -12,9 +12,9 @@ public:
 	{}
 };
 
-std::shared_ptr<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
+TRef<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
-	std::shared_ptr<TApplication> App = std::make_shared<TTestbed>(LaunchParams);
+	TRef<TApplication> App = AsRef<TApplication>(New<TTestbed>(LaunchParams));
 	// ... Do some processing if needed
 	return App;
 }

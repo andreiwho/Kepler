@@ -85,9 +85,9 @@ namespace Kepler
 		}
 	}
 
-	std::shared_ptr<TPlatform> TPlatform::CreatePlatformInterface()
+	TRef<TPlatform> TPlatform::CreatePlatformInterface()
 	{
-		return std::make_shared<TPlatformGLFW>();
+		return AsRef<TPlatform>(New<TPlatformGLFW>());
 	}
 }
 

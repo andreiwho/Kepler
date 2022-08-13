@@ -2,6 +2,7 @@
 #include "Platform/Platform.h"
 #include "Core/App.h"
 #include "Core/Log.h"
+#include "Core/Malloc.h"
 
 namespace Kepler
 {
@@ -21,6 +22,7 @@ namespace Kepler
 	int Main(i32 Argc, char** ppArgv)
 	{
 		// Log must be the first one always
+		TMalloc Malloc{};
 		TLog GlobalLog;
 
 		// Platform must be initialized after the log

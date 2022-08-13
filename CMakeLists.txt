@@ -7,7 +7,6 @@ set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Release)
 
 macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
@@ -19,8 +18,8 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
   )
  target_compile_definitions(${ModuleName} PRIVATE
   # SETUP LOGGING
-  $<$<CONFIG:RelWithDebInfo>:ENABLE_LOGGING>
-  $<$<CONFIG:Debug>:ENABLE_LOGGING>
+  $<$<CONFIG:RelWithDebInfo>:ENABLE_LOGGING USE_ASSERT>
+  $<$<CONFIG:Debug>:ENABLE_LOGGING USE_ASSERT>
  )
 
  if(WIN32 OR UNIX)
@@ -32,14 +31,14 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
 endmacro()
 
 macro(CreateLibrary ModuleName ModuleFolder)
- file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h LIST_DIRECTORIES TRUE)
+ file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h Source/**.inl LIST_DIRECTORIES TRUE)
  add_library(${ModuleName} STATIC ${PROJECT_FILES})
  SetupDefaultProjectProperties(${ModuleName} ${ModuleFolder})
  source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${PROJECT_FILES})
 endmacro()
 
 macro(CreateExecutable ModuleName ModuleFolder)
- file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h LIST_DIRECTORIES TRUE)
+ file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h Source/**.inl LIST_DIRECTORIES TRUE)
  add_executable(${ModuleName} ${PROJECT_FILES})
  SetupDefaultProjectProperties(${ModuleName} ${ModuleFolder})
  source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${PROJECT_FILES})

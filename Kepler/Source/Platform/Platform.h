@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "PlatformEvent.h"
 #include "Window.h"
+#include "Core/Malloc.h"
 
 #include <memory>
 
@@ -18,7 +19,7 @@ namespace Kepler
 
 		static TPlatform* Get();
 
-		static std::shared_ptr<TPlatform> CreatePlatformInterface();
+		static TRef<TPlatform> CreatePlatformInterface();
 
 		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const std::string& title, const TWindowParams& params = {}) = 0;
 		virtual void Update() = 0;

@@ -2,6 +2,7 @@
 #include "Macros.h"
 
 #include <cstdint>
+#include <string>
 
 namespace Kepler
 {
@@ -19,4 +20,7 @@ namespace Kepler
 
 	using usize = u64;
 	using isize = i64;
+
+	std::string ConvertToAnsiString(const std::wstring& WideString);
+	std::wstring ConvertToWideString(const std::string& AnsiString);
 }
