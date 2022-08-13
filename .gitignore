@@ -1,0 +1,11 @@
+Bin
+_Generated
+Release
+
+# Visual studio stuff
+.vscode
+.vs
+*.sln
+*.vcxproj
+*.filters
+*.user
