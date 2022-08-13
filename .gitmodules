@@ -1,0 +1,3 @@
+[submodule "Kepler/ThirdParty/spdlog"]
+	path = Kepler/ThirdParty/spdlog
+	url = https://github.com/gabime/spdlog

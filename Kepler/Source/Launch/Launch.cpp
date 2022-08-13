@@ -1,5 +1,6 @@
 #include "Launch.h"
 #include "Core/App.h"
+#include "Core/Log.h"
 
 namespace Kepler
 {
@@ -18,6 +19,7 @@ namespace Kepler
 
 	int Main(i32 Argc, char** ppArgv)
 	{
+		TLog GlobalLog;
 		std::shared_ptr<TApplication> AppInstance;
 		{
 			TApplicationLaunchParams Params{};

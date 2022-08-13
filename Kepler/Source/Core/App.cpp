@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Log.h"
 
 #include <iostream>
 
@@ -15,14 +16,17 @@ namespace Kepler
 
 	TApplication::TApplication(const TApplicationLaunchParams& LaunchParams)
 	{
+		TLog::Info("LogApp", "Starting application initialization");
 	}
 
 	TApplication::~TApplication()
 	{
+		TLog::Info("LogApp", "Finishing application termination");
 	}
 
 	void TApplication::Run()
 	{
+		TLog::Info("LogApp", "Application Run called...");
 	}
 
 }

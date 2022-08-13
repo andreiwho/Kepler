@@ -5,8 +5,9 @@ project "Testbed"
 
  includedirs {
     "Source/", 
-    "../Kepler/Source"
  }
+
+ Public_Engine_Includes()
 
  links {
   "Kepler"

@@ -1,4 +1,6 @@
 #pragma once
+#include "Macros.h"
+
 #include <cstdint>
 
 namespace Kepler
