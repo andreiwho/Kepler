@@ -35,13 +35,8 @@ namespace Kepler
 
 	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger)
 	{
-#ifndef NDEBUG
 		Logger->set_level(spdlog::level::trace);
-#else
-		Logger->set_level(spdlog::level::warn);
-#endif
 		Logger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
-
 		return Logger;
 	}
 

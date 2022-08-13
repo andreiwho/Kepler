@@ -1,4 +1,5 @@
 #include "Launch.h"
+#include "Platform/Platform.h"
 #include "Core/App.h"
 #include "Core/Log.h"
 
@@ -19,7 +20,12 @@ namespace Kepler
 
 	int Main(i32 Argc, char** ppArgv)
 	{
+		// Log must be the first one always
 		TLog GlobalLog;
+
+		// Platform must be initialized after the log
+		auto platform = TPlatform::CreatePlatformInterface();
+
 		std::shared_ptr<TApplication> AppInstance;
 		{
 			TApplicationLaunchParams Params{};

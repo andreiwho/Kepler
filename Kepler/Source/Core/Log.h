@@ -56,3 +56,17 @@ namespace Kepler
 		std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> Loggers;
 	};
 }
+
+#ifdef ENABLE_LOGGING
+# define KEPLER_TRACE(Channel, Format, ...)      Kepler::TLog::Trace(Channel, Format, __VA_ARGS__) 
+# define KEPLER_INFO(Channel, Format, ...) 		 Kepler::TLog::Info(Channel, Format, __VA_ARGS__)
+# define KEPLER_WARNING(Channel, Format, ...) 	 Kepler::TLog::Warn(Channel, Format, __VA_ARGS__)
+# define KEPLER_ERROR(Channel, Format, ...) 	 Kepler::TLog::Error(Channel, Format, __VA_ARGS__)
+# define KEPLER_CRITICAL(Channel, Format, ...) 	 Kepler::TLog::Critical(Channel, Format, __VA_ARGS__)
+#else
+# define KEPLER_TRACE(Channel, Format, ...)     
+# define KEPLER_INFO(Channel, Format, ...) 		
+# define KEPLER_WARNING(Channel, Format, ...) 	
+# define KEPLER_ERROR(Channel, Format, ...) 	
+# define KEPLER_CRITICAL(Channel, Format, ...) 	
+#endif
