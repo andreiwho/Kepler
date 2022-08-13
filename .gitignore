@@ -1,0 +1,9 @@
+Bin
+
+# Visual studio stuff
+.vscode
+.vs
+*.sln
+*.vcxproj
+*.filters
+*.user
