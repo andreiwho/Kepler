@@ -22,6 +22,7 @@ namespace Kepler
 
 		MainWindow = CHECKED(CHECKED(TPlatform::Get())->CreatePlatformWindow(1280, 720, "Kepler"));
 		RenderDevice = CHECKED(TRenderDevice::CreateRenderDevice(ERenderAPI::Default));
+		ENQUEUE_RENDER_TASK([this] { this->SwapChain = RenderDevice->CreateSwapChainForWindow(MainWindow); });
 	}
 
 	TApplication::~TApplication()
@@ -42,6 +43,7 @@ namespace Kepler
 			{
 				Platform->Update();
 
+				ENQUEUE_RENDER_TASK([this] { SwapChain->RT_Present(); });
 				RenderThread.FlushAndWait();
 			}
 		}

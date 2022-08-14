@@ -41,8 +41,10 @@ namespace Kepler
 
 	private:
 		TWindow* MainWindow{};
-		TRef<TRenderDevice> RenderDevice{};
 		TRenderThread RenderThread{};
+		
+		TRef<TRenderDevice> RenderDevice{};
+		TRef<TSwapChain> SwapChain{};
 	};
 
 	extern TRef<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);

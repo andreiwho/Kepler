@@ -1,5 +1,6 @@
 #include "RenderThread.h"
 #include "Core/Log.h"
+#include "Renderer/RenderGlobals.h"
 
 namespace Kepler
 {
@@ -41,6 +42,8 @@ namespace Kepler
 
 	void TRenderThread::ThreadMain(TRenderThread* This)
 	{
+		GRenderThreadID = std::this_thread::get_id();
+
 		while (This->bRunning)
 		{
 			if (This->Tasks.GetLength() == 0)

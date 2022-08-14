@@ -3,6 +3,8 @@
 #include "RenderTypes.h"
 #include "Core/Malloc.h"
 
+#include "Elements/SwapChain.h"
+
 #include <memory>
 
 namespace Kepler
@@ -13,5 +15,7 @@ namespace Kepler
 		virtual ~TRenderDevice() = default;
 
 		static TRef<TRenderDevice> CreateRenderDevice(ERenderAPI OverrideAPI = ERenderAPI::Default);
+
+		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) = 0;
 	};
 }

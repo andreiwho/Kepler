@@ -2,7 +2,12 @@
 #include "Core/Types.h"
 #include "RenderTypes.h"
 
+#include <thread>
+
 namespace Kepler
 {
 	extern ERenderAPI GRenderAPI;
+	extern std::thread::id GRenderThreadID;
+	
+	extern bool IsRenderThread();
 }

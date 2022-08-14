@@ -2,11 +2,18 @@
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
 #include "../RenderThread.h"
+#include "SwapChainD3D11.h"
+#include "Platform/Window.h"
 
 namespace Kepler
 {
+	TRenderDeviceD3D11* TRenderDeviceD3D11::Instance = nullptr;
+
 	TRenderDeviceD3D11::TRenderDeviceD3D11()
 	{
+		CHECK(!Instance);
+		Instance = this;
+
 		ENQUEUE_RENDER_TASK([this]
 			{
 				CreateFactory();
@@ -25,6 +32,12 @@ namespace Kepler
 				if (Factory)
 					Factory->Release();
 			});
+	}
+
+	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
+	{
+		return AsRef<TSwapChain>(New<TSwapChainD3D11>(Window));
+
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
