@@ -5,7 +5,7 @@ namespace Kepler
 {
 	TException::TException(const std::string& Message, const std::string& Name)
 		: ErrorMessage(fmt::format("{} -> {}", Name, Message))
-		, std::runtime_error(ErrorMessage)
+		, std::runtime_error("TException needs to be caught")
 	{
 	}
 }

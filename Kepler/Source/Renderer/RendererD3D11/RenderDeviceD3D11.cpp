@@ -1,11 +1,16 @@
 #ifdef WIN32
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
-#include "../RenderThread.h"
+#include "Renderer/RenderThread.h"
 #include "SwapChainD3D11.h"
 #include "Platform/Window.h"
 #include "Core/Macros.h"
-#include "../RenderGlobals.h"
+#include "Renderer/RenderGlobals.h"
+
+#ifndef NDEBUG
+# include <dxgidebug.h>
+#include "Core/Malloc.h"
+#endif
 
 namespace Kepler
 {
@@ -20,13 +25,18 @@ namespace Kepler
 
 		CreateFactory();
 		CreateDevice();
-
+#ifndef NDEBUG
+		InitializeInfoQueue();
+#endif
 	}
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
-
+#ifndef NDEBUG
+		if (InfoQueue)
+			InfoQueue->Release();
+#endif
 		if (ImmediateContext)
 			ImmediateContext->Release();
 		if (Device)
@@ -39,6 +49,36 @@ namespace Kepler
 	{
 		CHECK(IsRenderThread());
 		return MakeRef<TSwapChainD3D11>(Window);
+	}
+
+	void TRenderDeviceD3D11::Internal_InitInfoMessageStartIndex_Debug()
+	{
+#ifndef NDEBUG
+		if (InfoQueue)
+		{
+			InfoMsgStartIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+		}
+#endif
+	}
+
+	std::vector<std::string> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	{
+#ifndef NDEBUG
+		std::vector<std::string> OutMessages;
+		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
+		{
+			SIZE_T MessageLength{};
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, nullptr, &MessageLength));
+			DXGI_INFO_QUEUE_MESSAGE* pMessage = (DXGI_INFO_QUEUE_MESSAGE*)TMalloc::Get()->Allocate(MessageLength);
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, pMessage, &MessageLength));
+			OutMessages.emplace_back(pMessage->pDescription);
+			TMalloc::Get()->Free(pMessage);
+		}
+		return OutMessages;
+#else
+		return {};
+#endif
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
@@ -99,6 +139,21 @@ namespace Kepler
 		OutContext->Release();
 		KEPLER_TRACE("LogRender", "Created D3D11 Render Device from adapter '{}'", GetAdapterName(Adapter));
 		Adapter->Release();
+	}
+
+	void TRenderDeviceD3D11::InitializeInfoQueue()
+	{
+#ifndef NDEBUG
+		HMODULE DxgiDebug = CHECKED(::LoadLibraryA("DXGIDebug.dll"));
+		using TPFN_DXGIGetDebugInterface = HRESULT(*)(REFIID, void**);
+		auto LoadFunc = (TPFN_DXGIGetDebugInterface)::GetProcAddress(DxgiDebug, "DXGIGetDebugInterface");
+		CHECK(LoadFunc);
+		HRCHECK(LoadFunc(IID_PPV_ARGS(&InfoQueue)));
+		if (InfoQueue)
+		{
+			InfoMsgStartIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+		}
+#endif
 	}
 
 }

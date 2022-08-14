@@ -22,9 +22,7 @@ namespace Kepler
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeRef<TLowLevelRenderer>();
-		auto OtherWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Other"));
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
-		LowLevelRenderer->InitRenderStateForWindow(OtherWindow);
 	}
 
 	TApplication::~TApplication()

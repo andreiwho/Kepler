@@ -5,11 +5,13 @@
 #include "Platform/Window.h"
 #include "../RenderGlobals.h"
 
+#include <sstream>
+
 namespace Kepler
 {
 
 	TSwapChainD3D11::TSwapChainD3D11(class TWindow* Window)
-	: TSwapChain(Window) 
+		: TSwapChain(Window)
 	{
 		CHECK(IsRenderThread());
 		DXGI_SWAP_CHAIN_DESC1 Desc{};
@@ -34,7 +36,7 @@ namespace Kepler
 			Device->GetDevice(),
 			(HWND)Window->GetNativeHandle(),
 			&Desc,
-			nullptr, 
+			nullptr,
 			nullptr,
 			&NewChain
 		));
@@ -48,7 +50,7 @@ namespace Kepler
 	{
 		if (RenderTargetView)
 			RenderTargetView->Release();
-		
+
 		if (SwapChain)
 			SwapChain->Release();
 	}
@@ -64,7 +66,7 @@ namespace Kepler
 
 		ID3D11Resource* Buffer{};
 		HRCHECK(SwapChain->GetBuffer(0, IID_PPV_ARGS(&Buffer)));
-		
+
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
 
@@ -74,9 +76,26 @@ namespace Kepler
 
 	void TSwapChainD3D11::Present()
 	{
-		CHECK(SwapChain);
 		CHECK(IsRenderThread());
-		HRCHECK(SwapChain->Present(0, 0));
+		CHECK(SwapChain);
+		
+		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
+		CHECK(Device);
+		Device->Internal_InitInfoMessageStartIndex_Debug();
+		const HRESULT Result = SwapChain->Present(0, 0);
+		if (FAILED(Result))
+		{
+			auto Messages = Device->GetInfoQueueMessages();
+			if (!Messages.empty())
+			{
+				std::stringstream StringStream;
+				for (const auto& Message : Messages)
+				{
+					StringStream << Message << '\n';
+				}
+				CHECKMSG(false, fmt::format("DXGI Error list:\n{}", StringStream.str()));
+			}
+		}
 	}
 
 	void TSwapChainD3D11::Resize(i32 Width, i32 Heigt)
