@@ -1,25 +1,31 @@
 #ifdef WIN32
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
+#include "../RenderThread.h"
 
 namespace Kepler
 {
 	TRenderDeviceD3D11::TRenderDeviceD3D11()
 	{
-		CreateFactory();
-		CreateDevice();
+		ENQUEUE_RENDER_TASK([this]
+			{
+				CreateFactory();
+				CreateDevice();
+			});
 	}
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
-		if (ImmediateContext)
-			ImmediateContext->Release();
-
-		if (Device)
-			Device->Release();
-
-		if (Factory)
-			Factory->Release();
+		ENQUEUE_RENDER_TASK([this]
+			{
+				if (ImmediateContext)
+					ImmediateContext->Release();
+				if (Device)
+					Device->Release();
+				if (Factory)
+					Factory->Release();
+			});
+		FORCE_FLUSH_RENDER_THREAD();
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
@@ -41,7 +47,7 @@ namespace Kepler
 		Flags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 		HRCHECK(::CreateDXGIFactory2(Flags, IID_PPV_ARGS(&Factory)));
-	}
+}
 
 	void TRenderDeviceD3D11::CreateDevice()
 	{

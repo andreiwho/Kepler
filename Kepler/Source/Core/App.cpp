@@ -26,6 +26,7 @@ namespace Kepler
 
 	TApplication::~TApplication()
 	{
+		RenderDevice.reset();
 		KEPLER_INFO("LogApp", "Finishing application termination");
 	}
 

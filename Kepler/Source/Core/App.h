@@ -3,6 +3,7 @@
 #include "Platform/Window.h"
 #include "Platform/PlatformEvent.h"
 #include "Core/Malloc.h"
+#include "Renderer/RenderThread.h"
 
 #include "Renderer/RenderDevice.h"
 
@@ -41,6 +42,7 @@ namespace Kepler
 	private:
 		TWindow* MainWindow{};
 		TRef<TRenderDevice> RenderDevice{};
+		TRenderThread RenderThread{};
 	};
 
 	extern TRef<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
