@@ -62,7 +62,7 @@ namespace Kepler
 			RenderTargetView->Release();
 		}
 
-		ID3D11Resource* Buffer;
+		ID3D11Resource* Buffer{};
 		HRCHECK(SwapChain->GetBuffer(0, IID_PPV_ARGS(&Buffer)));
 		
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
@@ -86,6 +86,7 @@ namespace Kepler
 		if (RenderTargetView)
 		{
 			RenderTargetView->Release();
+			RenderTargetView = nullptr;
 		}
 		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 		CreateRenderTargets();
