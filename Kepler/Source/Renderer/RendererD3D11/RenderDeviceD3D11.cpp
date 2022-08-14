@@ -4,6 +4,8 @@
 #include "../RenderThread.h"
 #include "SwapChainD3D11.h"
 #include "Platform/Window.h"
+#include "Core/Macros.h"
+#include "../RenderGlobals.h"
 
 namespace Kepler
 {
@@ -12,36 +14,36 @@ namespace Kepler
 	TRenderDeviceD3D11::TRenderDeviceD3D11()
 	{
 		CHECK(!Instance);
+		CHECK(IsRenderThread());
+
 		Instance = this;
 
-		ENQUEUE_RENDER_TASK([this]
-			{
-				CreateFactory();
-				CreateDevice();
-			});
+		CreateFactory();
+		CreateDevice();
+
 	}
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
-		ENQUEUE_RENDER_TASK_FLUSH([this]
-			{
-				if (ImmediateContext)
-					ImmediateContext->Release();
-				if (Device)
-					Device->Release();
-				if (Factory)
-					Factory->Release();
-			});
+		CHECK(IsRenderThread());
+
+		if (ImmediateContext)
+			ImmediateContext->Release();
+		if (Device)
+			Device->Release();
+		if (Factory)
+			Factory->Release();
 	}
 
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
-		return AsRef<TSwapChain>(New<TSwapChainD3D11>(Window));
-
+		CHECK(IsRenderThread());
+		return MakeRef<TSwapChainD3D11>(Window);
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
 	{
+		CHECK(IsRenderThread());
 		if (!Adapter)
 		{
 			return "No Adapter";
@@ -54,15 +56,17 @@ namespace Kepler
 
 	void TRenderDeviceD3D11::CreateFactory()
 	{
+		CHECK(IsRenderThread());
 		UINT Flags = 0;
 #ifndef NDEBUG
 		Flags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 		HRCHECK(::CreateDXGIFactory2(Flags, IID_PPV_ARGS(&Factory)));
-}
+	}
 
 	void TRenderDeviceD3D11::CreateDevice()
 	{
+		CHECK(IsRenderThread());
 		CHECK(Factory);
 
 		IDXGIAdapter* Adapter;

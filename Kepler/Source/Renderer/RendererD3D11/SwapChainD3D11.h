@@ -11,13 +11,16 @@ namespace Kepler
 		TSwapChainD3D11(class TWindow* Window);
 		~TSwapChainD3D11();
 
+	private:
+		void CreateRenderTargets();
+
 	protected:
 		void Present() override;
 		void Resize(i32 Width, i32 Heigt) override;
-		virtual void ReleaseResources() override;
 
 	private:
 		IDXGISwapChain4* SwapChain{};
+		ID3D11RenderTargetView1* RenderTargetView{};
 	};
 }
 #endif

@@ -20,14 +20,16 @@ namespace Kepler
 	{
 		KEPLER_INFO("LogApp", "Starting application initialization");
 
-		MainWindow = CHECKED(CHECKED(TPlatform::Get())->CreatePlatformWindow(1280, 720, "Kepler"));
-		RenderDevice = CHECKED(TRenderDevice::CreateRenderDevice(ERenderAPI::Default));
-		ENQUEUE_RENDER_TASK([this] { this->SwapChain = RenderDevice->CreateSwapChainForWindow(MainWindow); });
+		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
+		LowLevelRenderer = MakeRef<TLowLevelRenderer>();
+		auto OtherWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Other"));
+		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
+		LowLevelRenderer->InitRenderStateForWindow(OtherWindow);
 	}
 
 	TApplication::~TApplication()
 	{
-		RenderDevice.reset();
+		LowLevelRenderer.reset();
 		KEPLER_INFO("LogApp", "Finishing application termination");
 	}
 
@@ -43,14 +45,36 @@ namespace Kepler
 			{
 				Platform->Update();
 
-				ENQUEUE_RENDER_TASK([this] { SwapChain->RT_Present(); });
-				RenderThread.FlushAndWait();
+				LowLevelRenderer->PresentAll();
 			}
 		}
 	}
 
 	void TApplication::OnPlatformEvent(const TPlatformEventBase& Event)
 	{
+		TPlatformEventDispatcher Dispatcher{ Event };
+		Dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
+		Dispatcher.Dispatch(this, &TApplication::OnWindowResized);
+	}
+
+	bool TApplication::OnWindowClosed(const TWindowClosedEvent& Event)
+	{
+		if (LowLevelRenderer)
+		{
+			LowLevelRenderer->DestroyRenderStateForWindow(Event.Window);
+			return true;
+		}
+		return false;
+	}
+
+	bool TApplication::OnWindowResized(const TWindowSizeEvent& Event)
+	{
+		if (LowLevelRenderer)
+		{
+			LowLevelRenderer->OnWindowResized(Event.Window);
+			return true;
+		}
+		return false;
 	}
 
 }

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <atomic>
 
 namespace Kepler
 {
@@ -20,6 +21,8 @@ namespace Kepler
 
 	using usize = u64;
 	using isize = i64;
+
+	template<typename T> using TAtomic = std::atomic<T>;
 
 	std::string ConvertToAnsiString(const std::wstring& WideString);
 	std::wstring ConvertToWideString(const std::string& AnsiString);

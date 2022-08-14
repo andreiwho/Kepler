@@ -22,7 +22,7 @@ namespace Kepler
 		case Kepler::ERenderAPI::DirectX11:
 			KEPLER_TRACE("LogRender", "Creating RenderDevice for DirectX11 API");
 			GRenderAPI = ERenderAPI::DirectX11;
-			return AsRef<TRenderDevice>(New<TRenderDeviceD3D11>());
+			return MakeRef<TRenderDeviceD3D11>();
 			break;
 #endif
 		default:

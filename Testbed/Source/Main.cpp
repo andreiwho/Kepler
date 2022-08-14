@@ -14,7 +14,7 @@ public:
 
 TRef<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
-	TRef<TApplication> App = AsRef<TApplication>(New<TTestbed>(LaunchParams));
+	TRef<TApplication> App = MakeRef<TTestbed>(LaunchParams);
 	// ... Do some processing if needed
 	return App;
 }

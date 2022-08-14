@@ -4,54 +4,57 @@
 
 namespace Kepler
 {
+	std::unique_ptr<TMemoryPool> GGlobalMemoryPool = nullptr;
 	TMalloc* TMalloc::Instance = nullptr;
 
 	TMalloc::TMalloc()
 	{
 		assert(!Instance);
 		Instance = this;
+
+		if (!GGlobalMemoryPool)
+		{
+			GGlobalMemoryPool = std::unique_ptr<TMemoryPool>(new TMemoryPool(1024 * 1024 * 1024));
+		}
 	}
 
 	TMalloc::~TMalloc()
 	{
 		Instance = nullptr;
+		if (GGlobalMemoryPool)
+		{
+			GGlobalMemoryPool.reset();
+		}
 	}
 
-	void* TMalloc::Allocate(usize size)
+	void* TMalloc::Allocate(usize Size, TMemoryPool* MemoryPool)
 	{
-		const usize sizeWithHeader = size + sizeof(TAllocationHeader);
-		void* newData = ::operator new(sizeWithHeader);
-		assert(newData && "TMalloc::Allocate - failed");
-		TAllocationHeader* header = (TAllocationHeader*)newData;
-		header->AllocationSize = size;
-		return (ubyte*)newData + sizeof(*header);
+		TMemoryPool* AllocationPool = MemoryPool;
+		if (!MemoryPool)
+		{
+			AllocationPool = GGlobalMemoryPool.get();
+		}
+
+		void* NewData = AllocationPool->Allocate(Size);
+		assert(NewData && "TMalloc::Allocate - failed");
+		return NewData;
 	}
 
-	void TMalloc::Free(void* block)
+	void TMalloc::Free(void* Block)
 	{
-		void* headerPtr = GetHeaderPtr(block);
-		assert(headerPtr);
-		::operator delete(headerPtr);
+		TMemoryPool* Pool = TMemoryPool::GetAllocationPool(Block);
+		CHECK(Pool != nullptr);
+		Pool->Deallocate(Block);
 	}
 
-	usize TMalloc::GetSize(void* block) const
+	usize TMalloc::GetSize(void* Block) const
 	{
-		auto header = GetHeaderPtr(block);
-		assert(header);
-		return header->AllocationSize;
+		return TMemoryPool::GetAllocationSize(Block);
 	}
 
-	TMalloc::TAllocationHeader* TMalloc::GetHeaderPtr(void* block)
+	usize MemorySize(void* Data)
 	{
-		auto userMemory = (ubyte*)block;
-		auto headerPtr = (TAllocationHeader*)(userMemory - sizeof(TAllocationHeader));
-		assert(headerPtr && "Failed to get proper allocation ptr");
-		return headerPtr;
-	}
-
-	usize MemorySize(void* data)
-	{
-		return CHECKED(TMalloc::Get())->GetSize(data);
+		return CHECKED(TMalloc::Get())->GetSize(Data);
 	}
 
 }

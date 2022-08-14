@@ -1,11 +1,14 @@
 #pragma once
 #include "Types.h"
 #include "Macros.h"
+#include "MemoryPool.h"
 
 #include <memory>
 
 namespace Kepler
 {
+	extern std::unique_ptr<TMemoryPool> GGlobalMemoryPool;
+
 	/**
 	 * Currently the TMalloc class does not hold any kind of state.
 	 * Just in case anyone is wondering, it will.
@@ -19,17 +22,15 @@ namespace Kepler
 
 		static TMalloc* Get() { return CHECKED(Instance); }
 
-		void* Allocate(usize size);
+		void* Allocate(usize Size, TMemoryPool* MemoryPool = nullptr);
 		void Free(void* block);
 		usize GetSize(void* block) const;
 
 	private:
-		struct TAllocationHeader 
+		struct TAllocationHeader
 		{
 			usize AllocationSize{};
 		};
-
-		static TAllocationHeader* GetHeaderPtr(void* block);
 	};
 
 	template<typename T, typename ... Args>
@@ -40,11 +41,50 @@ namespace Kepler
 
 	usize MemorySize(void* data);
 
+
 	template<typename T> using TRef = std::shared_ptr<T>;
-	template<typename T>
-	inline TRef<T> AsRef(T* Pointer) 
+
+	template <typename T>
+	class TMallocator
 	{
-		return std::shared_ptr<T>(Pointer, &Delete<T>);
+	public:
+		using value_type = T;
+
+		TMallocator() noexcept {}
+		template <typename U>
+		TMallocator(const TMallocator<U>&) noexcept {}
+		~TMallocator() = default;
+
+		T* allocate(uint64_t n) noexcept
+		{
+			return reinterpret_cast<T*>(TMalloc::Get()->Allocate(n * sizeof(T)));
+		}
+
+		void deallocate(T* p, uint64_t n) noexcept
+		{
+			if (p)
+			{
+				TMalloc::Get()->Free(p);
+			}
+		}
+
+		template <typename U>
+		struct rebind
+		{
+			using other = TMallocator<U>;
+		};
+
+		TMallocator(const TMallocator&) = default;
+		TMallocator& operator=(const TMallocator&) = default;
+		TMallocator(TMallocator&& other) noexcept = default;
+		TMallocator& operator=(TMallocator&& other) noexcept = default;
+	};
+
+
+	template<typename T, typename ... ARGS>
+	inline TRef<T> MakeRef(ARGS&& ... Args)
+	{
+		return std::allocate_shared<T>(TMallocator<T>{}, std::forward<ARGS>(Args)...);
 	}
 
 	template<typename T>
@@ -52,8 +92,8 @@ namespace Kepler
 
 	template<typename T> using TScope = std::unique_ptr<T, TDefaultDeleter<T>>;
 	template<typename T, typename... Args>
-	inline constexpr TScope<T> AsScoped(T* Pointer) 
-	{ 
+	inline constexpr TScope<T> AsScoped(T* Pointer)
+	{
 		return std::unique_ptr<T, TDefaultDeleter<T>>(Pointer, TDefaultDeleter<T>());
 	}
 }

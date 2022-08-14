@@ -3,6 +3,7 @@
 #include "D3D11Common.h"
 #include "RenderDeviceD3D11.h"
 #include "Platform/Window.h"
+#include "../RenderGlobals.h"
 
 namespace Kepler
 {
@@ -10,6 +11,7 @@ namespace Kepler
 	TSwapChainD3D11::TSwapChainD3D11(class TWindow* Window)
 	: TSwapChain(Window) 
 	{
+		CHECK(IsRenderThread());
 		DXGI_SWAP_CHAIN_DESC1 Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
 		Desc.Width = Width;
@@ -38,30 +40,55 @@ namespace Kepler
 		));
 		HRCHECK(NewChain->QueryInterface(&SwapChain));
 		NewChain->Release();
+
+		CreateRenderTargets();
 	}
 
 	TSwapChainD3D11::~TSwapChainD3D11()
 	{
+		if (RenderTargetView)
+			RenderTargetView->Release();
+		
 		if (SwapChain)
 			SwapChain->Release();
+	}
+
+	void TSwapChainD3D11::CreateRenderTargets()
+	{
+		CHECK(IsRenderThread() && SwapChain);
+
+		if (RenderTargetView)
+		{
+			RenderTargetView->Release();
+		}
+
+		ID3D11Resource* Buffer;
+		HRCHECK(SwapChain->GetBuffer(0, IID_PPV_ARGS(&Buffer)));
+		
+		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
+		CHECK(Device);
+
+		HRCHECK(Device->GetDevice()->CreateRenderTargetView1(Buffer, nullptr, &RenderTargetView));
+		Buffer->Release();
 	}
 
 	void TSwapChainD3D11::Present()
 	{
 		CHECK(SwapChain);
+		CHECK(IsRenderThread());
 		HRCHECK(SwapChain->Present(0, 0));
 	}
 
 	void TSwapChainD3D11::Resize(i32 Width, i32 Heigt)
 	{
-		// TODO: Release buffer views
-		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
-	}
+		CHECK(IsRenderThread());
 
-	void TSwapChainD3D11::ReleaseResources()
-	{
-		if (SwapChain)
-			SwapChain->Release();
+		if (RenderTargetView)
+		{
+			RenderTargetView->Release();
+		}
+		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		CreateRenderTargets();
 	}
 }
 #endif

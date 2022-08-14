@@ -36,6 +36,7 @@ namespace Kepler
 		bool Internal_MouseButtonReleased(const TMouseButtonUpEvent& e);
 		bool Internal_KeyPressed(const TKeyDownEvent& e);
 		bool Internal_KeyReleased(const TKeyDownEvent& e);
+		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
 
 	protected:
 		bool bInitialized = false;

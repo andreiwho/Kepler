@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "Core/Malloc.h"
 #include "Core/Containers/RingQueue.h"
+#include "Async/ThreadPool.h"
 
 #include <thread>
 #include <future>
@@ -19,32 +20,21 @@ namespace Kepler
 		static TRenderThread* Get() { return CHECKED(Instance); }
 
 		template<typename Fn>
-		void Enqueue(Fn&& Func)
+		auto Submit(Fn&& Func)
 		{
-			std::packaged_task<void()> Task(std::move(Func));
-			CHECK(Tasks.Enqueue(std::move(Task)));
-			QueueFence.notify_one();
+			return WorkerPool.SubmitTask(std::move(Func));
 		}
 
-		bool Dequeue(std::packaged_task<void()>& OutTask);
-		void FlushAndWait();
+		void Wait();
 
 	private:
-		static void ThreadMain(TRenderThread* This);
 		bool bRunning = true;
-		void Flush();
 
 	private:
-		TThreadSafeRingQueue<std::packaged_task<void()>> Tasks{ 16386 };
-		std::thread Thread{};
-		std::mutex Mutex{};
-		std::condition_variable QueueFence{};
-
-		std::mutex FlushMutex{};
-		std::condition_variable FlushFence{};
+		TThreadPool WorkerPool{ 1 };
 	};
 }
 
-#define ENQUEUE_RENDER_TASK(Task) Kepler::TRenderThread::Get()->Enqueue(Task)
-#define FORCE_FLUSH_RENDER_THREAD() Kepler::TRenderThread::Get()->FlushAndWait()
-#define ENQUEUE_RENDER_TASK_FLUSH(Task) ENQUEUE_RENDER_TASK(Task); FORCE_FLUSH_RENDER_THREAD()
+#define ENQUEUE_RENDER_TASK(Task) Kepler::TRenderThread::Get()->Submit(Task)
+#define WAIT_RENDER_THREAD() Kepler::TRenderThread::Get()->Wait()
+#define ENQUEUE_RENDER_TASK_AWAITED(Task) ENQUEUE_RENDER_TASK(Task); WAIT_RENDER_THREAD()

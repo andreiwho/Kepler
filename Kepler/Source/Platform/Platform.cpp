@@ -31,6 +31,7 @@ namespace Kepler
 		dispatcher.Dispatch(this, &TPlatform::Internal_MouseButtonPressed);
 		dispatcher.Dispatch(this, &TPlatform::Internal_KeyPressed);
 		dispatcher.Dispatch(this, &TPlatform::Internal_KeyReleased);
+		dispatcher.Dispatch(this, &TPlatform::Internal_WindowClosed);
 
 		if (EventListener)
 		{
@@ -70,6 +71,12 @@ namespace Kepler
 	bool TPlatform::Internal_KeyReleased(const TKeyDownEvent& e)
 	{
 		KeyboardState.OnKeyReleased(e.Key);
+		return false;
+	}
+
+	bool TPlatform::Internal_WindowClosed(const TWindowClosedEvent& Event)
+	{
+		// ...
 		return false;
 	}
 

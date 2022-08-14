@@ -17,6 +17,7 @@ namespace Kepler
 		inline ID3D11Device5* GetDevice() const { return Device; }
 		inline ID3D11DeviceContext4* GetImmediateContext() const { return ImmediateContext; }
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
+
 	private:
 		void CreateFactory();
 		void CreateDevice();

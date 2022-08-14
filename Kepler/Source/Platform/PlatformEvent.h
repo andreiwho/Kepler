@@ -29,6 +29,7 @@ namespace Kepler
 			WindowRestore = BIT(12),
 			MouseEnter = BIT(13),
 			MouseLeave = BIT(14),
+			WindowClosed = BIT(15),
 		} Value;
 
 		EPlatformEventType(EValue  value)
@@ -163,6 +164,7 @@ namespace Kepler
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowMaximize, Window);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowMinimize, Window);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowRestore, Window);
+	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowClosed, Window);
 
 	// Interface for the window event listener
 	class IPlatformEventListener

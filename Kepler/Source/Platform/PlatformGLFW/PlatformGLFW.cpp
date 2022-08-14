@@ -87,7 +87,7 @@ namespace Kepler
 
 	TRef<TPlatform> TPlatform::CreatePlatformInterface()
 	{
-		return AsRef<TPlatform>(New<TPlatformGLFW>());
+		return MakeRef<TPlatformGLFW>();
 	}
 }
 
