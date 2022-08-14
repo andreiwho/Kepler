@@ -47,3 +47,4 @@ namespace Kepler
 
 #define ENQUEUE_RENDER_TASK(Task) Kepler::TRenderThread::Get()->Enqueue(Task)
 #define FORCE_FLUSH_RENDER_THREAD() Kepler::TRenderThread::Get()->FlushAndWait()
+#define ENQUEUE_RENDER_TASK_FLUSH(Task) ENQUEUE_RENDER_TASK(Task); FORCE_FLUSH_RENDER_THREAD()

@@ -41,6 +41,8 @@ namespace Kepler
 			while (Platform->HasActiveMainWindow())
 			{
 				Platform->Update();
+
+				RenderThread.FlushAndWait();
 			}
 		}
 	}

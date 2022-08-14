@@ -16,7 +16,7 @@ namespace Kepler
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
-		ENQUEUE_RENDER_TASK([this]
+		ENQUEUE_RENDER_TASK_FLUSH([this]
 			{
 				if (ImmediateContext)
 					ImmediateContext->Release();
@@ -25,7 +25,6 @@ namespace Kepler
 				if (Factory)
 					Factory->Release();
 			});
-		FORCE_FLUSH_RENDER_THREAD();
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
