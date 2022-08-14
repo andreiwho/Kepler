@@ -1,5 +1,11 @@
 #include "Platform.h"
 
+#ifdef PLATFORM_DESKTOP
+# include "Platform/PlatformGLFW/PlatformGLFW.h"
+#else
+
+#endif
+
 namespace Kepler
 {
 	TPlatform* TPlatform::Instance = nullptr;
@@ -21,6 +27,15 @@ namespace Kepler
 	TPlatform* TPlatform::Get()
 	{
 		return Instance;
+	}
+
+	bool TPlatform::HandleCrashReported(const std::string& Message)
+	{
+#ifdef PLATFORM_DESKTOP
+		return TPlatformGLFW::HandleCrashReported_Impl(Message);
+#else
+		return true;
+#endif
 	}
 
 	void TPlatform::OnPlatformEvent(const TPlatformEventBase& event)

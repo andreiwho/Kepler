@@ -21,25 +21,39 @@ namespace Kepler
 
 	int Main(i32 Argc, char** ppArgv)
 	{
-		// Log must be the first one always
+		// Log must be the first one always (after malloc)
 		TMalloc Malloc{};
 		TLog GlobalLog;
 
-		// Platform must be initialized after the log
-		auto platform = TPlatform::CreatePlatformInterface();
-
-		std::shared_ptr<TApplication> AppInstance;
+		try
 		{
-			TApplicationLaunchParams Params{};
-			Params.CommandLine = ReadCommandLineArgs(Argc, ppArgv);
-			// ...
-			AppInstance = MakeRuntimeApplication(Params);
+			// Platform must be initialized after the log and 
+			auto platform = TPlatform::CreatePlatformInterface();
+
+			std::shared_ptr<TApplication> AppInstance;
+			{
+				TApplicationLaunchParams Params{};
+				Params.CommandLine = ReadCommandLineArgs(Argc, ppArgv);
+				// ...
+				AppInstance = MakeRuntimeApplication(Params);
+			}
+
+			if (AppInstance)
+			{
+				AppInstance->Run();
+				return EXIT_SUCCESS;
+			}
 		}
-
-		if (AppInstance)
+		catch (const Kepler::TException& Exception)
 		{
-			AppInstance->Run();
-			return EXIT_SUCCESS;
+			KEPLER_CRITICAL("LogInit", "{}", Exception.GetErrorMessage());
+			TPlatform::HandleCrashReported(Exception.GetErrorMessage());
+			return EXIT_FAILURE;
+		}
+		catch (const std::exception& Exception)
+		{
+			KEPLER_ERROR("LogInit", "Exception caught: {}", Exception.what());
+			return EXIT_FAILURE;
 		}
 
 		return EXIT_FAILURE;

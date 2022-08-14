@@ -117,45 +117,19 @@ namespace Kepler
 	class TThreadPool
 	{
 	public:
-		TThreadPool(const u32 InNumThreads = 0)
-			: ThreadCount(CalculateThreadCount(InNumThreads))
-			, Workers(CalculateThreadCount(ThreadCount))
-		{
-			CreateThreads();
-		}
+		TThreadPool(const u32 InNumThreads = 0);
 
-		~TThreadPool()
-		{
-			WaitForTasksToFinish();
-			DestroyThreads();
-		}
+		~TThreadPool();
 
-		usize GetNumTasks() const
-		{
-			const std::scoped_lock Lck(TasksMutex);
-			return Tasks.GetLength();
-		}
+		usize GetNumTasks() const;
 
-		usize GetNumExecutingTasks() const
-		{
-			const std::scoped_lock Lck(TasksMutex);
-			return TotalTaskNum - Tasks.GetLength();
-		}
+		usize GetNumExecutingTasks() const;
 
-		usize GetTotalNumTasks() const
-		{
-			return TotalTaskNum;
-		}
+		usize GetTotalNumTasks() const;
 
-		u32 GetNumThreads() const
-		{
-			return ThreadCount;
-		}
+		u32 GetNumThreads() const;
 
-		bool IsPaused() const
-		{
-			return bPaused;
-		}
+		bool IsPaused() const;
 
 		template <typename TFUNC, typename T1, typename T2, typename T = std::common_type_t<T1, T2>, typename RETVAL = std::invoke_result_t<std::decay_t<TFUNC>, T, T>>
 		TFuturePack<RETVAL> ParallelLoop(const T1 First, const T2 AfterLast, TFUNC&& Loop, const usize DesiredBlockCount = 0)
@@ -180,10 +154,7 @@ namespace Kepler
 			return ParallelLoop(0, AfterLast, std::forward<TFUNC>(Loop), DesiredBlockCount);
 		}
 
-		void Pause()
-		{
-			bPaused = true;
-		}
+		void Pause();
 
 		template <typename TFUNC, typename T1, typename T2, typename T = std::common_type_t<T1, T2>>
 		void EnqueueLoop(const T1 First, const T2 AfterLast, TFUNC&& Loop, const usize DesiredBlockCount = 0)
@@ -213,24 +184,14 @@ namespace Kepler
 			TasksAvailableFence.notify_one();
 		}
 
-		void Reset(const u32 thread_count_ = 0)
-		{
-			const bool bWasPaused = bPaused;
-			bPaused = true;
-			WaitForTasksToFinish();
-			DestroyThreads();
-			ThreadCount = CalculateThreadCount(thread_count_);
-			Workers = std::vector<std::thread>(ThreadCount);
-			bPaused = bWasPaused;
-			CreateThreads();
-		}
+		void Reset(const u32 NumThreads = 0);
 
 		template <typename TFUNC, typename... A, typename RETVAL = std::invoke_result_t<std::decay_t<TFUNC>, std::decay_t<A>...>>
 		std::future<RETVAL> SubmitTask(TFUNC&& Task)
 		{
 			TRef<std::promise<RETVAL>> Promise = MakeRef<std::promise<RETVAL>>();
 			EnqueueTask(
-				[Func = std::move(Task), Promise]
+				[Func = std::move(Task), Promise, this]
 				{
 					try
 					{
@@ -244,11 +205,17 @@ namespace Kepler
 							Promise->set_value(std::invoke(Func));
 						}
 					}
-					catch (...)
+					catch (const TException& Exception)
+					{
+						auto SavedException = std::make_shared<TException>(Exception);
+						Exceptions.Enqueue(std::move(SavedException));
+					}
+					catch (const std::exception& Exception)
 					{
 						try
 						{
-							Promise->set_exception(std::current_exception());
+							auto SavedException = std::make_shared<std::exception>(Exception);
+							Exceptions.Enqueue(std::move(SavedException));
 						}
 						catch (...)
 						{
@@ -258,75 +225,20 @@ namespace Kepler
 			return Promise->get_future();
 		}
 
-		void Unpause()
-		{
-			bPaused = false;
-		}
+		void Unpause();
 
-		void WaitForTasksToFinish()
-		{
-			bWaiting = true;
-			std::unique_lock Lck(TasksMutex);
-			TaskDoneFence.wait(Lck, [this] { return (TotalTaskNum == (bPaused ? Tasks.GetLength() : 0)); });
-			bWaiting = false;
-		}
+		void WaitForTasksToFinish();
 
+		bool HasAnyExceptions() const;
+		void RethrowExceptions_MainThread();
 	private:
-		void CreateThreads()
-		{
-			bIsRunning = true;
-			for (u32 Index = 0; Index < ThreadCount; ++Index)
-			{
-				Workers[Index] = std::thread(&TThreadPool::WorkerMain, this);
-			}
-		}
+		void CreateThreads();
 
-		void DestroyThreads()
-		{
-			bIsRunning = false;
-			TasksAvailableFence.notify_all();
-			for (u32 Index = 0; Index < ThreadCount; ++Index)
-			{
-				Workers[Index].join();
-			}
-		}
+		void DestroyThreads();
 
-		u32 CalculateThreadCount(const u32 InThreadCount)
-		{
-			if (InThreadCount > 0)
-				return InThreadCount;
-			else
-			{
-				const u32 HWConcurrency = std::thread::hardware_concurrency();
-				if (HWConcurrency > 0)
-					return HWConcurrency;
-				else
-					return 1;
-			}
-		}
+		u32 CalculateThreadCount(const u32 InThreadCount);
 
-		void WorkerMain()
-		{
-			while (bIsRunning)
-			{
-				std::function<void()> Task;
-				std::unique_lock<std::mutex> Lck(TasksMutex);
-				TasksAvailableFence.wait(Lck, [this] { return Tasks.GetLength() > 0 || !bIsRunning; });
-				if (bIsRunning && !bPaused)
-				{
-					bool bTaskValid = false;
-					if (bTaskValid = Tasks.Dequeue(Task))
-					{
-						Lck.unlock();
-						Task();
-						Lck.lock();
-						--TotalTaskNum;
-					}
-					if (bWaiting)
-						TaskDoneFence.notify_one();
-				}
-			}
-		}
+		void WorkerMain();
 
 
 		std::atomic<bool> bPaused = false;
@@ -349,5 +261,7 @@ namespace Kepler
 		std::vector<std::thread> Workers{ };
 
 		std::atomic<bool> bWaiting = false;
+
+		TThreadSafeRingQueue<std::shared_ptr<std::exception>> Exceptions{ 32 };
 	};
 }

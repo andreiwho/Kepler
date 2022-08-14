@@ -3,6 +3,13 @@
 #include "Core/Log.h"
 #include "WindowGLFW.h"
 
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN
+# include <Windows.h>
+#else
+
+#endif
+
 #include <cassert>
 
 #include <GLFW/glfw3.h>
@@ -64,6 +71,15 @@ namespace Kepler
 		// ...
 		// After handling pass this one to the GenericPlatformInterface
 		TPlatform::OnPlatformEvent(event);
+	}
+
+	bool TPlatformGLFW::HandleCrashReported_Impl(const std::string& Message)
+	{
+		if (::MessageBoxA(nullptr, Message.c_str(), "Crash Reported", MB_OK | MB_ICONERROR) == IDOK)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	void TPlatformGLFW::DestroyClosedWindows()

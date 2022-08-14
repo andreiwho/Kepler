@@ -21,6 +21,8 @@ namespace Kepler
 
 		static TRef<TPlatform> CreatePlatformInterface();
 
+		static bool HandleCrashReported(const std::string& Message);
+
 		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const std::string& title, const TWindowParams& params = {}) = 0;
 		virtual void Update() = 0;
 		virtual bool HasActiveMainWindow() const = 0;

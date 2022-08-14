@@ -22,6 +22,13 @@ namespace Kepler
 		template<typename Fn>
 		auto Submit(Fn&& Func)
 		{
+#ifdef USE_ASSERT
+			if (WorkerPool.HasAnyExceptions())
+			{
+				WorkerPool.RethrowExceptions_MainThread();
+			}
+#endif
+
 			return WorkerPool.SubmitTask(std::move(Func));
 		}
 

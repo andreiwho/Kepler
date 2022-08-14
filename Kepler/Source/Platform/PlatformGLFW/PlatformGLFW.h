@@ -22,6 +22,7 @@ namespace Kepler
 		virtual void Update() override;
 		virtual bool HasActiveMainWindow() const override;
 		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
+		static bool HandleCrashReported_Impl(const std::string& Message);
 
 	private:
 		void DestroyClosedWindows();

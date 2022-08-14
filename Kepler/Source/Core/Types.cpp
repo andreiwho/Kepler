@@ -1,4 +1,5 @@
 #include "Types.h"
+#include <spdlog/fmt/fmt.h>
 
 #include <cstdio>
 
@@ -20,5 +21,4 @@ namespace Kepler
 		CHECK(std::mbstowcs(OutString.data(), AnsiString.data(), OutString.length()));
 		return OutString;
 	}
-
 }

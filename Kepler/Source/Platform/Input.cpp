@@ -1,5 +1,4 @@
 #include "Input.h"
-
 #include "Platform/Platform.h"
 
 bool TInput::GetKey(EKeyCode key)

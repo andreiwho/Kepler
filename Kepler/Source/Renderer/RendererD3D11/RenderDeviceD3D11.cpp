@@ -25,7 +25,7 @@ namespace Kepler
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
-		CHECK(IsRenderThread());
+		CHECK_NOTHROW(IsRenderThread());
 
 		if (ImmediateContext)
 			ImmediateContext->Release();
@@ -88,7 +88,7 @@ namespace Kepler
 			Flags,
 			PreferredFeatureLevels,
 			ARRAYSIZE(PreferredFeatureLevels),
-			D3D11_SDK_VERSION,
+			D3D11_SDK_VERSION, 
 			&OutDevice, &OutFeatureLevel, &OutContext));
 		CHECK(OutDevice);
 		HRCHECK(OutDevice->QueryInterface(&Device));
