@@ -18,6 +18,17 @@ namespace Kepler
 		void DestroyRenderStateForWindow(class TWindow* InWindow);
 		void OnWindowResized(class TWindow* InWindow);
 
+	public:
+		inline TRef<TRenderDevice> GetRenderDevice() const { return RenderDevice; }
+		inline TRef<TSwapChain> GetSwapChain(u32 Index) const 
+		{ 
+			if (SwapChains.size() > Index)
+			{
+				return SwapChains.at(Index);
+			}
+			return nullptr;
+		}
+
 	private:
 		TRef<TSwapChain> FindAssociatedSwapChain(class TWindow* InWindow) const;
 

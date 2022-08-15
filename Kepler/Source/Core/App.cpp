@@ -23,6 +23,7 @@ namespace Kepler
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeRef<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
+		LowLevelRenderer->InitRenderStateForWindow(TPlatform::Get()->CreatePlatformWindow(640, 640, "Other"));
 	}
 
 	TApplication::~TApplication()
@@ -42,6 +43,24 @@ namespace Kepler
 			while (Platform->HasActiveMainWindow())
 			{
 				Platform->Update();
+
+				auto ImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
+				auto SwapChain = LowLevelRenderer->GetSwapChain(0);
+
+				if (SwapChain)
+				{
+					ImmList.StartDrawingToSwapChainImage(SwapChain.get());
+					float ClearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+					ImmList.ClearSwapChainImage(SwapChain.get(), ClearColor);
+				}
+
+				SwapChain = LowLevelRenderer->GetSwapChain(1);
+				if (SwapChain)
+				{
+					ImmList.StartDrawingToSwapChainImage(SwapChain.get());
+					float ClearColor1[4] = { 1.0f, 0.0f, 1.0f, 1.0f };
+					ImmList.ClearSwapChainImage(SwapChain.get(), ClearColor1);
+				}
 
 				LowLevelRenderer->PresentAll();
 			}

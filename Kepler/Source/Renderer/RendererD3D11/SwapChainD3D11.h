@@ -11,6 +11,7 @@ namespace Kepler
 		TSwapChainD3D11(class TWindow* Window);
 		~TSwapChainD3D11();
 
+		inline ID3D11RenderTargetView1* GetRenderTargetView() const { return RenderTargetView; }
 	private:
 		void CreateRenderTargets();
 

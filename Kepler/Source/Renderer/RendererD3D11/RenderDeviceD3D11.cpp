@@ -6,6 +6,7 @@
 #include "Platform/Window.h"
 #include "Core/Macros.h"
 #include "Renderer/RenderGlobals.h"
+#include "CommandListImmediateD3D11.h"
 
 #ifndef NDEBUG
 # include <dxgidebug.h>
@@ -28,6 +29,8 @@ namespace Kepler
 #ifndef NDEBUG
 		InitializeInfoQueue();
 #endif
+
+		ImmediateCommandList = MakeRef<TCommandListImmediateD3D11>(ImmediateContext);
 	}
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
