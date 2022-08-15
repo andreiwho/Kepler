@@ -2,6 +2,7 @@
 #ifdef PLATFORM_DESKTOP
 #include "Platform/Platform.h"
 #include "Core/Types.h"
+#include "Core/Containers/DynArray.h"
 
 #include <memory>
 #include <vector>
@@ -23,7 +24,7 @@ namespace Kepler
 		virtual bool HasActiveMainWindow() const override;
 		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
 		static bool HandleCrashReported_Impl(const std::string& Message);
-		inline virtual bool IsMainWindow(TWindow* Window) const override { return !Windows.empty() && (Windows.at(0).get() == Window); }
+		inline virtual bool IsMainWindow(TWindow* Window) const override { return !Windows.IsEmpty() && (Windows[0].get() == Window); }
 
 	private:
 		void DestroyClosedWindows();
@@ -33,7 +34,7 @@ namespace Kepler
 		virtual void CloseAllWindows() override;
 
 	private:
-		std::vector<std::unique_ptr<TWindow>> Windows;
+		TDynArray<std::unique_ptr<TWindow>> Windows;
 	};
 }
 #endif

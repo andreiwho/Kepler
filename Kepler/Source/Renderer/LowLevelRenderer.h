@@ -22,9 +22,9 @@ namespace Kepler
 		inline TRef<TRenderDevice> GetRenderDevice() const { return RenderDevice; }
 		inline TRef<TSwapChain> GetSwapChain(u32 Index) const 
 		{ 
-			if (SwapChains.size() > Index)
+			if (SwapChains.GetLength() > Index)
 			{
-				return SwapChains.at(Index);
+				return SwapChains[Index];
 			}
 			return nullptr;
 		}
@@ -36,6 +36,6 @@ namespace Kepler
 		TRenderThread RenderThread{};
 
 		TRef<TRenderDevice> RenderDevice{};
-		std::vector<TRef<TSwapChain>> SwapChains;
+		TDynArray<TRef<TSwapChain>> SwapChains;
 	};
 }

@@ -85,7 +85,7 @@ namespace Kepler
 		if (FAILED(Result))
 		{
 			auto Messages = Device->GetInfoQueueMessages();
-			if (!Messages.empty())
+			if (!Messages.IsEmpty())
 			{
 				std::stringstream StringStream;
 				for (const auto& Message : Messages)

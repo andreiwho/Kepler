@@ -18,7 +18,7 @@ namespace Kepler
 		TRenderThread::Submit(
 			[this] 
 			{
-				SwapChains.clear();
+				SwapChains.Clear();
 				RenderDevice.Release();
 			});
 		TRenderThread::Wait();
@@ -29,7 +29,7 @@ namespace Kepler
 		TRenderThread::Submit(
 			[this, InWindow]()
 			{ 
-				SwapChains.emplace_back(RenderDevice->CreateSwapChainForWindow(InWindow)); 
+				SwapChains.EmplaceBack(RenderDevice->CreateSwapChainForWindow(InWindow)); 
 			}
 		);
 	}
@@ -60,9 +60,9 @@ namespace Kepler
 				);
 				if (FoundSwapChain != SwapChains.end())
 				{
-					SwapChains.erase(FoundSwapChain);
+					SwapChains.Remove(FoundSwapChain);
 				}
-				SwapChains.shrink_to_fit();
+				SwapChains.Shrink();
 			});
 		TRenderThread::Wait();
 	}
@@ -81,13 +81,13 @@ namespace Kepler
 
 	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* InWindow) const
 	{
-		auto FoundSwapChain = std::find_if(std::begin(SwapChains), std::end(SwapChains),
+		auto FoundSwapChain = SwapChains.Find(
 			[InWindow](const auto& SwapChain)
 			{
 				return SwapChain->GetAssociatedWindow() == InWindow;
 			}
 		);
-		if (FoundSwapChain != SwapChains.end())
+		if (FoundSwapChain)
 		{
 			return *FoundSwapChain;
 		}

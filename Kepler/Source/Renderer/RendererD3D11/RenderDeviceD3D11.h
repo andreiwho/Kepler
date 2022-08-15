@@ -2,6 +2,7 @@
 #ifdef WIN32
 #include "D3D11Common.h"
 #include "Renderer/RenderDevice.h"
+#include "Core/Containers/DynArray.h"
 
 class IDXGIInfoQueue;
 
@@ -41,7 +42,7 @@ namespace Kepler
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
-		std::vector<std::string> GetInfoQueueMessages() const;
+		TDynArray<std::string> GetInfoQueueMessages() const;
 
 	private:
 		void CreateFactory();

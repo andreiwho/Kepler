@@ -8,12 +8,12 @@ namespace Kepler
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 Argc, char** ppArgv)
 	{
-		std::vector<std::string> CommandLineArguments;
+		TDynArray<std::string> CommandLineArguments;
 		for (i32 Index = 1; Index < Argc; ++Index)
 		{
 			if (char const* const arg = ppArgv[Index])
 			{
-				CommandLineArguments.emplace_back(ppArgv[Index]);
+				CommandLineArguments.EmplaceBack(ppArgv[Index]);
 			}
 		}
 		return TCommandLineArguments(CommandLineArguments);

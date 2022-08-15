@@ -78,7 +78,7 @@ namespace Kepler
 		WaitForTasksToFinish();
 		DestroyThreads();
 		ThreadCount = CalculateThreadCount(NumThreads);
-		Workers = std::vector<std::thread>(ThreadCount);
+		Workers = TDynArray<std::thread>(ThreadCount);
 		bPaused = bWasPaused;
 		CreateThreads();
 	}

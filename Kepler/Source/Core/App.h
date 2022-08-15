@@ -9,15 +9,15 @@
 #include "Renderer/RenderDevice.h"
 
 #include <string>
-#include <vector>
 #include <memory>
+#include "Containers/DynArray.h"
 
 namespace Kepler
 {
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(std::vector<std::string> const& CommandLine);
+		TCommandLineArguments(TDynArray<std::string> const& CommandLine);
 	};
 
 	struct TApplicationLaunchParams

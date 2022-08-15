@@ -67,10 +67,10 @@ namespace Kepler
 #endif
 	}
 
-	std::vector<std::string> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	TDynArray<std::string> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifndef NDEBUG
-		std::vector<std::string> OutMessages;
+		TDynArray<std::string> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
 		{
@@ -78,7 +78,7 @@ namespace Kepler
 			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, nullptr, &MessageLength));
 			DXGI_INFO_QUEUE_MESSAGE* pMessage = (DXGI_INFO_QUEUE_MESSAGE*)TMalloc::Get()->Allocate(MessageLength);
 			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, pMessage, &MessageLength));
-			OutMessages.emplace_back(pMessage->pDescription);
+			OutMessages.EmplaceBack(pMessage->pDescription);
 			TMalloc::Get()->Free(pMessage);
 		}
 		return OutMessages;

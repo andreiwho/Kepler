@@ -10,6 +10,8 @@
 
 namespace Kepler
 {
+	extern bool IsRenderThread();
+
 	class TRenderThread
 	{
 		static TRenderThread* Instance;
@@ -23,19 +25,19 @@ namespace Kepler
 		static decltype(auto) Submit(FUNC&& Func)
 		{
 #ifdef USE_ASSERT
-			if (Instance->WorkerPool.HasAnyExceptions())
+			if (GetWorkingPool().HasAnyExceptions())
 			{
-				Instance->WorkerPool.RethrowExceptions_MainThread();
+				GetWorkingPool().RethrowExceptions_MainThread();
 			}
 #endif
-
-			return Instance->WorkerPool.SubmitTask(std::move(Func));
+			return GetWorkingPool().SubmitTask(std::move(Func));
 		}
 
 		static void Wait();
 
 	private:
 		bool bRunning = true;
+		static TThreadPool& GetWorkingPool() { return Get()->WorkerPool; }
 
 	private:
 		TThreadPool WorkerPool{ 1 };

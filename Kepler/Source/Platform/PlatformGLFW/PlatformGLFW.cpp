@@ -45,7 +45,7 @@ namespace Kepler
 	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 Width, i32 Height, const std::string& Title, const TWindowParams& Params)
 	{
 		KEPLER_INFO("LogPlatform", "Creating GLFW platform window '{}'", Title);
-		return Windows.emplace_back(std::make_unique<TWindowGLFW>(Width, Height, Title, Params)).get();
+		return Windows.EmplaceBack(std::make_unique<TWindowGLFW>(Width, Height, Title, Params)).get();
 	}
 
 	void TPlatformGLFW::Update()
@@ -62,7 +62,7 @@ namespace Kepler
 
 	bool TPlatformGLFW::HasActiveMainWindow() const
 	{
-		return !Windows.empty() && !!Windows.at(0);
+		return !Windows.IsEmpty() && !!Windows[0];
 	}
 
 	void TPlatformGLFW::OnPlatformEvent(const TPlatformEventBase& event)
@@ -103,7 +103,7 @@ namespace Kepler
 
 	void TPlatformGLFW::CloseAllWindows()
 	{
-		Windows.clear();
+		Windows.Clear();
 	}
 
 	TSharedPtr<TPlatform> TPlatform::CreatePlatformInterface()

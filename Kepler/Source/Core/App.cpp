@@ -7,7 +7,7 @@
 
 namespace Kepler
 {
-	TCommandLineArguments::TCommandLineArguments(std::vector<std::string> const& CommandLine)
+	TCommandLineArguments::TCommandLineArguments(TDynArray<std::string> const& CommandLine)
 	{
 		// Parse command line args
 		for (const std::string& arg : CommandLine)
