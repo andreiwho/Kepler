@@ -4,6 +4,12 @@
 #include "Platform/Platform.h"
 
 #include <iostream>
+#include "Timer.h"
+#include "Async/Async.h"
+
+// Test
+#include "Renderer/ShaderCompiler.h"
+#include "Core/Filesystem/FileUtils.h"
 
 namespace Kepler
 {
@@ -23,7 +29,6 @@ namespace Kepler
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
-		LowLevelRenderer->InitRenderStateForWindow(TPlatform::Get()->CreatePlatformWindow(640, 640, "Other"));
 	}
 
 	TApplication::~TApplication()
@@ -37,36 +42,54 @@ namespace Kepler
 		KEPLER_INFO("LogApp", "Application Run called...");
 
 		// Begin main loop
+		TTimer MainTimer{};
+		GGlobalTimer = &MainTimer;
+		float DisplayInfoTime = 0.0f;
+
+		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
 		{
 			Platform->RegisterPlatformEventListener(this);
 			while (Platform->HasActiveMainWindow())
 			{
+				MainTimer.Begin();
 				Platform->Update();
 
-				TRenderThread::Submit(
-					[this]
+				if (!Platform->IsMainWindowMinimized())
+				{
+					// Update game state
+
+					// Render the frame
+					TRenderThread::Submit(
+						[this]
+						{
+							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
+							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
+
+							if (SwapChain)
+							{
+								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
+								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
+							}
+						});
+
+					LowLevelRenderer->PresentAll();
+				}
+
+				MainTimer.End();
+
+#ifdef ENABLE_DEBUG
+				if (Platform->HasActiveMainWindow())
+				{
+					DisplayInfoTime += MainTimer.Delta();
+					if (DisplayInfoTime >= 1.0f)
 					{
-						auto ImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
-						auto SwapChain = LowLevelRenderer->GetSwapChain(0);
-
-						if (SwapChain)
-						{
-							ImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
-							float ClearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-							ImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
-						}
-
-						SwapChain = LowLevelRenderer->GetSwapChain(1);
-						if (SwapChain)
-						{
-							ImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
-							float ClearColor1[4] = { 1.0f, 0.0f, 1.0f, 1.0f };
-							ImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor1);
-						}
-					});
-
-				LowLevelRenderer->PresentAll();
+						DisplayInfoTime = 0;
+						MainWindow->SetTitle(fmt::format("{} <{}>", InitialWindowName, 1.0f / MainTimer.Delta()));
+					}
+				}
+#endif
 			}
 		}
 	}

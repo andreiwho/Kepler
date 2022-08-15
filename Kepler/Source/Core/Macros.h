@@ -12,6 +12,8 @@
 # define CHECKMSG(x, msg) do { if(!(x)) { throw Kepler::TException(fmt::format("Assertion failed: '{}' \nin file {} \non line {}\n", msg, __FILE__, __LINE__), "CHECK FAILURE"); } } while(false)
 #else
 # define CHECK(x) x
+# define CHECK_NOTHROW(x) x
+# define CHECKMSG(x, msg) x
 #endif
 
 #define CHECKED(x) [](auto&& arg) { CHECK(!!(arg)); return arg; }(x)

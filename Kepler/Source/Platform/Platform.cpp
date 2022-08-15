@@ -48,6 +48,8 @@ namespace Kepler
 		dispatcher.Dispatch(this, &TPlatform::Internal_KeyPressed);
 		dispatcher.Dispatch(this, &TPlatform::Internal_KeyReleased);
 		dispatcher.Dispatch(this, &TPlatform::Internal_WindowClosed);
+		dispatcher.Dispatch(this, &TPlatform::Internal_WindowMinimized);
+		dispatcher.Dispatch(this, &TPlatform::Internal_WindowRestored);
 
 		if (EventListener)
 		{
@@ -99,6 +101,29 @@ namespace Kepler
 		}
 
 		return false;
+	}
+
+	bool TPlatform::Internal_WindowMinimized(const TWindowMinimizeEvent& Event)
+	{
+		if (IsMainWindow(Event.Window))
+		{
+			bMinimized = true;
+		}
+		return false;
+	}
+
+	bool TPlatform::Internal_WindowRestored(const TWindowRestoreEvent& Event)
+	{
+		if (IsMainWindow(Event.Window) && bMinimized)
+		{
+			bMinimized = false;
+		}
+		return false;
+	}
+
+	bool TPlatform::IsMainWindowMinimized() const
+	{
+		return bMinimized;
 	}
 
 }

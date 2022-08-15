@@ -1,5 +1,5 @@
 add_subdirectory(ThirdParty)
-
+add_subdirectory(Shaders)
 CreateLibrary("Kepler" "Main")
 target_link_libraries("Kepler" PUBLIC "spdlog" PRIVATE "glfw")
 

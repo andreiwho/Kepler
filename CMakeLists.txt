@@ -19,11 +19,12 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
  set_target_properties(${ModuleName} PROPERTIES 
   FOLDER ${ModuleFolder}
   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL"
+  VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   )
  target_compile_definitions(${ModuleName} PRIVATE
   # SETUP LOGGING
-  $<$<CONFIG:RelWithDebInfo>:ENABLE_LOGGING USE_ASSERT>
-  $<$<CONFIG:Debug>:ENABLE_LOGGING USE_ASSERT>
+  $<$<CONFIG:RelWithDebInfo>:ENABLE_LOGGING USE_ASSERT ENABLE_DEBUG>
+  $<$<CONFIG:Debug>:ENABLE_LOGGING USE_ASSERT ENABLE_DEBUG>
  )
 
  if(WIN32 OR UNIX)

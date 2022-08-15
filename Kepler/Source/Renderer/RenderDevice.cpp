@@ -37,7 +37,6 @@ namespace Kepler
 		{
 #ifdef WIN32
 		case Kepler::ERenderAPI::DirectX11:
-			KEPLER_TRACE("LogRender", "Creating RenderDevice for DirectX11 API");
 			return MakeRef(New<TDataBlobD3D11>(Data, Size));
 #endif
 		default:

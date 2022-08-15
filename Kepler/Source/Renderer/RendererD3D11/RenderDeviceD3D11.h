@@ -12,18 +12,13 @@ namespace Kepler
 	{
 	public:
 		TDataBlobD3D11(const void* Data, usize Size);
-		
-
 		virtual const void* GetData() const override;
-
-
 		virtual usize GetSize() const override;
-
-
 		virtual void Write(const void* Data, usize Size) override;
+		ID3DBlob* GetBlob() const { return Blob; }
 
 	private:
-		CComPtr<ID3DBlob> Blob;
+		CComPtr<ID3DBlob> Blob{};
 	};
 
 	class TRenderDeviceD3D11 : public TRenderDevice

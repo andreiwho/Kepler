@@ -8,7 +8,7 @@
 #include "Renderer/RenderGlobals.h"
 #include "CommandListImmediateD3D11.h"
 
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 # include <dxgidebug.h>
 #include "Core/Malloc.h"
 #endif
@@ -26,7 +26,7 @@ namespace Kepler
 
 		CreateFactory();
 		CreateDevice();
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		InitializeInfoQueue();
 #endif
 		CreateClassLinkage();
@@ -39,7 +39,7 @@ namespace Kepler
 		CHECK_NOTHROW(IsRenderThread());
 		if (ClassLinkage)
 			ClassLinkage->Release();
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		if (InfoQueue)
 			InfoQueue->Release();
 #endif
@@ -59,7 +59,7 @@ namespace Kepler
 
 	void TRenderDeviceD3D11::Internal_InitInfoMessageStartIndex_Debug()
 	{
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		if (InfoQueue)
 		{
 			InfoMsgStartIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
@@ -69,7 +69,7 @@ namespace Kepler
 
 	TDynArray<std::string> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		TDynArray<std::string> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
@@ -104,7 +104,7 @@ namespace Kepler
 	{
 		CHECK(IsRenderThread());
 		UINT Flags = 0;
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		Flags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 		HRCHECK(::CreateDXGIFactory2(Flags, IID_PPV_ARGS(&Factory)));
@@ -119,7 +119,7 @@ namespace Kepler
 		HRCHECK(Factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&Adapter)));
 
 		UINT Flags = 0;
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		Flags = D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -149,7 +149,7 @@ namespace Kepler
 
 	void TRenderDeviceD3D11::InitializeInfoQueue()
 	{
-#ifndef NDEBUG
+#ifdef ENABLE_DEBUG
 		HMODULE DxgiDebug = CHECKED(::LoadLibraryA("DXGIDebug.dll"));
 		using TPFN_DXGIGetDebugInterface = HRESULT(*)(REFIID, void**);
 		auto LoadFunc = (TPFN_DXGIGetDebugInterface)::GetProcAddress(DxgiDebug, "DXGIGetDebugInterface");
@@ -172,9 +172,15 @@ namespace Kepler
 
 	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size)
 	{
-		HRCHECK(D3DCreateBlob(Size, &Blob));
-		CHECK(Blob);
-		Write(Data, Size);
+		if (Size > 0)
+		{
+			HRCHECK(D3DCreateBlob(Size, &Blob));
+			CHECK(Blob);
+			if (Data)
+			{
+				Write(Data, Size);
+			}
+		}
 	}
 
 	const void* TDataBlobD3D11::GetData() const

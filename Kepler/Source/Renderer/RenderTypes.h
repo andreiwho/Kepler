@@ -17,10 +17,16 @@ namespace Kepler
 
 	};
 
+	enum class EShaderType
+	{
+		Vertex,
+		Pixel,
+	};
+
 	class TDataBlob : public TRefCounted
 	{
 	public:
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data, usize Size);
+		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0);
 
 		virtual const void* GetData() const = 0;
 		virtual usize GetSize() const = 0;

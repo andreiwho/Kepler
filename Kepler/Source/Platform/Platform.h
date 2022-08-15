@@ -40,6 +40,8 @@ namespace Kepler
 		bool Internal_KeyPressed(const TKeyDownEvent& e);
 		bool Internal_KeyReleased(const TKeyDownEvent& e);
 		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
+		bool Internal_WindowMinimized(const TWindowMinimizeEvent& Event);
+		bool Internal_WindowRestored(const TWindowRestoreEvent& Event);
 
 	protected:
 		bool bInitialized = false;
@@ -51,5 +53,9 @@ namespace Kepler
 		IPlatformEventListener* EventListener{ nullptr };
 		TMouseState MouseState{};
 		TKeyboardState KeyboardState{};
+
+	public:
+		bool bMinimized = false;
+		bool IsMainWindowMinimized() const;
 	};
 }

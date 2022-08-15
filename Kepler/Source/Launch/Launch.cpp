@@ -3,6 +3,7 @@
 #include "Core/App.h"
 #include "Core/Log.h"
 #include "Core/Malloc.h"
+#include "Async/Async.h"
 
 namespace Kepler
 {
@@ -24,6 +25,7 @@ namespace Kepler
 		// Log must be the first one always (after malloc)
 		TMalloc Malloc{};
 		TLog GlobalLog;
+		GLargeThreadPool = new TThreadPool(std::thread::hardware_concurrency() - 1); // We already have render thread
 
 		try
 		{
@@ -56,6 +58,7 @@ namespace Kepler
 			return EXIT_FAILURE;
 		}
 
+		delete GLargeThreadPool;
 		return EXIT_FAILURE;
 	}
 }
