@@ -46,8 +46,8 @@ namespace Kepler
 
 	private:
 		TWindow* MainWindow{};
-		TRef<TLowLevelRenderer> LowLevelRenderer{};
+		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
 	};
 
-	extern TRef<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
+	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
 }

@@ -12,9 +12,9 @@ public:
 	{}
 };
 
-TRef<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
+TSharedPtr<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
-	TRef<TApplication> App = MakeRef<TTestbed>(LaunchParams);
+	TSharedPtr<TApplication> App = MakeShared<TTestbed>(LaunchParams);
 	// ... Do some processing if needed
 	return App;
 }

@@ -6,49 +6,51 @@ namespace Kepler
 	
 	TLowLevelRenderer::TLowLevelRenderer()
 	{
-		ENQUEUE_RENDER_TASK([this]
+		TRenderThread::Submit([this]
 			{
 				RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
+		TRenderThread::Wait();
 	}
 
 	TLowLevelRenderer::~TLowLevelRenderer()
 	{
-		ENQUEUE_RENDER_TASK_AWAITED(
+		TRenderThread::Submit(
 			[this] 
 			{
-				for (auto& SwapChain : SwapChains)
-				{
-					SwapChain.reset();
-				}
-				RenderDevice.reset();
+				SwapChains.clear();
+				RenderDevice.Release();
 			});
+		TRenderThread::Wait();
 	}
 
 	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* InWindow)
 	{
-		ENQUEUE_RENDER_TASK_AWAITED((
+		TRenderThread::Submit(
 			[this, InWindow]()
 			{ 
 				SwapChains.emplace_back(RenderDevice->CreateSwapChainForWindow(InWindow)); 
-			})
+			}
 		);
 	}
 
 	void TLowLevelRenderer::PresentAll()
 	{
-		ENQUEUE_RENDER_TASK_AWAITED([this] 
+		TRenderThread::Submit(
+			[this]
 			{
 				for (const auto& SwapChain : SwapChains)
 				{
 					SwapChain->Present();
 				}
 			});
+		TRenderThread::Wait();
 	}
 
 	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* InWindow)
 	{
-		ENQUEUE_RENDER_TASK_AWAITED(([this, InWindow]
+		TRenderThread::Submit(
+			[this, InWindow]
 			{
 				auto FoundSwapChain = std::find_if(std::begin(SwapChains), std::end(SwapChains), 
 					[InWindow](const auto& SwapChain) 
@@ -61,18 +63,20 @@ namespace Kepler
 					SwapChains.erase(FoundSwapChain);
 				}
 				SwapChains.shrink_to_fit();
-			}));
+			});
+		TRenderThread::Wait();
 	}
 
 	void TLowLevelRenderer::OnWindowResized(class TWindow* InWindow)
 	{
-		ENQUEUE_RENDER_TASK_AWAITED(([this, InWindow]
+		TRenderThread::Submit(
+			[this, InWindow]
 			{
 				if (auto SwapChain = FindAssociatedSwapChain(InWindow))
 				{
 					SwapChain->Resize(InWindow->GetWidth(), InWindow->GetHeight());
 				}
-			}));
+			});
 	}
 
 	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* InWindow) const

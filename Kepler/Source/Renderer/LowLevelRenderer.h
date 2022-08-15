@@ -7,7 +7,7 @@
 
 namespace Kepler
 {
-	class TLowLevelRenderer
+	class TLowLevelRenderer : public TRefCounted
 	{
 	public:
 		TLowLevelRenderer();

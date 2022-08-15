@@ -62,7 +62,7 @@ namespace Kepler
 
 	bool TPlatformGLFW::HasActiveMainWindow() const
 	{
-		return !Windows.empty() && !!Windows[0];
+		return !Windows.empty() && !!Windows.at(0);
 	}
 
 	void TPlatformGLFW::OnPlatformEvent(const TPlatformEventBase& event)
@@ -101,9 +101,14 @@ namespace Kepler
 		}
 	}
 
-	TRef<TPlatform> TPlatform::CreatePlatformInterface()
+	void TPlatformGLFW::CloseAllWindows()
 	{
-		return MakeRef<TPlatformGLFW>();
+		Windows.clear();
+	}
+
+	TSharedPtr<TPlatform> TPlatform::CreatePlatformInterface()
+	{
+		return MakeShared<TPlatformGLFW>();
 	}
 }
 

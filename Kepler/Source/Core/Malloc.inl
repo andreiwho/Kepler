@@ -13,7 +13,7 @@ namespace Kepler
 	}
 
 	template<typename T>
-	void Delete(T* object)
+	void Delete(const T* object)
 	{
 		if (object)
 		{

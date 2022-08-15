@@ -3,7 +3,7 @@
 #include "D3D11Common.h"
 #include "RenderDeviceD3D11.h"
 #include "Platform/Window.h"
-#include "../RenderGlobals.h"
+#include "Renderer/RenderGlobals.h"
 
 #include <sstream>
 
@@ -64,14 +64,13 @@ namespace Kepler
 			RenderTargetView->Release();
 		}
 
-		ID3D11Resource* Buffer{};
+		CComPtr<ID3D11Resource> Buffer{};
 		HRCHECK(SwapChain->GetBuffer(0, IID_PPV_ARGS(&Buffer)));
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
 
 		HRCHECK(Device->GetDevice()->CreateRenderTargetView1(Buffer, nullptr, &RenderTargetView));
-		Buffer->Release();
 	}
 
 	void TSwapChainD3D11::Present()

@@ -29,13 +29,16 @@ namespace Kepler
 #ifndef NDEBUG
 		InitializeInfoQueue();
 #endif
+		CreateClassLinkage();
 
-		ImmediateCommandList = MakeRef<TCommandListImmediateD3D11>(ImmediateContext);
+		ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
 	}
 
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
+		if (ClassLinkage)
+			ClassLinkage->Release();
 #ifndef NDEBUG
 		if (InfoQueue)
 			InfoQueue->Release();
@@ -51,7 +54,7 @@ namespace Kepler
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
-		return MakeRef<TSwapChainD3D11>(Window);
+		return MakeRef(New<TSwapChainD3D11>(Window));
 	}
 
 	void TRenderDeviceD3D11::Internal_InitInfoMessageStartIndex_Debug()
@@ -157,6 +160,43 @@ namespace Kepler
 			InfoMsgStartIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		}
 #endif
+	}
+
+	void TRenderDeviceD3D11::CreateClassLinkage()
+	{
+		CHECK(IsRenderThread());
+		CHECK(Device);
+
+		HRCHECK(Device->CreateClassLinkage(&ClassLinkage));
+	}
+
+	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size)
+	{
+		HRCHECK(D3DCreateBlob(Size, &Blob));
+		CHECK(Blob);
+		Write(Data, Size);
+	}
+
+	const void* TDataBlobD3D11::GetData() const
+	{
+		CHECK(Blob);
+		return Blob->GetBufferPointer();
+	}
+
+	usize TDataBlobD3D11::GetSize() const
+	{
+		CHECK(Blob);
+		return Blob->GetBufferSize();
+	}
+
+	void TDataBlobD3D11::Write(const void* Data, usize Size)
+	{
+		CHECK(Blob);
+		CHECK(Size <= GetSize());
+		if (Data)
+		{
+			memcpy(Blob->GetBufferPointer(), Data, Size);
+		}
 	}
 
 }

@@ -19,20 +19,20 @@ namespace Kepler
 
 		static TRenderThread* Get() { return CHECKED(Instance); }
 
-		template<typename Fn>
-		auto Submit(Fn&& Func)
+		template<typename FUNC>
+		static decltype(auto) Submit(FUNC&& Func)
 		{
 #ifdef USE_ASSERT
-			if (WorkerPool.HasAnyExceptions())
+			if (Instance->WorkerPool.HasAnyExceptions())
 			{
-				WorkerPool.RethrowExceptions_MainThread();
+				Instance->WorkerPool.RethrowExceptions_MainThread();
 			}
 #endif
 
-			return WorkerPool.SubmitTask(std::move(Func));
+			return Instance->WorkerPool.SubmitTask(std::move(Func));
 		}
 
-		void Wait();
+		static void Wait();
 
 	private:
 		bool bRunning = true;
@@ -41,7 +41,3 @@ namespace Kepler
 		TThreadPool WorkerPool{ 1 };
 	};
 }
-
-#define ENQUEUE_RENDER_TASK(Task) Kepler::TRenderThread::Get()->Submit(Task)
-#define WAIT_RENDER_THREAD() Kepler::TRenderThread::Get()->Wait()
-#define ENQUEUE_RENDER_TASK_AWAITED(Task) ENQUEUE_RENDER_TASK(Task); WAIT_RENDER_THREAD()

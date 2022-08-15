@@ -4,7 +4,6 @@
 
 namespace Kepler
 {
-
 	TCommandListImmediateD3D11* TCommandListImmediateD3D11::Instance = nullptr;
 
 	TCommandListImmediateD3D11::TCommandListImmediateD3D11(ID3D11DeviceContext4* InContext) : Context(InContext)
@@ -37,6 +36,13 @@ namespace Kepler
 		CHECK(SwapChain && Context);
 		TSwapChainD3D11* MySwapChain = static_cast<TSwapChainD3D11*>(SwapChain);
 		Context->ClearRenderTargetView(MySwapChain->GetRenderTargetView(), ClearColor);
+	}
+
+	void TCommandListImmediateD3D11::Draw(u32 VertexCount, u32 BaseVertexIndex)
+	{
+		CHECK(IsRenderThread());
+		CHECK(Context);
+		Context->Draw(VertexCount, BaseVertexIndex);
 	}
 
 }

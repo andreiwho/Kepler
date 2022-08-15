@@ -16,8 +16,10 @@ namespace Kepler
 
 		virtual void StartDrawingToSwapChainImage(TSwapChain* SwapChain) override;
 		virtual void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]) override;
+		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) override;
 
 		static TCommandListImmediateD3D11* Get() { return CHECKED(Instance); }
+
 	private:
 		ID3D11DeviceContext4* Context{};
 	};

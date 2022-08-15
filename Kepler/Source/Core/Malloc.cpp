@@ -40,14 +40,14 @@ namespace Kepler
 		return NewData;
 	}
 
-	void TMalloc::Free(void* Block)
+	void TMalloc::Free(const void* Block)
 	{
 		TMemoryPool* Pool = TMemoryPool::GetAllocationPool(Block);
 		CHECK(Pool != nullptr);
 		Pool->Deallocate(Block);
 	}
 
-	usize TMalloc::GetSize(void* Block) const
+	usize TMalloc::GetSize(const void* Block) const
 	{
 		return TMemoryPool::GetAllocationSize(Block);
 	}
@@ -55,6 +55,24 @@ namespace Kepler
 	usize MemorySize(void* Data)
 	{
 		return CHECKED(TMalloc::Get())->GetSize(Data);
+	}
+
+	void TRefCounted::AddRef() const
+	{
+		RefCount++;
+	}
+
+	void TRefCounted::Release() const
+	{
+		if (RefCount > 0)
+		{
+			RefCount--;
+		}
+
+		if (RefCount == 0)
+		{
+			Delete(this);
+		}
 	}
 
 }

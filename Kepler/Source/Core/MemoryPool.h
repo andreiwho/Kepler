@@ -17,14 +17,14 @@ namespace Kepler
 		TMemoryPool(usize InitialSize);
 
 		void* Allocate(usize Size);
-		void Deallocate(void* Block);
+		void Deallocate(const void* Block);
 
 	public:
-		static usize GetAllocationSize(void* Block);
-		static TMemoryPool* GetAllocationPool(void* Block);
+		static usize GetAllocationSize(const void* Block);
+		static TMemoryPool* GetAllocationPool(const void* Block);
 
 	private:
-		static TMemoryPoolBlockHeader* GetAllocationHeader(void* Block);
+		static TMemoryPoolBlockHeader* GetAllocationHeader(const void* Block);
 
 	private:
 		ubyte* Memory{};

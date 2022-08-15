@@ -1,9 +1,10 @@
 #pragma once
 #include "Core/Types.h"
+#include "Core/Malloc.h"
 
 namespace Kepler
 {
-	class TSwapChain
+	class TSwapChain : public TRefCounted
 	{
 	public:
 		TSwapChain(class TWindow* Window);

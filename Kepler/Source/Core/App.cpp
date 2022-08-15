@@ -21,7 +21,7 @@ namespace Kepler
 		KEPLER_INFO("LogApp", "Starting application initialization");
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
-		LowLevelRenderer = MakeRef<TLowLevelRenderer>();
+		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
 		LowLevelRenderer->InitRenderStateForWindow(TPlatform::Get()->CreatePlatformWindow(640, 640, "Other"));
 	}
@@ -44,23 +44,27 @@ namespace Kepler
 			{
 				Platform->Update();
 
-				auto ImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
-				auto SwapChain = LowLevelRenderer->GetSwapChain(0);
+				TRenderThread::Submit(
+					[this]
+					{
+						auto ImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
+						auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
-				if (SwapChain)
-				{
-					ImmList.StartDrawingToSwapChainImage(SwapChain.get());
-					float ClearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-					ImmList.ClearSwapChainImage(SwapChain.get(), ClearColor);
-				}
+						if (SwapChain)
+						{
+							ImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
+							float ClearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+							ImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
+						}
 
-				SwapChain = LowLevelRenderer->GetSwapChain(1);
-				if (SwapChain)
-				{
-					ImmList.StartDrawingToSwapChainImage(SwapChain.get());
-					float ClearColor1[4] = { 1.0f, 0.0f, 1.0f, 1.0f };
-					ImmList.ClearSwapChainImage(SwapChain.get(), ClearColor1);
-				}
+						SwapChain = LowLevelRenderer->GetSwapChain(1);
+						if (SwapChain)
+						{
+							ImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
+							float ClearColor1[4] = { 1.0f, 0.0f, 1.0f, 1.0f };
+							ImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor1);
+						}
+					});
 
 				LowLevelRenderer->PresentAll();
 			}

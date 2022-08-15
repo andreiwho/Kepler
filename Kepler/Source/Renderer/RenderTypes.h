@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Malloc.h"
 
 namespace Kepler
 {
@@ -9,5 +10,20 @@ namespace Kepler
 #ifdef WIN32
 		DirectX11,
 #endif
+	};
+
+	enum class EFormat
+	{
+
+	};
+
+	class TDataBlob : public TRefCounted
+	{
+	public:
+		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data, usize Size);
+
+		virtual const void* GetData() const = 0;
+		virtual usize GetSize() const = 0;
+		virtual void Write(const void* Data, usize Size) = 0;
 	};
 }

@@ -5,6 +5,7 @@
 #else
 
 #endif
+#include "Core/Log.h"
 
 namespace Kepler
 {
@@ -91,7 +92,12 @@ namespace Kepler
 
 	bool TPlatform::Internal_WindowClosed(const TWindowClosedEvent& Event)
 	{
-		// ...
+		KEPLER_TRACE("LogPlatform", "Window {} closed", Event.Window->GetTitle());
+		if (IsMainWindow(Event.Window))
+		{
+			CloseAllWindows();
+		}
+
 		return false;
 	}
 

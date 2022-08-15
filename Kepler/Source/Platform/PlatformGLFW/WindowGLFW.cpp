@@ -56,8 +56,8 @@ namespace Kepler
 		glfwSetWindowCloseCallback(Window, [](GLFWwindow* window)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
-				TPlatform::Get()->OnPlatformEvent(TWindowClosedEvent(win));
 				win->RequestClose();
+				TPlatform::Get()->OnPlatformEvent(TWindowClosedEvent(win));
 			});
 
 		/************************************************************************/

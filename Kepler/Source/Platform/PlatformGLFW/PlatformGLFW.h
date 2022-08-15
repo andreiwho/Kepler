@@ -23,10 +23,14 @@ namespace Kepler
 		virtual bool HasActiveMainWindow() const override;
 		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
 		static bool HandleCrashReported_Impl(const std::string& Message);
+		inline virtual bool IsMainWindow(TWindow* Window) const override { return !Windows.empty() && (Windows.at(0).get() == Window); }
 
 	private:
 		void DestroyClosedWindows();
 		void Terminate();
+
+	protected:
+		virtual void CloseAllWindows() override;
 
 	private:
 		std::vector<std::unique_ptr<TWindow>> Windows;

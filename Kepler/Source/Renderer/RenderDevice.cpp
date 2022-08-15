@@ -22,7 +22,7 @@ namespace Kepler
 		case Kepler::ERenderAPI::DirectX11:
 			KEPLER_TRACE("LogRender", "Creating RenderDevice for DirectX11 API");
 			GRenderAPI = ERenderAPI::DirectX11;
-			return MakeRef<TRenderDeviceD3D11>();
+			return MakeRef(New<TRenderDeviceD3D11>());
 			break;
 #endif
 		default:
@@ -31,4 +31,19 @@ namespace Kepler
 		CHECK(false && "Failed to create render device. Unknown render API");
 	}
 
+	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* Data, usize Size)
+	{
+		switch (GRenderAPI)
+		{
+#ifdef WIN32
+		case Kepler::ERenderAPI::DirectX11:
+			KEPLER_TRACE("LogRender", "Creating RenderDevice for DirectX11 API");
+			return MakeRef(New<TDataBlobD3D11>(Data, Size));
+#endif
+		default:
+			break;
+		}
+		CHECK(false && "Failed to create data blob. Unknown render API");
+		return nullptr;
+	}
 }

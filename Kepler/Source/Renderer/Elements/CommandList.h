@@ -6,28 +6,17 @@ namespace Kepler
 {
 	class TSwapChain;
 
-	class TCommandList
+	class TCommandList : public TRefCounted
 	{
 	public:
 		virtual ~TCommandList() = default;
 
 		virtual void StartDrawingToSwapChainImage(TSwapChain* SwapChain) = 0;
 		virtual void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]) = 0;
+		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) = 0;
 	};
 
 	class TCommandListImmediate : public TCommandList
 	{
-	};
-
-	class TImmediateCommandListProxy
-	{
-	public:
-		TImmediateCommandListProxy(TRef<TCommandListImmediate> List) : CommandList(List) {}
-
-		void StartDrawingToSwapChainImage(TSwapChain* SwapChain);
-		void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]);
-
-	private:
-		TRef<TCommandListImmediate> CommandList;
 	};
 }

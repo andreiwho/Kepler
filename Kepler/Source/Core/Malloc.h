@@ -23,8 +23,8 @@ namespace Kepler
 		static TMalloc* Get() { return CHECKED(Instance); }
 
 		void* Allocate(usize Size, TMemoryPool* MemoryPool = nullptr);
-		void Free(void* block);
-		usize GetSize(void* block) const;
+		void Free(const void* block);
+		usize GetSize(const void* block) const;
 
 	private:
 		struct TAllocationHeader
@@ -41,8 +41,160 @@ namespace Kepler
 
 	usize MemorySize(void* data);
 
+	template<typename T> using TSharedPtr = std::shared_ptr<T>;
 
-	template<typename T> using TRef = std::shared_ptr<T>;
+	class TRefCounted
+	{
+	public:
+		virtual ~TRefCounted() = default;
+
+		void AddRef() const;
+		void Release() const;
+		inline u64 GetRefCount() const { return RefCount.load(); }
+
+	private:
+		mutable TAtomic<u64> RefCount{ 1 };
+	};
+
+	template<typename T>
+	class TRef
+	{
+	public:
+		TRef() : Memory(nullptr) {}
+		TRef(T* NewMemory)
+			: Memory(NewMemory)
+		{
+			if (Memory && !Memory->GetRefCount())
+			{
+				Memory->AddRef();
+			}
+		}
+
+		~TRef() { Release(); }
+
+		TRef(const TRef& Other) noexcept
+		{
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = const_cast<T*>(Other.Raw());
+			Memory->AddRef();
+		}
+
+		template<typename U>
+		TRef<T>(const TRef<U>& Other) noexcept
+		{
+			static_assert(std::is_base_of_v<T, U>);
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = const_cast<T*>(Other.Raw());
+			Memory->AddRef();
+		}
+
+		TRef& operator=(const TRef& Other) noexcept
+		{
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = const_cast<T*>(Other.Raw());
+			Memory->AddRef();
+			return *this;
+		}
+
+		template<typename U>
+		TRef<T>& operator=(const TRef<U>& Other) noexcept
+		{
+			static_assert(std::is_base_of_v<T, U>);
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = const_cast<T*>(Other.Raw());
+			Memory->AddRef();
+			return *this;
+		}
+
+		TRef(TRef&& Other) noexcept
+		{
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = Other.Raw();
+			Other.ResetMemoryUnsafe();
+		}
+
+		template<typename U>
+		TRef<T>(TRef<U>&& Other) noexcept
+		{
+			static_assert(std::is_base_of_v<T, U>);
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = Other.Raw();
+			Other.ResetMemoryUnsafe();
+		}
+
+		TRef& operator=(TRef&& Other) noexcept
+		{
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = Other.Raw();
+			Other.ResetMemoryUnsafe();
+			return *this;
+		}
+
+		template<typename U>
+		TRef<T>& operator=(TRef<U>&& Other) noexcept
+		{
+			static_assert(std::is_base_of_v<T, U>);
+			if (Memory)
+			{
+				Memory->Release();
+			}
+			Memory = Other.Raw();
+			Other.ResetMemoryUnsafe();
+			return *this;
+		}
+
+		T* operator->() { return Memory; }
+		T* operator->() const { return Memory; }
+
+		T& operator*() { return *Memory; }
+		const T& operator*() const { return *Memory; }
+		inline operator bool() const { return !!Raw(); }
+
+		T* Raw() { return Memory; }
+		const T* Raw() const { return Memory; }
+
+		void AddRef() const { if (Memory) Memory->AddRef(); }
+		void Release() const
+		{
+			if (Memory)
+			{
+				Memory->Release();
+				Memory = nullptr;
+			}
+		}
+		void ResetMemoryUnsafe() { Memory = nullptr; }
+	private:
+		//static_assert(std::is_base_of_v<TRefCounted, T>);
+		mutable T* Memory{};
+	};
+
+	template<typename T>
+	TRef<T> MakeRef(T* Memory)
+	{
+		//static_assert(std::is_base_of_v<TRefCounted, T>);
+		return TRef<T>(Memory);
+	}
 
 	template <typename T>
 	class TMallocator
@@ -82,7 +234,7 @@ namespace Kepler
 
 
 	template<typename T, typename ... ARGS>
-	inline TRef<T> MakeRef(ARGS&& ... Args)
+	inline TSharedPtr<T> MakeShared(ARGS&& ... Args)
 	{
 		return std::allocate_shared<T>(TMallocator<T>{}, std::forward<ARGS>(Args)...);
 	}

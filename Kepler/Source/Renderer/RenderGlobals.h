@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Types.h"
 #include "RenderTypes.h"
+#include "RenderThread.h"
 
 #include <thread>
 

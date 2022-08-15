@@ -22,7 +22,7 @@ namespace Kepler
 		return nullptr;
 	}
 
-	void TMemoryPool::Deallocate(void* Block)
+	void TMemoryPool::Deallocate(const void* Block)
 	{
 		if (!Block)
 		{
@@ -37,7 +37,7 @@ namespace Kepler
 		}
 	}
 
-	usize TMemoryPool::GetAllocationSize(void* Block)
+	usize TMemoryPool::GetAllocationSize(const void* Block)
 	{
 		if (!Block)
 		{
@@ -49,7 +49,7 @@ namespace Kepler
 		return Header->Size;
 	}
 
-	TMemoryPool* TMemoryPool::GetAllocationPool(void* Block)
+	TMemoryPool* TMemoryPool::GetAllocationPool(const void* Block)
 	{
 		if (!Block)
 		{
@@ -60,7 +60,7 @@ namespace Kepler
 		return Header->Pool;
 	}
 
-	TMemoryPoolBlockHeader* TMemoryPool::GetAllocationHeader(void* Block)
+	TMemoryPoolBlockHeader* TMemoryPool::GetAllocationHeader(const void* Block)
 	{
 		return (TMemoryPoolBlockHeader*)((ubyte*)Block - sizeof(TMemoryPoolBlockHeader));
 	}

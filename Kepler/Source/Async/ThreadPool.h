@@ -189,7 +189,7 @@ namespace Kepler
 		template <typename TFUNC, typename... A, typename RETVAL = std::invoke_result_t<std::decay_t<TFUNC>, std::decay_t<A>...>>
 		std::future<RETVAL> SubmitTask(TFUNC&& Task)
 		{
-			TRef<std::promise<RETVAL>> Promise = MakeRef<std::promise<RETVAL>>();
+			TSharedPtr<std::promise<RETVAL>> Promise = MakeShared<std::promise<RETVAL>>();
 			EnqueueTask(
 				[Func = std::move(Task), Promise, this]
 				{

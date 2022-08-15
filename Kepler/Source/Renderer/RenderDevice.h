@@ -10,7 +10,7 @@
 
 namespace Kepler
 {
-	class TRenderDevice
+	class TRenderDevice : public TRefCounted
 	{
 	public:
 		virtual ~TRenderDevice() = default;
@@ -18,7 +18,7 @@ namespace Kepler
 		static TRef<TRenderDevice> CreateRenderDevice(ERenderAPI OverrideAPI = ERenderAPI::Default);
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) = 0;
 
-		inline TImmediateCommandListProxy GetImmediateCommandList() const { return ImmediateCommandList; }
+		inline TRef<TCommandListImmediate> GetImmediateCommandList() const { return ImmediateCommandList; }
 
 	protected:
 		TRef<TCommandListImmediate> ImmediateCommandList{};

@@ -19,7 +19,7 @@ namespace Kepler
 
 		static TPlatform* Get();
 
-		static TRef<TPlatform> CreatePlatformInterface();
+		static TSharedPtr<TPlatform> CreatePlatformInterface();
 
 		static bool HandleCrashReported(const std::string& Message);
 
@@ -31,6 +31,7 @@ namespace Kepler
 
 		inline const TKeyboardState& GetKeyboardState() const { return KeyboardState; }
 		inline const TMouseState& GetMouseState() const { return MouseState; }
+		virtual bool IsMainWindow(TWindow* Window) const { return true; }
 
 	private:
 		bool Internal_MouseMoved(const TMouseMoveEvent& e);
@@ -42,6 +43,7 @@ namespace Kepler
 
 	protected:
 		bool bInitialized = false;
+		virtual void CloseAllWindows() = 0;
 
 	private:
 		static TPlatform* Instance;
