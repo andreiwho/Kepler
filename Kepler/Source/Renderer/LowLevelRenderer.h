@@ -37,5 +37,7 @@ namespace Kepler
 
 		TRef<TRenderDevice> RenderDevice{};
 		TDynArray<TRef<TSwapChain>> SwapChains;
+		TAtomic<u64> FrameCounter = 0;
+		const u64 FlushPendingDeleteResourcesInterval = 16;
 	};
 }

@@ -4,6 +4,7 @@
 #include "Core/Malloc.h"
 
 #include "Elements/SwapChain.h"
+#include "Elements/VertexBuffer.h"
 #include "Elements/CommandList.h"
 
 #include <memory>
@@ -19,6 +20,9 @@ namespace Kepler
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) = 0;
 
 		inline TRef<TCommandListImmediate> GetImmediateCommandList() const { return ImmediateCommandList; }
+		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) = 0;
+
+		virtual bool RT_FlushPendingDeleteResources() = 0;
 
 	protected:
 		TRef<TCommandListImmediate> ImmediateCommandList{};

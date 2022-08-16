@@ -31,13 +31,13 @@ namespace Kepler
 		CHECK(false && "Failed to create render device. Unknown render API");
 	}
 
-	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* Data, usize Size)
+	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* Data, usize Size, usize ElemSize)
 	{
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
 		case Kepler::ERenderAPI::DirectX11:
-			return MakeRef(New<TDataBlobD3D11>(Data, Size));
+			return MakeRef(New<TDataBlobD3D11>(Data, Size, ElemSize));
 #endif
 		default:
 			break;

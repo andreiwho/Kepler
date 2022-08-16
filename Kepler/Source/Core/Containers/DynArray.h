@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Types.h"
 #include "Core/Malloc.h"
+#include <initializer_list>
 
 namespace Kepler
 {
@@ -9,6 +10,10 @@ namespace Kepler
 	{
 	public:
 		TDynArray() = default;
+
+		TDynArray(std::initializer_list<T> NewData)
+			:	UnderlyingContainer(NewData.begin(), NewData.end())
+		{}
 
 		TDynArray(usize InitialSize)
 			:	UnderlyingContainer(InitialSize)

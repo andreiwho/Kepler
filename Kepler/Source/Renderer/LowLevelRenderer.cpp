@@ -3,8 +3,9 @@
 
 namespace Kepler
 {
-	
+	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::TLowLevelRenderer()
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit([this]
 			{
@@ -13,10 +14,12 @@ namespace Kepler
 		TRenderThread::Wait();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::~TLowLevelRenderer()
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit(
-			[this] 
+			[this]
 			{
 				SwapChains.Clear();
 				RenderDevice.Release();
@@ -24,17 +27,21 @@ namespace Kepler
 		TRenderThread::Wait();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* InWindow)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit(
 			[this, InWindow]()
-			{ 
-				SwapChains.EmplaceBack(RenderDevice->CreateSwapChainForWindow(InWindow)); 
+			{
+				SwapChains.EmplaceBack(RenderDevice->CreateSwapChainForWindow(InWindow));
 			}
 		);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TLowLevelRenderer::PresentAll()
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit(
 			[this]
@@ -43,17 +50,27 @@ namespace Kepler
 				{
 					SwapChain->Present();
 				}
+
+				if (++FrameCounter % FlushPendingDeleteResourcesInterval == 0)
+				{
+					if (RenderDevice)
+					{
+						RenderDevice->RT_FlushPendingDeleteResources();
+					}
+				}
 			});
 		TRenderThread::Wait();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* InWindow)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit(
 			[this, InWindow]
 			{
-				auto FoundSwapChain = std::find_if(std::begin(SwapChains), std::end(SwapChains), 
-					[InWindow](const auto& SwapChain) 
+				auto FoundSwapChain = std::find_if(std::begin(SwapChains), std::end(SwapChains),
+					[InWindow](const auto& SwapChain)
 					{
 						return SwapChain->GetAssociatedWindow() == InWindow;
 					}
@@ -67,7 +84,9 @@ namespace Kepler
 		TRenderThread::Wait();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TLowLevelRenderer::OnWindowResized(class TWindow* InWindow)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		TRenderThread::Submit(
 			[this, InWindow]
@@ -79,7 +98,9 @@ namespace Kepler
 			});
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* InWindow) const
+		//////////////////////////////////////////////////////////////////////////
 	{
 		auto FoundSwapChain = SwapChains.Find(
 			[InWindow](const auto& SwapChain)
@@ -94,4 +115,5 @@ namespace Kepler
 		return nullptr;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 }

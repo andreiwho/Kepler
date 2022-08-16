@@ -7,6 +7,7 @@
 #include "Core/Macros.h"
 #include "Renderer/RenderGlobals.h"
 #include "CommandListImmediateD3D11.h"
+#include "VertexBufferD3D11.h"
 
 #ifdef ENABLE_DEBUG
 # include <dxgidebug.h>
@@ -37,6 +38,8 @@ namespace Kepler
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
+		RT_FlushPendingDeleteResources();
+
 		if (ClassLinkage)
 			ClassLinkage->Release();
 #ifdef ENABLE_DEBUG
@@ -49,6 +52,12 @@ namespace Kepler
 			Device->Release();
 		if (Factory)
 			Factory->Release();
+	}
+
+	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	{
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TVertexBufferD3D11>(InAccessFlags, Data));
 	}
 
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
@@ -85,6 +94,35 @@ namespace Kepler
 #else
 		return {};
 #endif
+	}
+
+	bool TRenderDeviceD3D11::RT_FlushPendingDeleteResources()
+	{
+		CHECK(IsRenderThread());
+
+		bool bHasDeletedAny = false;
+		ID3D11Resource* pResource;
+		if (PendingDeleteResources.GetLength() > 0)
+		{
+#ifdef ENABLE_DEBUG
+			u32 NumDeletedResources{ (u32)PendingDeleteResources.GetLength() };
+#endif
+			std::lock_guard Lck{ ResourceMutex };
+			while (PendingDeleteResources.Dequeue(pResource))
+			{
+				pResource->Release();
+				bHasDeletedAny = true;
+			}
+#ifdef ENABLE_DEBUG
+			KEPLER_TRACE("LogRender", "RT_FlushPendingDeleteResources - destroyed {} D3D11 resources.", NumDeletedResources);
+#endif
+		}
+		return bHasDeletedAny;
+	}
+
+	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11Resource* Resource)
+	{
+		PendingDeleteResources.Enqueue(std::move(Resource));
 	}
 
 	static std::string GetAdapterName(IDXGIAdapter* Adapter)
@@ -134,7 +172,7 @@ namespace Kepler
 			Flags,
 			PreferredFeatureLevels,
 			ARRAYSIZE(PreferredFeatureLevels),
-			D3D11_SDK_VERSION, 
+			D3D11_SDK_VERSION,
 			&OutDevice, &OutFeatureLevel, &OutContext));
 		CHECK(OutDevice);
 		HRCHECK(OutDevice->QueryInterface(&Device));
@@ -170,7 +208,8 @@ namespace Kepler
 		HRCHECK(Device->CreateClassLinkage(&ClassLinkage));
 	}
 
-	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size)
+	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
+		: Stride(ElemSize)
 	{
 		if (Size > 0)
 		{
@@ -204,6 +243,5 @@ namespace Kepler
 			memcpy(Blob->GetBufferPointer(), Data, Size);
 		}
 	}
-
 }
 #endif

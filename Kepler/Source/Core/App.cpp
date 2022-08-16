@@ -46,6 +46,26 @@ namespace Kepler
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
 
+		struct TVertex
+		{
+			float Pos[3]{};
+			float Clo[4]{};
+		};
+
+		TDynArray<TVertex> Vertices = {
+			{0.0f, 0.1f, 0.0f},
+			{0.5f, -0.5f, 0.0f}
+		};
+		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
+
+		{
+			TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
+				[Blob, this]
+				{
+					return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
+				}));
+		}
+
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
 		{
