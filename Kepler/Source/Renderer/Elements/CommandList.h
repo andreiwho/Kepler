@@ -1,6 +1,8 @@
 #pragma once
 #include "Core/Types.h"
 #include "Core/Malloc.h"
+#include "Core/Containers/DynArray.h"
+#include "VertexBuffer.h"
 
 namespace Kepler
 {
@@ -13,6 +15,13 @@ namespace Kepler
 
 		virtual void StartDrawingToSwapChainImage(TSwapChain* SwapChain) = 0;
 		virtual void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]) = 0;
+		
+		// A version for the single buffer (called like this for optimization reasons)
+		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) = 0;
+
+		// A version for multiple buffers (called like this for optimization reasons)
+		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) = 0;
+
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) = 0;
 	};
 

@@ -1,6 +1,7 @@
 #include "CommandListImmediateD3D11.h"
 #include "SwapChainD3D11.h"
 #include "Renderer/RenderGlobals.h"
+#include "VertexBufferD3D11.h"
 
 namespace Kepler
 {
@@ -43,6 +44,61 @@ namespace Kepler
 		CHECK(IsRenderThread());
 		CHECK(Context);
 		Context->Draw(VertexCount, BaseVertexIndex);
+	}
+
+	void TCommandListImmediateD3D11::BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset)
+	{
+		CHECK(IsRenderThread());
+		if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(VertexBuffer))
+		{
+			if (ID3D11Buffer* Buffer = MyBuffer->GetBuffer())
+			{
+				UINT Stride = (UINT)MyBuffer->GetStride();
+				UINT BindOffset = (UINT)Offset;
+				Context->IASetVertexBuffers(StartSlot, 1, &Buffer, &Stride, &BindOffset);
+			}
+		}
+	}
+
+	void TCommandListImmediateD3D11::BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets)
+	{
+		CHECK(IsRenderThread());
+		const bool bOffsetsHasEntries = Offsets.GetLength() > 0;
+
+		if (bOffsetsHasEntries)
+		{
+			CHECKMSG(VertexBuffers.GetLength() == Offsets.GetLength(),
+				"Error in BindVertexBuffers. If you specify at least one offset than the number of offsets in Offsets must match with the number of vertex buffers");
+		}
+
+		if (VertexBuffers.GetLength() > 0)
+		{
+			TDynArray<ID3D11Buffer*> ppBuffers;
+			TDynArray<u32> pStrides;
+			TDynArray<u32> pOffsets;
+
+			ppBuffers.Reserve(VertexBuffers.GetLength());
+			pStrides.Reserve(VertexBuffers.GetLength());
+			pOffsets.Reserve(VertexBuffers.GetLength());
+
+			usize Index = 0;
+			for (const auto& Buffer : VertexBuffers)
+			{
+				if (Buffer)
+				{
+					if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(Buffer))
+					{
+						ppBuffers.EmplaceBack(MyBuffer->GetBuffer());
+						pStrides.EmplaceBack((u32)MyBuffer->GetStride());
+						pOffsets.EmplaceBack(bOffsetsHasEntries ? (u32)Offsets[Index] : (u32)0);
+					}
+				}
+				Index++;
+			}
+
+			CHECK((pStrides.GetLength() == ppBuffers.GetLength()) && (pOffsets.GetLength() == ppBuffers.GetLength()));
+			Context->IASetVertexBuffers(StartSlot, (UINT)ppBuffers.GetLength(), ppBuffers.GetData(), pStrides.GetData(), pOffsets.GetData());
+		}
 	}
 
 }

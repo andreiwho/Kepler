@@ -232,6 +232,20 @@ namespace Kepler
 		TMallocator& operator=(TMallocator&& other) noexcept = default;
 	};
 
+	template<typename T, typename U>
+	TRef<T> RefCast(TRef<U> Ref)
+	{
+		if constexpr (std::is_base_of_v<T, U> || std::is_base_of_v<U, T>)
+		{
+			if (Ref)
+			{
+				Ref.AddRef();
+				return TRef<T>(static_cast<T*>(Ref.Raw()));
+			}
+		}
+		return nullptr;
+	}
+
 
 	template<typename T, typename ... ARGS>
 	inline TSharedPtr<T> MakeShared(ARGS&& ... Args)

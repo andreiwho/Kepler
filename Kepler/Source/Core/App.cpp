@@ -58,13 +58,19 @@ namespace Kepler
 		};
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
-		{
-			TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
-				[Blob, this]
-				{
-					return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
-				}));
-		}
+
+		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
+			[Blob, this]
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
+			}));
+
+		TRef<TVertexBuffer> VertexBuffer1 = Await(TRenderThread::Submit(
+			[Blob, this]
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
+			}));
+
 
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
@@ -81,13 +87,15 @@ namespace Kepler
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this]
+						[this, VertexBuffer1, VertexBuffer]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
 							if (SwapChain)
 							{
+								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
+
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
 								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);

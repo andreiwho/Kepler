@@ -11,6 +11,8 @@ namespace Kepler
 		TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<TDataBlob> Data);
 		~TVertexBufferD3D11();
 		
+		inline ID3D11Buffer* GetBuffer() const { return Buffer; }
+
 	private:
 		ID3D11Buffer* Buffer{};
 		TRef<TDataBlob> TempDataBlob{};

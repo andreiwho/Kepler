@@ -1,6 +1,7 @@
 #pragma once
 #include "D3D11Common.h"
 #include "Renderer/Elements/CommandList.h"
+#include "VertexBufferD3D11.h"
 
 namespace Kepler
 {
@@ -19,6 +20,9 @@ namespace Kepler
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) override;
 
 		static TCommandListImmediateD3D11* Get() { return CHECKED(Instance); }
+
+		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) override;
+		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) override;
 
 	private:
 		ID3D11DeviceContext4* Context{};

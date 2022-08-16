@@ -13,6 +13,9 @@ namespace Kepler
 		TVertexBuffer() = default;
 		TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
 
+		inline usize GetSize() const { return Size; }
+		inline usize GetStride() const { return Stride; }
+
 	protected:
 		EBufferAccessFlags AccessFlags{};
 		usize Size{};
