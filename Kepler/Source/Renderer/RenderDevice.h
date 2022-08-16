@@ -8,6 +8,7 @@
 #include "Elements/CommandList.h"
 
 #include <memory>
+#include "Elements/IndexBuffer.h"
 
 namespace Kepler
 {
@@ -21,6 +22,7 @@ namespace Kepler
 
 		inline TRef<TCommandListImmediate> GetImmediateCommandList() const { return ImmediateCommandList; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) = 0;
+		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) = 0;
 
 		virtual bool RT_FlushPendingDeleteResources() = 0;
 

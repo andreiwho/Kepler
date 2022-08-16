@@ -39,6 +39,7 @@ namespace Kepler
 		inline ID3D11DeviceContext4* GetImmediateContext() const { return ImmediateContext; }
 		inline ID3D11ClassLinkage* GetClassLinkage() const { return ClassLinkage; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
+		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();

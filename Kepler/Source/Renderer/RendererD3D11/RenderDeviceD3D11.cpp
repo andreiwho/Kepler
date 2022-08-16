@@ -12,6 +12,7 @@
 #ifdef ENABLE_DEBUG
 # include <dxgidebug.h>
 #include "Core/Malloc.h"
+#include "IndexBufferD3D11.h"
 #endif
 
 namespace Kepler
@@ -56,8 +57,16 @@ namespace Kepler
 
 	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 	{
+		CHECK(IsRenderThread());
 		std::lock_guard Lck{ ResourceMutex };
 		return MakeRef(New<TVertexBufferD3D11>(InAccessFlags, Data));
+	}
+
+	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
 	}
 
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)

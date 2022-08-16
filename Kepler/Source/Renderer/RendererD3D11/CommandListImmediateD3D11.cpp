@@ -2,12 +2,15 @@
 #include "SwapChainD3D11.h"
 #include "Renderer/RenderGlobals.h"
 #include "VertexBufferD3D11.h"
+#include "IndexBufferD3D11.h"
 
 namespace Kepler
 {
 	TCommandListImmediateD3D11* TCommandListImmediateD3D11::Instance = nullptr;
 
+	//////////////////////////////////////////////////////////////////////////
 	TCommandListImmediateD3D11::TCommandListImmediateD3D11(ID3D11DeviceContext4* InContext) : Context(InContext)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(!Instance);
 		Instance = this;
@@ -16,13 +19,17 @@ namespace Kepler
 		Context->AddRef();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TCommandListImmediateD3D11::~TCommandListImmediateD3D11()
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK_NOTHROW(IsRenderThread());
 		Context->Release();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::StartDrawingToSwapChainImage(TSwapChain* SwapChain)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
@@ -31,7 +38,9 @@ namespace Kepler
 		Context->OMSetRenderTargets(ARRAYSIZE(ppRTV), ppRTV, nullptr);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4])
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
@@ -39,14 +48,18 @@ namespace Kepler
 		Context->ClearRenderTargetView(MySwapChain->GetRenderTargetView(), ClearColor);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::Draw(u32 VertexCount, u32 BaseVertexIndex)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(Context);
 		Context->Draw(VertexCount, BaseVertexIndex);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(VertexBuffer))
@@ -60,7 +73,9 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets)
+		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		const bool bOffsetsHasEntries = Offsets.GetLength() > 0;
@@ -101,4 +116,44 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset)
+		//////////////////////////////////////////////////////////////////////////
+	{
+		CHECK(IsRenderThread());
+		CHECK(Context);
+		Context->DrawIndexed(IndexCount, BaseIndexOffset, (INT)BaseVertexOffset);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset)
+		//////////////////////////////////////////////////////////////////////////
+	{
+		CHECK(IsRenderThread());
+		if (auto MyBuffer = RefCast<TIndexBufferD3D11>(IndexBuffer))
+		{
+			if (ID3D11Buffer* pBuffer = MyBuffer->GetBuffer())
+			{
+				UINT Stride = MyBuffer->GetStride();
+				Context->IASetIndexBuffer(pBuffer,
+					[Stride]()
+					{
+						const usize UShort = sizeof(u16);
+						const usize UInt = sizeof(u32);
+						switch (Stride)
+						{
+						case UShort:
+							return DXGI_FORMAT_R16_UINT;
+						case UInt:
+							return DXGI_FORMAT_R32_UINT;
+						default:
+							CHECKMSG(false, "Unknown index format");
+						}
+						return DXGI_FORMAT_UNKNOWN;
+					}(), Offset);
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 }

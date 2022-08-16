@@ -5,14 +5,15 @@
 
 namespace Kepler
 {
-	class TVertexBuffer : public TRefCounted
+	class TIndexBuffer : public TRefCounted
 	{
 	public:
-		TVertexBuffer() = default;
-		TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
+		TIndexBuffer() = default;
+		TIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
 
 		inline usize GetSize() const { return Size; }
 		inline usize GetStride() const { return Stride; }
+		inline usize GetCount() const { return Size / Stride; }
 
 	protected:
 		EBufferAccessFlags AccessFlags{};

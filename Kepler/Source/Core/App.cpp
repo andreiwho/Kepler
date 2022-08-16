@@ -10,6 +10,7 @@
 // Test
 #include "Renderer/ShaderCompiler.h"
 #include "Core/Filesystem/FileUtils.h"
+#include "Renderer/Elements/IndexBuffer.h"
 
 namespace Kepler
 {
@@ -71,6 +72,13 @@ namespace Kepler
 				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
 			}));
 
+		TDynArray<u32> Indices = { 0,1,2 };
+		TRef<TIndexBuffer> IndexBuffer = Await(TRenderThread::Submit(
+			[this, &Indices] 
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateIndexBuffer(EBufferAccessFlags::GPUOnly, TDataBlob::CreateGraphicsDataBlob(Indices));
+			}));
+
 
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
@@ -87,7 +95,7 @@ namespace Kepler
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer]
+						[this, VertexBuffer1, VertexBuffer, IndexBuffer]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
@@ -95,10 +103,13 @@ namespace Kepler
 							if (SwapChain)
 							{
 								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
+								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
 								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
+
+								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
 							}
 						});
 
