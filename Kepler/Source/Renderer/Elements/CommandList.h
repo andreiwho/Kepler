@@ -28,6 +28,11 @@ namespace Kepler
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) = 0;
 
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) = 0;
+
+		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
+
+	protected:
+		bool bHasAttachedPipeline = false;
 	};
 
 	class TCommandListImmediate : public TCommandList

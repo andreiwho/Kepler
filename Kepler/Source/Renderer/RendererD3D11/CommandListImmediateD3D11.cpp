@@ -53,7 +53,7 @@ namespace Kepler
 		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
-		CHECK(Context);
+		CHECK(HasPipelineStateSetup() && Context);
 		Context->Draw(VertexCount, BaseVertexIndex);
 	}
 
@@ -121,7 +121,7 @@ namespace Kepler
 		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
-		CHECK(Context);
+		CHECK(HasPipelineStateSetup() && Context);
 		Context->DrawIndexed(IndexCount, BaseIndexOffset, (INT)BaseVertexOffset);
 	}
 
