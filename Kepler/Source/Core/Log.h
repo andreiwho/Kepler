@@ -74,5 +74,10 @@ namespace Kepler
 #endif
 
 // It has to be here... though will be moved to other file
-# define VALIDATED(x) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {}", #x); bFired = true; } return arg; }(x)
-# define VALIDATEDMSG(x, msg) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {}", msg); bFired = true;} return arg; }(x)
+#ifdef ENABLE_VALIDATION_BREAK
+# define VALIDATED(x) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {} on line {} in file {}", #x, __LINE__, __FILE__); bFired = true; } return arg; }(x)
+# define VALIDATEDMSG(x, msg) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {} on line {} in file {}", msg, __LINE__, __FILE__); bFired = true;} return arg; }(x)
+#else
+# define VALIDATED(x) x
+# define VALIDATEDMSG(x, msg) x
+#endif
