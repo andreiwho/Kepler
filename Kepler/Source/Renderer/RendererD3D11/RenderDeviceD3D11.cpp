@@ -123,7 +123,7 @@ namespace Kepler
 				bHasDeletedAny = true;
 			}
 #ifdef ENABLE_DEBUG
-			KEPLER_TRACE("LogRender", "RT_FlushPendingDeleteResources - destroyed {} D3D11 resources.", NumDeletedResources);
+			KEPLER_TRACE(LogRender, "RT_FlushPendingDeleteResources - destroyed {} D3D11 resources.", NumDeletedResources);
 #endif
 		}
 		return bHasDeletedAny;
@@ -190,7 +190,7 @@ namespace Kepler
 		CHECK(OutContext);
 		HRCHECK(OutContext->QueryInterface(&ImmediateContext));
 		OutContext->Release();
-		KEPLER_TRACE("LogRender", "Created D3D11 Render Device from adapter '{}'", GetAdapterName(Adapter));
+		KEPLER_TRACE(LogRender, "Created D3D11 Render Device from adapter '{}'", GetAdapterName(Adapter));
 		Adapter->Release();
 	}
 

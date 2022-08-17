@@ -8,7 +8,6 @@
 
 namespace Kepler
 {
-
 	TRef<Kepler::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI OverrideAPI)
 	{
 		switch (OverrideAPI)
@@ -20,7 +19,7 @@ namespace Kepler
 			break;
 #ifdef WIN32
 		case Kepler::ERenderAPI::DirectX11:
-			KEPLER_TRACE("LogRender", "Creating RenderDevice for DirectX11 API");
+			KEPLER_TRACE(LogRender, "Creating RenderDevice for DirectX11 API");
 			GRenderAPI = ERenderAPI::DirectX11;
 			return MakeRef(New<TRenderDeviceD3D11>());
 			break;

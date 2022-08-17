@@ -52,4 +52,4 @@ endmacro()
 add_subdirectory(Kepler)
 add_subdirectory(Testbed)
 
-set_property(GLOBAL PROPERTY VS_STARTUP_PROJECT Testbed)
+set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY VS_STARTUP_PROJECT Testbed)

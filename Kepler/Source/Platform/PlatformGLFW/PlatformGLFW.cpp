@@ -23,7 +23,7 @@ namespace Kepler
 	TPlatformGLFW::TPlatformGLFW()
 	{
 		bInitialized = !!glfwInit();
-		KEPLER_INFO("LogPlatform", "GLFW platform initialized");
+		KEPLER_INFO(LogPlatform, "GLFW platform initialized");
 		if (!bInitialized)
 		{
 			// Throw some kind of an error
@@ -38,13 +38,13 @@ namespace Kepler
 		if (bInitialized)
 		{
 			glfwTerminate();
-			KEPLER_INFO("LogPlatform", "GLFW platform terminated");
+			KEPLER_INFO(LogPlatform, "GLFW platform terminated");
 		}
 	}
 
 	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 Width, i32 Height, const std::string& Title, const TWindowParams& Params)
 	{
-		KEPLER_INFO("LogPlatform", "Creating GLFW platform window '{}'", Title);
+		KEPLER_INFO(LogPlatform, "Creating GLFW platform window '{}'", Title);
 		return Windows.EmplaceBack(std::make_unique<TWindowGLFW>(Width, Height, Title, Params)).get();
 	}
 

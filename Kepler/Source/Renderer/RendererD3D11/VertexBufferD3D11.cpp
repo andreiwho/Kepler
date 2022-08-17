@@ -4,6 +4,8 @@
 
 namespace Kepler
 {
+	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer);
+
 	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<TDataBlob> Data)
 		:	TVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
@@ -36,7 +38,7 @@ namespace Kepler
 		{
 			if (Desc.CPUAccessFlags != 0)
 			{
-				KEPLER_WARNING("LogVertexBuffer", "You cannot mix EBufferUsageFlags::GPUOnly with other ones." 
+				KEPLER_WARNING(LogVertexBuffer, "You cannot mix EBufferUsageFlags::GPUOnly with other ones." 
 					" If using GPUOnly, other flags will be ignored.");
 			}
 
@@ -54,7 +56,7 @@ namespace Kepler
 		// This is used to ensure that the data buffer will live long enough on the render thread to copy the buffer data into the buffer
 		TempDataBlob.Release();
 
-		KEPLER_TRACE("LogVertexBuffer", "Created Vertex Buffer with size {} and stride {}", Size, Stride);
+		KEPLER_TRACE(LogVertexBuffer, "Created Vertex Buffer with size {} and stride {}", Size, Stride);
 	}
 
 	TVertexBufferD3D11::~TVertexBufferD3D11()

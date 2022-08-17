@@ -4,15 +4,6 @@
 
 namespace Kepler
 {
-	class TShaderLayout
-	{
-
-	};
-
-#define BEGIN_SHADER_LAYOUT(Name)
-
-#define END_SHADER_LAYOUT()
-
 	class TShader : public TRefCounted
 	{
 	public:
@@ -20,6 +11,7 @@ namespace Kepler
 		virtual ~TShader() = default;
 
 	private:
+
 	};
 
 	class TVertexShader : public TShader

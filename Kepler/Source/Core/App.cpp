@@ -25,22 +25,25 @@ namespace Kepler
 
 	TApplication::TApplication(const TApplicationLaunchParams& LaunchParams)
 	{
-		KEPLER_INFO("LogApp", "Starting application initialization");
+		KEPLER_INFO(LogApp, "Starting application initialization");
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
+
+		TRef<TShaderCompiler> pCmp = TShaderCompiler::CreateShaderCompiler();
+		auto pCode = Await(pCmp->CompileShaderCodeFromFileAsync("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", "VSMain", EShaderType::Vertex));
 	}
 
 	TApplication::~TApplication()
 	{
 		LowLevelRenderer.reset();
-		KEPLER_INFO("LogApp", "Finishing application termination");
+		KEPLER_INFO(LogApp, "Finishing application termination");
 	}
 
 	void TApplication::Run()
 	{
-		KEPLER_INFO("LogApp", "Application Run called...");
+		KEPLER_INFO(LogApp, "Application Run called...");
 
 		// Begin main loop
 		TTimer MainTimer{};

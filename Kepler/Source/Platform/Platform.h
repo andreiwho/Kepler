@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Types.h"
+#include "Core/Core.h"
 #include "PlatformEvent.h"
 #include "Window.h"
 #include "Core/Malloc.h"
@@ -9,6 +9,8 @@
 #ifdef CreateWindow
 #  undef CreateWindow
 #endif
+
+DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
 
 namespace Kepler
 {

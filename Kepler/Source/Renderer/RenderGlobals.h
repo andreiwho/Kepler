@@ -1,7 +1,9 @@
 #pragma once
-#include "Core/Types.h"
+#include "Core/Core.h"
 #include "RenderTypes.h"
 #include "RenderThread.h"
+
+DEFINE_UNIQUE_LOG_CHANNEL(LogRender);
 
 #include <thread>
 

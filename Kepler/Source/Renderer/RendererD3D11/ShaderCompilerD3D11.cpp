@@ -1,4 +1,7 @@
 #include "ShaderCompilerD3D11.h"
+#include "Core/Core.h"
+#include "Async/Async.h"
+#include "Core/Filesystem/FileUtils.h"
 
 namespace Kepler
 {
@@ -7,6 +10,8 @@ namespace Kepler
 		EShaderType Type,
 		const std::string& Code) const
 	{
+		KEPLER_TRACE(LogShaderCompiler, "Compiling shader with name '{}'", SourceName);
+
 		std::string ShaderType;
 		switch (Type)
 		{
@@ -45,5 +50,16 @@ namespace Kepler
 		}
 		return nullptr;
 	}
+
+	TRef<TDataBlob> TShaderCompilerD3D11::CompileShaderCodeFromFile(const std::string& FilePath, const std::string& EntryPoint, EShaderType Type) const
+	{
+		return CompileHLSLCode(FilePath, EntryPoint, Type, Await(TFileUtils::ReadTextFileAsync(FilePath)));
+	}
+
+	std::future<TRef<TDataBlob>> TShaderCompilerD3D11::CompileShaderCodeFromFileAsync(std::string FilePath, std::string EntryPoint, EShaderType Type) const
+	{
+		return Async([this, FilePath, EntryPoint, Type] { return CompileShaderCodeFromFile(FilePath, EntryPoint, Type); });
+	}
+
 }
 

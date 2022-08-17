@@ -48,13 +48,13 @@ namespace Kepler
 		}
 		catch (const Kepler::TException& Exception)
 		{
-			KEPLER_CRITICAL("LogInit", "{}", Exception.GetErrorMessage());
+			KEPLER_CRITICAL(LogInit, "{}", Exception.GetErrorMessage());
 			TPlatform::HandleCrashReported(Exception.GetErrorMessage());
 			return EXIT_FAILURE;
 		}
 		catch (const std::exception& Exception)
 		{
-			KEPLER_ERROR("LogInit", "Exception caught: {}", Exception.what());
+			KEPLER_CRITICAL(LogInit, "Exception caught: {}", Exception.what());
 			return EXIT_FAILURE;
 		}
 
