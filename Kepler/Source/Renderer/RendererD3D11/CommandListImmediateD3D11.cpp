@@ -3,6 +3,7 @@
 #include "Renderer/RenderGlobals.h"
 #include "VertexBufferD3D11.h"
 #include "IndexBufferD3D11.h"
+#include "Core/Log.h"
 
 namespace Kepler
 {
@@ -48,8 +49,10 @@ namespace Kepler
 	void TCommandListImmediateD3D11::Draw(u32 VertexCount, u32 BaseVertexIndex)
 	{
 		CHECK(IsRenderThread());
-		CHECK(HasPipelineStateSetup() && Context);
-		Context->Draw(VertexCount, BaseVertexIndex);
+		if (VALIDATEDMSG(HasPipelineStateSetup(), "Pipeline state not setup. Cannot draw."))
+		{
+			Context->Draw(VertexCount, BaseVertexIndex);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -113,8 +116,12 @@ namespace Kepler
 	void TCommandListImmediateD3D11::DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset)
 	{
 		CHECK(IsRenderThread());
-		CHECK(HasPipelineStateSetup() && Context);
-		Context->DrawIndexed(IndexCount, BaseIndexOffset, (INT)BaseVertexOffset);
+
+		// Let us be a little forgiving here
+		if (VALIDATED(HasPipelineStateSetup()))
+		{
+			Context->DrawIndexed(IndexCount, BaseIndexOffset, (INT)BaseVertexOffset);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

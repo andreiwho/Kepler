@@ -62,11 +62,17 @@ namespace Kepler
 # define KEPLER_INFO(Channel, Format, ...) 		 Kepler::TLog::Info(Channel, Format, __VA_ARGS__)
 # define KEPLER_WARNING(Channel, Format, ...) 	 Kepler::TLog::Warn(Channel, Format, __VA_ARGS__)
 # define KEPLER_ERROR(Channel, Format, ...) 	 Kepler::TLog::Error(Channel, Format, __VA_ARGS__)
+# define KEPLER_ERROR_STOP(Channel, Format, ...)  Kepler::TLog::Error(Channel, Format, __VA_ARGS__); DEBUG_BREAK
 # define KEPLER_CRITICAL(Channel, Format, ...) 	 Kepler::TLog::Critical(Channel, Format, __VA_ARGS__)
 #else
 # define KEPLER_TRACE(Channel, Format, ...)     
 # define KEPLER_INFO(Channel, Format, ...) 		
 # define KEPLER_WARNING(Channel, Format, ...) 	
 # define KEPLER_ERROR(Channel, Format, ...) 	
+# define KEPLER_ERROR_STOP(Channel, Format, ...)
 # define KEPLER_CRITICAL(Channel, Format, ...) 	
 #endif
+
+// It has to be here... though will be moved to other file
+# define VALIDATED(x) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {}", #x); bFired = true; } return arg; }(x)
+# define VALIDATEDMSG(x, msg) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP("VALIDATE", "Validation failed: {}", msg); bFired = true;} return arg; }(x)
