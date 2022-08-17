@@ -10,7 +10,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	TCommandListImmediateD3D11::TCommandListImmediateD3D11(ID3D11DeviceContext4* InContext) : Context(InContext)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(!Instance);
 		Instance = this;
@@ -21,7 +20,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	TCommandListImmediateD3D11::~TCommandListImmediateD3D11()
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK_NOTHROW(IsRenderThread());
 		Context->Release();
@@ -29,7 +27,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::StartDrawingToSwapChainImage(TSwapChain* SwapChain)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
@@ -40,7 +37,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4])
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
@@ -50,7 +46,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::Draw(u32 VertexCount, u32 BaseVertexIndex)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(HasPipelineStateSetup() && Context);
@@ -59,7 +54,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(VertexBuffer))
@@ -75,7 +69,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		const bool bOffsetsHasEntries = Offsets.GetLength() > 0;
@@ -118,7 +111,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		CHECK(HasPipelineStateSetup() && Context);
@@ -127,7 +119,6 @@ namespace Kepler
 
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset)
-		//////////////////////////////////////////////////////////////////////////
 	{
 		CHECK(IsRenderThread());
 		if (auto MyBuffer = RefCast<TIndexBufferD3D11>(IndexBuffer))
