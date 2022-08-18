@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <stdexcept>
+#include <vector>
+#include <mutex>
 
 namespace Kepler
 {
@@ -12,5 +14,25 @@ namespace Kepler
 
 	private:
 		std::string ErrorMessage;
+	};
+
+	class TGlobalExceptionContainer
+	{
+		static TGlobalExceptionContainer* Instance;
+	public:
+		TGlobalExceptionContainer() { Instance = this; }
+
+		static TGlobalExceptionContainer* Get() { return Instance; }
+
+		void Push(std::shared_ptr<TException> Exception) 
+		{ 
+			std::lock_guard Lck{ ExceptionsMutex };
+			Exceptions.push_back(Exception); 
+		}
+		void Rethrow();
+
+	private:
+		std::mutex ExceptionsMutex;
+		std::vector<std::shared_ptr<TException>> Exceptions;
 	};
 }

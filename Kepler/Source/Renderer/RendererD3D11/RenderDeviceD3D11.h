@@ -47,7 +47,7 @@ namespace Kepler
 
 		virtual bool RT_FlushPendingDeleteResources() override;
 
-		void RegisterPendingDeleteResource(ID3D11Resource* Resource);
+		void RegisterPendingDeleteResource(ID3D11DeviceChild* Resource);
 
 	private:
 		void CreateFactory();
@@ -63,7 +63,7 @@ namespace Kepler
 		u64 InfoMsgStartIndex = 0;
 		ID3D11ClassLinkage* ClassLinkage{};
 
-		TThreadSafeRingQueue<ID3D11Resource*> PendingDeleteResources{10000};
+		TThreadSafeRingQueue<ID3D11DeviceChild*> PendingDeleteResources{10000};
 
 		std::mutex ResourceMutex;
 	};

@@ -15,7 +15,15 @@ namespace Kepler
 	template<typename Type>
 	inline decltype(auto) Await(std::future<Type>&& Future)
 	{
-		return Future.get();
+		try
+		{
+			return Future.get();
+		}
+		catch (const TException& Exception)
+		{
+			TGlobalExceptionContainer::Get()->Push(std::make_shared<TException>(Exception));
+			throw;
+		}
 	}
 
 	template<typename Type>

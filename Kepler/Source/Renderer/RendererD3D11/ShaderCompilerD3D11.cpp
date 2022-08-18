@@ -3,23 +3,89 @@
 #include "Async/Async.h"
 #include "Core/Filesystem/FileUtils.h"
 
+#include "HLSLShaderD3D11.h"
+#include "Renderer/RenderThread.h"
+
 namespace Kepler
 {
-	TRef<TDataBlob> TShaderCompilerD3D11::CompileHLSLCode(const std::string& SourceName, 
-		const std::string& EntryPoint,
-		EShaderType Type,
-		const std::string& Code) const
+	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const std::string& Path, EShaderStageFlags TypeMask)
 	{
-		KEPLER_TRACE(LogShaderCompiler, "Compiling shader with name '{}'", SourceName);
+		std::string Source;
+		try
+		{
+			Source = Await(TFileUtils::ReadTextFileAsync(Path));
+		}
+		catch (const TException& Exception)
+		{
+			KEPLER_ERROR_STOP(LogShaderCompiler, "Failed to compile shader {}.\n{}", Path, Exception.GetErrorMessage());
+			return nullptr;
+		}
+
+		const auto Stages = TypeMask.Separate();
+		TDynArray<std::future<TShaderModule>> ModuleFutures;
+		for (const EShaderStageFlags::Type Stage : Stages)
+		{
+			ModuleFutures.EmplaceBack(Async(
+				[PathRef = std::ref(Path), SourceRef = std::ref(Source), Stage]()
+				{
+					return CreateShaderModule(PathRef, Stage, SourceRef);
+				})
+			);
+		}
+
+		TDynArray<TShaderModule> Modules;
+		Modules.Reserve(ModuleFutures.GetLength());
+		for (auto& Future : ModuleFutures)
+		{
+			Modules.EmplaceBack(Await(Future));
+		}
+
+		return New<THLSLShaderD3D11>(Path, Modules);
+	}
+
+	TShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const std::string& SourceName, EShaderStageFlags::Type Flag, const std::string& Source)
+	{
+		TShaderModule OutShaderModule{};
+		OutShaderModule.StageFlags = Flag;
+
+		const std::string EntryPoint = std::invoke([Flag]
+		{
+			switch (Flag)
+			{
+			case Kepler::EShaderStageFlags::Vertex:
+				return "VSMain";
+			case Kepler::EShaderStageFlags::Pixel:
+				return "PSMain";
+			case Kepler::EShaderStageFlags::Compute:
+				return "CSMain";
+			default:
+				break;
+			}
+			CHECK(false && "Unknown shader type");
+		});
+
+		OutShaderModule.ByteCode = CompileHLSLCode(SourceName, EntryPoint, Flag, Source);
+		return OutShaderModule;
+	}
+
+	TRef<TDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const std::string& SourceName,
+		const std::string& EntryPoint,
+		EShaderStageFlags::Type Type,
+		const std::string& Code)
+	{
+		KEPLER_TRACE(LogShaderCompiler, "Compiling shader '{}' as {}", SourceName, EShaderStageFlags::ToString(Type));
 
 		std::string ShaderType;
 		switch (Type)
 		{
-		case Kepler::EShaderType::Vertex:
+		case Kepler::EShaderStageFlags::Vertex:
 			ShaderType = "vs_5_0";
 			break;
-		case Kepler::EShaderType::Pixel:
+		case Kepler::EShaderStageFlags::Pixel:
 			ShaderType = "ps_5_0";
+			break;
+		case Kepler::EShaderStageFlags::Compute:
+			ShaderType = "cs_5_0";
 			break;
 		default:
 			CHECKMSG(false, "Unknown shader type");
@@ -41,7 +107,7 @@ namespace Kepler
 		{
 			if (ErrorBlob)
 			{
-				CHECKMSG(false, fmt::format("Failed to compile shader: {}", (const char*)(ErrorBlob->GetBufferPointer())));
+				CHECKMSG(false, fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer())));
 			}
 		}
 		else
@@ -50,16 +116,5 @@ namespace Kepler
 		}
 		return nullptr;
 	}
-
-	TRef<TDataBlob> TShaderCompilerD3D11::CompileShaderCodeFromFile(const std::string& FilePath, const std::string& EntryPoint, EShaderType Type) const
-	{
-		return CompileHLSLCode(FilePath, EntryPoint, Type, Await(TFileUtils::ReadTextFileAsync(FilePath)));
-	}
-
-	std::future<TRef<TDataBlob>> TShaderCompilerD3D11::CompileShaderCodeFromFileAsync(std::string FilePath, std::string EntryPoint, EShaderType Type) const
-	{
-		return Async([this, FilePath, EntryPoint, Type] { return CompileShaderCodeFromFile(FilePath, EntryPoint, Type); });
-	}
-
 }
 

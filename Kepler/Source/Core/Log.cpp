@@ -15,6 +15,7 @@ namespace Kepler
 
 	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const std::string& Name)
 	{
+		std::lock_guard Lck{ LoggerCreationFence };
 		if (Loggers.contains(Name))
 		{
 			return Loggers.at(Name);

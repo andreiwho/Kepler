@@ -76,13 +76,14 @@ namespace Kepler
 					catch (const TException& Exception)
 					{
 						auto SavedException = std::make_shared<TException>(Exception);
-						Exceptions.Enqueue(std::move(SavedException));
+						TGlobalExceptionContainer::Get()->Push(std::move(SavedException));
 					}
 					catch (const std::exception& Exception)
 					{
-						auto SavedException = std::make_shared<std::exception>(Exception);
-						Exceptions.Enqueue(std::move(SavedException));
+						auto SavedException = std::make_shared<TException>(Exception.what(), "StdException");
+						TGlobalExceptionContainer::Get()->Push(std::move(SavedException));
 					}
+					
 				});
 			return Promise->get_future();
 		}
@@ -125,6 +126,6 @@ namespace Kepler
 
 		std::atomic<bool> bWaiting = false;
 
-		TThreadSafeRingQueue<std::shared_ptr<std::exception>> Exceptions{ 32 };
+		TThreadSafeRingQueue<std::shared_ptr<TException>> Exceptions{ 32 };
 	};
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "ShaderCompiler.h"
+#include "HLSLShaderCompiler.h"
 #include "RenderGlobals.h"
 #include "Core/Malloc.h"
 
@@ -9,12 +9,12 @@
 
 namespace Kepler
 {
-	TRef<TShaderCompiler> TShaderCompiler::CreateShaderCompiler()
+	TRef<THLSLShaderCompiler> THLSLShaderCompiler::CreateShaderCompiler()
 	{
 		switch (GRenderAPI)
 		{
 		case ERenderAPI::DirectX11:
-			return MakeRef(New<TShaderCompilerD3D11>());
+			return MakeRef(New<THLSLShaderCompilerD3D11>());
 		default:
 			break;
 		}

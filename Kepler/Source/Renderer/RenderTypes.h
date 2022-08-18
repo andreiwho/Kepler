@@ -4,6 +4,7 @@
 
 namespace Kepler
 {
+	//////////////////////////////////////////////////////////////////////////
 	enum class ERenderAPI
 	{
 		Default,	// For now the default one is D3D11 for windows. Other platforms are unsupported
@@ -13,17 +14,74 @@ namespace Kepler
 #endif
 	};
 
+	//////////////////////////////////////////////////////////////////////////
 	enum class EFormat
 	{
 
 	};
 
-	enum class EShaderType
+	//////////////////////////////////////////////////////////////////////////
+	struct EShaderStageFlags
 	{
-		Vertex,
-		Pixel,
+		enum Type{
+			Vertex = BIT(0),
+			Pixel = BIT(1),
+			Compute = BIT(2),
+		};
+		
+		u32 Mask{};
+
+		EShaderStageFlags() = default;
+		EShaderStageFlags(u32 InMask) : Mask(InMask) {}
+		EShaderStageFlags& operator|=(EShaderStageFlags Flags)
+		{
+			Mask |= Flags.Mask;
+			return *this;
+		}
+
+		inline TDynArray<EShaderStageFlags::Type> Separate() const
+		{
+			TDynArray<EShaderStageFlags::Type> OutFlags = 0;
+
+			auto EmplaceIf = [&](EShaderStageFlags::Type CheckMask)
+			{
+				if (Mask & CheckMask)
+				{
+					OutFlags.EmplaceBack(CheckMask);
+				}
+			};
+
+			EmplaceIf(EShaderStageFlags::Vertex);
+			EmplaceIf(EShaderStageFlags::Pixel);
+			EmplaceIf(EShaderStageFlags::Compute);
+
+			return OutFlags;
+		}
+
+		static std::string ToString(Type Value)
+		{
+			return std::invoke([Value] 
+			{
+					switch (Value)
+					{
+					case Kepler::EShaderStageFlags::Vertex:
+						return "Vertex";
+					case Kepler::EShaderStageFlags::Pixel:
+						return "Pixel";
+					case Kepler::EShaderStageFlags::Compute:
+						return "Compute";
+					default:
+						break;
+					}
+					return "Unknown";
+			});
+		}
+
+		inline operator u32() const { return Mask; }
 	};
 
+
+	//////////////////////////////////////////////////////////////////////////
 	class TDataBlob : public TRefCounted
 	{
 	public:
@@ -41,9 +99,10 @@ namespace Kepler
 		virtual void Write(const void* Data, usize Size) = 0;
 	};
 
+	//////////////////////////////////////////////////////////////////////////
 	struct EBufferAccessFlags
 	{
-		enum EValues
+		enum
 		{
 			GPUOnly = BIT(0),
 			ReadAccess = BIT(1),
@@ -56,4 +115,5 @@ namespace Kepler
 		EBufferAccessFlags(u32 InMask) : Mask(InMask) {}
 		inline operator u32() const { return Mask; }
 	};
+	//////////////////////////////////////////////////////////////////////////
 }

@@ -8,9 +8,10 @@
 #include "Async/Async.h"
 
 // Test
-#include "Renderer/ShaderCompiler.h"
+#include "Renderer/HLSLShaderCompiler.h"
 #include "Core/Filesystem/FileUtils.h"
 #include "Renderer/Elements/IndexBuffer.h"
+#include "Renderer/Elements/HLSLShader.h"
 
 namespace Kepler
 {
@@ -29,10 +30,8 @@ namespace Kepler
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
-		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
-
-		TRef<TShaderCompiler> pCmp = TShaderCompiler::CreateShaderCompiler();
-		auto pCode = Await(pCmp->CompileShaderCodeFromFileAsync("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", "VSMain", EShaderType::Vertex));
+		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+		TRef<TShader> Shader = Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 	}
 
 	TApplication::~TApplication()

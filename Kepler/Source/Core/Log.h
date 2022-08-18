@@ -63,6 +63,7 @@ namespace Kepler
 		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger);
 
 		std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> Loggers;
+		std::mutex LoggerCreationFence;
 	};
 }
 

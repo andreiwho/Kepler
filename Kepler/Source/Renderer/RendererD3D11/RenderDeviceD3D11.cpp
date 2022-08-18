@@ -110,7 +110,7 @@ namespace Kepler
 		CHECK(IsRenderThread());
 
 		bool bHasDeletedAny = false;
-		ID3D11Resource* pResource;
+		ID3D11DeviceChild* pResource;
 		if (PendingDeleteResources.GetLength() > 0)
 		{
 #ifdef ENABLE_DEBUG
@@ -129,7 +129,7 @@ namespace Kepler
 		return bHasDeletedAny;
 	}
 
-	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11Resource* Resource)
+	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11DeviceChild* Resource)
 	{
 		PendingDeleteResources.Enqueue(std::move(Resource));
 	}

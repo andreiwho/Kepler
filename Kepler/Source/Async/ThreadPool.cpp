@@ -129,15 +129,17 @@ namespace Kepler
 
 	void TThreadPool::RethrowExceptions_MainThread()
 	{
-		std::shared_ptr<std::exception> Exception;
+		TGlobalExceptionContainer::Get()->Rethrow();
+/*
+* LEGACY
+		std::shared_ptr<TException> Exception;
+		std::stringstream ErrorStream;
 		while (Exceptions.Dequeue(Exception))
 		{
-			if (auto Casted = std::dynamic_pointer_cast<TException>(Exception))
-			{
-				throw* Casted;
-			}
-			throw *Exception;
+			ErrorStream << Exception->GetErrorMessage() << std::endl;
 		}
+		throw TException(ErrorStream.str(), "RethrowExceptions_MainThread");
+	*/
 	}
 
 	bool TThreadPool::HasAnyExceptions() const
