@@ -58,8 +58,9 @@ namespace Kepler
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{{0.0f, 0.5f, 0.0f}, {0.0f, 1.0, 0.0f, 1.0f}},
-			{{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
 			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
 
@@ -78,7 +79,7 @@ namespace Kepler
 				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
 			}));
 
-		TDynArray<u32> Indices = { 0,1,2 };
+		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
 		TRef<TIndexBuffer> IndexBuffer = Await(TRenderThread::Submit(
 			[this, &Indices] 
 			{

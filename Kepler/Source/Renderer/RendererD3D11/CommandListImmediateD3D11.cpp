@@ -149,9 +149,10 @@ namespace Kepler
 
 	void TCommandListImmediateD3D11::BindPipeline(TRef<TGraphicsPipeline> Pipeline)
 	{
+		CHECK(IsRenderThread());
 		BindShader(Pipeline->GetShader());
 		TRef<TGraphicsPipelineHandleD3D11> Handle = RefCast<TGraphicsPipelineHandleD3D11>(Pipeline->GetHandle());
-		if (Handle)
+		if (Handle && BoundGraphicsPipeline != Pipeline.Raw())
 		{
 			Context->IASetPrimitiveTopology(Handle->GetPrimitiveTopology());
 			Context->IASetInputLayout(Handle->GetInputLayout());
@@ -159,6 +160,7 @@ namespace Kepler
 			Context->OMSetDepthStencilState(Handle->GetDepthStencilState(), D3D11_STENCIL_OP_KEEP);
 			Context->RSSetState(Handle->GetRasterState());
 			bHasAttachedPipeline = true;
+			BoundGraphicsPipeline = Pipeline.Raw();
 		}
 	}
 

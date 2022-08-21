@@ -107,7 +107,9 @@ namespace Kepler
 		{
 			if (ErrorBlob)
 			{
-				CRASHMSG(fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer())));
+				std::string Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
+				KEPLER_ERROR_STOP(LogShaderCompiler, "{}", Message);
+				CRASHMSG(fmt::format("{}", Message));
 			}
 		}
 		else

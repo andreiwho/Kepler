@@ -13,6 +13,10 @@ namespace Kepler
 #else
 				std::ifstream File{ CopiedPath, std::ios::ate };
 #endif
+				if (!File.is_open())
+				{
+					CRASHMSG(fmt::format("Failed to read text file: {}", CopiedPath));
+				}
 				CHECK(File.is_open());
 				usize Size = (usize)File.tellg();
 				File.seekg(0);
