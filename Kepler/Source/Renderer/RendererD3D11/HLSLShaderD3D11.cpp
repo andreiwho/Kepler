@@ -23,51 +23,48 @@ namespace Kepler
 
 	void THLSLShaderD3D11::InitShaders(const TDynArray<TShaderModule>& Modules)
 	{
-		CHECK(IsRenderThread());
+		// CHECK(IsRenderThread());
 		auto Device = TRenderDeviceD3D11::Get();
 		if (Modules.GetLength() > 0)
 		{
 			CHECK(Device);
 		}
 
-		Await(TRenderThread::Submit([&]
+		for (const auto& Module : Modules)
+		{
+			if (Module.ByteCode && VALIDATED(Module.ByteCode->GetSize() > 0))
 			{
-				for (const auto& Module : Modules)
+				if (Module.StageFlags & EShaderStageFlags::Vertex)
 				{
-					if (Module.ByteCode && VALIDATED(Module.ByteCode->GetSize() > 0))
-					{
-						if (Module.StageFlags & EShaderStageFlags::Vertex)
-						{
-							HRCHECK(Device->GetDevice()->CreateVertexShader(
-								Module.ByteCode->GetData(),
-								Module.ByteCode->GetSize(),
-								Device->GetClassLinkage(),
-								&CHECKED(GetD3D11Handle())->VertexShader
-							));
-						}
-
-						if (Module.StageFlags & EShaderStageFlags::Pixel)
-						{
-							HRCHECK(Device->GetDevice()->CreatePixelShader(
-								Module.ByteCode->GetData(),
-								Module.ByteCode->GetSize(),
-								Device->GetClassLinkage(),
-								&CHECKED(GetD3D11Handle())->PixelShader
-							));
-						}
-
-						if (Module.StageFlags & EShaderStageFlags::Compute)
-						{
-							HRCHECK(Device->GetDevice()->CreateComputeShader(
-								Module.ByteCode->GetData(),
-								Module.ByteCode->GetSize(),
-								Device->GetClassLinkage(),
-								&CHECKED(GetD3D11Handle())->ComputeShader
-							));
-						}
-					}
+					HRCHECK(Device->GetDevice()->CreateVertexShader(
+						Module.ByteCode->GetData(),
+						Module.ByteCode->GetSize(),
+						Device->GetClassLinkage(),
+						&CHECKED(GetD3D11Handle())->VertexShader
+					));
 				}
-			}));
+
+				if (Module.StageFlags & EShaderStageFlags::Pixel)
+				{
+					HRCHECK(Device->GetDevice()->CreatePixelShader(
+						Module.ByteCode->GetData(),
+						Module.ByteCode->GetSize(),
+						Device->GetClassLinkage(),
+						&CHECKED(GetD3D11Handle())->PixelShader
+					));
+				}
+
+				if (Module.StageFlags & EShaderStageFlags::Compute)
+				{
+					HRCHECK(Device->GetDevice()->CreateComputeShader(
+						Module.ByteCode->GetData(),
+						Module.ByteCode->GetSize(),
+						Device->GetClassLinkage(),
+						&CHECKED(GetD3D11Handle())->ComputeShader
+					));
+				}
+			}
+		}
 	}
 
 	TShaderHandleD3D11::~TShaderHandleD3D11()

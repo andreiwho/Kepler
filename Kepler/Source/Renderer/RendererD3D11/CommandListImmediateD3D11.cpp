@@ -4,6 +4,7 @@
 #include "VertexBufferD3D11.h"
 #include "IndexBufferD3D11.h"
 #include "Core/Log.h"
+#include "HLSLShaderD3D11.h"
 
 namespace Kepler
 {
@@ -109,6 +110,38 @@ namespace Kepler
 
 			CHECK((pStrides.GetLength() == ppBuffers.GetLength()) && (pOffsets.GetLength() == ppBuffers.GetLength()));
 			Context->IASetVertexBuffers(StartSlot, (UINT)ppBuffers.GetLength(), ppBuffers.GetData(), pStrides.GetData(), pOffsets.GetData());
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindShader(TRef<TShader> Shader)
+	{
+		if (!Shader)
+		{
+			return;
+		}
+
+		TRef<TShaderHandleD3D11> MyShader = RefCast<TShaderHandleD3D11>(Shader->GetHandle());
+		// TODO: Make handling for HLSL Class Instances (or should we?)
+		if (MyShader)
+		{
+			if (MyShader->VertexShader && BoundVertexShader != MyShader->VertexShader)
+			{
+				BoundVertexShader = MyShader->VertexShader;
+				Context->VSSetShader(BoundVertexShader, nullptr, 0);
+			}
+
+			if (MyShader->PixelShader && BoundPixelShader != MyShader->PixelShader)
+			{
+				BoundPixelShader = MyShader->PixelShader;
+				Context->PSSetShader(BoundPixelShader, nullptr, 0);
+			}
+
+			if (MyShader->ComputeShader && BoundComputeShader != MyShader->ComputeShader)
+			{
+				BoundComputeShader = MyShader->ComputeShader;
+				Context->CSSetShader(BoundComputeShader, nullptr, 0);
+			}
 		}
 	}
 

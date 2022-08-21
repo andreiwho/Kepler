@@ -4,6 +4,7 @@
 #include "Core/Containers/DynArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "Shader.h"
 
 namespace Kepler
 {
@@ -29,8 +30,9 @@ namespace Kepler
 
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) = 0;
 
-		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
+		virtual void BindShader(TRef<TShader> Shader) = 0;
 
+		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
 	protected:
 		bool bHasAttachedPipeline = false;
 	};

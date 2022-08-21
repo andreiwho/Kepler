@@ -115,5 +115,109 @@ namespace Kepler
 		EBufferAccessFlags(u32 InMask) : Mask(InMask) {}
 		inline operator u32() const { return Mask; }
 	};
+
 	//////////////////////////////////////////////////////////////////////////
+	struct ERenderPassId
+	{
+		enum
+		{
+			Geometry = BIT(0),
+		};
+
+		u32 Mask{};
+
+		ERenderPassId() = default;
+		ERenderPassId(u32 InMask) : Mask(InMask) {}
+		inline operator u32() const { return Mask; }
+
+		inline ERenderPassId& operator|=(ERenderPassId InId)
+		{
+			Mask |= InId.Mask;
+			return *this;
+		}
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	enum class EPrimitiveFillMode
+	{
+		Wireframe,
+		Solid,
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	enum class EPrimitiveCullMode
+	{
+		None,
+		Front,
+		Back,
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	struct EDepthBufferAccess
+	{
+		enum
+		{
+			None = 0,
+			Read = BIT(0),
+			Write = BIT(1),
+		};
+
+		u32 Mask{};
+
+		EDepthBufferAccess() = default;
+		EDepthBufferAccess(u32 InMask) : Mask(InMask) {}
+		inline operator u32() const { return Mask; }
+
+		inline EDepthBufferAccess& operator|=(EDepthBufferAccess InId)
+		{
+			Mask |= InId.Mask;
+			return *this;
+		}
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	struct EStencilBufferAccess
+	{
+		enum
+		{
+			None = 0,
+			Read = BIT(0),
+			Write = BIT(1),
+		};
+
+		u32 Mask{};
+
+		EStencilBufferAccess() = default;
+		EStencilBufferAccess(u32 InMask) : Mask(InMask) {}
+		inline operator u32() const { return Mask; }
+
+		inline EStencilBufferAccess& operator|=(EStencilBufferAccess InId)
+		{
+			Mask |= InId.Mask;
+			return *this;
+		}
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	struct EShaderInputType
+	{
+		enum {
+			Float,
+			Float2,
+			Float3,
+			Float4,
+
+			Int,
+			Int2,
+			Int3,
+			Int4,
+
+			UInt,
+			UInt2,
+			UInt3,
+			UInt4,
+		} Value;
+
+		bool GetSize() const;
+	};
 }

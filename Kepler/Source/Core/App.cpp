@@ -30,8 +30,7 @@ namespace Kepler
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
-		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
-		TRef<TShader> Shader = Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
 	}
 
 	TApplication::~TApplication()
@@ -82,6 +81,14 @@ namespace Kepler
 			}));
 
 
+		auto Shader = Await(TRenderThread::Submit([&]
+			{
+				TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+				return Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+			}
+		));
+
+
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
 		{
@@ -97,7 +104,7 @@ namespace Kepler
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer]
+						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Shader]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
@@ -110,6 +117,7 @@ namespace Kepler
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
 								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
+								pImmList->BindShader(Shader);
 
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
 							}

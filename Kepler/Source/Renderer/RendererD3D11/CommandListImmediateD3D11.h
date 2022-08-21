@@ -24,9 +24,13 @@ namespace Kepler
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) override;
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) override;
 		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) override;
+		virtual void BindShader(TRef<TShader> Shader) override;
 
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) override;
 	private:
 		ID3D11DeviceContext4* Context{};
+		ID3D11VertexShader* BoundVertexShader = nullptr;
+		ID3D11PixelShader* BoundPixelShader = nullptr;
+		ID3D11ComputeShader* BoundComputeShader = nullptr;
 	};
 }

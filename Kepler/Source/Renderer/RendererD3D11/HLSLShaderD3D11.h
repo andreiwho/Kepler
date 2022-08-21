@@ -17,9 +17,9 @@ namespace Kepler
 			StageMask = Mask;
 		}
 
-		CComPtr<ID3D11VertexShader> VertexShader{};
-		CComPtr<ID3D11PixelShader> PixelShader{};
-		CComPtr<ID3D11ComputeShader> ComputeShader{};
+		ID3D11VertexShader* VertexShader{};
+		ID3D11PixelShader* PixelShader{};
+		ID3D11ComputeShader* ComputeShader{};
 	};
 
 	class THLSLShaderD3D11 : public THLSLShader
