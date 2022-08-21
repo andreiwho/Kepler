@@ -1,10 +1,14 @@
 #pragma once
 #include "Core/Core.h"
 #include "Renderer/RenderTypes.h"
-#include "Renderer/Elements/CommandList.h"
+#include "Renderer/Elements/VertexLayout.h"
+#include "Renderer/Elements/Shader.h"
+#include "Core/Malloc.h"
 
 namespace Kepler
 {
+	class TCommandListImmediate;
+
 	// What pipeline needs
 	// - Input layout.
 	// - Uniform mapping
@@ -13,7 +17,13 @@ namespace Kepler
 	struct TGraphicsPipelineConfiguration
 	{
 		ERenderPassId RenderPassMask{ ERenderPassId::Geometry };
-	
+		
+		struct
+		{
+			EPrimitiveTopology Topology = EPrimitiveTopology::TriangleList;
+			TVertexLayout VertexLayout{};
+		} VertexInput;
+
 		struct
 		{
 			EPrimitiveFillMode FillMode = EPrimitiveFillMode::Solid;
@@ -41,11 +51,17 @@ namespace Kepler
 	public:
 		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
-		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);;
+		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);
+	
+		TRef<TShader> GetShader() const { return Shader; }
+		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
+
+	protected:
+		static TRef<TShader> LoadHLSLShader(const std::string& ShaderPath, EShaderStageFlags Stages);
 
 	private:
-		TRef<TGraphicsPipelineHandle> Handle;
-		TRef<TShader> Shader;
+		TRef<TGraphicsPipelineHandle> Handle{};
+		TRef<TShader> Shader{};
 		TGraphicsPipelineConfiguration Configuration{};
 	};
 }

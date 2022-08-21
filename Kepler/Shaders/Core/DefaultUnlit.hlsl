@@ -1,7 +1,7 @@
 struct TDefaultUnlit_VSInput
 {
-	float3 Position : ATTRIB0;
-	float3 Color : ATTRIB1;
+	float3 Position : POSITION;
+	float3 Color : COLOR;
 };
 
 struct TDefaultUnlit_PSInput

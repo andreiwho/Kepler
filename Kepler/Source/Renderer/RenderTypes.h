@@ -201,8 +201,9 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	struct EShaderInputType
 	{
-		enum {
-			Float,
+		enum EValue : u32
+		{
+			Float = 0,
 			Float2,
 			Float3,
 			Float4,
@@ -218,6 +219,15 @@ namespace Kepler
 			UInt4,
 		} Value;
 
-		bool GetSize() const;
+		EShaderInputType(EValue InValue) :Value(InValue) {}
+		inline operator u32() const { return Value; }
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	enum class EPrimitiveTopology
+	{
+		TriangleList,
+		LineList,
+		PointList,
 	};
 }

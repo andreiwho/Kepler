@@ -57,6 +57,21 @@ namespace Kepler
 		return CHECKED(TMalloc::Get())->GetSize(Data);
 	}
 
+	void DoRelease(void* RefCounted)
+	{
+		((TRefCounted*)RefCounted)->Release();
+	}
+
+	void DoAddRef(void* RefCounted)
+	{
+		((TRefCounted*)RefCounted)->AddRef();
+	}
+
+	usize DoGetRefCount(void* RefCounted)
+	{
+		return ((TRefCounted*)RefCounted)->GetRefCount();
+	}
+
 	void TRefCounted::AddRef() const
 	{
 		RefCount++;

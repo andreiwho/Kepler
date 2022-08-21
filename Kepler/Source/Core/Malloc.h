@@ -56,6 +56,10 @@ namespace Kepler
 		mutable TAtomic<u64> RefCount{ 1 };
 	};
 
+	void DoRelease(void* RefCounted);
+	void DoAddRef(void* RefCounted);
+	usize DoGetRefCount(void* RefCounted);
+
 	template<typename T>
 	class TRef
 	{
@@ -64,9 +68,9 @@ namespace Kepler
 		TRef(T* NewMemory)
 			: Memory(NewMemory)
 		{
-			if (Memory && !Memory->GetRefCount())
+			if (Memory && !DoGetRefCount(Memory))
 			{
-				Memory->AddRef();
+				DoAddRef(Memory);
 			}
 		}
 
@@ -76,10 +80,10 @@ namespace Kepler
 		{
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			Memory->AddRef();
+			DoAddRef(Memory);
 		}
 
 		template<typename U>
@@ -88,20 +92,20 @@ namespace Kepler
 			static_assert(std::is_base_of_v<T, U>);
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			Memory->AddRef();
+			DoAddRef(Memory);
 		}
 
 		TRef& operator=(const TRef& Other) noexcept
 		{
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			Memory->AddRef();
+			DoAddRef(Memory);
 			return *this;
 		}
 
@@ -111,10 +115,10 @@ namespace Kepler
 			static_assert(std::is_base_of_v<T, U>);
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			Memory->AddRef();
+			DoAddRef(Memory);
 			return *this;
 		}
 
@@ -122,7 +126,7 @@ namespace Kepler
 		{
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = Other.Raw();
 			Other.ResetMemoryUnsafe();
@@ -134,7 +138,7 @@ namespace Kepler
 			static_assert(std::is_base_of_v<T, U>);
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = Other.Raw();
 			Other.ResetMemoryUnsafe();
@@ -144,7 +148,7 @@ namespace Kepler
 		{
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = Other.Raw();
 			Other.ResetMemoryUnsafe();
@@ -157,7 +161,7 @@ namespace Kepler
 			static_assert(std::is_base_of_v<T, U>);
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 			}
 			Memory = Other.Raw();
 			Other.ResetMemoryUnsafe();
@@ -179,7 +183,7 @@ namespace Kepler
 		{
 			if (Memory)
 			{
-				Memory->Release();
+				DoRelease(Memory);
 				Memory = nullptr;
 			}
 		}

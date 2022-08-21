@@ -172,48 +172,48 @@ namespace Kepler
 		template<typename T, usize Size>
 		TVecHandle<T, Size> Add(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
-#ifdef USE_DIRECTX_MATH
 			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			auto Simd = DirectX::XMVectorAdd(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
-			return OutHandle;
 #endif
+			return OutHandle;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		template<typename T, usize Size>
 		TVecHandle<T, Size> Sub(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
-#ifdef USE_DIRECTX_MATH
 			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			auto Simd = DirectX::XMVectorSubtract(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
-			return OutHandle;
 #endif
+			return OutHandle;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		template<typename T, usize Size>
 		TVecHandle<T, Size> Mul(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
-#ifdef USE_DIRECTX_MATH
 			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			auto Simd = DirectX::XMVectorMultiply(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
-			return OutHandle;
 #endif
+			return OutHandle;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		template<typename T, usize Size>
 		TVecHandle<T, Size> Div(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
-#ifdef USE_DIRECTX_MATH
 			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			auto Simd = DirectX::XMVectorDivide(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
-			return OutHandle;
 #endif
+			return OutHandle;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -221,23 +221,25 @@ namespace Kepler
 		T DotProduct(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
 			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			TStaticSwitch < Size - 1,
 				decltype([](DirectX::FXMVECTOR, DirectX::FXMVECTOR) { CRASH(); }),
 				decltype([](DirectX::FXMVECTOR Lhs, DirectX::FXMVECTOR Rhs) { return DirectX::XMVector2Dot(Lhs, Rhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs, DirectX::FXMVECTOR Rhs) { return DirectX::XMVector3Dot(Lhs, Rhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs, DirectX::FXMVECTOR Rhs) { return DirectX::XMVector3Dot(Lhs, Rhs); }) > DotLambda;
-#ifdef USE_DIRECTX_MATH
 
 			auto Simd = DotLambda(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
-			return OutHandle.x;
 #endif
+			return OutHandle.x;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		template<typename T, usize Size>
 		TVecHandle<T, Size> CrossProduct(TVecHandle<T, Size> Lhs, TVecHandle<T, Size> Rhs)
 		{
+			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			TStaticSwitch < Size - 1,
 				decltype([](DirectX::FXMVECTOR, DirectX::FXMVECTOR) { CRASH(); }),
 				decltype([](DirectX::FXMVECTOR Lhs, DirectX::FXMVECTOR Rhs) { CRASH(); }),
@@ -245,8 +247,8 @@ namespace Kepler
 				decltype([](DirectX::FXMVECTOR Lhs, DirectX::FXMVECTOR Rhs) { return DirectX::XMVector3Cross(Lhs, Rhs); }) > CrossLambda;
 
 			auto Simd = CrossLambda(Handles::Pack<T, Size>(Lhs), Handles::Pack<T, Size>(Rhs));
-			TVecHandle<T, Size> OutHandle;
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
+#endif
 			return OutHandle;
 		}
 
@@ -254,14 +256,16 @@ namespace Kepler
 		template<typename T, usize Size>
 		float Length(TVecHandle<T, Size> Lhs)
 		{
+			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			TStaticSwitch < Size - 1,
 				decltype([](DirectX::FXMVECTOR) { return 0.0f; }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector2Length(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector3Length(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector4Length(Lhs); }) > NormLambda;
 			auto Simd = NormLambda(Handles::Pack<T, Size>(Lhs));
-			TVecHandle<T, Size> OutHandle;
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
+#endif
 			return OutHandle.x;
 		}
 
@@ -269,14 +273,16 @@ namespace Kepler
 		template<typename T, usize Size>
 		float LengthSquared(TVecHandle<T, Size> Lhs)
 		{
+			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			TStaticSwitch < Size - 1,
 				decltype([](DirectX::FXMVECTOR) { return 0.0f; }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector2LengthSq(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector3LengthSq(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector4LengthSq(Lhs); }) > NormLambda;
 			auto Simd = NormLambda(Handles::Pack<T, Size>(Lhs));
-			TVecHandle<T, Size> OutHandle;
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
+#endif
 			return OutHandle.x;
 		}
 
@@ -285,19 +291,21 @@ namespace Kepler
 		template<typename T, usize Size>
 		TVecHandle<T, Size> Normalize(TVecHandle<T, Size> Lhs)
 		{
+			TVecHandle<T, Size> OutHandle;
+#ifdef USE_DIRECTX_MATH
 			TStaticSwitch < Size - 1,
 				decltype([](DirectX::FXMVECTOR) { float RetVal = 1.0f; return DirectX::XMLoadFloat(&RetVal); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector2Normalize(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector3Normalize(Lhs); }),
 				decltype([](DirectX::FXMVECTOR Lhs) { return DirectX::XMVector3Normalize(Lhs); }) > NormLambda;
 			DirectX::XMVECTOR Simd = Length<T, Size>(Lhs) > 0 ? NormLambda(Handles::Pack<T, Size>(Lhs)) : DirectX::XMVectorZero();
-			TVecHandle<T, Size> OutHandle;
 			Handles::Unpack<T, Size>(Simd, &OutHandle);
 			if constexpr (Size == 4)
 			{
 				// Do not normalize the perspective divisor
 				OutHandle.z = Lhs.z;
 			}
+#endif
 			return OutHandle;
 		}
 

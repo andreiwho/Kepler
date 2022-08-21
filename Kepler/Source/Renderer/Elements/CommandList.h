@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Renderer/Pipelines/GraphicsPipeline.h"
 
 namespace Kepler
 {
@@ -31,6 +32,13 @@ namespace Kepler
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) = 0;
 
 		virtual void BindShader(TRef<TShader> Shader) = 0;
+
+		virtual void BindPipeline(TRef<TGraphicsPipeline> Pipeline) = 0;
+
+		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) = 0;
+		
+		virtual void SetScissor(float X, float Y, float Width, float Height) = 0;
+
 
 		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
 	protected:

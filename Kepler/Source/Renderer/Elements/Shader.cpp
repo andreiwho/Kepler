@@ -12,6 +12,11 @@ namespace Kepler
 			{
 				ShaderStageMask = ShaderStageMask | Module.StageFlags;
 			}
+
+			if (Module.StageFlags & EShaderStageFlags::Vertex)
+			{
+				TempVertexShaderBytecode = Module.ByteCode;
+			}
 		}
 	}
 }

@@ -6,12 +6,13 @@
 #else
 
 #endif
+#include "../HLSLShaderCompiler.h"
 
 namespace Kepler
 {
 	//////////////////////////////////////////////////////////////////////////
 	TGraphicsPipeline::TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Config)
-		: Handle(TGraphicsPipelineHandle::CreatePipelineHandle(Shader, Config))
+		: Handle(TGraphicsPipelineHandle::CreatePipelineHandle(InShader, Config))
 		, Shader(InShader)
 		, Configuration(Config)
 	{
@@ -20,6 +21,13 @@ namespace Kepler
 	void TGraphicsPipeline::UploadParameters(TRef<TCommandListImmediate> pImmCmdList)
 	{
 	}
+
+	TRef<TShader> TGraphicsPipeline::LoadHLSLShader(const std::string& Shader, EShaderStageFlags Stages)
+	{
+		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+		return Compiler->CompileShader(Shader, Stages);
+	}
+
 }
 
 // Some internals

@@ -5,6 +5,7 @@
 #include "IndexBufferD3D11.h"
 #include "Core/Log.h"
 #include "HLSLShaderD3D11.h"
+#include "GraphicsPipelineHandleD3D11.h"
 
 namespace Kepler
 {
@@ -146,6 +147,21 @@ namespace Kepler
 		}
 	}
 
+	void TCommandListImmediateD3D11::BindPipeline(TRef<TGraphicsPipeline> Pipeline)
+	{
+		BindShader(Pipeline->GetShader());
+		TRef<TGraphicsPipelineHandleD3D11> Handle = RefCast<TGraphicsPipelineHandleD3D11>(Pipeline->GetHandle());
+		if (Handle)
+		{
+			Context->IASetPrimitiveTopology(Handle->GetPrimitiveTopology());
+			Context->IASetInputLayout(Handle->GetInputLayout());
+			// TODO: Deal with stencil
+			Context->OMSetDepthStencilState(Handle->GetDepthStencilState(), D3D11_STENCIL_OP_KEEP);
+			Context->RSSetState(Handle->GetRasterState());
+			bHasAttachedPipeline = true;
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset)
 	{
@@ -156,6 +172,32 @@ namespace Kepler
 		{
 			Context->DrawIndexed(IndexCount, BaseIndexOffset, (INT)BaseVertexOffset);
 		}
+	}
+
+	void TCommandListImmediateD3D11::SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth)
+	{
+		CHECK(IsRenderThread());
+
+		D3D11_VIEWPORT Viewport{};
+		Viewport.TopLeftX = X;
+		Viewport.TopLeftY = Y;
+		Viewport.Width = Width;
+		Viewport.Height = Height;
+		Viewport.MinDepth = MinDepth;
+		Viewport.MaxDepth = MaxDepth;
+		
+		Context->RSSetViewports(1, &Viewport);
+	}
+
+	void TCommandListImmediateD3D11::SetScissor(float X, float Y, float Width, float Height)
+	{
+		D3D11_RECT Rect{};
+		Rect.left = (LONG)X;
+		Rect.right = (LONG)X + (LONG)Width;
+		Rect.top = (LONG)Y;
+		Rect.bottom = (LONG)Y + (LONG)Height;
+		
+		Context->RSSetScissorRects(1, &Rect);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

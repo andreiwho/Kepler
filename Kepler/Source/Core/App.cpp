@@ -13,6 +13,8 @@
 #include "Core/Filesystem/FileUtils.h"
 #include "Renderer/Elements/IndexBuffer.h"
 #include "Renderer/Elements/HLSLShader.h"
+#include "Renderer/Pipelines/GraphicsPipeline.h"
+#include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
 
 namespace Kepler
 {
@@ -56,9 +58,11 @@ namespace Kepler
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{{0.0f, 0.1f, 0.0f}, {0.0f, 1.0, 0.0f, 1.0f}},
-			{{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}
+			{{0.0f, 0.5f, 0.0f}, {0.0f, 1.0, 0.0f, 1.0f}},
+			{{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
+
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
 
@@ -81,18 +85,16 @@ namespace Kepler
 				return LowLevelRenderer->GetRenderDevice()->CreateIndexBuffer(EBufferAccessFlags::GPUOnly, TDataBlob::CreateGraphicsDataBlob(Indices));
 			}));
 
-
-		auto Shader = Await(TRenderThread::Submit(
+		TRef<TGraphicsPipeline> Pipeline = Await(TRenderThread::Submit(
 			[&]
 			{
-				TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
-				return Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+				return MakeRef(New<TDefaultUnlitPipeline>());
 			}
 		));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
-		float3 Result = Normalize(Vec * Vec1 * 15.0f);
+		float4 Result = Normalize(Vec * Vec1 * 15.0f);
 
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
@@ -109,7 +111,7 @@ namespace Kepler
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Shader]
+						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
@@ -120,9 +122,11 @@ namespace Kepler
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
+								pImmList->SetViewport(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.0f, 1.0f);
+								pImmList->SetScissor(0, 0,  (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight());
 								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
-								pImmList->BindShader(Shader);
+								pImmList->BindPipeline(Pipeline);
 
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
 							}

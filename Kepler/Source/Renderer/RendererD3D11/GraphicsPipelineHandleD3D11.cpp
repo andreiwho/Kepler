@@ -1,6 +1,8 @@
 #include "GraphicsPipelineHandleD3D11.h"
 #include "Renderer/RendererD3D11/RenderDeviceD3D11.h"
 #include "../RenderGlobals.h"
+#include "../RenderTypes.h"
+#include <type_traits>
 
 namespace Kepler
 {
@@ -9,7 +11,7 @@ namespace Kepler
 	{
 		SetupRasterizer(Config);
 		SetupDepthStencil(Config);
-		SetupInputLayout(Shader);
+		SetupInputLayout(Shader, Config);
 	}
 
 	TGraphicsPipelineHandleD3D11::~TGraphicsPipelineHandleD3D11()
@@ -76,6 +78,7 @@ namespace Kepler
 
 	void TGraphicsPipelineHandleD3D11::SetupDepthStencil(const TGraphicsPipelineConfiguration& Config)
 	{
+		CHECK(IsRenderThread());
 		CD3D11_DEPTH_STENCIL_DESC Desc(D3D11_DEFAULT);
 		Desc.DepthEnable = Config.DepthStencil.bDepthEnable;
 		Desc.DepthWriteMask = std::invoke(
@@ -116,9 +119,79 @@ namespace Kepler
 		HRCHECK(Device->CreateDepthStencilState(&Desc, &DepthStencil));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupInputLayout(TRef<TShader> Shader)
+	void TGraphicsPipelineHandleD3D11::SetupInputLayout(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
+		CHECK(IsRenderThread());
+		PrimitiveTopology = std::invoke([&Config]
+			{
+				switch (Config.VertexInput.Topology)
+				{
+				case EPrimitiveTopology::TriangleList:
+					return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+				case EPrimitiveTopology::LineList:
+					return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+				case EPrimitiveTopology::PointList:
+					return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+				}
+				CRASH();
+			});
+		
+		TDynArray<D3D11_INPUT_ELEMENT_DESC> Elements;
+		Elements.Reserve(Config.VertexInput.VertexLayout.GetAttributes().GetLength());
+		
+		for (const TVertexAttribute& Element : Config.VertexInput.VertexLayout.GetAttributes())
+		{
+			D3D11_INPUT_ELEMENT_DESC Desc{};
+			ZeroMemory(&Desc, sizeof(Desc));
+			Desc.SemanticName = Element.AttributeName.c_str();
+			Desc.SemanticIndex = Element.AttributeId;
+			Desc.Format = std::invoke([&Element]()->DXGI_FORMAT
+				{
+					switch (Element.InputType.Value)
+					{
+					case EShaderInputType::Float:
+						return DXGI_FORMAT_R32_FLOAT;
+					case EShaderInputType::Float2:
+						return DXGI_FORMAT_R32G32_FLOAT;
+					case EShaderInputType::Float3:
+						return DXGI_FORMAT_R32G32B32_FLOAT;
+					case EShaderInputType::Float4:
+						return DXGI_FORMAT_R32G32B32A32_FLOAT;
 
+					case EShaderInputType::Int:
+						return DXGI_FORMAT_R32_SINT;
+					case EShaderInputType::Int2:
+						return DXGI_FORMAT_R32G32_SINT;
+					case EShaderInputType::Int3:
+						return DXGI_FORMAT_R32G32B32_SINT;
+					case EShaderInputType::Int4:
+						return DXGI_FORMAT_R32G32B32A32_SINT;
+
+
+					case EShaderInputType::UInt:
+						return DXGI_FORMAT_R32_UINT;
+					case EShaderInputType::UInt2:
+						return DXGI_FORMAT_R32G32_UINT;
+					case EShaderInputType::UInt3:
+						return DXGI_FORMAT_R32G32B32_UINT;
+					case EShaderInputType::UInt4:
+						return DXGI_FORMAT_R32G32B32A32_UINT;
+					}
+					CRASH();
+					return DXGI_FORMAT_UNKNOWN;
+				}
+			);
+
+			Desc.InputSlot = 0;
+			Desc.AlignedByteOffset = (UINT)Element.Offset;
+			Desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA; // TODO: Add support for instancing
+			Desc.InstanceDataStepRate = 0;
+			Elements.EmplaceBack(Desc);
+		}
+		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
+		CHECK(Device);
+		TRef<TDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
+		HRCHECK(Device->CreateInputLayout(Elements.GetData(), (UINT)Elements.GetLength(), VertexShaderBytecode->GetData(), VertexShaderBytecode->GetSize(), &InputLayout));
 	}
 
 }

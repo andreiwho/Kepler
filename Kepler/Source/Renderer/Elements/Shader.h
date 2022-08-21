@@ -27,8 +27,11 @@ namespace Kepler
 		inline TRef<TShaderHandle> GetHandle() const { return Handle; }
 		inline const std::string& GetName() const { return Name; }
 
+		inline TRef<TDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
+
 	protected:
 		TRef<TShaderHandle> Handle{};
+		TRef<TDataBlob> TempVertexShaderBytecode;
 		EShaderStageFlags ShaderStageMask{};
 
 	private:
