@@ -51,13 +51,13 @@ namespace Kepler
 
 		struct TVertex
 		{
-			float Pos[3]{};
-			float Clo[4]{};
+			float3 Pos{};
+			float4 Col{};
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{0.0f, 0.1f, 0.0f},
-			{0.5f, -0.5f, 0.0f}
+			{{0.0f, 0.1f, 0.0f}, {0.0f, 1.0, 0.0f, 1.0f}},
+			{{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}
 		};
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
@@ -82,17 +82,17 @@ namespace Kepler
 			}));
 
 
-		auto Shader = Await(TRenderThread::Submit([&]
+		auto Shader = Await(TRenderThread::Submit(
+			[&]
 			{
 				TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
 				return Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 			}
 		));
 
-		TVector4 Vec(1.0f, 0.0f, 0.0f, 1.0f);
-		TVector4 Vec1(1.0f, 0.0f, 0.0f, 1.0f);
-		TVector4 Result = TVector4(Kepler::VectorOperations::Add<float, 4>(Vec.ToHandle(), Vec1.ToHandle()));
-
+		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
+		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
+		float3 Result = Normalize(Vec * Vec1 * 15.0f);
 
 		const std::string InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())

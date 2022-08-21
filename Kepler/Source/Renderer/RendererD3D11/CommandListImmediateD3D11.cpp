@@ -116,6 +116,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindShader(TRef<TShader> Shader)
 	{
+		CHECK(IsRenderThread());
 		if (!Shader)
 		{
 			return;
