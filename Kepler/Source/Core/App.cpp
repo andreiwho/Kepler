@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Timer.h"
 #include "Async/Async.h"
+#include "Math/Vector.h"
 
 // Test
 #include "Renderer/HLSLShaderCompiler.h"
@@ -87,6 +88,10 @@ namespace Kepler
 				return Compiler->CompileShader("Kepler/Shaders/Source/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 			}
 		));
+
+		TVector4 Vec(1.0f, 0.0f, 0.0f, 1.0f);
+		TVector4 Vec1(1.0f, 0.0f, 0.0f, 1.0f);
+		TVector4 Result = TVector4(Kepler::VectorOperations::Add<float, 4>(Vec.ToHandle(), Vec1.ToHandle()));
 
 
 		const std::string InitialWindowName = MainWindow->GetTitle();
