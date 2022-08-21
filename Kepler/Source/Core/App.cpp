@@ -46,6 +46,8 @@ namespace Kepler
 	{
 		KEPLER_INFO(LogApp, "Application Run called...");
 
+		InitApplicationModules();
+
 		// Begin main loop
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
@@ -151,6 +153,8 @@ namespace Kepler
 #endif
 			}
 		}
+
+		TerminateModuleStack();
 	}
 
 	void TApplication::OnPlatformEvent(const TPlatformEventBase& Event)
@@ -158,6 +162,27 @@ namespace Kepler
 		TPlatformEventDispatcher Dispatcher{ Event };
 		Dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
 		Dispatcher.Dispatch(this, &TApplication::OnWindowResized);
+
+		if (!Event.Handled)
+		{
+			ModuleStack.HandlePlatformEvent(Event);
+		}
+	}
+
+	void TApplication::InitApplicationModules()
+	{
+		// Initialize engine modules
+		// ...
+
+		ChildSetupModuleStack(ModuleStack);
+
+		ModuleStack.Init();
+	}
+
+	void TApplication::TerminateModuleStack()
+	{
+		ModuleStack.Terminate();
+		ModuleStack.Clear();
 	}
 
 	bool TApplication::OnWindowClosed(const TWindowClosedEvent& Event)
