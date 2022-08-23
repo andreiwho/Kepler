@@ -54,17 +54,20 @@ namespace Kepler
 
 		struct TUniformBuffer
 		{
-			float3 Offset;
-			float3 Tint;
+			float4 Offset;
+			float4 Tint;
 		};
 
-		TPipelineParamPack Pack;
-		ADD_PIPELINE_PARAM(Pack, TUniformBuffer, Offset, EShaderInputType::Float3);
-		ADD_PIPELINE_PARAM(Pack, TUniformBuffer, Tint, EShaderInputType::Float3);
-		Pack.Compile();
+		TRef<TPipelineParamPack> Pack = MakeRef(New<TPipelineParamPack>());
+		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Offset, EShaderStageFlags::Vertex, EShaderInputType::Float4);
+		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Tint, EShaderStageFlags::Vertex | EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		Pack->Compile();
 
-		float3 NewPosition(0.0f, 0.0f, 1.0f);
-		Pack.Write("Offset", &NewPosition);
+		TRef<TParamBuffer> ParamBuffer = Await(TRenderThread::Submit(
+			[Pack, this] 
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Pack);
+			}));
 
 		struct TVertex
 		{
@@ -116,6 +119,7 @@ namespace Kepler
 		if (TPlatform* Platform = TPlatform::Get())
 		{
 			Platform->RegisterPlatformEventListener(this);
+			float PositionX = 0.0f;
 			while (Platform->HasActiveMainWindow())
 			{
 				MainTimer.Begin();
@@ -124,16 +128,27 @@ namespace Kepler
 				if (!Platform->IsMainWindowMinimized())
 				{
 					// Update game state
+					PositionX += GGlobalTimer->Delta();
+					auto Param = ParamBuffer->GetParam<float3>("Offset");
+					// Param->X = std::sin(PositionX);
+					// Param->Y = std::cos(PositionX);
+
+					auto Tint = ParamBuffer->GetParam<float3>("Tint");
+					Tint->X = (std::sin(PositionX) + 1.0f)  / 2.0f;
+					Tint->Y = (std::sin(PositionX) + 1.0f)  / 2.0f;
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline]
+						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline, ParamBuffer]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
 							if (SwapChain)
 							{
+								ParamBuffer->RT_UploadToGPU(pImmList);
+								pImmList->BindParamBuffers(ParamBuffer, 0);
+
 								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 

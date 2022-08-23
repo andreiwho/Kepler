@@ -2,10 +2,11 @@
 #include "Core/Malloc.h"
 #include "Core/Types.h"
 #include "Renderer/RenderTypes.h"
+#include "Buffer.h"
 
 namespace Kepler
 {
-	class TVertexBuffer : public TRefCounted
+	class TVertexBuffer : public TBuffer
 	{
 	public:
 		TVertexBuffer() = default;

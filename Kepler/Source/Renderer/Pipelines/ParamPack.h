@@ -27,11 +27,10 @@ namespace Kepler
 	class TPipelineParamPack : public TRefCounted
 	{
 	public:
-		void AddParam(const TString& Name, usize Offset, usize Size, EShaderInputType Type = EShaderInputType::Custom);
+		void AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type = EShaderInputType::Custom);
 		void Compile();
 
 		inline bool IsCompiled() const { return bIsCompiled; }
-		inline usize GetSizeInBytes() const { return CPUData.GetLength(); }
 
 		template<typename T>
 		void Write(const TString& Param, const T* Data)
@@ -49,11 +48,16 @@ namespace Kepler
 			return reinterpret_cast<T*>(CPUData.GetData() + Params.Find(Param)->GetOffset());
 		}
 
+		const ubyte* GetDataPointer() const { return CPUData.GetData(); }
+		usize GetDataSize() const { return CPUData.GetLength(); }
+		inline EShaderStageFlags GetShaderStages() const { return ShaderStages; }
+
 	private:
 		TChaoticMap<TString, TPipelineParam> Params;
 		TDynArray<ubyte> CPUData;
+		EShaderStageFlags ShaderStages{0};
 		bool bIsCompiled = false;
 	};
 
-#define ADD_PIPELINE_PARAM(Pack, Struct, Name, Type) (Pack).AddParam(#Name, offsetof(Struct, Name), sizeof(Struct::Name), Type)
+#define ADD_PIPELINE_PARAM(Pack, Struct, Name, Stage, Type) (Pack).AddParam(#Name, offsetof(Struct, Name), sizeof(Struct::Name), Stage, Type)
 }

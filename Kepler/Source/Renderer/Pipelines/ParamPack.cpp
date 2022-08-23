@@ -4,12 +4,13 @@
 
 namespace Kepler
 {
-	void TPipelineParamPack::AddParam(const TString& Name, usize Offset, usize Size, EShaderInputType Type)
+	void TPipelineParamPack::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
 	{
 		CHECK(!bIsCompiled);
 		CHECK(!Name.empty());
 
 		Params.Insert(Name, TPipelineParam(Offset, Size, Type));
+		ShaderStages |= Stage;
 	}
 
 	void TPipelineParamPack::Compile()

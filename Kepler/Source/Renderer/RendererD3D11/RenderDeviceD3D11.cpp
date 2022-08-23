@@ -13,6 +13,7 @@
 # include <dxgidebug.h>
 #include "Core/Malloc.h"
 #include "IndexBufferD3D11.h"
+#include "ParamBufferD3D11.h"
 #endif
 
 namespace Kepler
@@ -67,6 +68,13 @@ namespace Kepler
 		CHECK(IsRenderThread());
 		std::lock_guard Lck{ ResourceMutex };
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
+	}
+
+	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamPack> Params)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TParamBufferD3D11>(Params));
 	}
 
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)

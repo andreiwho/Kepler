@@ -6,6 +6,7 @@
 #include "Core/Log.h"
 #include "HLSLShaderD3D11.h"
 #include "GraphicsPipelineHandleD3D11.h"
+#include "ParamBufferD3D11.h"
 
 namespace Kepler
 {
@@ -176,6 +177,7 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth)
 	{
 		CHECK(IsRenderThread());
@@ -191,6 +193,7 @@ namespace Kepler
 		Context->RSSetViewports(1, &Viewport);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::SetScissor(float X, float Y, float Width, float Height)
 	{
 		D3D11_RECT Rect{};
@@ -200,6 +203,63 @@ namespace Kepler
 		Rect.bottom = (LONG)Y + (LONG)Height;
 		
 		Context->RSSetScissorRects(1, &Rect);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void* TCommandListImmediateD3D11::MapBuffer(TBuffer* Buffer)
+	{
+		CHECK(IsRenderThread());
+
+		D3D11_MAPPED_SUBRESOURCE Subresource;
+		HRCHECK(Context->Map((ID3D11Resource*)Buffer->GetNativeHandle(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Subresource));
+		return Subresource.pData;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::UnmapBuffer(TBuffer* Buffer)
+	{
+		CHECK(IsRenderThread());
+		Context->Unmap((ID3D11Resource*)Buffer->GetNativeHandle(), 0);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot)
+	{
+		CHECK(IsRenderThread());
+		CHECK(ParamBufer);
+
+		const EShaderStageFlags Stages = ParamBufer->GetShaderStages();
+		if (Stages == 0)
+		{
+			return;
+		}
+
+		auto MyBuffer = RefCast<TParamBufferD3D11>(ParamBufer);
+		if (MyBuffer)
+		{
+			ID3D11Buffer* BindBuffers[] = { (ID3D11Buffer*)MyBuffer->GetNativeHandle() };
+			if (Stages & EShaderStageFlags::Vertex)
+			{
+				Context->VSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+
+			if (Stages & EShaderStageFlags::Pixel)
+			{
+				Context->PSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+
+			if (Stages & EShaderStageFlags::Compute)
+			{
+				Context->CSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBufer, u32 Slot)
+	{
+
 	}
 
 	//////////////////////////////////////////////////////////////////////////
