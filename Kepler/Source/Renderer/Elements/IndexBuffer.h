@@ -2,10 +2,11 @@
 #include "Core/Malloc.h"
 #include "Core/Types.h"
 #include "Renderer/RenderTypes.h"
+#include "Buffer.h"
 
 namespace Kepler
 {
-	class TIndexBuffer : public TRefCounted
+	class TIndexBuffer : public TBuffer
 	{
 	public:
 		TIndexBuffer() = default;

@@ -2,7 +2,7 @@
 
 namespace Kepler
 {
-	THLSLShader::THLSLShader(const std::string& Name, const TDynArray<TShaderModule>& Modules)
+	THLSLShader::THLSLShader(const TString& Name, const TDynArray<TShaderModule>& Modules)
 		:	TShader(Name, Modules)
 	{
 	}

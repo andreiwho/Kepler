@@ -21,11 +21,11 @@ namespace Kepler
 	class TShader : public TRefCounted
 	{
 	public:
-		TShader(const std::string& InName, const TDynArray<TShaderModule>& ShaderModules);
+		TShader(const TString& InName, const TDynArray<TShaderModule>& ShaderModules);
 		virtual ~TShader() = default;
 
 		inline TRef<TShaderHandle> GetHandle() const { return Handle; }
-		inline const std::string& GetName() const { return Name; }
+		inline const TString& GetName() const { return Name; }
 
 		inline TRef<TDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
 
@@ -35,6 +35,6 @@ namespace Kepler
 		EShaderStageFlags ShaderStageMask{};
 
 	private:
-		std::string Name{};
+		TString Name{};
 	};
 }

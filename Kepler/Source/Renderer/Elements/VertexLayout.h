@@ -8,7 +8,7 @@ namespace Kepler
 {
 	struct TVertexAttribute
 	{
-		TVertexAttribute(u32 Id, const std::string& Name, EShaderInputType Type, usize InOffset)
+		TVertexAttribute(u32 Id, const TString& Name, EShaderInputType Type, usize InOffset)
 			:	AttributeId(Id)
 			,	AttributeName(Name)
 			,	InputType(Type)
@@ -16,7 +16,7 @@ namespace Kepler
 		{}
 
 		u32 AttributeId{};
-		std::string AttributeName{};
+		TString AttributeName{};
 		EShaderInputType InputType{EShaderInputType::Float4};
 		usize Offset{};
 	};
@@ -30,7 +30,7 @@ namespace Kepler
 			:	Stride(InStride)
 		{}
 
-		inline void AddAttribute(u32 Id, const std::string& Name, EShaderInputType Type, usize Offset)
+		inline void AddAttribute(u32 Id, const TString& Name, EShaderInputType Type, usize Offset)
 		{
 			Attributes.EmplaceBack(Id, Name, Type, Offset);
 		}

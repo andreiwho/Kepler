@@ -14,6 +14,6 @@ namespace Kepler
 	public:
 		static TRef<THLSLShaderCompiler> CreateShaderCompiler();
 
-		virtual TRef<TShader> CompileShader(const std::string& Path, EShaderStageFlags TypeMask) = 0;
+		virtual TRef<TShader> CompileShader(const TString& Path, EShaderStageFlags TypeMask) = 0;
 	};
 }

@@ -3,11 +3,11 @@
 
 namespace Kepler
 {
-	std::future<std::string> TFileUtils::ReadTextFileAsync(const std::string& Path)
+	std::future<TString> TFileUtils::ReadTextFileAsync(const TString& Path)
 	{
 		return Async([CopiedPath = Path] 
 			{
-				std::string OutString;
+				TString OutString;
 #ifdef WIN32
 				std::ifstream File{ CopiedPath, std::ios::ate | std::ios::binary };
 #else

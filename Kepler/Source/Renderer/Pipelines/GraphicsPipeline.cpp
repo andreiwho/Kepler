@@ -22,7 +22,7 @@ namespace Kepler
 	{
 	}
 
-	TRef<TShader> TGraphicsPipeline::LoadHLSLShader(const std::string& Shader, EShaderStageFlags Stages)
+	TRef<TShader> TGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
 	{
 		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
 		return Compiler->CompileShader(Shader, Stages);

@@ -30,7 +30,7 @@ namespace Kepler
 		return Instance;
 	}
 
-	bool TPlatform::HandleCrashReported(const std::string& Message)
+	bool TPlatform::HandleCrashReported(const TString& Message)
 	{
 #ifdef PLATFORM_DESKTOP
 		return TPlatformGLFW::HandleCrashReported_Impl(Message);

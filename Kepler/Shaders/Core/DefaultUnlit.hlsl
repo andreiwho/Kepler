@@ -10,15 +10,21 @@ struct TDefaultUnlit_PSInput
 	float3 Color : ATTRIB1;
 };
 
+cbuffer TUniformBuffer : register(b0)
+{
+	float4 Offset;
+	float4 Tint;
+};
+
 TDefaultUnlit_PSInput VSMain(in TDefaultUnlit_VSInput Input)
 {
 	TDefaultUnlit_PSInput Output;
-	Output.Position = float4(Input.Position, 1.0f);
+	Output.Position = float4(Input.Position + Offset.xyz, 1.0f);
 	Output.Color = Input.Color;
 	return Output;
 }
 
 float4 PSMain(in TDefaultUnlit_PSInput Input) : SV_Target0
 {
-	return float4(Input.Color, 1.0f);
+	return float4(Tint.rgb, 1.0f);
 }

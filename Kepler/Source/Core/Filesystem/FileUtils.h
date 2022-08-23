@@ -7,6 +7,6 @@ namespace Kepler
 {
 	struct TFileUtils
 	{
-		static std::future<std::string> ReadTextFileAsync(const std::string& Path);
+		static std::future<TString> ReadTextFileAsync(const TString& Path);
 	};
 }

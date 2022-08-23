@@ -2,7 +2,7 @@
 
 namespace Kepler
 {
-	TShader::TShader(const std::string& InName, const TDynArray<TShaderModule>& ShaderModules)
+	TShader::TShader(const TString& InName, const TDynArray<TShaderModule>& ShaderModules)
 		:	Name(InName)
 	{
 		// Combine the shader stage mask

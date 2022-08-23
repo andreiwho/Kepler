@@ -18,7 +18,7 @@ namespace Kepler
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(TDynArray<std::string> const& CommandLine);
+		TCommandLineArguments(TDynArray<TString> const& CommandLine);
 	};
 
 	struct TApplicationLaunchParams

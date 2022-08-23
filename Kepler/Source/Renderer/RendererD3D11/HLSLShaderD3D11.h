@@ -25,7 +25,7 @@ namespace Kepler
 	class THLSLShaderD3D11 : public THLSLShader
 	{
 	public:
-		THLSLShaderD3D11(const std::string& Name, const TDynArray<TShaderModule>& Modules);
+		THLSLShaderD3D11(const TString& Name, const TDynArray<TShaderModule>& Modules);
 
 	protected:
 		inline TRef<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(Handle); }

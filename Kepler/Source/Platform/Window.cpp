@@ -2,12 +2,12 @@
 
 namespace Kepler
 {
-	TWindow::TWindow(i32 width, i32 height, const std::string& title, const TWindowParams& params)
+	TWindow::TWindow(i32 width, i32 height, const TString& title, const TWindowParams& params)
 		:	Width(width), Height(height), Title(title)
 	{
 	}
 
-	void TWindow::SetTitle(const std::string& newTitle)
+	void TWindow::SetTitle(const TString& newTitle)
 	{
 		SetTitle_Impl(newTitle);
 		Title = newTitle;
