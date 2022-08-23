@@ -217,6 +217,8 @@ namespace Kepler
 			UInt2,
 			UInt3,
 			UInt4,
+
+			Custom,
 		} Value;
 
 		EShaderInputType(EValue InValue) :Value(InValue) {}
