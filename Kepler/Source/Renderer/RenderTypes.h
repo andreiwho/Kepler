@@ -58,7 +58,7 @@ namespace Kepler
 			return OutFlags;
 		}
 
-		static std::string ToString(Type Value)
+		static TString ToString(Type Value)
 		{
 			return std::invoke([Value] 
 			{

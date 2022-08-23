@@ -12,7 +12,7 @@
 
 namespace Kepler
 {
-	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const std::string& Title, const TWindowParams& Params)
+	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
 		: TWindow(Width, Height, Title, Params)
 	{
 		glfwWindowHint(GLFW_DECORATED, Params.bDecorated);
@@ -170,7 +170,7 @@ namespace Kepler
 			});
 	}
 
-	void TWindowGLFW::SetTitle_Impl(const std::string& NewTitle)
+	void TWindowGLFW::SetTitle_Impl(const TString& NewTitle)
 	{
 		glfwSetWindowTitle(Window, NewTitle.c_str());
 	}

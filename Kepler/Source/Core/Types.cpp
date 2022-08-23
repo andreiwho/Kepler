@@ -8,17 +8,17 @@
 namespace Kepler
 {
 
-	std::string ConvertToAnsiString(const std::wstring& WideString)
+	TString ConvertToAnsiString(const TWideString& WideString)
 	{
-		std::string OutString;
+		TString OutString;
 		OutString.resize(WideString.length());
 		CHECK(std::wcstombs(OutString.data(), WideString.data(), OutString.length()));
 		return OutString;
 	}
 
-	std::wstring ConvertToWideString(const std::string& AnsiString)
+	TWideString ConvertToWideString(const TString& AnsiString)
 	{
-		std::wstring OutString;
+		TWideString OutString;
 		OutString.resize(AnsiString.length());
 		CHECK(std::mbstowcs(OutString.data(), AnsiString.data(), OutString.length()));
 		return OutString;
@@ -42,8 +42,8 @@ namespace Kepler
 	{
 	}
 
-	id64::id64(const std::string& HashableString)
-		: Value(std::hash<std::string>{}(HashableString))
+	id64::id64(const TString& HashableString)
+		: Value(std::hash<TString>{}(HashableString))
 	{
 	}
 

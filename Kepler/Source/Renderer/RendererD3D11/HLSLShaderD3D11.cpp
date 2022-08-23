@@ -8,7 +8,7 @@
 namespace Kepler
 {
 
-	THLSLShaderD3D11::THLSLShaderD3D11(const std::string& Name, const TDynArray<TShaderModule>& Modules)
+	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const TDynArray<TShaderModule>& Modules)
 		: THLSLShader(Name, Modules)
 	{
 		InitHandle();

@@ -7,6 +7,6 @@ namespace Kepler
 	class THLSLShader : public TShader 
 	{
 	public:
-		THLSLShader(const std::string& Name, const TDynArray<TShaderModule>& Modules);
+		THLSLShader(const TString& Name, const TDynArray<TShaderModule>& Modules);
 	};
 }

@@ -15,13 +15,14 @@
 #include "Renderer/Elements/HLSLShader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
+#include "Renderer/Pipelines/ParamPack.h"
 
 namespace Kepler
 {
-	TCommandLineArguments::TCommandLineArguments(TDynArray<std::string> const& CommandLine)
+	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& CommandLine)
 	{
 		// Parse command line args
-		for (const std::string& arg : CommandLine)
+		for (const TString& arg : CommandLine)
 		{
 			// TODO: Do some parsing
 		}
@@ -50,6 +51,20 @@ namespace Kepler
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
+
+		struct TUniformBuffer
+		{
+			float3 Offset;
+			float3 Tint;
+		};
+
+		TPipelineParamPack Pack;
+		ADD_PIPELINE_PARAM(Pack, TUniformBuffer, Offset, EShaderInputType::Float3);
+		ADD_PIPELINE_PARAM(Pack, TUniformBuffer, Tint, EShaderInputType::Float3);
+		Pack.Compile();
+
+		float3 NewPosition(0.0f, 0.0f, 1.0f);
+		Pack.Write("Offset", &NewPosition);
 
 		struct TVertex
 		{
@@ -97,7 +112,7 @@ namespace Kepler
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
 		float4 Result = Normalize(Vec * Vec1 * 15.0f);
 
-		const std::string InitialWindowName = MainWindow->GetTitle();
+		const TString InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
 		{
 			Platform->RegisterPlatformEventListener(this);

@@ -43,7 +43,7 @@ namespace Kepler
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
-		TDynArray<std::string> GetInfoQueueMessages() const;
+		TDynArray<TString> GetInfoQueueMessages() const;
 
 		virtual bool RT_FlushPendingDeleteResources() override;
 

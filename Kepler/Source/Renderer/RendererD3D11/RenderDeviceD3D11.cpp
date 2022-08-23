@@ -85,10 +85,10 @@ namespace Kepler
 #endif
 	}
 
-	TDynArray<std::string> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	TDynArray<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifdef ENABLE_DEBUG
-		TDynArray<std::string> OutMessages;
+		TDynArray<TString> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
 		{
@@ -134,7 +134,7 @@ namespace Kepler
 		PendingDeleteResources.Enqueue(std::move(Resource));
 	}
 
-	static std::string GetAdapterName(IDXGIAdapter* Adapter)
+	static TString GetAdapterName(IDXGIAdapter* Adapter)
 	{
 		CHECK(IsRenderThread());
 		if (!Adapter)
