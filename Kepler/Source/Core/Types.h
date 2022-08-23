@@ -5,6 +5,7 @@
 #include <string>
 #include <atomic>
 #include <stdexcept>
+#include <xhash>
 
 namespace Kepler
 {
@@ -29,4 +30,26 @@ namespace Kepler
 
 	std::string ConvertToAnsiString(const std::wstring& WideString);
 	std::wstring ConvertToWideString(const std::string& AnsiString);
+
+	// a 64 bit identifier, which claims to be unique
+	struct id64
+	{
+		id64();
+		id64(u64 InValue) : Value(InValue) {}
+		id64(const std::string& HashableString);
+		id64(const id64& Other) noexcept { Value = Other.Value; }
+		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
+
+		u64 Value;
+		inline operator u64() const { return Value; }
+	};
+}
+
+namespace std
+{
+	template<>
+	struct hash<Kepler::id64>
+	{
+		[[nodiscard]] size_t operator()(const Kepler::id64& Id) const noexcept { return Id.Value; }
+	};
 }
