@@ -3,7 +3,9 @@
 #include "Core/Log.h"
 #include "Core/Malloc.h"
 #include "Elements/Shader.h"
+#include "Elements/ShaderReflection.h"
 #include <future>
+
 
 namespace Kepler
 {

@@ -206,7 +206,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void* TCommandListImmediateD3D11::MapBuffer(TBuffer* Buffer)
+	void* TCommandListImmediateD3D11::MapBuffer(TRef<TBuffer> Buffer)
 	{
 		CHECK(IsRenderThread());
 
@@ -217,7 +217,7 @@ namespace Kepler
 
 
 	//////////////////////////////////////////////////////////////////////////
-	void TCommandListImmediateD3D11::UnmapBuffer(TBuffer* Buffer)
+	void TCommandListImmediateD3D11::UnmapBuffer(TRef<TBuffer> Buffer)
 	{
 		CHECK(IsRenderThread());
 		Context->Unmap((ID3D11Resource*)Buffer->GetNativeHandle(), 0);

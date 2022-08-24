@@ -29,8 +29,8 @@ namespace Kepler
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) override;
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) override;
 		virtual void SetScissor(float X, float Y, float Width, float Height) override;
-		virtual void* MapBuffer(TBuffer* Buffer) override;
-		virtual void UnmapBuffer(TBuffer* Buffer) override;
+		virtual void* MapBuffer(TRef<TBuffer> Buffer) override;
+		virtual void UnmapBuffer(TRef<TBuffer> Buffer) override;
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) override;
 		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBufer, u32 Slot) override;
 

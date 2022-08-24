@@ -2,6 +2,7 @@
 #include "Renderer/HLSLShaderCompiler.h"
 #include "D3D11Common.h"
 #include "Async/Async.h"
+#include "../Elements/VertexLayout.h"
 
 namespace Kepler
 {

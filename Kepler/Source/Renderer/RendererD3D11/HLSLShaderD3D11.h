@@ -4,6 +4,7 @@
 #include "Renderer/RenderTypes.h"
 #include "D3D11Common.h"
 #include "Core/Malloc.h"
+#include "Renderer/Elements/VertexLayout.h"
 
 namespace Kepler
 {
@@ -33,5 +34,9 @@ namespace Kepler
 	private:
 		void InitHandle();
 		void InitShaders(const TDynArray<TShaderModule>& Modules);
+
+		// Reflection interface
+		void InitReflection(const TDynArray<TShaderModule>& Modules);
+		TVertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule);
 	};
 }

@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/RenderTypes.h"
 #include <string>
+#include "ShaderReflection.h"
 
 namespace Kepler
 {
@@ -26,13 +27,17 @@ namespace Kepler
 
 		inline TRef<TShaderHandle> GetHandle() const { return Handle; }
 		inline const TString& GetName() const { return Name; }
-
 		inline TRef<TDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
+		inline TRef<TShaderModuleReflection> GetReflection() const { return ReflectionData; }
 
 	protected:
 		TRef<TShaderHandle> Handle{};
 		TRef<TDataBlob> TempVertexShaderBytecode;
 		EShaderStageFlags ShaderStageMask{};
+
+		// This data gets created and maintained by the child shader class.
+		// May be NULL
+		TRef<TShaderModuleReflection> ReflectionData{};
 
 	private:
 		TString Name{};

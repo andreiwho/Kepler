@@ -60,11 +60,11 @@ namespace Kepler
 		auto MyCmd = RefCast<TCommandListImmediateD3D11>(pImmContext);
 		if (MyCmd)
 		{
-			void* Memory = MyCmd->MapBuffer(this);
+			void* Memory = MyCmd->MapBuffer(RefFromThis());
 			if (Memory)
 			{
 				memcpy(Memory, Params->GetDataPointer(), Params->GetDataSize());
-				MyCmd->UnmapBuffer(this);
+				MyCmd->UnmapBuffer(RefFromThis());
 			}
 		}
 	}

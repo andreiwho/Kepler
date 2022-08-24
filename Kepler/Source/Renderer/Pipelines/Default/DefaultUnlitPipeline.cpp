@@ -4,16 +4,17 @@
 namespace Kepler
 {
 	TDefaultUnlitPipeline::TDefaultUnlitPipeline()
-		: TGraphicsPipeline(LoadHLSLShader("Kepler/Shaders/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel),
-			CreateConfiguration())
+		: TGraphicsPipeline()
 	{
+		TRef<TShader> Shader = LoadHLSLShader("Kepler/Shaders/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		TGraphicsPipelineConfiguration Configuration = CreateConfiguration(Shader);
+		DeferredInit(Shader, Configuration);
 	}
 
-	TGraphicsPipelineConfiguration TDefaultUnlitPipeline::CreateConfiguration()
+	TGraphicsPipelineConfiguration TDefaultUnlitPipeline::CreateConfiguration(TRef<TShader> Shader)
 	{
 		TGraphicsPipelineConfiguration Configuration{};
-		Configuration.VertexInput.VertexLayout.AddAttribute(0, "POSITION", EShaderInputType::Float3, 0);
-		Configuration.VertexInput.VertexLayout.AddAttribute(0, "COLOR", EShaderInputType::Float3, sizeof(float3));
+		Configuration.VertexInput.VertexLayout = Shader->GetReflection()->VertexLayout;
 
 		Configuration.DepthStencil.bDepthEnable = false;
 		return Configuration;

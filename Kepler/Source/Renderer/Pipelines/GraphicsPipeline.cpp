@@ -28,6 +28,12 @@ namespace Kepler
 		return Compiler->CompileShader(Shader, Stages);
 	}
 
+	void TGraphicsPipeline::DeferredInit(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
+	{
+		Handle = TGraphicsPipelineHandle::CreatePipelineHandle(InShader, InConfiguration);
+		Shader = InShader;
+		Configuration = InConfiguration;
+	}
 }
 
 // Some internals

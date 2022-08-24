@@ -223,6 +223,8 @@ namespace Kepler
 
 		EShaderInputType(EValue InValue) :Value(InValue) {}
 		inline operator u32() const { return Value; }
+
+		usize GetValueSize() const;
 	};
 
 	//////////////////////////////////////////////////////////////////////////

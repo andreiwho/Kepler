@@ -53,8 +53,8 @@ namespace Kepler
 	class TCommandListImmediate : public TCommandList
 	{
 	public:
-		virtual void* MapBuffer(TBuffer* Buffer) = 0;
+		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
 
-		virtual void UnmapBuffer(TBuffer* Buffer) = 0;
+		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
 	};
 }

@@ -1,3 +1,5 @@
+#include "Core.hlsl"
+
 struct TDefaultUnlit_VSInput
 {
 	float3 Position : POSITION;

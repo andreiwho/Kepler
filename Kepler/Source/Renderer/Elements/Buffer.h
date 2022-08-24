@@ -3,7 +3,7 @@
 
 namespace Kepler
 {
-	class TBuffer : public TRefCounted
+	class TBuffer : public TEnableRefFromThis<TBuffer>
 	{
 	public:
 		virtual void* GetNativeHandle() const = 0;
