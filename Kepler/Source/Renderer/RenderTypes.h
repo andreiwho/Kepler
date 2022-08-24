@@ -218,6 +218,11 @@ namespace Kepler
 			UInt3,
 			UInt4,
 
+			Matrix3x3,
+			Matrix3x4,
+			Matrix4x3,
+			Matrix4x4,
+
 			Custom,
 		} Value;
 

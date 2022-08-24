@@ -8,6 +8,7 @@
 #include <xhash>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Kepler
 {
@@ -65,6 +66,7 @@ namespace Kepler
 	using matrix3x4 = glm::mat3x4;
 	using matrix4x3 = glm::mat4x3;
 	using matrix4x4 = glm::mat4x4;
+	using matrix = matrix4x4;
 }
 
 namespace std

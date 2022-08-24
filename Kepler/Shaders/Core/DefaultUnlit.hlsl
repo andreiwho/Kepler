@@ -12,27 +12,23 @@ struct TDefaultUnlit_PSInput
 	float3 Color : ATTRIB1;
 };
 
-cbuffer TUniformBuffer : register(b0)
+cbuffer TWorldViewProj : register(b0)
 {
-	float4 Offset;
-	float4 Tint;
-};
-
-cbuffer TOtherBuffer : register(b1)
-{
-	float4 TintTint;
+	float4x4 mWorldViewProj;
 };
 
 TDefaultUnlit_PSInput VSMain(in
 	TDefaultUnlit_VSInput Input)
 {
 	TDefaultUnlit_PSInput Output;
-	Output.Position = float4(Input.Position + Offset.xyz, 1.0f);
+	Output.Position = float4(Input.Position, 1.0f);
+	Output.Position = mul(Output.Position, mWorldViewProj);
+	
 	Output.Color = Input.Color;
 	return Output;
 }
 
 float4 PSMain(in TDefaultUnlit_PSInput Input) : SV_Target0
 {
-	return float4(Tint.xyz + TintTint.xyz, 1.0f);
+	return float4(Input.Color, 1.0f);
 }

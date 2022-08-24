@@ -10,6 +10,8 @@
 #include <GLFW/glfw3native.h>
 #include <cassert>
 
+DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
+
 namespace Kepler
 {
 	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
@@ -41,11 +43,11 @@ namespace Kepler
 		bCloseRequested = true;
 	}
 
-	void TWindowGLFW::Internal_UpdateSize(i32 Width, i32 Height)
+	void TWindowGLFW::Internal_UpdateSize(i32 InWidth, i32 InHeight)
 	{
-		Width = Width;
-		Height = Height;
-
+		Width = InWidth;
+		Height = InHeight;
+		KEPLER_TRACE(LogGLFWWindow, "Window size set to {}, {}", Width, Height);
 		// Add a callback to signal subscribers that the window was resized
 	}
 
@@ -139,8 +141,8 @@ namespace Kepler
 		glfwSetFramebufferSizeCallback(Window, [](GLFWwindow* window, i32 width, i32 height)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
-				TPlatform::Get()->OnPlatformEvent(TWindowSizeEvent(win, width, height));
 				win->Internal_UpdateSize(width, height);
+				TPlatform::Get()->OnPlatformEvent(TWindowSizeEvent(win, width, height));
 			});
 
 		glfwSetWindowIconifyCallback(Window, [](GLFWwindow* window, int iconified)

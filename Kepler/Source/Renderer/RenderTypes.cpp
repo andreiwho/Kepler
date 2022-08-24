@@ -30,6 +30,14 @@ namespace Kepler
 			return sizeof(uint3);
 		case Kepler::EShaderInputType::UInt4:
 			return sizeof(uint4);
+		case Kepler::EShaderInputType::Matrix3x3:
+			return sizeof(matrix3x3);
+		case Kepler::EShaderInputType::Matrix3x4:
+			return sizeof(matrix3x4);
+		case Kepler::EShaderInputType::Matrix4x3:
+			return sizeof(matrix4x3);
+		case Kepler::EShaderInputType::Matrix4x4:
+			return sizeof(matrix4x4);
 		case Kepler::EShaderInputType::Custom:
 			return 0;
 		default:

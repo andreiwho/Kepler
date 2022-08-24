@@ -53,34 +53,18 @@ namespace Kepler
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
 
-		struct TUniformBuffer
+		struct TWorldViewProj
 		{
-			float4 Offset;
-			float4 Tint;
-		};
-
-		struct TOtherBuffer
-		{
-			float4 TintTint;
+			matrix4x4 mWorldViewProj = matrix4x4(1.0f);
 		};
 
 		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
-		Mapping->AddParam("Offset", 0,0, EShaderStageFlags::Vertex, EShaderInputType::Float4);
-		Mapping->AddParam("Tint", sizeof(float4), 0, EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		Mapping->AddParam("mWorldViewProj", 0,0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 
-		TRef<TPipelineParamMapping> Mapping1 = MakeRef(New<TPipelineParamMapping>());
-		Mapping1->AddParam("TintTint", 0, 0, EShaderStageFlags::Pixel, EShaderInputType::Float4);
-
-		TRef<TParamBuffer> ParamBuffer = Await(TRenderThread::Submit(
+		TRef<TParamBuffer> MvpBuffer = Await(TRenderThread::Submit(
 			[Mapping, this] 
 			{
 				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping);
-			}));
-
-		TRef<TParamBuffer> ParamBuffer1 = Await(TRenderThread::Submit(
-			[Mapping1, this]
-			{
-				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping1);
 			}));
 
 		struct TVertex
@@ -90,22 +74,16 @@ namespace Kepler
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
 
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
 
 		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
-			[Blob, this]
-			{
-				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
-			}));
-
-		TRef<TVertexBuffer> VertexBuffer1 = Await(TRenderThread::Submit(
 			[Blob, this]
 			{
 				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
@@ -143,33 +121,28 @@ namespace Kepler
 				{
 					// Update game state
 					PositionX += GGlobalTimer->Delta();
-					auto Param = ParamBuffer->GetParam<float4>("Offset");
-					// Param->X = std::sin(PositionX);
-					// Param->Y = std::cos(PositionX);
-
-					auto Tint = ParamBuffer->GetParam<float4>("Tint");
-					Tint->x = (std::sin(PositionX) + 1.0f)  / 2.0f;
-					Tint->y = (std::cos(PositionX) + 1.0f)  / 2.0f;
-
-					auto TintTint = ParamBuffer1->GetParam<float4>("TintTint");
-					TintTint->x = 0;
-					TintTint->y = 0;
-					TintTint->z = 0;
+					auto& Param = *MvpBuffer->GetParam<matrix4x4>("mWorldViewProj");
 					
+					auto Projection = glm::perspectiveFovLH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
+					auto View = glm::lookAtLH(float3(0.0f, 2.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
+					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
+					Param = Projection * View;
+					Param = transpose(Param);
+
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline, ParamBuffer, ParamBuffer1]
+						[this, VertexBuffer, IndexBuffer, Pipeline, MvpBuffer]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
 							if (SwapChain)
 							{
-								ParamBuffer->RT_UploadToGPU(pImmList);
-								ParamBuffer1->RT_UploadToGPU(pImmList);
-								pImmList->BindParamBuffers({ ParamBuffer, ParamBuffer1 }, 0);
 
-								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
+								MvpBuffer->RT_UploadToGPU(pImmList);
+								pImmList->BindParamBuffers(MvpBuffer, 0);
+
+								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
