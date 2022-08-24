@@ -38,7 +38,7 @@ namespace Kepler
 		}
 
 		inline operator u32() const { return Value; }
-		std::string ToString() const;
+		TString ToString() const;
 	};
 
 	struct EPlatformEventCategory
@@ -58,7 +58,7 @@ namespace Kepler
 		}
 
 		inline operator u32() const { return Value; }
-		std::string ToString() const;
+		TString ToString() const;
 	};
 
 	struct TPlatformEventBase
@@ -73,7 +73,7 @@ namespace Kepler
 			return TypeMask == T::StaticMask;
 		}
 
-		virtual std::string ToString() const 
+		virtual TString ToString() const 
 		{
 			return "PlatformEventBase";
 		}
@@ -94,7 +94,7 @@ namespace Kepler
 		TEvent(class TWindow* window)\
 			: TPlatformEventBase(window, EPlatformEventType::##Type, EPlatformEventCategory::##Category){}\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline std::string ToString() const override {return #Type;}\
+		virtual inline TString ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -108,7 +108,7 @@ namespace Kepler
 			, p0n(arg0) {}\
 		const p0t p0n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline std::string ToString() const override {return #Type;}\
+		virtual inline TString ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -123,7 +123,7 @@ namespace Kepler
 		const p0t p0n;\
 		const p1t p1n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline std::string ToString() const override {return #Type;}\
+		virtual inline TString ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -140,7 +140,7 @@ namespace Kepler
 		const p1t p1n;\
 		const p2t p2n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline std::string ToString() const override {return #Type;}\
+		virtual inline TString ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 

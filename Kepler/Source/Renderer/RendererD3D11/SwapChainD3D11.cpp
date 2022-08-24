@@ -9,6 +9,7 @@
 
 namespace Kepler
 {
+	DEFINE_UNIQUE_LOG_CHANNEL(LogSwapchain);
 
 	TSwapChainD3D11::TSwapChainD3D11(class TWindow* Window)
 		: TSwapChain(Window)
@@ -97,7 +98,7 @@ namespace Kepler
 		}
 	}
 
-	void TSwapChainD3D11::Resize(i32 Width, i32 Heigt)
+	void TSwapChainD3D11::Resize(i32 InWidth, i32 InHeight)
 	{
 		CHECK(IsRenderThread());
 
@@ -106,7 +107,10 @@ namespace Kepler
 			RenderTargetView->Release();
 			RenderTargetView = nullptr;
 		}
-		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		
+		Width = InWidth;
+		Height = InHeight;
+		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 		CreateRenderTargets();
 	}
 }

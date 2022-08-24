@@ -6,6 +6,7 @@
 #include "Core/Log.h"
 #include "HLSLShaderD3D11.h"
 #include "GraphicsPipelineHandleD3D11.h"
+#include "ParamBufferD3D11.h"
 
 namespace Kepler
 {
@@ -176,6 +177,7 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth)
 	{
 		CHECK(IsRenderThread());
@@ -191,6 +193,7 @@ namespace Kepler
 		Context->RSSetViewports(1, &Viewport);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::SetScissor(float X, float Y, float Width, float Height)
 	{
 		D3D11_RECT Rect{};
@@ -200,6 +203,128 @@ namespace Kepler
 		Rect.bottom = (LONG)Y + (LONG)Height;
 		
 		Context->RSSetScissorRects(1, &Rect);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void* TCommandListImmediateD3D11::MapBuffer(TRef<TBuffer> Buffer)
+	{
+		CHECK(IsRenderThread());
+
+		D3D11_MAPPED_SUBRESOURCE Subresource;
+		HRCHECK(Context->Map((ID3D11Resource*)Buffer->GetNativeHandle(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Subresource));
+		return Subresource.pData;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::UnmapBuffer(TRef<TBuffer> Buffer)
+	{
+		CHECK(IsRenderThread());
+		Context->Unmap((ID3D11Resource*)Buffer->GetNativeHandle(), 0);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindParamBuffers(TRef<TParamBuffer> ParamBuffer, u32 Slot)
+	{
+		CHECK(IsRenderThread());
+		CHECK(ParamBuffer);
+
+		const EShaderStageFlags Stages = ParamBuffer->GetShaderStages();
+		if (Stages == 0)
+		{
+			return;
+		}
+
+		auto MyBuffer = RefCast<TParamBufferD3D11>(ParamBuffer);
+		if (MyBuffer)
+		{
+			ID3D11Buffer* BindBuffers[] = { (ID3D11Buffer*)MyBuffer->GetNativeHandle() };
+			if (Stages & EShaderStageFlags::Vertex)
+			{
+				Context->VSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+
+			if (Stages & EShaderStageFlags::Pixel)
+			{
+				Context->PSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+
+			if (Stages & EShaderStageFlags::Compute)
+			{
+				Context->CSSetConstantBuffers(Slot, 1, BindBuffers);
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffers, u32 Slot)
+	{
+		CHECK(IsRenderThread());
+		bool bAllocatedVSBuffers = false;
+		bool bAllocatedPSBuffers = false;
+		bool bAllocatedCSBuffers = false;
+		TDynArray<ID3D11Buffer*> Buffers;
+		const usize BufferCount = ParamBuffers.GetLength();
+		Buffers.Resize(BufferCount * 3);
+
+		const usize VSOffset = BufferCount * 0;
+		const usize PSOffset = BufferCount * 1;
+		const usize CSOffset = BufferCount * 2;
+		
+		usize Index = 0;
+		for (const auto& Buffer : ParamBuffers)
+		{
+			const EShaderStageFlags Stages = Buffer->GetShaderStages();
+			if (Stages == 0)
+			{
+				continue;
+			}
+
+			auto MyBuffer = RefCast<TParamBufferD3D11>(Buffer);
+			if (MyBuffer)
+			{
+				if (Stages & EShaderStageFlags::Vertex)
+				{
+					if (!bAllocatedVSBuffers)
+					{
+						bAllocatedVSBuffers = true;
+					}
+					Buffers[VSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+
+				if (Stages & EShaderStageFlags::Pixel)
+				{
+					if (!bAllocatedPSBuffers)
+					{
+						bAllocatedPSBuffers = true;
+					}
+					Buffers[PSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+
+				if (Stages & EShaderStageFlags::Compute)
+				{
+					if (!bAllocatedCSBuffers)
+					{
+						bAllocatedCSBuffers = true;
+					}
+					Buffers[CSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+			}
+			Index++;
+		}
+
+		if (bAllocatedVSBuffers)
+		{
+			Context->VSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + VSOffset);
+		}
+		if (bAllocatedPSBuffers)
+		{
+			Context->PSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + PSOffset);
+		}
+		if (bAllocatedCSBuffers)
+		{
+			Context->CSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + CSOffset);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

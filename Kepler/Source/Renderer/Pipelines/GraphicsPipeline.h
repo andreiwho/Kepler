@@ -49,6 +49,7 @@ namespace Kepler
 	class TGraphicsPipeline : public TRefCounted
 	{
 	public:
+		TGraphicsPipeline() = default;
 		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
 		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);
@@ -57,7 +58,8 @@ namespace Kepler
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
 
 	protected:
-		static TRef<TShader> LoadHLSLShader(const std::string& ShaderPath, EShaderStageFlags Stages);
+		static TRef<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
+		void DeferredInit(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
 	private:
 		TRef<TGraphicsPipelineHandle> Handle{};

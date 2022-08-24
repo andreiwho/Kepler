@@ -1,3 +1,5 @@
+#include "Core.hlsl"
+
 struct TDefaultUnlit_VSInput
 {
 	float3 Position : POSITION;
@@ -10,10 +12,18 @@ struct TDefaultUnlit_PSInput
 	float3 Color : ATTRIB1;
 };
 
-TDefaultUnlit_PSInput VSMain(in TDefaultUnlit_VSInput Input)
+cbuffer TWorldViewProj : register(b0)
+{
+	float4x4 mWorldViewProj;
+};
+
+TDefaultUnlit_PSInput VSMain(in
+	TDefaultUnlit_VSInput Input)
 {
 	TDefaultUnlit_PSInput Output;
 	Output.Position = float4(Input.Position, 1.0f);
+	Output.Position = mul(Output.Position, mWorldViewProj);
+	
 	Output.Color = Input.Color;
 	return Output;
 }

@@ -6,6 +6,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
+#include "ParamBuffer.h"
 
 namespace Kepler
 {
@@ -39,13 +40,21 @@ namespace Kepler
 		
 		virtual void SetScissor(float X, float Y, float Width, float Height) = 0;
 
-
 		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
+
+		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) = 0;
+		
+		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
+
 	protected:
 		bool bHasAttachedPipeline = false;
 	};
 
 	class TCommandListImmediate : public TCommandList
 	{
+	public:
+		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
+
+		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
 	};
 }

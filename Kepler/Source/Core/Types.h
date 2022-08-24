@@ -5,6 +5,10 @@
 #include <string>
 #include <atomic>
 #include <stdexcept>
+#include <xhash>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Kepler
 {
@@ -26,7 +30,50 @@ namespace Kepler
 	using isize = i64;
 
 	template<typename T> using TAtomic = std::atomic<T>;
+	using TString = std::string;
+	using TWideString = std::wstring;
 
-	std::string ConvertToAnsiString(const std::wstring& WideString);
-	std::wstring ConvertToWideString(const std::string& AnsiString);
+	TString ConvertToAnsiString(const TWideString& WideString);
+	TWideString ConvertToWideString(const TString& AnsiString);
+
+	// a 64 bit identifier, which claims to be unique
+	struct id64
+	{
+		id64();
+		id64(u64 InValue) : Value(InValue) {}
+		id64(const TString& HashableString);
+		id64(const id64& Other) noexcept { Value = Other.Value; }
+		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
+
+		u64 Value;
+		inline operator u64() const { return Value; }
+	};
+
+	// Math types
+	using float2 = glm::vec2;
+	using float3 = glm::vec3;
+	using float4 = glm::vec4;
+
+	using int2 = glm::ivec2;
+	using int3 = glm::ivec3;
+	using int4 = glm::ivec4;
+
+	using uint2 = glm::uvec2;
+	using uint3 = glm::uvec3;
+	using uint4 = glm::uvec4;
+
+	using matrix3x3 = glm::mat3x3;
+	using matrix3x4 = glm::mat3x4;
+	using matrix4x3 = glm::mat4x3;
+	using matrix4x4 = glm::mat4x4;
+	using matrix = matrix4x4;
+}
+
+namespace std
+{
+	template<>
+	struct hash<Kepler::id64>
+	{
+		[[nodiscard]] size_t operator()(const Kepler::id64& Id) const noexcept { return Id.Value; }
+	};
 }

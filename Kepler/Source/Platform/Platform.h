@@ -23,9 +23,9 @@ namespace Kepler
 
 		static TSharedPtr<TPlatform> CreatePlatformInterface();
 
-		static bool HandleCrashReported(const std::string& Message);
+		static bool HandleCrashReported(const TString& Message);
 
-		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const std::string& title, const TWindowParams& params = {}) = 0;
+		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) = 0;
 		virtual void Update() = 0;
 		virtual bool HasActiveMainWindow() const = 0;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event);

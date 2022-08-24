@@ -11,13 +11,14 @@
 #include <string>
 #include <memory>
 #include "Containers/DynArray.h"
+#include "Modules/ModuleStack.h"
 
 namespace Kepler
 {
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(TDynArray<std::string> const& CommandLine);
+		TCommandLineArguments(TDynArray<TString> const& CommandLine);
 	};
 
 	struct TApplicationLaunchParams
@@ -36,17 +37,22 @@ namespace Kepler
 		virtual ~TApplication();
 
 		virtual void Run();
-		
+
 	protected:
+		virtual void ChildSetupModuleStack(TModuleStack& ModuleStack) {}
 		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
 
 	private:
+		void InitApplicationModules();
+		void TerminateModuleStack();
+
 		bool OnWindowClosed(const TWindowClosedEvent& Event);
 		bool OnWindowResized(const TWindowSizeEvent& Event);
 
 	private:
 		TWindow* MainWindow{};
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
+		TModuleStack ModuleStack{};
 	};
 
 	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);

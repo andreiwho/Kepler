@@ -7,6 +7,10 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory(glfw)
 set_target_properties(glfw PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL")
 
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE "glm")
+target_compile_definitions(glm INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
  update_mappings 

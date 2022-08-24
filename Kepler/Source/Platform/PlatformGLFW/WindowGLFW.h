@@ -9,7 +9,7 @@ namespace Kepler
 	class TWindowGLFW : public TWindow
 	{
 	public:
-		TWindowGLFW(i32 Width, i32 Height, const std::string& Title, const TWindowParams& Params = {});
+		TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params = {});
 		~TWindowGLFW();
 
 		virtual void* GetNativeHandle() const override;
@@ -20,7 +20,7 @@ namespace Kepler
 		void SetupCallbacks();
 
 	protected:
-		virtual void SetTitle_Impl(const std::string& newTitle) override;
+		virtual void SetTitle_Impl(const TString& newTitle) override;
 
 		virtual void SetMaximized_Impl(bool bNewMaximized) override;
 
