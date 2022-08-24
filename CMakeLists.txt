@@ -13,11 +13,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Release)
 
-set(MATH_MACROS)
-if(WIN32)
- list(APPEND MATH_MACROS "SUPPORTS_SIMD" "USE_DIRECTX_MATH")
-endif()
-
 macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
  target_compile_features(${ModuleName} PUBLIC cxx_std_20)
  target_include_directories(${ModuleName} PUBLIC Source)
@@ -30,7 +25,6 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
   # SETUP LOGGING
   $<$<CONFIG:RelWithDebInfo>:ENABLE_LOGGING USE_ASSERT ENABLE_DEBUG ENABLE_VALIDATION_BREAK>
   $<$<CONFIG:Debug>:ENABLE_LOGGING USE_ASSERT ENABLE_DEBUG ENABLE_VALIDATION_BREAK>
-  ${MATH_MACROS}
  )
 
  if(WIN32 OR UNIX)

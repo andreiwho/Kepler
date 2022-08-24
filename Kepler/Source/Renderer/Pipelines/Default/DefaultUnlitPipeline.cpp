@@ -1,5 +1,4 @@
 #include "DefaultUnlitPipeline.h"
-#include "Math/Vector.h"
 
 namespace Kepler
 {

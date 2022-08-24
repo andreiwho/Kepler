@@ -44,7 +44,7 @@ namespace Kepler
 
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) = 0;
 		
-		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBufer, u32 Slot) = 0;
+		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
 
 	protected:
 		bool bHasAttachedPipeline = false;

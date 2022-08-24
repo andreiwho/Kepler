@@ -8,8 +8,8 @@ namespace Kepler
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer);
 
-	TParamBufferD3D11::TParamBufferD3D11(TRef<TPipelineParamPack> Params)
-		:	TParamBuffer(Params)
+	TParamBufferD3D11::TParamBufferD3D11(TRef<TPipelineParamMapping> Mapping)
+		:	TParamBuffer(Mapping)
 	{
 		CHECK(Params);
 		CHECK(Params->IsCompiled());

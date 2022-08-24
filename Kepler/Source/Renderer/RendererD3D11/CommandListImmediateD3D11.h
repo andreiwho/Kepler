@@ -32,7 +32,7 @@ namespace Kepler
 		virtual void* MapBuffer(TRef<TBuffer> Buffer) override;
 		virtual void UnmapBuffer(TRef<TBuffer> Buffer) override;
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) override;
-		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBufer, u32 Slot) override;
+		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffers, u32 Slot) override;
 
 	private:
 		ID3D11DeviceContext4* Context{};

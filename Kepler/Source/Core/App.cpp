@@ -6,7 +6,6 @@
 #include <iostream>
 #include "Timer.h"
 #include "Async/Async.h"
-#include "Math/Vector.h"
 
 // Test
 #include "Renderer/HLSLShaderCompiler.h"
@@ -60,16 +59,28 @@ namespace Kepler
 			float4 Tint;
 		};
 
-		TRef<TPipelineParamPack> Pack = MakeRef(New<TPipelineParamPack>());
-		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Offset, EShaderStageFlags::Vertex, EShaderInputType::Float4);
-		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Tint, EShaderStageFlags::Vertex | EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		struct TOtherBuffer
+		{
+			float4 TintTint;
+		};
 
-		Pack->Compile();
+		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
+		Mapping->AddParam("Offset", 0,0, EShaderStageFlags::Vertex, EShaderInputType::Float4);
+		Mapping->AddParam("Tint", sizeof(float4), 0, EShaderStageFlags::Pixel, EShaderInputType::Float4);
+
+		TRef<TPipelineParamMapping> Mapping1 = MakeRef(New<TPipelineParamMapping>());
+		Mapping1->AddParam("TintTint", 0, 0, EShaderStageFlags::Pixel, EShaderInputType::Float4);
 
 		TRef<TParamBuffer> ParamBuffer = Await(TRenderThread::Submit(
-			[Pack, this] 
+			[Mapping, this] 
 			{
-				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Pack);
+				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping);
+			}));
+
+		TRef<TParamBuffer> ParamBuffer1 = Await(TRenderThread::Submit(
+			[Mapping1, this]
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping1);
 			}));
 
 		struct TVertex
@@ -116,7 +127,7 @@ namespace Kepler
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
-		float4 Result = Normalize(Vec * Vec1 * 15.0f);
+		float3 Result = glm::normalize(Vec * float3(Vec1) * 15.0f);
 
 		const TString InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
@@ -137,12 +148,17 @@ namespace Kepler
 					// Param->Y = std::cos(PositionX);
 
 					auto Tint = ParamBuffer->GetParam<float4>("Tint");
-					Tint->X = (std::sin(PositionX) + 1.0f)  / 2.0f;
-					Tint->Y = (std::cos(PositionX) + 1.0f)  / 2.0f;
+					Tint->x = (std::sin(PositionX) + 1.0f)  / 2.0f;
+					Tint->y = (std::cos(PositionX) + 1.0f)  / 2.0f;
 
+					auto TintTint = ParamBuffer1->GetParam<float4>("TintTint");
+					TintTint->x = 0;
+					TintTint->y = 0;
+					TintTint->z = 0;
+					
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline, ParamBuffer]
+						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline, ParamBuffer, ParamBuffer1]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
@@ -150,7 +166,8 @@ namespace Kepler
 							if (SwapChain)
 							{
 								ParamBuffer->RT_UploadToGPU(pImmList);
-								pImmList->BindParamBuffers(ParamBuffer, 0);
+								ParamBuffer1->RT_UploadToGPU(pImmList);
+								pImmList->BindParamBuffers({ ParamBuffer, ParamBuffer1 }, 0);
 
 								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
 								pImmList->BindIndexBuffer(IndexBuffer, 0);

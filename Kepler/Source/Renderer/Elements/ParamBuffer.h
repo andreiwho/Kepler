@@ -9,7 +9,7 @@ namespace Kepler
 	class TParamBuffer : public TBuffer
 	{
 	public:
-		TParamBuffer(TRef<TPipelineParamPack> ParamPack);
+		TParamBuffer(TRef<TPipelineParamMapping> ParamPack);
 
 		template<typename T>
 		void Write(const TString& Param, const T* Data)

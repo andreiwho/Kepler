@@ -70,7 +70,7 @@ namespace Kepler
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
 	}
 
-	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamPack> Params)
+	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamMapping> Params)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard Lck{ ResourceMutex };

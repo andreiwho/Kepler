@@ -1,19 +1,10 @@
 #include "ParamPack.h"
-#include "Math/Vector.h"
 #include <set>
 
 namespace Kepler
 {
-	void TPipelineParamPack::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
-	{
-		CHECK(!bIsCompiled);
-		CHECK(!Name.empty());
-
-		Params.Insert(Name, TPipelineParam(Offset, Size, Type));
-		ShaderStages |= Stage;
-	}
-
-	void TPipelineParamPack::Compile()
+	TPipelineParamPack::TPipelineParamPack(TRef<TPipelineParamMapping> Mapping)
+		:	Params(Mapping)
 	{
 		struct TLocalParam
 		{
@@ -22,9 +13,9 @@ namespace Kepler
 		};
 
 		TDynArray<TLocalParam> SortedParams;
-		SortedParams.Reserve(Params.GetLength());
+		SortedParams.Reserve(Mapping->GetParams().GetLength());
 
-		for (auto& [Name, Value] : Params)
+		for (auto& [Name, Value] : Mapping->GetParams())
 		{
 			SortedParams.EmplaceBack(TLocalParam{ Name, Value });
 		}
@@ -44,4 +35,29 @@ namespace Kepler
 		CPUData.Resize(LastParam.GetOffset() + LastParam.GetSize());
 		bIsCompiled = true;
 	}
+
+	void TPipelineParamMapping::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
+	{
+		CHECK(!Name.empty());
+
+		usize ActualSize = Size;
+		if (Size == 0 && Type != EShaderInputType::Custom)
+		{
+			ActualSize = Type.GetValueSize();
+		}
+		else if (Type == EShaderInputType::Custom)
+		{
+			CHECKMSG(Size > 0, "You must specify size for EShaderInputType::Custom");
+		}
+
+		CHECK(ActualSize > 0);
+		Params.Insert(Name, TPipelineParam(Offset, ActualSize, Type));
+		ShaderStages |= Stage;
+	}
+
+	TRef<TPipelineParamPack> TPipelineParamMapping::CreatePack()
+	{
+		return MakeRef(New<TPipelineParamPack>(RefFromThis()));
+	}
+
 }

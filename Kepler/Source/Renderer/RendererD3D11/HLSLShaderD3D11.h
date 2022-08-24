@@ -5,6 +5,7 @@
 #include "D3D11Common.h"
 #include "Core/Malloc.h"
 #include "Renderer/Elements/VertexLayout.h"
+#include "Renderer/Pipelines/ParamPack.h"
 
 namespace Kepler
 {

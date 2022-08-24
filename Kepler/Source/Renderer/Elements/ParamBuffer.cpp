@@ -2,8 +2,8 @@
 
 namespace Kepler
 {
-	TParamBuffer::TParamBuffer(TRef<TPipelineParamPack> ParamPack)
-		:	Params(ParamPack)
+	TParamBuffer::TParamBuffer(TRef<TPipelineParamMapping> Mapping)
+		:	Params(Mapping->CreatePack())
 	{
 	}
 }

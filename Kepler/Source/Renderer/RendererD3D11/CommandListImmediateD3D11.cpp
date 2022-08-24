@@ -224,18 +224,18 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TCommandListImmediateD3D11::BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot)
+	void TCommandListImmediateD3D11::BindParamBuffers(TRef<TParamBuffer> ParamBuffer, u32 Slot)
 	{
 		CHECK(IsRenderThread());
-		CHECK(ParamBufer);
+		CHECK(ParamBuffer);
 
-		const EShaderStageFlags Stages = ParamBufer->GetShaderStages();
+		const EShaderStageFlags Stages = ParamBuffer->GetShaderStages();
 		if (Stages == 0)
 		{
 			return;
 		}
 
-		auto MyBuffer = RefCast<TParamBufferD3D11>(ParamBufer);
+		auto MyBuffer = RefCast<TParamBufferD3D11>(ParamBuffer);
 		if (MyBuffer)
 		{
 			ID3D11Buffer* BindBuffers[] = { (ID3D11Buffer*)MyBuffer->GetNativeHandle() };
@@ -257,9 +257,74 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TCommandListImmediateD3D11::BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBufer, u32 Slot)
+	void TCommandListImmediateD3D11::BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffers, u32 Slot)
 	{
+		CHECK(IsRenderThread());
+		bool bAllocatedVSBuffers = false;
+		bool bAllocatedPSBuffers = false;
+		bool bAllocatedCSBuffers = false;
+		TDynArray<ID3D11Buffer*> Buffers;
+		const usize BufferCount = ParamBuffers.GetLength();
+		Buffers.Resize(BufferCount * 3);
 
+		const usize VSOffset = BufferCount * 0;
+		const usize PSOffset = BufferCount * 1;
+		const usize CSOffset = BufferCount * 2;
+		
+		usize Index = 0;
+		for (const auto& Buffer : ParamBuffers)
+		{
+			const EShaderStageFlags Stages = Buffer->GetShaderStages();
+			if (Stages == 0)
+			{
+				continue;
+			}
+
+			auto MyBuffer = RefCast<TParamBufferD3D11>(Buffer);
+			if (MyBuffer)
+			{
+				if (Stages & EShaderStageFlags::Vertex)
+				{
+					if (!bAllocatedVSBuffers)
+					{
+						bAllocatedVSBuffers = true;
+					}
+					Buffers[VSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+
+				if (Stages & EShaderStageFlags::Pixel)
+				{
+					if (!bAllocatedPSBuffers)
+					{
+						bAllocatedPSBuffers = true;
+					}
+					Buffers[PSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+
+				if (Stages & EShaderStageFlags::Compute)
+				{
+					if (!bAllocatedCSBuffers)
+					{
+						bAllocatedCSBuffers = true;
+					}
+					Buffers[CSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+				}
+			}
+			Index++;
+		}
+
+		if (bAllocatedVSBuffers)
+		{
+			Context->VSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + VSOffset);
+		}
+		if (bAllocatedPSBuffers)
+		{
+			Context->PSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + PSOffset);
+		}
+		if (bAllocatedCSBuffers)
+		{
+			Context->CSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + CSOffset);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

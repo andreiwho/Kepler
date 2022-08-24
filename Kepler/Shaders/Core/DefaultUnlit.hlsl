@@ -18,7 +18,13 @@ cbuffer TUniformBuffer : register(b0)
 	float4 Tint;
 };
 
-TDefaultUnlit_PSInput VSMain(in TDefaultUnlit_VSInput Input)
+cbuffer TOtherBuffer : register(b1)
+{
+	float4 TintTint;
+};
+
+TDefaultUnlit_PSInput VSMain(in
+	TDefaultUnlit_VSInput Input)
 {
 	TDefaultUnlit_PSInput Output;
 	Output.Position = float4(Input.Position + Offset.xyz, 1.0f);
@@ -28,5 +34,5 @@ TDefaultUnlit_PSInput VSMain(in TDefaultUnlit_VSInput Input)
 
 float4 PSMain(in TDefaultUnlit_PSInput Input) : SV_Target0
 {
-	return float4(Tint.xyz, 1.0f);
+	return float4(Tint.xyz + TintTint.xyz, 1.0f);
 }

@@ -1,5 +1,4 @@
 #include "RenderTypes.h"
-#include "Math/Vector.h"
 
 namespace Kepler
 {

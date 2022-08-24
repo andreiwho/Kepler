@@ -7,7 +7,7 @@ namespace Kepler
 	class TParamBufferD3D11 : public TParamBuffer
 	{
 	public:
-		TParamBufferD3D11(TRef<TPipelineParamPack> Params);
+		TParamBufferD3D11(TRef<TPipelineParamMapping> Params);
 		~TParamBufferD3D11();
 
 		virtual void RT_UploadToGPU(TRef<class TCommandListImmediate> pImmContext) override;

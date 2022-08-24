@@ -40,7 +40,7 @@ namespace Kepler
 		inline ID3D11ClassLinkage* GetClassLinkage() const { return ClassLinkage; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
-		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamPack> Params) override;
+		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) override;
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
