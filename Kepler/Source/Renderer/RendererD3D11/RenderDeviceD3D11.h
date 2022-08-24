@@ -42,6 +42,9 @@ namespace Kepler
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) override;
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
+		virtual TRef<TImage1D> CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual TRef<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual TRef<TImage3D> CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
 		TDynArray<TString> GetInfoQueueMessages() const;
@@ -49,6 +52,8 @@ namespace Kepler
 		virtual bool RT_FlushPendingDeleteResources() override;
 
 		void RegisterPendingDeleteResource(ID3D11DeviceChild* Resource);
+
+
 
 	private:
 		void CreateFactory();

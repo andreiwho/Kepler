@@ -82,6 +82,11 @@ namespace Kepler
 
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
+		TRef<TImage2D> Image = Await(TRenderThread::Submit(
+			[this]
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateImage2D(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+			}));
 
 		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
 			[Blob, this]
@@ -138,7 +143,6 @@ namespace Kepler
 
 							if (SwapChain)
 							{
-
 								MvpBuffer->RT_UploadToGPU(pImmList);
 								pImmList->BindParamBuffers(MvpBuffer, 0);
 
