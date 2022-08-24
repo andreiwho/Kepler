@@ -28,10 +28,10 @@ namespace Kepler
 			{
 				Desc.ByteWidth += CONSTANT_BUFFER_MULTIPLE - (Desc.ByteWidth % CONSTANT_BUFFER_MULTIPLE);
 			}
-			else
-			{
-				Desc.ByteWidth = CONSTANT_BUFFER_MULTIPLE;
-			}
+		}
+		else
+		{
+			Desc.ByteWidth = CONSTANT_BUFFER_MULTIPLE;
 		}
 
 		Desc.StructureByteStride = Params->GetDataSize();

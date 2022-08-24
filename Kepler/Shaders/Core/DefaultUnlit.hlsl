@@ -26,5 +26,5 @@ TDefaultUnlit_PSInput VSMain(in TDefaultUnlit_VSInput Input)
 
 float4 PSMain(in TDefaultUnlit_PSInput Input) : SV_Target0
 {
-	return float4(Tint.rgb, 1.0f);
+	return float4(Tint.xyz, 1.0f);
 }

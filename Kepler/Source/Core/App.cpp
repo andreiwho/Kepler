@@ -63,6 +63,7 @@ namespace Kepler
 		TRef<TPipelineParamPack> Pack = MakeRef(New<TPipelineParamPack>());
 		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Offset, EShaderStageFlags::Vertex, EShaderInputType::Float4);
 		ADD_PIPELINE_PARAM(*Pack, TUniformBuffer, Tint, EShaderStageFlags::Vertex | EShaderStageFlags::Pixel, EShaderInputType::Float4);
+
 		Pack->Compile();
 
 		TRef<TParamBuffer> ParamBuffer = Await(TRenderThread::Submit(
@@ -131,13 +132,13 @@ namespace Kepler
 				{
 					// Update game state
 					PositionX += GGlobalTimer->Delta();
-					auto Param = ParamBuffer->GetParam<float3>("Offset");
+					auto Param = ParamBuffer->GetParam<float4>("Offset");
 					// Param->X = std::sin(PositionX);
 					// Param->Y = std::cos(PositionX);
 
-					auto Tint = ParamBuffer->GetParam<float3>("Tint");
+					auto Tint = ParamBuffer->GetParam<float4>("Tint");
 					Tint->X = (std::sin(PositionX) + 1.0f)  / 2.0f;
-					Tint->Y = (std::sin(PositionX) + 1.0f)  / 2.0f;
+					Tint->Y = (std::cos(PositionX) + 1.0f)  / 2.0f;
 
 					// Render the frame
 					TRenderThread::Submit(
