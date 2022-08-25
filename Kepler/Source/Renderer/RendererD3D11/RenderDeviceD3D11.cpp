@@ -11,13 +11,12 @@
 
 #ifdef ENABLE_DEBUG
 # include <dxgidebug.h>
+#endif
+
 #include "Core/Malloc.h"
 #include "IndexBufferD3D11.h"
 #include "ParamBufferD3D11.h"
-#include "Image1D_D3D11.h"
-#include "Image2D_D3D11.h"
-#include "Image3D_D3D11.h"
-#endif
+#include "ImageD3D11.h"
 
 namespace Kepler
 {

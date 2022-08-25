@@ -1,4 +1,5 @@
 #include "RenderGlobals.h"
+#include "LowLevelRenderer.h"
 
 namespace Kepler
 {
@@ -10,4 +11,8 @@ namespace Kepler
 		return std::this_thread::get_id() == GRenderThreadID;
 	}
 
+	class TRef<TRenderDevice> GetRenderDevice()
+	{
+		return TLowLevelRenderer::Get()->GetRenderDevice();
+	}
 }

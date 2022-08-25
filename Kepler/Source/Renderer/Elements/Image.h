@@ -31,10 +31,13 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	class TImage1D : public TImage
 	{
-	public:
+	protected:
 		TImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
+	public:
 		inline u32 GetWidth() const { return Width; }
+
+		static TRef<TImage1D> New(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
 	protected:
 		u32 Width{};
@@ -43,11 +46,14 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	class TImage2D : public TImage
 	{
-	public:
+	protected:
 		TImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
+	public:
 		inline u32 GetWidth() const { return Width; }
 		inline u32 GetHeight() const { return Height; }
+
+		static TRef<TImage2D> New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
 	protected:
 		u32 Width{};
@@ -57,12 +63,15 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	class TImage3D : public TImage
 	{
-	public:
+	protected:
 		TImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
+	public:
 		inline u32 GetWidth() const { return Width; }
 		inline u32 GetHeight() const { return Height; }
 		inline u32 GetDepth() const { return Depth; }
+
+		static TRef<TImage3D> New(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
 
 	protected:
 		u32 Width{};

@@ -163,7 +163,7 @@ namespace Kepler
 		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0, usize ElemSize = 0);
 
 		template<typename T>
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const TDynArray<T>& Data)
+		static TRef<TDataBlob> New(const TDynArray<T>& Data)
 		{
 			return CreateGraphicsDataBlob(Data.GetData(), Data.GetLength() * sizeof(T), sizeof(T));
 		}

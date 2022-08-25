@@ -9,6 +9,8 @@ namespace Kepler
 {
 	class TLowLevelRenderer : public TRefCounted
 	{
+		static TLowLevelRenderer* Instance;
+
 	public:
 		TLowLevelRenderer();
 		~TLowLevelRenderer();
@@ -17,7 +19,8 @@ namespace Kepler
 		void PresentAll();
 		void DestroyRenderStateForWindow(class TWindow* InWindow);
 		void OnWindowResized(class TWindow* InWindow);
-
+		
+		static TLowLevelRenderer* Get() { return Instance; }
 	public:
 		inline TRef<TRenderDevice> GetRenderDevice() const { return RenderDevice; }
 		inline TRef<TSwapChain> GetSwapChain(u32 Index) const 

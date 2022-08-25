@@ -80,25 +80,25 @@ namespace Kepler
 			{{-0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
 
-		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
+		TRef<TDataBlob> Blob = TDataBlob::New(Vertices);
 
 		TRef<TImage2D> Image = Await(TRenderThread::Submit(
 			[this]
 			{
-				return LowLevelRenderer->GetRenderDevice()->CreateImage2D(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				return TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 			}));
 
 		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
 			[Blob, this]
 			{
-				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
+				return TVertexBuffer::New(EBufferAccessFlags::GPUOnly, Blob);
 			}));
 
 		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
 		TRef<TIndexBuffer> IndexBuffer = Await(TRenderThread::Submit(
 			[this, &Indices] 
 			{
-				return LowLevelRenderer->GetRenderDevice()->CreateIndexBuffer(EBufferAccessFlags::GPUOnly, TDataBlob::CreateGraphicsDataBlob(Indices));
+				return TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 			}));
 
 		TRef<TGraphicsPipeline> Pipeline = Await(TRenderThread::Submit(

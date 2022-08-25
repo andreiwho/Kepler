@@ -3,9 +3,13 @@
 
 namespace Kepler
 {
+
+	TLowLevelRenderer* TLowLevelRenderer::Instance;
+
 	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::TLowLevelRenderer()
 	{
+		Instance = this;
 		TRenderThread::Submit([this]
 			{
 				RenderDevice = TRenderDevice::CreateRenderDevice();
