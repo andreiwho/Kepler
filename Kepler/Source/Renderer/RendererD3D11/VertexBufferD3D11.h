@@ -12,6 +12,7 @@ namespace Kepler
 		~TVertexBufferD3D11();
 		
 		inline ID3D11Buffer* GetBuffer() const { return Buffer; }
+		virtual void* GetNativeHandle() const override { return Buffer; }
 
 	private:
 		ID3D11Buffer* Buffer{};

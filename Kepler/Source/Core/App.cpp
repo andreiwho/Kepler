@@ -6,7 +6,6 @@
 #include <iostream>
 #include "Timer.h"
 #include "Async/Async.h"
-#include "Math/Vector.h"
 
 // Test
 #include "Renderer/HLSLShaderCompiler.h"
@@ -15,13 +14,14 @@
 #include "Renderer/Elements/HLSLShader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
+#include "Renderer/Pipelines/ParamPack.h"
 
 namespace Kepler
 {
-	TCommandLineArguments::TCommandLineArguments(TDynArray<std::string> const& CommandLine)
+	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& CommandLine)
 	{
 		// Parse command line args
-		for (const std::string& arg : CommandLine)
+		for (const TString& arg : CommandLine)
 		{
 			// TODO: Do some parsing
 		}
@@ -46,10 +46,26 @@ namespace Kepler
 	{
 		KEPLER_INFO(LogApp, "Application Run called...");
 
+		InitApplicationModules();
+
 		// Begin main loop
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
+
+		struct TWorldViewProj
+		{
+			matrix4x4 mWorldViewProj = matrix4x4(1.0f);
+		};
+
+		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
+		Mapping->AddParam("mWorldViewProj", 0,0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+
+		TRef<TParamBuffer> MvpBuffer = Await(TRenderThread::Submit(
+			[Mapping, this] 
+			{
+				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping);
+			}));
 
 		struct TVertex
 		{
@@ -58,22 +74,16 @@ namespace Kepler
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
+			{{ 0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
 
 		TRef<TDataBlob> Blob = TDataBlob::CreateGraphicsDataBlob(Vertices);
 
 
 		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
-			[Blob, this]
-			{
-				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
-			}));
-
-		TRef<TVertexBuffer> VertexBuffer1 = Await(TRenderThread::Submit(
 			[Blob, this]
 			{
 				return LowLevelRenderer->GetRenderDevice()->CreateVertexBuffer(EBufferAccessFlags::GPUOnly, Blob);
@@ -95,12 +105,13 @@ namespace Kepler
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
-		float4 Result = Normalize(Vec * Vec1 * 15.0f);
+		float3 Result = glm::normalize(Vec * float3(Vec1) * 15.0f);
 
-		const std::string InitialWindowName = MainWindow->GetTitle();
+		const TString InitialWindowName = MainWindow->GetTitle();
 		if (TPlatform* Platform = TPlatform::Get())
 		{
 			Platform->RegisterPlatformEventListener(this);
+			float PositionX = 0.0f;
 			while (Platform->HasActiveMainWindow())
 			{
 				MainTimer.Begin();
@@ -109,17 +120,29 @@ namespace Kepler
 				if (!Platform->IsMainWindowMinimized())
 				{
 					// Update game state
+					PositionX += GGlobalTimer->Delta();
+					auto& Param = *MvpBuffer->GetParam<matrix4x4>("mWorldViewProj");
+					
+					auto Projection = glm::perspectiveFovLH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
+					auto View = glm::lookAtLH(float3(0.0f, 2.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
+					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
+					Param = Projection * View;
+					Param = transpose(Param);
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer1, VertexBuffer, IndexBuffer, Pipeline]
+						[this, VertexBuffer, IndexBuffer, Pipeline, MvpBuffer]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
 							if (SwapChain)
 							{
-								pImmList->BindVertexBuffers({ VertexBuffer, VertexBuffer1 }, 0, { 0, 0 });
+
+								MvpBuffer->RT_UploadToGPU(pImmList);
+								pImmList->BindParamBuffers(MvpBuffer, 0);
+
+								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
 								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
@@ -151,6 +174,8 @@ namespace Kepler
 #endif
 			}
 		}
+
+		TerminateModuleStack();
 	}
 
 	void TApplication::OnPlatformEvent(const TPlatformEventBase& Event)
@@ -158,6 +183,27 @@ namespace Kepler
 		TPlatformEventDispatcher Dispatcher{ Event };
 		Dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
 		Dispatcher.Dispatch(this, &TApplication::OnWindowResized);
+
+		if (!Event.Handled)
+		{
+			ModuleStack.HandlePlatformEvent(Event);
+		}
+	}
+
+	void TApplication::InitApplicationModules()
+	{
+		// Initialize engine modules
+		// ...
+
+		ChildSetupModuleStack(ModuleStack);
+
+		ModuleStack.Init();
+	}
+
+	void TApplication::TerminateModuleStack()
+	{
+		ModuleStack.Terminate();
+		ModuleStack.Clear();
 	}
 
 	bool TApplication::OnWindowClosed(const TWindowClosedEvent& Event)

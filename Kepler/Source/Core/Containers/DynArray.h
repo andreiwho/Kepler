@@ -62,6 +62,9 @@ namespace Kepler
 			UnderlyingContainer.erase(At);
 		}
 
+		template<typename TIterType>
+		inline bool IsValidIterator(TIterType Iter) const { return Iter != UnderlyingContainer.end(); }
+
 		inline void Shrink()
 		{
 			UnderlyingContainer.shrink_to_fit();

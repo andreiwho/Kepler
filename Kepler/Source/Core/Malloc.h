@@ -200,6 +200,17 @@ namespace Kepler
 		return TRef<T>(Memory);
 	}
 
+	template<typename T>
+	struct TEnableRefFromThis : public TRefCounted
+	{
+		inline TRef<T> RefFromThis()
+		{
+			AddRef();
+			return MakeRef(static_cast<T*>(this));
+		}
+	};
+
+
 	template <typename T>
 	class TMallocator
 	{

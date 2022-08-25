@@ -58,11 +58,11 @@ namespace Kepler
 		}
 
 	private:
-		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const std::string& Name);
-		std::shared_ptr<spdlog::logger> CreateLogger(const std::string& Name);
+		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& Name);
+		std::shared_ptr<spdlog::logger> CreateLogger(const TString& Name);
 		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger);
 
-		std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> Loggers;
+		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> Loggers;
 		std::mutex LoggerCreationFence;
 	};
 }

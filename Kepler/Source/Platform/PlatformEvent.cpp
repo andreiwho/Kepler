@@ -6,7 +6,7 @@
 namespace Kepler
 {
 
-	std::string EPlatformEventType::ToString() const
+	TString EPlatformEventType::ToString() const
 	{
 		switch (Value)
 		{
@@ -44,7 +44,7 @@ namespace Kepler
 		return "Unknown";
 	}
 
-	std::string EPlatformEventCategory::ToString() const
+	TString EPlatformEventCategory::ToString() const
 	{
 		switch (Value)
 		{

@@ -42,7 +42,7 @@ namespace Kepler
 		}
 	}
 
-	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 Width, i32 Height, const std::string& Title, const TWindowParams& Params)
+	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
 	{
 		KEPLER_INFO(LogPlatform, "Creating GLFW platform window '{}'", Title);
 		return Windows.EmplaceBack(std::make_unique<TWindowGLFW>(Width, Height, Title, Params)).get();
@@ -73,7 +73,7 @@ namespace Kepler
 		TPlatform::OnPlatformEvent(event);
 	}
 
-	bool TPlatformGLFW::HandleCrashReported_Impl(const std::string& Message)
+	bool TPlatformGLFW::HandleCrashReported_Impl(const TString& Message)
 	{
 		if (::MessageBoxA(nullptr, Message.c_str(), "Crash Reported", MB_OK | MB_ICONERROR) == IDOK)
 		{

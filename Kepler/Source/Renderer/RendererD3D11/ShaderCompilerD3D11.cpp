@@ -8,9 +8,9 @@
 
 namespace Kepler
 {
-	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const std::string& Path, EShaderStageFlags TypeMask)
+	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
 	{
-		std::string Source;
+		TString Source;
 		try
 		{
 			Source = Await(TFileUtils::ReadTextFileAsync(Path));
@@ -43,12 +43,12 @@ namespace Kepler
 		return New<THLSLShaderD3D11>(Path, Modules);
 	}
 
-	TShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const std::string& SourceName, EShaderStageFlags::Type Flag, const std::string& Source)
+	TShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flag, const TString& Source)
 	{
 		TShaderModule OutShaderModule{};
 		OutShaderModule.StageFlags = Flag;
 
-		const std::string EntryPoint = std::invoke([Flag]
+		const TString EntryPoint = std::invoke([Flag]
 		{
 			switch (Flag)
 			{
@@ -68,14 +68,14 @@ namespace Kepler
 		return OutShaderModule;
 	}
 
-	TRef<TDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const std::string& SourceName,
-		const std::string& EntryPoint,
+	TRef<TDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
+		const TString& EntryPoint,
 		EShaderStageFlags::Type Type,
-		const std::string& Code)
+		const TString& Code)
 	{
 		KEPLER_TRACE(LogShaderCompiler, "Compiling shader '{}' as {}", SourceName, EShaderStageFlags::ToString(Type));
 
-		std::string ShaderType;
+		TString ShaderType;
 		switch (Type)
 		{
 		case Kepler::EShaderStageFlags::Vertex:
@@ -98,7 +98,8 @@ namespace Kepler
 			Code.data(),
 			Code.size(),
 			SourceName.c_str(),
-			nullptr, nullptr,
+			nullptr, 
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			EntryPoint.c_str(),
 			ShaderType.c_str(),
 			0, 0,
@@ -107,7 +108,7 @@ namespace Kepler
 		{
 			if (ErrorBlob)
 			{
-				std::string Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
+				TString Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
 				KEPLER_ERROR_STOP(LogShaderCompiler, "{}", Message);
 				CRASHMSG(fmt::format("{}", Message));
 			}

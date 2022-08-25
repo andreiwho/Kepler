@@ -58,7 +58,7 @@ namespace Kepler
 			return OutFlags;
 		}
 
-		static std::string ToString(Type Value)
+		static TString ToString(Type Value)
 		{
 			return std::invoke([Value] 
 			{
@@ -217,10 +217,19 @@ namespace Kepler
 			UInt2,
 			UInt3,
 			UInt4,
+
+			Matrix3x3,
+			Matrix3x4,
+			Matrix4x3,
+			Matrix4x4,
+
+			Custom,
 		} Value;
 
 		EShaderInputType(EValue InValue) :Value(InValue) {}
 		inline operator u32() const { return Value; }
+
+		usize GetValueSize() const;
 	};
 
 	//////////////////////////////////////////////////////////////////////////

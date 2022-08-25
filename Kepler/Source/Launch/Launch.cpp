@@ -9,7 +9,7 @@ namespace Kepler
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 Argc, char** ppArgv)
 	{
-		TDynArray<std::string> CommandLineArguments;
+		TDynArray<TString> CommandLineArguments;
 		for (i32 Index = 1; Index < Argc; ++Index)
 		{
 			if (char const* const arg = ppArgv[Index])

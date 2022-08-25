@@ -8,6 +8,6 @@ namespace Kepler
 	public:
 		TDefaultUnlitPipeline();
 
-		static TGraphicsPipelineConfiguration CreateConfiguration();
+		static TGraphicsPipelineConfiguration CreateConfiguration(TRef<TShader> Shader);
 	};
 }

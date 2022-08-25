@@ -13,7 +13,7 @@ namespace Kepler
 		Instance = this;
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const std::string& Name)
+	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& Name)
 	{
 		std::lock_guard Lck{ LoggerCreationFence };
 		if (Loggers.contains(Name))
@@ -23,7 +23,7 @@ namespace Kepler
 		return CreateLogger(Name);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const std::string& Name)
+	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& Name)
 	{
 		std::shared_ptr<spdlog::logger> Logger = spdlog::stdout_color_mt(Name);
 		if (!Logger)
