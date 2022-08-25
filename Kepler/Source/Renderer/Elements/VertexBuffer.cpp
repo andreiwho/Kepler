@@ -1,4 +1,6 @@
 #include "VertexBuffer.h"
+#include "../RenderGlobals.h"
+#include "../RenderDevice.h"
 
 namespace Kepler
 {
@@ -8,6 +10,11 @@ namespace Kepler
 		, Size(Data ? Data->GetSize() : 0)
 		, Stride(Data ? Data->GetStride() : 0)
 	{
+	}
+
+	TRef<TVertexBuffer> TVertexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	{
+		return GetRenderDevice()->CreateVertexBuffer(InAccessFlags, Data);
 	}
 
 }

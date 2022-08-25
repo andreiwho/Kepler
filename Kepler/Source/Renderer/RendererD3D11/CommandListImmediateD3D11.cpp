@@ -327,6 +327,15 @@ namespace Kepler
 		}
 	}
 
+	void TCommandListImmediateD3D11::Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	{
+		ID3D11Resource* pFrom = (ID3D11Resource*)From->GetNativeHandle();
+		ID3D11Resource* pTo = (ID3D11Resource*)To->GetNativeHandle();
+		
+		CD3D11_BOX SrcBox(SrcOffset, 0, 0, SrcOffset + Size, 1, 1);
+		Context->CopySubresourceRegion(pTo, 0, DstOffset, 0, 0, pFrom, 0, &SrcBox);
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset)
 	{

@@ -11,10 +11,13 @@
 
 #ifdef ENABLE_DEBUG
 # include <dxgidebug.h>
+#endif
+
 #include "Core/Malloc.h"
 #include "IndexBufferD3D11.h"
 #include "ParamBufferD3D11.h"
-#endif
+#include "ImageD3D11.h"
+#include "TransferBufferD3D11.h"
 
 namespace Kepler
 {
@@ -80,6 +83,7 @@ namespace Kepler
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
 		return MakeRef(New<TSwapChainD3D11>(Window));
 	}
 
@@ -140,6 +144,35 @@ namespace Kepler
 	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11DeviceChild* Resource)
 	{
 		PendingDeleteResources.Enqueue(std::move(Resource));
+	}
+
+	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TTransferBufferD3D11>(Size, InitialData));
+	}
+
+	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TImage1D_D3D11>(InWidth, InFormat, InUsage, MipLevels, InArraySize));
+	}
+
+	TRef<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TImage2D_D3D11>(InWidth, InHeight, InFormat, InUsage, MipLevels, InArraySize));
+	}
+
+	TRef<TImage3D> TRenderDeviceD3D11::CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TImage3D_D3D11>(InWidth, InHeight, InDepth, InFormat, InUsage, MipLevels, InArraySize));
+
 	}
 
 	static TString GetAdapterName(IDXGIAdapter* Adapter)

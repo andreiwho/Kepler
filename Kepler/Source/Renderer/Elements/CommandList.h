@@ -7,6 +7,8 @@
 #include "Shader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "ParamBuffer.h"
+#include "Buffer.h"
+#include "Image.h"
 
 namespace Kepler
 {
@@ -46,6 +48,8 @@ namespace Kepler
 		
 		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
 
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+	
 	protected:
 		bool bHasAttachedPipeline = false;
 	};
@@ -56,5 +60,6 @@ namespace Kepler
 		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
 
 		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
+
 	};
 }

@@ -1,4 +1,6 @@
 #include "IndexBuffer.h"
+#include "../RenderDevice.h"
+#include "../RenderGlobals.h"
 
 namespace Kepler
 {
@@ -8,4 +10,10 @@ namespace Kepler
 		, Stride(Data ? Data->GetStride() : 0)
 	{
 	}
+
+	TRef<TIndexBuffer> TIndexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	{
+		return GetRenderDevice()->CreateIndexBuffer(InAccessFlags, Data);
+	}
+
 }

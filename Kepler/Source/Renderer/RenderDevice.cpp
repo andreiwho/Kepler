@@ -36,7 +36,7 @@ namespace Kepler
 		{
 #ifdef WIN32
 		case Kepler::ERenderAPI::DirectX11:
-			return MakeRef(New<TDataBlobD3D11>(Data, Size, ElemSize));
+			return MakeRef(Kepler::New<TDataBlobD3D11>(Data, Size, ElemSize));
 #endif
 		default:
 			break;

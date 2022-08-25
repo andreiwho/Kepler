@@ -1,4 +1,6 @@
 #include "ParamBuffer.h"
+#include "../RenderDevice.h"
+#include "../RenderGlobals.h"
 
 namespace Kepler
 {
@@ -6,4 +8,10 @@ namespace Kepler
 		:	Params(Mapping->CreatePack())
 	{
 	}
+
+	TRef<TParamBuffer> TParamBuffer::New(TRef<TPipelineParamMapping> ParamPack)
+	{
+		return GetRenderDevice()->CreateParamBuffer(ParamPack);
+	}
+
 }

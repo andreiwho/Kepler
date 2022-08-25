@@ -21,6 +21,7 @@ namespace Kepler
 
 		static TCommandListImmediateD3D11* Get() { return CHECKED(Instance); }
 
+		// Command list interface
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) override;
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) override;
 		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) override;
@@ -29,10 +30,13 @@ namespace Kepler
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) override;
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) override;
 		virtual void SetScissor(float X, float Y, float Width, float Height) override;
-		virtual void* MapBuffer(TRef<TBuffer> Buffer) override;
-		virtual void UnmapBuffer(TRef<TBuffer> Buffer) override;
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) override;
 		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffers, u32 Slot) override;
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
+
+		// CommandListImmediate interface
+		virtual void* MapBuffer(TRef<TBuffer> Buffer) override;
+		virtual void UnmapBuffer(TRef<TBuffer> Buffer) override;
 
 	private:
 		ID3D11DeviceContext4* Context{};

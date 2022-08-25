@@ -94,7 +94,7 @@ namespace Kepler
 			{
 				DoRelease(Memory);
 			}
-			Memory = const_cast<T*>(Other.Raw());
+			Memory = (T*)const_cast<U*>(Other.Raw());
 			DoAddRef(Memory);
 		}
 
@@ -117,7 +117,7 @@ namespace Kepler
 			{
 				DoRelease(Memory);
 			}
-			Memory = const_cast<T*>(Other.Raw());
+			Memory = (T*)const_cast<U*>(Other.Raw());
 			DoAddRef(Memory);
 			return *this;
 		}
