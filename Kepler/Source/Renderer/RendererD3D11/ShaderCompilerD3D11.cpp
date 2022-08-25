@@ -61,7 +61,7 @@ namespace Kepler
 			default:
 				break;
 			}
-			CHECK(false && "Unknown shader type");
+			CRASHMSG("Unknown shader type");
 		});
 
 		OutShaderModule.ByteCode = CompileHLSLCode(SourceName, EntryPoint, Flag, Source);
@@ -88,7 +88,7 @@ namespace Kepler
 			ShaderType = "cs_5_0";
 			break;
 		default:
-			CHECKMSG(false, "Unknown shader type");
+			CRASHMSG("Unknown shader type");
 			break;
 		}
 

@@ -27,7 +27,7 @@ namespace Kepler
 		default:
 			break;
 		}
-		CHECK(false && "Failed to create render device. Unknown render API");
+		CRASHMSG("Failed to create render device. Unknown render API");
 	}
 
 	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* Data, usize Size, usize ElemSize)
@@ -41,7 +41,7 @@ namespace Kepler
 		default:
 			break;
 		}
-		CHECK(false && "Failed to create data blob. Unknown render API");
+		CRASHMSG("Failed to create data blob. Unknown render API");
 		return nullptr;
 	}
 }
