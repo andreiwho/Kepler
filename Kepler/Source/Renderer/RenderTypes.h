@@ -160,7 +160,7 @@ namespace Kepler
 	class TDataBlob : public TRefCounted
 	{
 	public:
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0, usize ElemSize = 0);
+		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0, usize Stride = 0);
 
 		template<typename T>
 		static TRef<TDataBlob> New(const TDynArray<T>& Data)

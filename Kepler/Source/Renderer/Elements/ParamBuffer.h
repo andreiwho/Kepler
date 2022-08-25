@@ -8,9 +8,10 @@ namespace Kepler
 {
 	class TParamBuffer : public TBuffer
 	{
-	public:
+	protected:
 		TParamBuffer(TRef<TPipelineParamMapping> ParamPack);
 
+	public:
 		template<typename T>
 		void Write(const TString& Param, const T* Data)
 		{
@@ -27,6 +28,7 @@ namespace Kepler
 
 		inline EShaderStageFlags GetShaderStages() const { return Params->GetShaderStages(); }
 
+		static TRef<TParamBuffer> New(TRef<TPipelineParamMapping> ParamPack);
 	protected:
 		TRef<TPipelineParamPack> Params;
 	};

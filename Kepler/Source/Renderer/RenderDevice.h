@@ -25,6 +25,7 @@ namespace Kepler
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) = 0;
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) = 0;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) = 0;
+		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData) = 0;
 		virtual TRef<TImage1D> CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels = 1, u32 InArraySize = 1) = 0;
 		virtual TRef<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels = 1, u32 InArraySize = 1) = 0;
 		virtual TRef<TImage3D> CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels = 1, u32 InArraySize = 1) = 0;

@@ -58,15 +58,6 @@ namespace Kepler
 			matrix4x4 mWorldViewProj = matrix4x4(1.0f);
 		};
 
-		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
-		Mapping->AddParam("mWorldViewProj", 0,0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-
-		TRef<TParamBuffer> MvpBuffer = Await(TRenderThread::Submit(
-			[Mapping, this] 
-			{
-				return LowLevelRenderer->GetRenderDevice()->CreateParamBuffer(Mapping);
-			}));
-
 		struct TVertex
 		{
 			float3 Pos{};
@@ -79,34 +70,29 @@ namespace Kepler
 			{{ 0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
 			{{-0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
 		};
-
-		TRef<TDataBlob> Blob = TDataBlob::New(Vertices);
-
-		TRef<TImage2D> Image = Await(TRenderThread::Submit(
-			[this]
-			{
-				return TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
-			}));
-
-		TRef<TVertexBuffer> VertexBuffer = Await(TRenderThread::Submit(
-			[Blob, this]
-			{
-				return TVertexBuffer::New(EBufferAccessFlags::GPUOnly, Blob);
-			}));
-
 		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
-		TRef<TIndexBuffer> IndexBuffer = Await(TRenderThread::Submit(
-			[this, &Indices] 
-			{
-				return TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
-			}));
 
-		TRef<TGraphicsPipeline> Pipeline = Await(TRenderThread::Submit(
-			[&]
+		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
+		Mapping->AddParam("mWorldViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+
+		TRef<TParamBuffer> MvpBuffer;
+		TRef<TImage2D> Image;
+		TRef<TVertexBuffer> VertexBuffer;
+		TRef<TIndexBuffer> IndexBuffer;
+		TRef<TGraphicsPipeline> Pipeline;
+
+		TRef<TDataBlob> VertexBlob = TDataBlob::New(Vertices);
+		auto RenderTask = TRenderThread::Submit(
+			[&, this]
 			{
-				return MakeRef(New<TDefaultUnlitPipeline>());
-			}
-		));
+				MvpBuffer = TParamBuffer::New(Mapping);
+				Image = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, VertexBlob);
+				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
+				TRef<TTransferBuffer> Transfer = TTransferBuffer::New(VertexBlob->GetSize(), VertexBlob);
+				Transfer->Transfer(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), VertexBuffer, 0, 0, VertexBlob->GetSize());
+				Pipeline = MakeRef(New<TDefaultUnlitPipeline>());
+			});
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -117,6 +103,8 @@ namespace Kepler
 		{
 			Platform->RegisterPlatformEventListener(this);
 			float PositionX = 0.0f;
+
+			Await(RenderTask);
 			while (Platform->HasActiveMainWindow())
 			{
 				MainTimer.Begin();
@@ -141,11 +129,13 @@ namespace Kepler
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
+							// Transfer
+							MvpBuffer->RT_UploadToGPU(pImmList);
+
+							// Render
 							if (SwapChain)
 							{
-								MvpBuffer->RT_UploadToGPU(pImmList);
 								pImmList->BindParamBuffers(MvpBuffer, 0);
-
 								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
@@ -172,7 +162,7 @@ namespace Kepler
 					if (DisplayInfoTime >= 1.0f)
 					{
 						DisplayInfoTime = 0;
-						MainWindow->SetTitle(fmt::format("{} <{}>", InitialWindowName, 1.0f / MainTimer.Delta()));
+						MainWindow->SetTitle(fmt::format("{} <{}>", MainWindow->GetName(), 1.0f / MainTimer.Delta()));
 					}
 				}
 #endif

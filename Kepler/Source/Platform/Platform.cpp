@@ -94,7 +94,7 @@ namespace Kepler
 
 	bool TPlatform::Internal_WindowClosed(const TWindowClosedEvent& Event)
 	{
-		KEPLER_TRACE(LogPlatform, "Window {} closed", Event.Window->GetTitle());
+		KEPLER_TRACE(LogPlatform, "Window {} closed", Event.Window->GetName());
 		if (IsMainWindow(Event.Window))
 		{
 			CloseAllWindows();

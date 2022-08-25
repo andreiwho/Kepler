@@ -17,6 +17,7 @@
 #include "IndexBufferD3D11.h"
 #include "ParamBufferD3D11.h"
 #include "ImageD3D11.h"
+#include "TransferBufferD3D11.h"
 
 namespace Kepler
 {
@@ -143,6 +144,13 @@ namespace Kepler
 	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11DeviceChild* Resource)
 	{
 		PendingDeleteResources.Enqueue(std::move(Resource));
+	}
+
+	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard Lck{ ResourceMutex };
+		return MakeRef(New<TTransferBufferD3D11>(Size, InitialData));
 	}
 
 	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
