@@ -60,11 +60,19 @@ namespace Kepler
 		}
 		
 		template<typename T>
-		T* GetParam(const TString& Param)
+		T& GetParam(const TString& Param)
 		{
 			CHECK(Params);
 			CHECK(Params->GetParams().Contains(Param) && IsCompiled());
-			return reinterpret_cast<T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset());
+			return *reinterpret_cast<T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset());
+		}
+
+		template<typename T>
+		const T& GetParam(const TString& Param) const
+		{
+			CHECK(Params);
+			CHECK(Params->GetParams().Contains(Param) && IsCompiled());
+			return *reinterpret_cast<const T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset());
 		}
 
 		const ubyte* GetDataPointer() const { return CPUData.GetData(); }

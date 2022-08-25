@@ -114,7 +114,7 @@ namespace Kepler
 				{
 					// Update game state
 					PositionX += GGlobalTimer->Delta();
-					auto& Param = *MvpBuffer->GetParam<matrix4x4>("mWorldViewProj");
+					auto& Param = MvpBuffer->GetParamForWriting<matrix4x4>("mWorldViewProj");
 					
 					auto Projection = glm::perspectiveFovLH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
 					auto View = glm::lookAtLH(float3(0.0f, 2.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));

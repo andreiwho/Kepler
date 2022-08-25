@@ -57,15 +57,20 @@ namespace Kepler
 	void TParamBufferD3D11::RT_UploadToGPU(TRef<TCommandListImmediate> pImmContext)
 	{
 		CHECK(IsRenderThread());
-		auto MyCmd = RefCast<TCommandListImmediateD3D11>(pImmContext);
-		if (MyCmd)
+
+		if (bRenderStateDirty)
 		{
-			void* Memory = MyCmd->MapBuffer(RefFromThis());
-			if (Memory)
+			auto MyCmd = RefCast<TCommandListImmediateD3D11>(pImmContext);
+			if (MyCmd)
 			{
-				memcpy(Memory, Params->GetDataPointer(), Params->GetDataSize());
-				MyCmd->UnmapBuffer(RefFromThis());
+				void* Memory = MyCmd->MapBuffer(RefFromThis());
+				if (Memory)
+				{
+					memcpy(Memory, Params->GetDataPointer(), Params->GetDataSize());
+					MyCmd->UnmapBuffer(RefFromThis());
+				}
 			}
+			bRenderStateDirty = false;
 		}
 	}
 
