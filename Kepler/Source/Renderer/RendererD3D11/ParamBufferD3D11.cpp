@@ -58,7 +58,7 @@ namespace Kepler
 	{
 		CHECK(IsRenderThread());
 
-		if (bRenderStateDirty)
+		if (IsRenderStateDirty())
 		{
 			auto MyCmd = RefCast<TCommandListImmediateD3D11>(pImmContext);
 			if (MyCmd)
@@ -70,7 +70,7 @@ namespace Kepler
 					MyCmd->UnmapBuffer(RefFromThis());
 				}
 			}
-			bRenderStateDirty = false;
+			ResetRenderState();
 		}
 	}
 

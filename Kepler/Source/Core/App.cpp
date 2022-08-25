@@ -149,8 +149,12 @@ namespace Kepler
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
 							}
 						});
-
 					LowLevelRenderer->PresentAll();
+				}
+				else // minimized
+				{
+					using namespace std::chrono_literals;
+					std::this_thread::sleep_for(10ms);
 				}
 
 				MainTimer.End();

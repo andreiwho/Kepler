@@ -10,3 +10,6 @@
 [submodule "Kepler/ThirdParty/tinygltf"]
 	path = Kepler/ThirdParty/tinygltf
 	url = https://github.com/syoyo/tinygltf
+[submodule "Kepler/ThirdParty/imgui"]
+	path = Kepler/ThirdParty/imgui
+	url = https://github.com/ocornut/imgui
