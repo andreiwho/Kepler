@@ -15,7 +15,8 @@ namespace Kepler
 		TGraphicsPipelineConfiguration Configuration{};
 		Configuration.VertexInput.VertexLayout = Shader->GetReflection()->VertexLayout;
 
-		Configuration.DepthStencil.bDepthEnable = false;
+		Configuration.DepthStencil.bDepthEnable = true;
+		Configuration.DepthStencil.DepthAccess = EDepthBufferAccess::Read | EDepthBufferAccess::Write;
 		return Configuration;
 	}
 

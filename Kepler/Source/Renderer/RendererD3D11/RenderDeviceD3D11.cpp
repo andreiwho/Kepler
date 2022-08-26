@@ -18,6 +18,8 @@
 #include "ParamBufferD3D11.h"
 #include "ImageD3D11.h"
 #include "TransferBufferD3D11.h"
+#include "RenderTargetD3D11.h"
+#include "TextureD3D11.h"
 
 namespace Kepler
 {
@@ -146,6 +148,11 @@ namespace Kepler
 		PendingDeleteResources.Enqueue(std::move(Resource));
 	}
 
+	TRef<TTextureSampler2D> TRenderDeviceD3D11::CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	{
+		return MakeRef(New<TTextureSampler2D_D3D11>(InImage, MipLevel, ArrayLayer));
+	}
+
 	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
@@ -173,6 +180,16 @@ namespace Kepler
 		std::lock_guard Lck{ ResourceMutex };
 		return MakeRef(New<TImage3D_D3D11>(InWidth, InHeight, InDepth, InFormat, InUsage, MipLevels, InArraySize));
 
+	}
+
+	TRef<TRenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	{
+		return MakeRef(New<TRenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
+	}
+
+	TRef<TDepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	{
+		return MakeRef(New<TDepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	static TString GetAdapterName(IDXGIAdapter* Adapter)

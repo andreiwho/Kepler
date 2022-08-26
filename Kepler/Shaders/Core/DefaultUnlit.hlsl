@@ -14,12 +14,16 @@ TPixel VSMain(in TVertex Vertex)
 	Output.Position = mul(Output.Position, mWorldViewProj);
 	
 	Output.Color = Vertex.Color;
+	Output.UV0 = Vertex.UV0;
 	return Output;
 }
 
 
 //////////////////////////////////////////////////////////////////
+SamplerState AlbedoSampler : register(s0);
+Texture2D AlbedoTexture : register(t0);
+
 float4 PSMain(in TPixel Input) : SV_Target0
 {
-	return float4(Input.Color, 1.0f);
+	return AlbedoTexture.Sample(AlbedoSampler, Input.UV0);
 }

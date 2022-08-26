@@ -52,8 +52,9 @@ namespace Kepler
 	public:
 		inline u32 GetWidth() const { return Width; }
 		inline u32 GetHeight() const { return Height; }
-
+		
 		static TRef<TImage2D> New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
+		void Write(TRef<class TCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data);
 
 	protected:
 		u32 Width{};

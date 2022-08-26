@@ -298,6 +298,9 @@ namespace Kepler
 			Matrix4x3,
 			Matrix4x4,
 
+			Sampler2D,
+			Texture2D,
+
 			Custom,
 		} Value;
 

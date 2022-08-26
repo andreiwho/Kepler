@@ -210,7 +210,6 @@ namespace Kepler
 		}
 	};
 
-
 	template <typename T>
 	class TMallocator
 	{
@@ -260,7 +259,6 @@ namespace Kepler
 		}
 		return nullptr;
 	}
-
 
 	template<typename T, typename ... ARGS>
 	inline TSharedPtr<T> MakeShared(ARGS&& ... Args)

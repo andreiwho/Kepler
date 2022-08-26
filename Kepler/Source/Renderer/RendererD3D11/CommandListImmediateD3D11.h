@@ -15,8 +15,8 @@ namespace Kepler
 		TCommandListImmediateD3D11(ID3D11DeviceContext4* InContext);
 		~TCommandListImmediateD3D11();
 
-		virtual void StartDrawingToSwapChainImage(TSwapChain* SwapChain) override;
-		virtual void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]) override;
+		virtual void StartDrawingToSwapChainImage(TRef<TSwapChain> SwapChain, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) override;
+		virtual void ClearSwapChainImage(TRef<TSwapChain> SwapChain, float4 ClearColor) override;
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) override;
 
 		static TCommandListImmediateD3D11* Get() { return CHECKED(Instance); }
@@ -26,17 +26,25 @@ namespace Kepler
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) override;
 		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) override;
 		virtual void BindShader(TRef<TShader> Shader) override;
+		virtual void BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot = 0) override;
 		virtual void BindPipeline(TRef<TGraphicsPipeline> Pipeline) override;
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) override;
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) override;
 		virtual void SetScissor(float X, float Y, float Width, float Height) override;
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) override;
 		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffers, u32 Slot) override;
-		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
+		virtual void StartDrawingToRenderTargets(TRef<TRenderTarget2D> RenderTarget, TRef<TDepthStencilTarget2D> DepthStencil) override;
+		virtual void StartDrawingToRenderTargets(const TDynArray<TRef<TRenderTarget2D>>& RenderTargets, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) override;
+		virtual void ClearRenderTarget(TRef<TRenderTarget2D> Target, float4 Color) override;
+		virtual void ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bCleanStencil = false) override;
 
 		// CommandListImmediate interface
 		virtual void* MapBuffer(TRef<TBuffer> Buffer) override;
 		virtual void UnmapBuffer(TRef<TBuffer> Buffer) override;
+		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data) override;
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
+
+
 
 	private:
 		ID3D11DeviceContext4* Context{};

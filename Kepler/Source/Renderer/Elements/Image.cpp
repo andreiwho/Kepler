@@ -2,6 +2,7 @@
 #include "../RenderGlobals.h"
 #include "Async/Async.h"
 #include "../RenderDevice.h"
+#include "CommandList.h"
 
 namespace Kepler
 {
@@ -32,6 +33,15 @@ namespace Kepler
 		, Width(InWidth)
 		, Height(InHeight)
 	{
+	}
+
+	void TImage2D::Write(TRef<TCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data)
+	{
+		CHECK(IsRenderThread());
+		if (pImmCmd)
+		{
+			pImmCmd->Transfer(RefCast<TImage2D>(RefFromThis()), X, Y, Width, Height, Data);
+		}
 	}
 
 	TRef<TImage2D> TImage2D::New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)

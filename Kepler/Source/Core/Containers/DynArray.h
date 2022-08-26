@@ -15,6 +15,11 @@ namespace Kepler
 			:	UnderlyingContainer(NewData.begin(), NewData.end())
 		{}
 
+		TDynArray(T* Begin, T* End)
+			:	UnderlyingContainer(Begin, End)
+		{
+		}
+
 		TDynArray(usize InitialSize)
 			:	UnderlyingContainer(InitialSize)
 		{}

@@ -15,6 +15,7 @@
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
 #include "Renderer/Pipelines/ParamPack.h"
+#include "Tools/ImageLoader.h"
 
 namespace Kepler
 {
@@ -61,37 +62,50 @@ namespace Kepler
 		struct TVertex
 		{
 			float3 Pos{};
-			float4 Col{};
+			float3 Col{};
+			float2 UV{};
 		};
 
 		TDynArray<TVertex> Vertices = {
-			{{-0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f, 1.0f}},
-			{{ 0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.0f, -0.5f  }, {1.0f, 0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		};
 		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
 
 		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
 		Mapping->AddParam("mWorldViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-
+		Mapping->AddTextureSampler("Albedo", EShaderStageFlags::Pixel, 0);
+		
+		TRef<TPipelineSamplerPack> Samplers = Mapping->CreateSamplerPack();
 		TRef<TParamBuffer> MvpBuffer;
-		TRef<TImage2D> Image;
+		TRef<TImage2D> DepthImage;
+		TRef<TImage2D> SampledImage;
 		TRef<TVertexBuffer> VertexBuffer;
 		TRef<TIndexBuffer> IndexBuffer;
 		TRef<TGraphicsPipeline> Pipeline;
-
+		TRef<TDepthStencilTarget2D> DepthTarget;
+		TRef<TTextureSampler2D> Sampler;
+		
 		TRef<TDataBlob> VertexBlob = TDataBlob::New(Vertices);
 		auto RenderTask = TRenderThread::Submit(
 			[&, this]
 			{
 				MvpBuffer = TParamBuffer::New(Mapping);
-				Image = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				DepthImage = TImage2D::New(MainWindow->GetWidth(), MainWindow->GetHeight(), EFormat::D24_UNORM_S8_UINT, EImageUsage::DepthTarget);
+				
 				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, VertexBlob);
 				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				TRef<TTransferBuffer> Transfer = TTransferBuffer::New(VertexBlob->GetSize(), VertexBlob);
 				Transfer->Transfer(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), VertexBuffer, 0, 0, VertexBlob->GetSize());
 				Pipeline = MakeRef(New<TDefaultUnlitPipeline>());
+				DepthTarget = TDepthStencilTarget2D::New(DepthImage);
+				auto ImageData = Await(TImageLoader::LoadImage("Kepler/Assets/Ground.png"));
+				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
+				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
+				Samplers->Write("Albedo", Sampler);
 			});
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
@@ -110,12 +124,16 @@ namespace Kepler
 				MainTimer.Begin();
 				Platform->Update();
 
-				if (!Platform->IsMainWindowMinimized())
+				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
 				{
 					// Update game state
 					PositionX += GGlobalTimer->Delta();
 					auto& Param = MvpBuffer->GetParamForWriting<matrix4x4>("mWorldViewProj");
 					
+					float Width = (float)MainWindow->GetWidth();
+					float Height = (float)MainWindow->GetHeight();
+					Width = Width > 0 ? Width: 1;
+					Height = Height > 0 ? Height : 1;
 					auto Projection = glm::perspectiveFovLH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
 					auto View = glm::lookAtLH(float3(0.0f, 2.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
 					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
@@ -124,7 +142,7 @@ namespace Kepler
 
 					// Render the frame
 					TRenderThread::Submit(
-						[this, VertexBuffer, IndexBuffer, Pipeline, MvpBuffer]
+						[&, this]
 						{
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
@@ -139,13 +157,15 @@ namespace Kepler
 								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
-								pImmList->StartDrawingToSwapChainImage(SwapChain.Raw());
 								pImmList->SetViewport(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.0f, 1.0f);
 								pImmList->SetScissor(0, 0,  (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight());
-								float ClearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-								pImmList->ClearSwapChainImage(SwapChain.Raw(), ClearColor);
+								
+								pImmList->StartDrawingToSwapChainImage(SwapChain, DepthTarget);
+								pImmList->ClearDepthTarget(DepthTarget);
+								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
+								
 								pImmList->BindPipeline(Pipeline);
-
+								pImmList->BindSamplers(Samplers);
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
 							}
 						});
