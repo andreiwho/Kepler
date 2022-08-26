@@ -13,6 +13,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Release)
 
+function(SetDefaultMSVCLib ModuleName)
+ set_target_properties(${ModuleName} PROPERTIES 
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL")
+endfunction()
+
 macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
  target_compile_features(${ModuleName} PUBLIC cxx_std_20)
  target_include_directories(${ModuleName} PUBLIC Source)
