@@ -42,6 +42,8 @@ namespace Kepler
 
 		virtual void BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot = 0) = 0;
 
+		virtual void ClearSamplers(u32 Slot = 0) = 0;
+
 		virtual void BindPipeline(TRef<TGraphicsPipeline> Pipeline) = 0;
 
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) = 0;

@@ -27,6 +27,7 @@ namespace Kepler
 		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) override;
 		virtual void BindShader(TRef<TShader> Shader) override;
 		virtual void BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot = 0) override;
+		virtual void ClearSamplers(u32 Slot = 0) override;
 		virtual void BindPipeline(TRef<TGraphicsPipeline> Pipeline) override;
 		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) override;
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) override;

@@ -16,6 +16,7 @@
 #include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
 #include "Renderer/Pipelines/ParamPack.h"
 #include "Tools/ImageLoader.h"
+#include "Renderer/Pipelines/Default/ScreenQuadPipeline.h"
 
 namespace Kepler
 {
@@ -72,6 +73,15 @@ namespace Kepler
 			{{ 0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 			{{-0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		};
+
+		TDynArray<TVertex> QuadVertices =
+		{
+			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		};
+
 		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
 
 		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
@@ -80,32 +90,55 @@ namespace Kepler
 		
 		TRef<TPipelineSamplerPack> Samplers = Mapping->CreateSamplerPack();
 		TRef<TParamBuffer> MvpBuffer;
-		TRef<TImage2D> DepthImage;
 		TRef<TImage2D> SampledImage;
 		TRef<TVertexBuffer> VertexBuffer;
 		TRef<TIndexBuffer> IndexBuffer;
-		TRef<TGraphicsPipeline> Pipeline;
-		TRef<TDepthStencilTarget2D> DepthTarget;
+		TRef<TGraphicsPipeline> UnlitPipeline;
 		TRef<TTextureSampler2D> Sampler;
+
+		// Screen quad stuff
+		TRef<TPipelineParamMapping> ScreenQuadMapping = MakeRef(New<TPipelineParamMapping>());
+		ScreenQuadMapping->AddTextureSampler("RenderTarget", EShaderStageFlags::Pixel, 0);
+
+		TRef<TPipelineSamplerPack> QuadSamplers = ScreenQuadMapping->CreateSamplerPack();
+		TRef<TImage2D> QuadImage;
+
+		TRef<TImage2D> DepthImage;
+		TDynArray<TRef<TRenderTarget2D>> RenderTargets;
+		TDynArray<TRef<TTextureSampler2D>> QuadSamplerHandles;
+		TRef<TDepthStencilTarget2D> DepthTarget;
+		TRef<TGraphicsPipeline> ScreenQuadPipeline;
+		TRef<TVertexBuffer> QuadVertexBuffer;
+		TRef<TIndexBuffer> QuadIndexBuffer;
 		
+		// TODO: Finish screen quad stuff
+
 		TRef<TDataBlob> VertexBlob = TDataBlob::New(Vertices);
 		auto RenderTask = TRenderThread::Submit(
 			[&, this]
 			{
 				MvpBuffer = TParamBuffer::New(Mapping);
-				DepthImage = TImage2D::New(MainWindow->GetWidth(), MainWindow->GetHeight(), EFormat::D24_UNORM_S8_UINT, EImageUsage::DepthTarget);
-				
-				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, VertexBlob);
+				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
 				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
-				TRef<TTransferBuffer> Transfer = TTransferBuffer::New(VertexBlob->GetSize(), VertexBlob);
-				Transfer->Transfer(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), VertexBuffer, 0, 0, VertexBlob->GetSize());
-				Pipeline = MakeRef(New<TDefaultUnlitPipeline>());
-				DepthTarget = TDepthStencilTarget2D::New(DepthImage);
+				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
 				auto ImageData = Await(TImageLoader::LoadImage("Kepler/Assets/Ground.png"));
 				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
 				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
 				Samplers->Write("Albedo", Sampler);
+				
+				// Screen quad
+				QuadImage = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource | EImageUsage::RenderTarget, 1, 3);
+				for (u32 Index = 0; Index < 3; ++Index)
+				{
+					RenderTargets.AppendBack(TRenderTarget2D::New(QuadImage, 0, Index));
+					QuadSamplerHandles.AppendBack(TTextureSampler2D::New(QuadImage, 0, Index));
+				}
+				DepthImage = TImage2D::New(MainWindow->GetWidth(), MainWindow->GetHeight(), EFormat::D24_UNORM_S8_UINT, EImageUsage::DepthTarget);
+				DepthTarget = TDepthStencilTarget2D::New(DepthImage);
+				ScreenQuadPipeline = MakeRef(New<TScreenQuadPipeline>());
+				QuadVertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
+				QuadIndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 			});
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
@@ -144,6 +177,8 @@ namespace Kepler
 					TRenderThread::Submit(
 						[&, this]
 						{
+							static u32 FrameIndex = 0;
+
 							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
 							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
 
@@ -153,20 +188,36 @@ namespace Kepler
 							// Render
 							if (SwapChain)
 							{
+								pImmList->ClearSamplers();
+
 								pImmList->BindParamBuffers(MvpBuffer, 0);
 								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
 
 								pImmList->SetViewport(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.0f, 1.0f);
 								pImmList->SetScissor(0, 0,  (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight());
-								
-								pImmList->StartDrawingToSwapChainImage(SwapChain, DepthTarget);
+							
+								// Write to quad render target
+								pImmList->StartDrawingToRenderTargets(RenderTargets[FrameIndex], DepthTarget);
 								pImmList->ClearDepthTarget(DepthTarget);
-								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
-								
-								pImmList->BindPipeline(Pipeline);
+								pImmList->ClearRenderTarget(RenderTargets[FrameIndex], {0.1f, 0.1f, 0.1f, 1.0f});
+								pImmList->BindPipeline(UnlitPipeline);
 								pImmList->BindSamplers(Samplers);
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
+								
+								pImmList->StartDrawingToSwapChainImage(SwapChain);
+								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
+								pImmList->BindVertexBuffers(QuadVertexBuffer, 0, 0);
+								pImmList->BindIndexBuffer(QuadIndexBuffer, 0);
+								pImmList->BindPipeline(ScreenQuadPipeline);
+
+								//Write quad sampler 
+								QuadSamplers->Write("RenderTarget", QuadSamplerHandles[FrameIndex]);
+								// and
+								pImmList->BindSamplers(QuadSamplers);
+								pImmList->DrawIndexed(QuadIndexBuffer->GetCount(), 0, 0);
+
+								FrameIndex = (FrameIndex + 1) % 3;
 							}
 						});
 					LowLevelRenderer->PresentAll();

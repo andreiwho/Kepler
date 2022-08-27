@@ -17,7 +17,7 @@ namespace Kepler
 		ID3D11Texture2D* Texture = MyImage->GetImage();
 		CHECK(Texture);
 
-		CD3D11_RENDER_TARGET_VIEW_DESC Desc(Texture, D3D11_RTV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, ArrayLayer, 1);
+		CD3D11_RENDER_TARGET_VIEW_DESC Desc(Texture, D3D11_RTV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, MipLevel, ArrayLayer, 1);
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{

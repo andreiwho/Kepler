@@ -179,7 +179,7 @@ namespace Kepler
 			ppShaderResources.Resize(SamplerCount);
 			for (usize Index = 0; Index < SamplerCount; ++Index)
 			{
-				if(auto Sampler = RefCast<TTextureSampler2D_D3D11>(Samplers->GetSamplers()[Index]))
+				if (auto Sampler = RefCast<TTextureSampler2D_D3D11>(Samplers->GetSamplers()[Index]))
 				{
 					ppSamplers[Index] = Sampler->GetSampler();
 					ppShaderResources[Index] = Sampler->GetView();
@@ -189,6 +189,20 @@ namespace Kepler
 			Context->PSSetShaderResources(Slot, ppShaderResources.GetLength(), ppShaderResources.GetData());
 			Context->PSSetSamplers(Slot, ppSamplers.GetLength(), ppSamplers.GetData());
 		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::ClearSamplers(u32 Slot)
+	{
+		CHECK(IsRenderThread());
+		static constexpr UINT ResourceCount = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+		std::array<void*, ResourceCount> Nulls{};
+		for (auto& Null : Nulls) { Null = nullptr; }
+
+		// This is a little hack to do this fast and without allocations
+		Context->PSSetShaderResources(Slot, ResourceCount, (ID3D11ShaderResourceView**)Nulls.data());
+		Context->PSSetSamplers(Slot, ResourceCount, (ID3D11SamplerState**)Nulls.data());
+
 	}
 
 	//////////////////////////////////////////////////////////////////////////
