@@ -24,10 +24,10 @@ Roadmap:
 * Audio streaming for long tracks ⚒️
 
 ### - VFS
-* Management of the working directory ⚒️
-* Setting up default directories for in-game assets ⚒️
-* Virtual folders such as ***'Game/'*** ***'Engine/'*** ⚒️ 
-* * Also would be great to add ability for custom folders in VFS (*e.g. '/Shaders' '/Resources'*) ⚒️
+* Management of the working directory ✅
+* Setting up default directories for in-game assets ✅
+* Virtual folders such as ***'Game/'*** ***'Engine/'*** ✅ 
+* * Also would be great to add ability for custom folders in VFS (*e.g. '/Shaders' '/Resources'*) ✅
 
 ## Tier 2:
 
