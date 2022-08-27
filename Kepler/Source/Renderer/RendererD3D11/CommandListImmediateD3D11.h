@@ -45,10 +45,11 @@ namespace Kepler
 		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data) override;
 		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
 
-
-
+		virtual void BeginDebugEvent(const char* Name) override;
+		virtual void EndDebugEvent() override;
 	private:
 		ID3D11DeviceContext4* Context{};
+		ID3DUserDefinedAnnotation* AnnotationInterface{};
 		ID3D11VertexShader* BoundVertexShader = nullptr;
 		ID3D11PixelShader* BoundPixelShader = nullptr;
 		ID3D11ComputeShader* BoundComputeShader = nullptr;

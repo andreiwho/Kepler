@@ -63,6 +63,10 @@ namespace Kepler
 		virtual void ClearRenderTarget(TRef<TRenderTarget2D> Target, float4 Color) = 0;
 
 		virtual void ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bCleanStencil = false) = 0;
+
+		virtual void BeginDebugEvent(const char* Name) = 0;
+
+		virtual void EndDebugEvent() = 0;
 		
 	protected:
 		bool bHasAttachedPipeline = false;

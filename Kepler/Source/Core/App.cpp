@@ -188,8 +188,11 @@ namespace Kepler
 							// Render
 							if (SwapChain)
 							{
+								pImmList->BeginDebugEvent("Clear Render State");
 								pImmList->ClearSamplers();
+								pImmList->EndDebugEvent();
 
+								pImmList->BeginDebugEvent("Mesh Pass");
 								pImmList->BindParamBuffers(MvpBuffer, 0);
 								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
 								pImmList->BindIndexBuffer(IndexBuffer, 0);
@@ -204,7 +207,9 @@ namespace Kepler
 								pImmList->BindPipeline(UnlitPipeline);
 								pImmList->BindSamplers(Samplers);
 								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
-								
+								pImmList->EndDebugEvent();
+
+								pImmList->BeginDebugEvent("Screen Quad Pass");
 								pImmList->StartDrawingToSwapChainImage(SwapChain);
 								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
 								pImmList->BindVertexBuffers(QuadVertexBuffer, 0, 0);
@@ -216,6 +221,7 @@ namespace Kepler
 								// and
 								pImmList->BindSamplers(QuadSamplers);
 								pImmList->DrawIndexed(QuadIndexBuffer->GetCount(), 0, 0);
+								pImmList->EndDebugEvent();
 
 								FrameIndex = (FrameIndex + 1) % 3;
 							}

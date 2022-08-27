@@ -487,6 +487,31 @@ namespace Kepler
 		}
 	}
 
+	void TCommandListImmediateD3D11::BeginDebugEvent(const char* Name)
+	{
+#ifdef ENABLE_DEBUG
+		if (!AnnotationInterface)
+		{
+			HRCHECK(Context->QueryInterface(&AnnotationInterface));
+		}
+
+		static constexpr SIZE_T MaxBufferSize = 256;
+		wchar_t NameBuffer[MaxBufferSize] = {};
+		mbstowcs(NameBuffer, Name, MaxBufferSize);
+		AnnotationInterface->BeginEvent(NameBuffer);
+#endif
+	}
+
+	void TCommandListImmediateD3D11::EndDebugEvent()
+	{
+#ifdef ENABLE_DEBUG
+		if (AnnotationInterface)
+		{
+			AnnotationInterface->EndEvent();
+		}
+#endif
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset)
 	{
