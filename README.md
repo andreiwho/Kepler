@@ -13,7 +13,6 @@ Roadmap:
 * Shader uniform layout ***must*** be set by hand (including constant buffer parameters and samplers) ✅
 * Vertex buffers, index buffers and transfer buffers ✅
 * Image loading and displaying on a plane ✅
-* GLTF2.0 model loading and rendering ⚒️
 * Rendering onto render target and displaying it on a plane ✅
 * ***Render thread*** is the main executor of the rendering commands. ✅ 
 * * Executing render commands on another thread must be ***forbidden*** ✅
@@ -50,6 +49,12 @@ Roadmap:
 * * Handling all render targets and recreating them as needed
 * * Managing access of the depth targets
 * * ***Global renderer-wise TParamBuffer*** which will hold all of the information for drawing primitives
+
+### - Asset system
+* Basic asset type
+* Asset loader and streaming database (?)
+* Loading of audio, image, model files
+* Own asset format bound to VFS
 
 ### - Application
  * Move client code into ***testbed*** module

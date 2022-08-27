@@ -26,6 +26,7 @@ namespace Kepler
 	bool TVirtualFileSystem::ResolvePath(const TString& PathToResolve, TString& OutPath)
 	{
 		CHECK(!PathToResolve.starts_with(' '));
+		CHECK(!TPath{ PathToResolve }.is_absolute());
 
 		TString NewPath = PathToResolve;
 		usize FirstSlash = PathToResolve.find_first_of('/');
