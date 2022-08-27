@@ -26,7 +26,7 @@ namespace Kepler
 		for (const EShaderStageFlags::Type Stage : Stages)
 		{
 			ModuleFutures.EmplaceBack(Async(
-				[PathRef = std::ref(Path), SourceRef = std::ref(Source), Stage]()
+				[PathRef = VFSResolvePath(Path), SourceRef = std::ref(Source), Stage]()
 				{
 					return CreateShaderModule(PathRef, Stage, SourceRef);
 				})

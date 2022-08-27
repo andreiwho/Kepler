@@ -5,7 +5,7 @@ namespace Kepler
 	TScreenQuadPipeline::TScreenQuadPipeline()
 		: TGraphicsPipeline()
 	{
-		TRef<TShader> Shader = LoadHLSLShader("Kepler/Shaders/Core/ScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		TRef<TShader> Shader = LoadHLSLShader("EngineShaders/Core/ScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 		TGraphicsPipelineConfiguration Configuration = CreateConfiguration(Shader);
 		DeferredInit(Shader, Configuration);
 	}

@@ -20,7 +20,9 @@ class TTestbed : public Kepler::TApplication
 public:
 	TTestbed(const TApplicationLaunchParams& LaunchParams)
 		: Base(LaunchParams)
-	{}
+	{
+		VFSRegisterPathAlias("Game", "Testbed/Assets");
+	}
 
 protected:
 	virtual void ChildSetupModuleStack(TModuleStack& ModuleStack) override

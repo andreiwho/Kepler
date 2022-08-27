@@ -7,7 +7,7 @@ namespace Kepler
 	std::future<TImageData> TImageLoader::LoadImage(const TString& Path)
 	{
 		return Async(
-			[CopiedPath = Path]
+			[CopiedPath = VFSResolvePath(Path)]
 			{
 				static constexpr u32 COMPONENT_COUNT = 4;
 

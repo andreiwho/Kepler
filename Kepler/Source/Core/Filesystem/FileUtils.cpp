@@ -1,11 +1,12 @@
 #include "FileUtils.h"
+#include "Core/Filesystem/VFS.h"
 #include <fstream>
 
 namespace Kepler
 {
 	std::future<TString> TFileUtils::ReadTextFileAsync(const TString& Path)
 	{
-		return Async([CopiedPath = Path] 
+		return Async([CopiedPath = VFSResolvePath(Path)] 
 			{
 				TString OutString;
 #ifdef WIN32

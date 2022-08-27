@@ -4,6 +4,7 @@
 #include "Core/Log.h"
 #include "Core/Malloc.h"
 #include "Async/Async.h"
+#include "Core/Filesystem/VFS.h"
 
 namespace Kepler
 {
@@ -26,6 +27,7 @@ namespace Kepler
 		TGlobalExceptionContainer Exceptions{};
 		TMalloc Malloc{};
 		TLog GlobalLog;
+		TVirtualFileSystem FileSystem;
 		GLargeThreadPool = new TThreadPool(std::thread::hardware_concurrency() - 1); // We already have render thread
 
 		try
@@ -39,6 +41,10 @@ namespace Kepler
 				Params.CommandLine = ReadCommandLineArgs(Argc, ppArgv);
 				// ...
 				AppInstance = MakeRuntimeApplication(Params);
+
+				TString GamePath;
+				CHECKMSG(FileSystem.ResolvePath("Game/", GamePath), "You must register Game/ path alias inside your application child constructor.");
+				KEPLER_INFO(LogInit, "Resolved game path: {}", GamePath);
 			}
 
 			if (AppInstance)

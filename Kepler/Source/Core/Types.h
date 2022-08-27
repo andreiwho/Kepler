@@ -2,6 +2,7 @@
 #include "Macros.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <atomic>
 #include <stdexcept>
@@ -32,6 +33,7 @@ namespace Kepler
 	template<typename T> using TAtomic = std::atomic<T>;
 	using TString = std::string;
 	using TWideString = std::wstring;
+	using TPath = std::filesystem::path;
 
 	TString ConvertToAnsiString(const TWideString& WideString);
 	TWideString ConvertToWideString(const TString& AnsiString);

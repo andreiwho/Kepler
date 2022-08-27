@@ -121,7 +121,7 @@ namespace Kepler
 				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
 				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
-				auto ImageData = Await(TImageLoader::LoadImage("Kepler/Assets/Ground.png"));
+				auto ImageData = Await(TImageLoader::LoadImage("Engine/Ground.png"));
 				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
 				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);

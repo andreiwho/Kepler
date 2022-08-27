@@ -5,7 +5,7 @@ namespace Kepler
 	TDefaultUnlitPipeline::TDefaultUnlitPipeline()
 		: TGraphicsPipeline()
 	{
-		TRef<TShader> Shader = LoadHLSLShader("Kepler/Shaders/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		TRef<TShader> Shader = LoadHLSLShader("EngineShaders/Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 		TGraphicsPipelineConfiguration Configuration = CreateConfiguration(Shader);
 		DeferredInit(Shader, Configuration);
 	}
