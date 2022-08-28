@@ -34,12 +34,15 @@ namespace Kepler
 		KEPLER_INFO(LogApp, "Starting application initialization");
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
+
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
+		AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 	}
 
 	TApplication::~TApplication()
 	{
+		AudioEngine.reset();
 		LowLevelRenderer.reset();
 		KEPLER_INFO(LogApp, "Finishing application termination");
 	}

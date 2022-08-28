@@ -6,6 +6,8 @@
 #include "Renderer/RenderThread.h"
 #include "Renderer/LowLevelRenderer.h"
 
+#include "Audio/AudioEngine.h"
+
 #include "Renderer/RenderDevice.h"
 
 #include <string>
@@ -52,6 +54,8 @@ namespace Kepler
 	private:
 		TWindow* MainWindow{};
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
+		TSharedPtr<TAudioEngine> AudioEngine{};
+
 		TModuleStack ModuleStack{};
 	};
 

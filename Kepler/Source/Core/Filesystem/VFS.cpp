@@ -8,6 +8,7 @@ namespace Kepler
 	TVirtualFileSystem::TVirtualFileSystem()
 	{
 		Instance = this;
+
 		RegisterVirtualPathAlias("Engine", GetCurrentWorkingDirectory() + "/Kepler/Assets");
 		RegisterVirtualPathAlias("EngineShaders", GetCurrentWorkingDirectory() + "/Kepler/Shaders");
 	}
@@ -18,8 +19,9 @@ namespace Kepler
 		CHECK(!Path.starts_with(' '));
 		CHECK(!PathAliases.Contains(Name));
 
-		TString NewPath = Path;
+		TString NewPath = std::filesystem::relative(Path, GetCurrentWorkingDirectory()).string();
 		std::replace(NewPath.begin(), NewPath.end(), '\\', '/');
+		
 		PathAliases.Insert(Name, NewPath);
 	}
 
@@ -42,6 +44,7 @@ namespace Kepler
 			else
 			{
 				OutPath = fmt::format("{}/{}", GetCurrentWorkingDirectory(), PathToResolve);
+				std::replace(OutPath.begin(), OutPath.end(), '\\', '/');
 			}
 		}
 		return false;
