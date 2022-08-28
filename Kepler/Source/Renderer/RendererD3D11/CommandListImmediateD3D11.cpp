@@ -31,6 +31,10 @@ namespace Kepler
 	TCommandListImmediateD3D11::~TCommandListImmediateD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
+		if (AnnotationInterface)
+		{
+			AnnotationInterface->Release();
+		}
 		Context->Release();
 	}
 
