@@ -317,8 +317,7 @@ namespace Kepler
 			AudioEngine->Play("Engine/prog3.mp3", ESoundCreateFlags::Streamed);
 
 		if (Event.Key == EKeyCode::Z)
-			AudioEngine->UnloadPlaybackCache(false);
-
+			AudioEngine->UnloadPlaybackCache(true);
 
 		return false;
 	}
