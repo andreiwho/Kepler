@@ -17,5 +17,12 @@ namespace Kepler
 		static TAudioEngine* Get() { return Instance; }
 
 		static TSharedPtr<TAudioEngine> CreateAudioEngine(EAudioEngineAPI Api = EAudioEngineAPI::Default);
+
+		virtual void PlayInline(const TString& Path) = 0;
+
+		virtual void Play(const TString& Path, ESoundCreateFlags LoadFlags) = 0;
+
+	public:
+		u32 MaxOverlappingClips = 8;
 	};
 }

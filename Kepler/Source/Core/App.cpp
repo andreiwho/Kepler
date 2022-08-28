@@ -261,6 +261,7 @@ namespace Kepler
 		TPlatformEventDispatcher Dispatcher{ Event };
 		Dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
 		Dispatcher.Dispatch(this, &TApplication::OnWindowResized);
+		Dispatcher.Dispatch(this, &TApplication::OnKeyDown);
 
 		if (!Event.Handled)
 		{
@@ -304,4 +305,17 @@ namespace Kepler
 		return false;
 	}
 
+	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
+	{
+		if(Event.Key == EKeyCode::Space)
+			AudioEngine->Play("Engine/Coin.wav", ESoundCreateFlags::None);
+		
+		if(Event.Key == EKeyCode::Escape)
+			AudioEngine->Play("Engine/cool.flac", ESoundCreateFlags::Streamed);
+
+		if (Event.Key == EKeyCode::F)
+			AudioEngine->Play("Engine/prog3.mp3", ESoundCreateFlags::Streamed | ESoundCreateFlags::Looping);
+
+		return false;
+	}
 }

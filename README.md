@@ -18,9 +18,9 @@ Roadmap:
 * * Executing render commands on another thread must be ***forbidden*** ✅
 
 ### - Audio
-* Loading of audio clips ⚒️
-* Ability to play selected audio clip ⚒️
-* Audio streaming for long tracks ⚒️
+* Loading of audio clips ✅
+* Ability to play selected audio clip ✅
+* Audio streaming for long tracks ✅
 
 ### - VFS
 * Management of the working directory ✅

@@ -23,6 +23,7 @@ namespace Kepler
 		switch (Api)
 		{
 		case Kepler::EAudioEngineAPI::MiniAudio:
+			GAudioEngineAPI = EAudioEngineAPI::MiniAudio;
 			return MakeShared<TAudioEngineMA>();
 			break;
 		default:

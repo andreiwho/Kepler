@@ -50,7 +50,7 @@ namespace Kepler
 
 		bool OnWindowClosed(const TWindowClosedEvent& Event);
 		bool OnWindowResized(const TWindowSizeEvent& Event);
-
+		bool OnKeyDown(const TKeyDownEvent& Event);
 	private:
 		TWindow* MainWindow{};
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
