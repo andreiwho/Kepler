@@ -78,7 +78,7 @@ namespace Kepler
 		ma_sound_seek_to_pcm_frame(&SoundBuffer[CurrentSound], 0);
 	}
 
-	void TSoundMA::Play()
+	void TSoundMA::Play(float3 Position)
 	{
 		CurrentSound = (CurrentSound + 1) % (u32)SoundBuffer.GetLength();
 		WaitForLoad();
@@ -93,6 +93,8 @@ namespace Kepler
 		{
 			ma_sound_set_looping(&SoundBuffer[CurrentSound], true);
 		}
+
+		ma_sound_set_position(&SoundBuffer[CurrentSound], Position.x, Position.y, Position.z);
 		ma_sound_start(&SoundBuffer[CurrentSound]);
 	}
 

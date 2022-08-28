@@ -27,14 +27,12 @@ namespace Kepler
 
 	void TAudioEngineMA::Play(const TString& Path, ESoundCreateFlags LoadFlags)
 	{
-		auto ResolvedPath = VFSResolvePath(Path);
-		if (!Sounds.Contains(Path))
-		{
-			Sounds[Path] = RefCast<TSoundMA>(TSound::New(ResolvedPath, ESoundCreateFlags::Decode | ESoundCreateFlags::Async | LoadFlags.Mask));
-		}
+		GetOrLoadSound(Path, LoadFlags)->Play();
+	}
 
-		TRef<TSound> Sound = Sounds[Path];
-		Sound->Play();
+	void TAudioEngineMA::PlayAt(const TString& Path, float3 Position, ESoundCreateFlags LoadFlags)
+	{
+		GetOrLoadSound(Path, LoadFlags)->Play(Position);
 	}
 
 	void TAudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
@@ -51,6 +49,16 @@ namespace Kepler
 					return !Sound.second->IsPlaying();
 				});
 		}
+	}
+
+	TRef<TSound> TAudioEngineMA::GetOrLoadSound(const TString& InPath, ESoundCreateFlags LoadFlags)
+	{
+		if (!Sounds.Contains(InPath))
+		{
+			TString ResolvedPath = VFSResolvePath(InPath);
+			Sounds[InPath] = RefCast<TSoundMA>(TSound::New(ResolvedPath, ESoundCreateFlags::Decode | ESoundCreateFlags::Async | LoadFlags.Mask));
+		}
+		return Sounds[InPath];
 	}
 
 }

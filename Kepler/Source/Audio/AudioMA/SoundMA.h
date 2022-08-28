@@ -13,7 +13,7 @@ namespace Kepler
 		virtual bool IsPlaying() const override;
 		virtual bool IsFinished() const override;
 		virtual void Rewind() override;
-		virtual void Play() override;
+		virtual void Play(float3 Position = float3()) override;
 		virtual void WaitForLoad() override;
 		virtual void Stop() override;
 

@@ -18,8 +18,12 @@ namespace Kepler
 
 		virtual void Play(const TString& Path, ESoundCreateFlags LoadFlags) override;
 
+		virtual void PlayAt(const TString& Path, float3 Position, ESoundCreateFlags LoadFlags = 0) override;
+
 		virtual void UnloadPlaybackCache(bool bAlsoForPlaying) override;
 	
+		virtual TRef<TSound> GetOrLoadSound(const TString& InPath, ESoundCreateFlags LoadFlags = 0) override;
+
 	private:
 		ma_engine Engine;
 

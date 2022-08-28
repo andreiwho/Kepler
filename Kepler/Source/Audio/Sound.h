@@ -14,7 +14,7 @@ namespace Kepler
 		virtual bool IsFinished() const = 0;
 		virtual void Rewind() = 0;
 		virtual void WaitForLoad() = 0;
-		virtual void Play() = 0;
+		virtual void Play(float3 Position = float3()) = 0;
 		virtual void Stop() = 0;
 		virtual void SetLooping(bool bLooping)
 		{
