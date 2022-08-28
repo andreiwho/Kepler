@@ -21,6 +21,9 @@ set(TINYGLTF_INSTALL OFF CACHE BOOL "")
 add_subdirectory(tinygltf)
 SetDefaultMSVCLib(tinygltf)
 
+add_library(miniaudio INTERFACE)
+target_include_directories(miniaudio INTERFACE miniaudio)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image
