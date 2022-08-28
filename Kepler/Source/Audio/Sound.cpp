@@ -5,7 +5,7 @@ namespace Kepler
 {
 
 	TSound::TSound(const TString& InPath, ESoundCreateFlags InCreateFlags)
-		:	CreateFlags(InCreateFlags)
+		:	Path(InPath)
 	{
 	}
 

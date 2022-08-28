@@ -37,4 +37,20 @@ namespace Kepler
 		Sound->Play();
 	}
 
+	void TAudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
+	{
+		if (bAlsoForPlaying)
+		{
+			Sounds.Clear();
+		}
+		else
+		{
+			std::erase_if(Sounds.GetUnderlyingContainer(),
+				[](const auto& Sound) 
+				{
+					return !Sound.second->IsPlaying();
+				});
+		}
+	}
+
 }

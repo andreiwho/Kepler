@@ -42,6 +42,11 @@ namespace Kepler
 			MACHECK(ma_sound_init_from_file(Engine->GetEngineHandle(), InPath.c_str(), LoadFlags, nullptr, DoneFence, &SoundBuffer[Index]));
 		}
 
+		if (CreateFlags & ESoundCreateFlags::Looping)
+		{
+			SetLooping(true);
+		}
+
 		// TODO: Deal with looping
 		KEPLER_TRACE(LogSoundMA, "Audio track {} loaded", InPath);
 		CurrentSound = MaxBufferCount - 1;
@@ -49,6 +54,8 @@ namespace Kepler
 
 	TSoundMA::~TSoundMA()
 	{
+		KEPLER_TRACE(LogSoundMA, "Unloading audio track {}", Path);
+
 		TAudioEngineMA* Engine = (TAudioEngineMA*)TAudioEngine::Get();
 		for (auto& Sound : SoundBuffer)
 		{
@@ -82,7 +89,7 @@ namespace Kepler
 			Rewind();
 		}
 
-		if (CreateFlags & ESoundCreateFlags::Looping)
+		if (bIsLooping)
 		{
 			ma_sound_set_looping(&SoundBuffer[CurrentSound], true);
 		}
@@ -104,5 +111,4 @@ namespace Kepler
 	{
 		ma_sound_stop(&SoundBuffer[CurrentSound]);
 	}
-
 }

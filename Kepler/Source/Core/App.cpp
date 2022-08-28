@@ -314,7 +314,11 @@ namespace Kepler
 			AudioEngine->Play("Engine/cool.flac", ESoundCreateFlags::Streamed);
 
 		if (Event.Key == EKeyCode::F)
-			AudioEngine->Play("Engine/prog3.mp3", ESoundCreateFlags::Streamed | ESoundCreateFlags::Looping);
+			AudioEngine->Play("Engine/prog3.mp3", ESoundCreateFlags::Streamed);
+
+		if (Event.Key == EKeyCode::Z)
+			AudioEngine->UnloadPlaybackCache(false);
+
 
 		return false;
 	}

@@ -22,6 +22,8 @@ namespace Kepler
 
 		virtual void Play(const TString& Path, ESoundCreateFlags LoadFlags) = 0;
 
+		virtual void UnloadPlaybackCache(bool bAlsoForPlaying) = 0;
+
 	public:
 		u32 MaxOverlappingClips = 8;
 	};

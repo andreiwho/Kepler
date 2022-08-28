@@ -16,10 +16,17 @@ namespace Kepler
 		virtual void WaitForLoad() = 0;
 		virtual void Play() = 0;
 		virtual void Stop() = 0;
+		virtual void SetLooping(bool bLooping)
+		{
+			bIsLooping = bLooping;
+		}
 
 		static TRef<TSound> New(const TString& InPath, ESoundCreateFlags CreateFlags = ESoundCreateFlags::None);
 	
 	protected:
-		ESoundCreateFlags CreateFlags;
+		TString Path{};
+
+		bool bIsLooping = false;
+
 	};
 }

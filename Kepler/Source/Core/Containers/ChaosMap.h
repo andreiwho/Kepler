@@ -88,6 +88,9 @@ namespace Kepler
 			return nullptr;
 		}
 
+		inline TMapType& GetUnderlyingContainer() { return UnderlyingContainer; }
+		inline const TMapType& GetUnderlyingContainer() const { return UnderlyingContainer; }
+
 		inline decltype(auto) begin() { return UnderlyingContainer.begin(); }
 		inline decltype(auto) end() { return UnderlyingContainer.end(); }
 		inline decltype(auto) begin() const { return UnderlyingContainer.begin(); }
