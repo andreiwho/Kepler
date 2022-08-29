@@ -15,6 +15,6 @@ namespace Kepler
 	class TImageLoader
 	{
 	public:
-		static std::future<TImageData> LoadImage(const TString& Path);
+		static std::future<TImageData> Load(const TString& Path);
 	};
 }

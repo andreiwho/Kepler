@@ -15,6 +15,7 @@ namespace Kepler
 				if (bTaskValid = Tasks.Dequeue(Task))
 				{
 					Lck.unlock();
+					// TODO: Fix cross-thread exception handling
 					Task();
 					Lck.lock();
 					--TotalTaskNum;
