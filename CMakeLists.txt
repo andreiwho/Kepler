@@ -56,5 +56,6 @@ endmacro()
 
 add_subdirectory(Kepler)
 add_subdirectory(Testbed)
+set_target_properties(Testbed PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "Testbed")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY VS_STARTUP_PROJECT Testbed)

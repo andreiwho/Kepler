@@ -42,9 +42,7 @@ namespace Kepler
 				// ...
 				AppInstance = MakeRuntimeApplication(Params);
 
-				TString GamePath;
-				CHECKMSG(FileSystem.ResolvePath("Game/", GamePath), "You must register Game/ path alias inside your application child constructor.");
-				KEPLER_INFO(LogInit, "Resolved game path: {}", GamePath);
+				KEPLER_INFO(LogInit, "Resolved game path: {}", VFSResolvePath("Game://"));
 			}
 
 			if (AppInstance)

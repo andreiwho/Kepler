@@ -21,6 +21,8 @@ namespace Kepler
 	{
 		TCommandLineArguments() = default;
 		TCommandLineArguments(TDynArray<TString> const& CommandLine);
+
+		TString GameModuleDirectory = "";
 	};
 
 	struct TApplicationLaunchParams
@@ -47,6 +49,7 @@ namespace Kepler
 	private:
 		void InitApplicationModules();
 		void TerminateModuleStack();
+		void InitVFSAliases(const TApplicationLaunchParams& LaunchParams);
 
 		bool OnWindowClosed(const TWindowClosedEvent& Event);
 		bool OnWindowResized(const TWindowSizeEvent& Event);

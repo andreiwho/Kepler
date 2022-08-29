@@ -23,21 +23,44 @@ namespace Kepler
 	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& CommandLine)
 	{
 		// Parse command line args
-		for (const TString& arg : CommandLine)
+		// Game module name must always be the first arg
+		CHECKMSG(CommandLine.GetLength() > 0, "The first param of the command line must be the application directory");
+		TString GameModuleDirectory = CommandLine[0];
+
+		usize Index = 0;
+		for (const auto& Argument : CommandLine)
 		{
-			// TODO: Do some parsing
+			if (Index == 0)
+			{
+				continue;
+				Index++;
+			}
+			// Do someting 
+			// ...
+			// Increment the index
+			Index++;
 		}
 	}
 
 	TApplication::TApplication(const TApplicationLaunchParams& LaunchParams)
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
+		InitVFSAliases(LaunchParams);
 
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
 
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
 		AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
+
+	}
+
+	void TApplication::InitVFSAliases(const TApplicationLaunchParams& LaunchParams)
+	{
+		// Initialize VFS
+		VFSRegisterPathAlias("Engine", "Kepler/Assets");
+		VFSRegisterPathAlias("EngineShaders", "Kepler/Shaders");
+		VFSRegisterPathAlias("Game", fmt::format("{}/Assets", LaunchParams.CommandLine.GameModuleDirectory));
 	}
 
 	TApplication::~TApplication()
@@ -124,7 +147,7 @@ namespace Kepler
 				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
 				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
-				auto ImageData = Await(TImageLoader::LoadImage("Engine/Ground.png"));
+				auto ImageData = Await(TImageLoader::LoadImage("Engine://Ground.png"));
 				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
 				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
@@ -308,13 +331,13 @@ namespace Kepler
 	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
 	{
 		if(Event.Key == EKeyCode::Space)
-			AudioEngine->Play("Engine/Coin.wav");
+			AudioEngine->Play("Engine://Coin.wav");
 		
 		if(Event.Key == EKeyCode::Escape)
-			AudioEngine->Play("Engine/cool.flac", ESoundCreateFlags::Streamed);
+			AudioEngine->Play("Engine://cool.flac", ESoundCreateFlags::Streamed);
 
 		if (Event.Key == EKeyCode::F)
-			AudioEngine->Play("Engine/prog3.mp3", ESoundCreateFlags::Streamed);
+			AudioEngine->Play("Engine://prog3.mp3", ESoundCreateFlags::Streamed);
 
 		if (Event.Key == EKeyCode::Z)
 			AudioEngine->UnloadPlaybackCache(true);

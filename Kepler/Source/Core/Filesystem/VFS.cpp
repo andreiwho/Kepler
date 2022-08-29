@@ -8,9 +8,6 @@ namespace Kepler
 	TVirtualFileSystem::TVirtualFileSystem()
 	{
 		Instance = this;
-
-		RegisterVirtualPathAlias("Engine", GetCurrentWorkingDirectory() + "/Kepler/Assets");
-		RegisterVirtualPathAlias("EngineShaders", GetCurrentWorkingDirectory() + "/Kepler/Shaders");
 	}
 
 	void TVirtualFileSystem::RegisterVirtualPathAlias(const TString& Name, const TString& Path)
@@ -29,22 +26,18 @@ namespace Kepler
 	{
 		CHECK(!PathToResolve.starts_with(' '));
 		CHECK(!TPath{ PathToResolve }.is_absolute());
+		CHECK(PathToResolve.find(PathSeparationToken) != TString::npos);
 
 		TString NewPath = PathToResolve;
-		usize FirstSlash = PathToResolve.find_first_of('/');
+		usize FirstSlash = PathToResolve.find_first_of(PathSeparationToken);
 		if (FirstSlash != std::string::npos)
 		{
 			TString Alias = PathToResolve.substr(0, FirstSlash);
 			if (PathAliases.Contains(Alias))
 			{
-				NewPath.replace(0, FirstSlash, PathAliases[Alias]);
+				NewPath.replace(0, FirstSlash + strlen(PathSeparationToken), PathAliases[Alias] + '/');
 				OutPath = std::move(NewPath);
 				return true;
-			}
-			else
-			{
-				OutPath = fmt::format("{}/{}", GetCurrentWorkingDirectory(), PathToResolve);
-				std::replace(OutPath.begin(), OutPath.end(), '\\', '/');
 			}
 		}
 		return false;
@@ -52,13 +45,13 @@ namespace Kepler
 
 	void VFSRegisterPathAlias(const TString& Name, const TString& Path)
 	{
-		TVirtualFileSystem::Get()->RegisterVirtualPathAlias(Name, TVirtualFileSystem::Get()->GetCurrentWorkingDirectory() + "/" + Path);
+		TVirtualFileSystem::Get()->RegisterVirtualPathAlias(Name, Path);
 	}
 
 	TString VFSResolvePath(const TString& Path)
 	{
 		TString OutString;
-		TVirtualFileSystem::Get()->ResolvePath(Path, OutString);
+		CHECK(TVirtualFileSystem::Get()->ResolvePath(Path, OutString));
 		return OutString;
 	}
 

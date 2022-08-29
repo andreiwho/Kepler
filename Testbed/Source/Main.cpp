@@ -21,7 +21,6 @@ public:
 	TTestbed(const TApplicationLaunchParams& LaunchParams)
 		: Base(LaunchParams)
 	{
-		VFSRegisterPathAlias("Game", "Testbed/Assets");
 	}
 
 protected:
