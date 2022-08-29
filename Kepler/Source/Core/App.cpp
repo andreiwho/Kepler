@@ -330,8 +330,11 @@ namespace Kepler
 
 	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
 	{
-		if(Event.Key == EKeyCode::Space)
-			AudioEngine->Play("Engine://Coin.wav");
+		if (Event.Key == EKeyCode::Space)
+		{
+			TRef<TSound> Sound = AudioEngine->GetOrLoadSound("Engine://Coin.wav");
+			Sound->Play();
+		}
 		
 		if(Event.Key == EKeyCode::Escape)
 			AudioEngine->Play("Engine://cool.flac", ESoundCreateFlags::Streamed);
