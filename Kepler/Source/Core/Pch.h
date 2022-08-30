@@ -20,3 +20,6 @@
 #include "Core/Macros.h"
 #include "Core/Log.h"
 #include "Core/Malloc.h"
+
+// EnTT
+#include <entt/entt.hpp>

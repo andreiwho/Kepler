@@ -3,7 +3,8 @@
 //////////////////////////////////////////////////////////////////
 cbuffer TWorldViewProj : register(b0)
 {
-	float4x4 mWorldViewProj;
+	float4x4 mViewProj;
+	float4x4 mWorld;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -11,7 +12,8 @@ TPixel VSMain(in TVertex Vertex)
 {
 	TPixel Output;
 	Output.Position = float4(Vertex.Position, 1.0f);
-	Output.Position = mul(Output.Position, mWorldViewProj);
+	Output.Position = mul(Output.Position, mWorld);
+	Output.Position = mul(Output.Position, mViewProj);
 	
 	Output.Color = Vertex.Color;
 	Output.UV0 = Vertex.UV0;

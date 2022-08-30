@@ -17,6 +17,10 @@
 #include "Renderer/Pipelines/ParamPack.h"
 #include "Tools/ImageLoader.h"
 #include "Renderer/Pipelines/Default/ScreenQuadPipeline.h"
+#include "World/Game/GameEntity.h"
+#include "Renderer/World/WorldTransform.h"
+#include "Renderer/World/StaticMesh.h"
+#include "World/Game/Components/StaticMeshComponent.h"
 
 namespace Kepler
 {
@@ -52,7 +56,9 @@ namespace Kepler
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
 		AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
+		AudioEngine->Play("Game://Startup.mp3");
 
+		WorldRegistry = MakeShared<TWorldRegistry>();
 	}
 
 	void TApplication::InitVFSAliases(const TApplicationLaunchParams& LaunchParams)
@@ -65,6 +71,9 @@ namespace Kepler
 
 	TApplication::~TApplication()
 	{
+		CurrentWorld.Release();
+
+		WorldRegistry.reset();
 		AudioEngine.reset();
 		LowLevelRenderer.reset();
 		KEPLER_INFO(LogApp, "Finishing application termination");
@@ -76,6 +85,11 @@ namespace Kepler
 
 		InitApplicationModules();
 
+		// Create the world
+		CurrentWorld = WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
+		
+		TWorldTransform Transform;
+
 		// Begin main loop
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
@@ -83,7 +97,8 @@ namespace Kepler
 
 		struct TWorldViewProj
 		{
-			matrix4x4 mWorldViewProj = matrix4x4(1.0f);
+			matrix4x4 mViewProj = matrix4x4(1.0f);
+			matrix4x4 mWorld = matrix4x4(1.0f);
 		};
 
 		struct TVertex
@@ -93,11 +108,42 @@ namespace Kepler
 			float2 UV{};
 		};
 
-		TDynArray<TVertex> Vertices = {
-			{{-0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f, 0.0f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f, 0.0f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		TDynArray<TStaticMeshVertex> Vertices = {
+			// Front
+			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+			// Left
+			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+			// Top
+			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+			// Right
+			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+			// Bottom
+			{{-0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+			// Back
+			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		};
 
 		TDynArray<TVertex> QuadVertices =
@@ -108,17 +154,23 @@ namespace Kepler
 			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		};
 
-		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
+		TDynArray<u32> Indices = { 
+			0,1,3,1,2,3,
+			4,5,7,5,6,7,
+			8,9,11,9,10,11,
+			12,13,15,13,14,15,
+			16,17,19,17,18,19,
+			20,21,23,21,22,23
+		};
 
 		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
-		Mapping->AddParam("mWorldViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		Mapping->AddParam("mViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		Mapping->AddParam("mWorld", offsetof(TWorldViewProj, mWorld), 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 		Mapping->AddTextureSampler("Albedo", EShaderStageFlags::Pixel, 0);
 		
 		TRef<TPipelineSamplerPack> Samplers = Mapping->CreateSamplerPack();
 		TRef<TParamBuffer> MvpBuffer;
 		TRef<TImage2D> SampledImage;
-		TRef<TVertexBuffer> VertexBuffer;
-		TRef<TIndexBuffer> IndexBuffer;
 		TRef<TGraphicsPipeline> UnlitPipeline;
 		TRef<TTextureSampler2D> Sampler;
 
@@ -136,16 +188,15 @@ namespace Kepler
 		TRef<TGraphicsPipeline> ScreenQuadPipeline;
 		TRef<TVertexBuffer> QuadVertexBuffer;
 		TRef<TIndexBuffer> QuadIndexBuffer;
-		
-		// TODO: Finish screen quad stuff
 
-		TRef<TDataBlob> VertexBlob = TDataBlob::New(Vertices);
+		auto Entity = CurrentWorld->CreateEntity("Entity");
+		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, Vertices, Indices);
+
+		// TODO: Finish screen quad stuff
 		auto RenderTask = TRenderThread::Submit(
 			[&, this]
 			{
 				MvpBuffer = TParamBuffer::New(Mapping);
-				VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
-				IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
 				auto ImageData = Await(TImageLoader::Load("Game://Ground.png"));
 				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
@@ -186,18 +237,31 @@ namespace Kepler
 				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
 				{
 					// Update game state
+					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+
 					PositionX += GGlobalTimer->Delta();
-					auto& Param = MvpBuffer->GetParamForWriting<matrix4x4>("mWorldViewProj");
+					auto& Param = MvpBuffer->GetParamForWriting<matrix4x4>("mViewProj");
 					
 					float Width = (float)MainWindow->GetWidth();
 					float Height = (float)MainWindow->GetHeight();
 					Width = Width > 0 ? Width: 1;
 					Height = Height > 0 ? Height : 1;
-					auto Projection = glm::perspectiveFovLH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
-					auto View = glm::lookAtLH(float3(0.0f, 2.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
+					auto Projection = glm::perspectiveFovRH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
+					auto View = glm::lookAtRH(float3(0.0f, -3.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
+
+					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
+
+					auto Rotation = EntityRef.GetRotation();
+					Rotation.z = PositionX * 100.0f;
+					Rotation.x = PositionX * 100.0f;
+					Rotation.y = PositionX * 100.0f;
+					EntityRef.SetRotation(Rotation);
+
+					auto& TransformParam = MvpBuffer->GetParamForWriting<matrix4x4>("mWorld");
+					TransformParam = glm::transpose(EntityRef.GetTransform().GenerateWorldMatrix());
+
 					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
-					Param = Projection * View;
-					Param = transpose(Param);
+					Param = glm::transpose(Projection * View);
 
 					// Render the frame
 					TRenderThread::Submit(
@@ -220,8 +284,8 @@ namespace Kepler
 
 								pImmList->BeginDebugEvent("Mesh Pass");
 								pImmList->BindParamBuffers(MvpBuffer, 0);
-								pImmList->BindVertexBuffers(VertexBuffer, 0, 0);
-								pImmList->BindIndexBuffer(IndexBuffer, 0);
+								pImmList->BindVertexBuffers(CurrentWorld->GetComponent<TStaticMeshComponent>(Entity).GetStaticMesh()->GetVertexBuffer(), 0, 0);
+								pImmList->BindIndexBuffer(CurrentWorld->GetComponent<TStaticMeshComponent>(Entity).GetStaticMesh()->GetIndexBuffer(), 0);
 
 								pImmList->SetViewport(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.0f, 1.0f);
 								pImmList->SetScissor(0, 0,  (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight());
@@ -232,7 +296,7 @@ namespace Kepler
 								pImmList->ClearRenderTarget(RenderTargets[FrameIndex], {0.1f, 0.1f, 0.1f, 1.0f});
 								pImmList->BindPipeline(UnlitPipeline);
 								pImmList->BindSamplers(Samplers);
-								pImmList->DrawIndexed(IndexBuffer->GetCount(), 0, 0);
+								pImmList->DrawIndexed(CurrentWorld->GetComponent<TStaticMeshComponent>(Entity).GetStaticMesh()->GetIndexCount(), 0, 0);
 								pImmList->EndDebugEvent();
 
 								pImmList->BeginDebugEvent("Screen Quad Pass");

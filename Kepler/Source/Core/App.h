@@ -14,6 +14,8 @@
 #include <memory>
 #include "Containers/DynArray.h"
 #include "Modules/ModuleStack.h"
+#include "World/WorldRegistry.h"
+#include "World/Game/GameWorld.h"
 
 namespace Kepler
 {
@@ -58,6 +60,9 @@ namespace Kepler
 		TWindow* MainWindow{};
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
 		TSharedPtr<TAudioEngine> AudioEngine{};
+		TSharedPtr<TWorldRegistry> WorldRegistry{};
+
+		TRef<TGameWorld> CurrentWorld;
 
 		TModuleStack ModuleStack{};
 	};

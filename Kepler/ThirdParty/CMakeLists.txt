@@ -24,6 +24,8 @@ SetDefaultMSVCLib(tinygltf)
 add_library(miniaudio INTERFACE)
 target_include_directories(miniaudio INTERFACE miniaudio)
 
+add_subdirectory(entt)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image

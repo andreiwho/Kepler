@@ -16,3 +16,6 @@
 [submodule "Kepler/ThirdParty/miniaudio"]
 	path = Kepler/ThirdParty/miniaudio
 	url = https://github.com/mackron/miniaudio
+[submodule "Kepler/ThirdParty/entt"]
+	path = Kepler/ThirdParty/entt
+	url = https://github.com/skypjack/entt
