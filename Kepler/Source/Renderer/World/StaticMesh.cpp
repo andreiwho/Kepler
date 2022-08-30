@@ -1,5 +1,6 @@
 #include "StaticMesh.h"
 #include "Renderer/RenderGlobals.h"
+#include "Async/Async.h"
 
 namespace Kepler
 {
@@ -24,21 +25,21 @@ namespace Kepler
 
 		if (!VertexBuffer)
 		{
-			TRenderThread::Submit(
+			Await(TRenderThread::Submit(
 				[&Vertices, This = RefFromThis()]
 				{
 					This->VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
-				});
+				}));
 		}
 	}
 
 	void TStaticMesh::SetIndices(const TDynArray<u32>& Indices)
 	{
-		TRenderThread::Submit(
+		Await(TRenderThread::Submit(
 			[&Indices, This = RefFromThis()]
 			{
 				This->IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
-			});
+			}));
 	}
 
 }

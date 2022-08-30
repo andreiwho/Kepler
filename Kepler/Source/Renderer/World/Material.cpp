@@ -1,5 +1,6 @@
 #include "Material.h"
 #include "../RenderGlobals.h"
+#include "Async/Async.h"
 
 namespace Kepler
 {
@@ -7,12 +8,12 @@ namespace Kepler
 		:	Pipeline(InPipeline)
 	{
 		CHECK(!IsRenderThread());
-		TRenderThread::Submit(
+		Await(TRenderThread::Submit(
 			[This = RefFromThis(), InParamMapping]
 			{
 				This->ParamBuffer = TParamBuffer::New(InParamMapping);
 				This->Samplers = InParamMapping->CreateSamplerPack();
-			});
+			}));
 	}
 
 	void TMaterial::RT_Update(TRef<class TCommandListImmediate> pImmCmd)
