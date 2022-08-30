@@ -49,6 +49,12 @@ namespace Kepler
 			EntityRegistry.remove<T>(Entity.Entity);
 		}
 
+		template<typename ... Ts>
+		inline decltype(auto) GetComponentView()
+		{
+			return EntityRegistry.view<Ts...>();
+		}
+
 		virtual void UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind) override;
 
 	private:
