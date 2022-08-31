@@ -4,15 +4,19 @@
 
 namespace Kepler
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline, TRef<TPipelineParamMapping> InParamMapping)
-		:	Pipeline(InPipeline)
+	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline)
+		: Pipeline(InPipeline)
 	{
 		CHECK(!IsRenderThread());
 		Await(TRenderThread::Submit(
-			[This = RefFromThis(), InParamMapping]
+			[This = RefFromThis()]
 			{
-				This->ParamBuffer = TParamBuffer::New(InParamMapping);
-				This->Samplers = InParamMapping->CreateSamplerPack();
+				auto ParamMapping = This->GetPipeline()->GetParamMapping();
+				if (ParamMapping)
+				{
+					This->ParamBuffer = TParamBuffer::New(ParamMapping);
+					This->Samplers = ParamMapping->CreateSamplerPack();
+				}
 			}));
 	}
 

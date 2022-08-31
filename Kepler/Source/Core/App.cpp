@@ -57,7 +57,7 @@ namespace Kepler
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
 		AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
-		AudioEngine->Play("Game://Startup.mp3");
+		// AudioEngine->Play("Game://Startup.mp3");
 
 		WorldRegistry = MakeShared<TWorldRegistry>();
 	}
@@ -163,23 +163,14 @@ namespace Kepler
 			16,17,19,17,18,19,
 			20,21,23,21,22,23
 		};
-
-		TRef<TPipelineParamMapping> Mapping = MakeRef(New<TPipelineParamMapping>());
-		Mapping->AddParam("mViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-		Mapping->AddParam("mWorld", offsetof(TWorldViewProj, mWorld), 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-		Mapping->AddTextureSampler("Albedo", EShaderStageFlags::Pixel, 0);
 		
-		TRef<TPipelineSamplerPack> Samplers = Mapping->CreateSamplerPack();
+		TRef<TPipelineSamplerPack> Samplers;
 		TRef<TParamBuffer> MvpBuffer;
 		TRef<TImage2D> SampledImage;
 		TRef<TGraphicsPipeline> UnlitPipeline;
 		TRef<TTextureSampler2D> Sampler;
 
-		// Screen quad stuff
-		TRef<TPipelineParamMapping> ScreenQuadMapping = MakeRef(New<TPipelineParamMapping>());
-		ScreenQuadMapping->AddTextureSampler("RenderTarget", EShaderStageFlags::Pixel, 0);
-
-		TRef<TPipelineSamplerPack> QuadSamplers = ScreenQuadMapping->CreateSamplerPack();
+		TRef<TPipelineSamplerPack> QuadSamplers;
 		TRef<TImage2D> QuadImage;
 
 		TRef<TImage2D> DepthImage;
@@ -197,12 +188,13 @@ namespace Kepler
 		auto RenderTask = TRenderThread::Submit(
 			[&, this]
 			{
-				MvpBuffer = TParamBuffer::New(Mapping);
 				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
+				MvpBuffer = TParamBuffer::New(UnlitPipeline->GetParamMapping());
 				auto ImageData = Await(TImageLoader::Load("Game://Ground.png"));
 				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
 				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
+				Samplers = UnlitPipeline->GetParamMapping()->CreateSamplerPack();
 				Samplers->Write("Albedo", Sampler);
 				
 				// Screen quad
@@ -217,10 +209,11 @@ namespace Kepler
 				ScreenQuadPipeline = MakeRef(New<TScreenQuadPipeline>());
 				QuadVertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
 				QuadIndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
+				QuadSamplers = ScreenQuadPipeline->GetParamMapping()->CreateSamplerPack();
 			});
 		Await(RenderTask);
 
-		CurrentWorld->AddComponent<TMaterialComponent>(Entity, UnlitPipeline, Mapping);
+		CurrentWorld->AddComponent<TMaterialComponent>(Entity, UnlitPipeline);
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);

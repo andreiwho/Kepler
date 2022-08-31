@@ -40,6 +40,12 @@ namespace Kepler
 
 		inline const auto& GetSamplers() const { return Samplers; }
 		inline EShaderStageFlags GetSamplerShaderStages() const { return SamplerShaderStages; }
+
+		static TRef<TPipelineParamMapping> New()
+		{
+			return MakeRef(Kepler::New<TPipelineParamMapping>());
+		}
+
 	private:
 		TChaoticMap<TString, TPipelineParam> Params;
 		EShaderStageFlags ParamShaderStages{0};

@@ -17,6 +17,10 @@ namespace Kepler
 
 		Configuration.DepthStencil.bDepthEnable = false;
 		Configuration.DepthStencil.DepthAccess = EDepthBufferAccess::Read | EDepthBufferAccess::Write;
+
+		Configuration.ParamMapping = TPipelineParamMapping::New();
+		Configuration.ParamMapping->AddTextureSampler("RenderTarget", EShaderStageFlags::Pixel, 0);
+
 		return Configuration;
 	}
 

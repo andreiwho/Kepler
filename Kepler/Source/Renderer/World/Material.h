@@ -9,7 +9,7 @@ namespace Kepler
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(TRef<TGraphicsPipeline> InPipeline, TRef<TPipelineParamMapping> InParamMapping);
+		TMaterial(TRef<TGraphicsPipeline> InPipeline);
 
 		void RT_Update(TRef<class TCommandListImmediate> pImmCmd);
 
@@ -47,9 +47,9 @@ namespace Kepler
 			return MakeRef(Kepler::New<TMaterial>());
 		}
 
-		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline, TRef<TPipelineParamMapping> InParamMapping)
+		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline)
 		{
-			return MakeRef(Kepler::New<TMaterial>(InPipeline, InParamMapping));
+			return MakeRef(Kepler::New<TMaterial>(InPipeline));
 		}
 
 	private:

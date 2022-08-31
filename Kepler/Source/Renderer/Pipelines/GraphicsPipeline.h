@@ -4,6 +4,7 @@
 #include "Renderer/Elements/VertexLayout.h"
 #include "Renderer/Elements/Shader.h"
 #include "Core/Malloc.h"
+#include "ParamPack.h"
 
 namespace Kepler
 {
@@ -38,6 +39,8 @@ namespace Kepler
 			bool bStencilEnable = false;
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
 		} DepthStencil;
+
+		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
 	class TGraphicsPipelineHandle : public TRefCounted
@@ -56,6 +59,8 @@ namespace Kepler
 	
 		TRef<TShader> GetShader() const { return Shader; }
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
+
+		TRef<TPipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
 
 	protected:
 		static TRef<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);

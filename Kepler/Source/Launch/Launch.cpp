@@ -6,6 +6,10 @@
 #include "Async/Async.h"
 #include "Core/Filesystem/VFS.h"
 
+#ifdef WIN32
+# include <crtdbg.h>
+#endif
+
 namespace Kepler
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 Argc, char** ppArgv)
@@ -23,6 +27,7 @@ namespace Kepler
 
 	int Main(i32 Argc, char** ppArgv)
 	{
+
 		// Log must be the first one always (after malloc)
 		TGlobalExceptionContainer Exceptions{};
 		TMalloc Malloc{};
@@ -48,7 +53,6 @@ namespace Kepler
 			if (AppInstance)
 			{
 				AppInstance->Run();
-				return EXIT_SUCCESS;
 			}
 		}
 		catch (const Kepler::TException& Exception)
@@ -64,11 +68,14 @@ namespace Kepler
 		}
 
 		delete GLargeThreadPool;
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 }
 
 extern int main(int argc, char** argv)
 {
+#if defined(ENABLE_DEBUG) && defined(WIN32)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 	return Kepler::Main(argc, argv);
 }

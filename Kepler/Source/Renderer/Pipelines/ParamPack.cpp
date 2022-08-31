@@ -64,12 +64,12 @@ namespace Kepler
 
 	TRef<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
 	{
-		return MakeRef(New<TPipelineParamPack>(RefFromThis()));
+		return MakeRef(Kepler::New<TPipelineParamPack>(RefFromThis()));
 	}
 
 	TRef<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
 	{
-		return MakeRef(New<TPipelineSamplerPack>(RefFromThis()));
+		return MakeRef(Kepler::New<TPipelineSamplerPack>(RefFromThis()));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

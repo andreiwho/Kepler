@@ -2,9 +2,8 @@
 
 namespace Kepler
 {
-
-	TMaterialComponent::TMaterialComponent(TRef<TGraphicsPipeline> InPipeline, TRef<TPipelineParamMapping> InParamMapping)
-		:	Material(TMaterial::New(InPipeline, InParamMapping))
+	TMaterialComponent::TMaterialComponent(TRef<TGraphicsPipeline> InPipeline)
+		: Material(TMaterial::New(InPipeline))
 	{
 	}
 
