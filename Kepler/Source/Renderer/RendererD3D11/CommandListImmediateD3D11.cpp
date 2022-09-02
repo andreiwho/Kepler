@@ -296,6 +296,8 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::StartDrawingToRenderTargets(const TDynArray<TRef<TRenderTarget2D>>& RenderTargets, TRef<TDepthStencilTarget2D> DepthStencil)
 	{
+		CHECK(IsRenderThread());
+
 		TDynArray<ID3D11RenderTargetView*> ppRTVs;
 		ID3D11DepthStencilView* pDSV = nullptr;
 
@@ -336,6 +338,8 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bClearStencil)
 	{
+		CHECK(IsRenderThread());
+
 		if (auto MyTarget = RefCast<TDepthStencilTarget2D_D3D11>(Target))
 		{
 			ID3D11DepthStencilView* Dsv = MyTarget->GetView();
