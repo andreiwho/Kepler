@@ -64,6 +64,7 @@ namespace Kepler
 
 	void TGameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (UpdateKind != EWorldUpdateKind::Game)
 		{
 			return;
@@ -89,6 +90,7 @@ namespace Kepler
 
 	void TGameWorld::FlushPendingDestroys()
 	{
+		KEPLER_PROFILE_SCOPE();
 		// Flush pending destroys
 		for (auto Id : PendingDestroyEntities)
 		{

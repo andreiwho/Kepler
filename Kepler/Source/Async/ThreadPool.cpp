@@ -4,6 +4,7 @@ namespace Kepler
 {
 	void TThreadPool::WorkerMain()
 	{
+		KEPLER_PROFILE_INIT_THREAD("Worker");
 		while (bIsRunning)
 		{
 			std::function<void()> Task;

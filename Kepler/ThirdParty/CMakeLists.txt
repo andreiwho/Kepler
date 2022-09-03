@@ -26,12 +26,15 @@ target_include_directories(miniaudio INTERFACE miniaudio)
 
 add_subdirectory(entt)
 
+add_subdirectory(optick)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image
  tinygltf
  update_mappings 
- uninstall)
+ uninstall
+ OptickCore)
 
 foreach(THIRD_PARTY_PROJECT ${THIRD_PARTY_PROJECTS})
  set_target_properties(${THIRD_PARTY_PROJECT} PROPERTIES FOLDER "ThirdParty")

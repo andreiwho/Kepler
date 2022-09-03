@@ -228,6 +228,7 @@ namespace Kepler
 
 			while (Platform->HasActiveMainWindow())
 			{
+				KEPLER_PROFILE_FRAME("GameLoop")
 				MainTimer.Begin();
 				Platform->Update();
 

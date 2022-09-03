@@ -15,6 +15,7 @@ namespace Kepler
 		Instance = this;
 		TRenderThread::Submit([this]
 			{
+				KEPLER_PROFILE_INIT_THREAD("RenderThread");
 				RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
 		TRenderThread::Wait();

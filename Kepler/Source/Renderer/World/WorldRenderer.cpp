@@ -55,6 +55,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::RT_UpdateMaterialComponents(TRef<TCommandListImmediate> pImmCtx)
 	{
+		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 		CurrentWorld->GetComponentView<TMaterialComponent>().each(
 			[this, pImmCtx](auto, TMaterialComponent& Component)
@@ -73,6 +74,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::MeshPass(TRef<TCommandListImmediate> pImmCtx)
 	{
+		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("MeshPass");
 		const u32 FrameIndex = LLR->GetFrameIndex();
 
@@ -117,6 +119,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::FlushPass(TRef<TCommandListImmediate> pImmCtx)
 	{
+		KEPLER_PROFILE_SCOPE();
 		// For now just flush the mesh pass image
 		pImmCtx->BeginDebugEvent("Screen Quad Pass");
 		// Main swap chain

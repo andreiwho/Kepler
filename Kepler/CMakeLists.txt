@@ -6,7 +6,8 @@ target_link_libraries("Kepler"
   "spdlog" 
   "glm" 
   "tinygltf"
-  "EnTT" 
+  "EnTT"
+  "OptickCore"
  PRIVATE 
   "glfw" 
   "stb_image" 
@@ -14,6 +15,8 @@ target_link_libraries("Kepler"
 target_compile_definitions("Kepler"
  PUBLIC
 #  FORCE_REPORT_LIVE_OBJECTS      # Uncomment if you want to see live DXGI objects on shutdown   
+  $<$<CONFIG:Debug>:ENABLE_PROFILING>
+  $<$<CONFIG:RelWithDebInfo>:ENABLE_PROFILING>
 )
 
 target_precompile_headers("Kepler" PRIVATE Source/Core/Pch.h)
