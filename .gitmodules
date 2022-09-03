@@ -19,3 +19,6 @@
 [submodule "Kepler/ThirdParty/entt"]
 	path = Kepler/ThirdParty/entt
 	url = https://github.com/skypjack/entt
+[submodule "Kepler/ThirdParty/optick"]
+	path = Kepler/ThirdParty/optick
+	url = https://github.com/bombomby/optick
