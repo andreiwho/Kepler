@@ -47,8 +47,6 @@ namespace Kepler
 	{
 		Width = InWidth;
 		Height = InHeight;
-		KEPLER_TRACE(LogGLFWWindow, "Window size set to {}, {}", Width, Height);
-		// Add a callback to signal subscribers that the window was resized
 	}
 
 	void TWindowGLFW::SetupCallbacks()

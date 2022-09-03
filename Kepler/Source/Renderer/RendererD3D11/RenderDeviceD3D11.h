@@ -58,9 +58,6 @@ namespace Kepler
 
 		void RegisterPendingDeleteResource(ID3D11DeviceChild* Resource);
 
-
-
-
 	private:
 		void CreateFactory();
 		void CreateDevice();

@@ -11,6 +11,10 @@ target_link_libraries("Kepler"
   "glfw" 
   "stb_image" 
   "miniaudio")
+target_compile_definitions("Kepler"
+ PUBLIC
+#  FORCE_REPORT_LIVE_OBJECTS      # Uncomment if you want to see live DXGI objects on shutdown   
+)
 
 target_precompile_headers("Kepler" PRIVATE Source/Core/Pch.h)
 if(WIN32)

@@ -22,6 +22,7 @@
 #include "Renderer/World/StaticMesh.h"
 #include "World/Game/Components/StaticMeshComponent.h"
 #include "World/Game/Components/MaterialComponent.h"
+#include "Renderer/World/WorldRenderer.h"
 
 namespace Kepler
 {
@@ -88,7 +89,7 @@ namespace Kepler
 
 		// Create the world
 		CurrentWorld = WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
-		
+
 		TWorldTransform Transform;
 
 		// Begin main loop
@@ -155,7 +156,7 @@ namespace Kepler
 			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		};
 
-		TDynArray<u32> Indices = { 
+		TDynArray<u32> Indices = {
 			0,1,3,1,2,3,
 			4,5,7,5,6,7,
 			8,9,11,9,10,11,
@@ -163,7 +164,7 @@ namespace Kepler
 			16,17,19,17,18,19,
 			20,21,23,21,22,23
 		};
-		
+
 		TRef<TPipelineSamplerPack> Samplers;
 		TRef<TParamBuffer> MvpBuffer;
 		TRef<TImage2D> SampledImage;
@@ -196,7 +197,7 @@ namespace Kepler
 				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
 				Samplers = UnlitPipeline->GetParamMapping()->CreateSamplerPack();
 				Samplers->Write("Albedo", Sampler);
-				
+
 				// Screen quad
 				QuadImage = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource | EImageUsage::RenderTarget, 1, 3);
 				for (u32 Index = 0; Index < 3; ++Index)
@@ -239,10 +240,10 @@ namespace Kepler
 
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
 					auto& Param = PlayerMaterial->GetParamReferenceForWriting<matrix4x4>("mViewProj");
-					
+
 					float Width = (float)MainWindow->GetWidth();
 					float Height = (float)MainWindow->GetHeight();
-					Width = Width > 0 ? Width: 1;
+					Width = Width > 0 ? Width : 1;
 					Height = Height > 0 ? Height : 1;
 					auto Projection = glm::perspectiveFovRH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
 					auto View = glm::lookAtRH(float3(0.0f, -3.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
@@ -260,10 +261,17 @@ namespace Kepler
 
 					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
 					Param = glm::transpose(Projection * View);
-
 					PlayerMaterial->WriteSampler("Albedo", Sampler);
 
 					// Render the frame
+					TRenderThread::Submit([&, this]
+						{
+							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
+							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
+						});
+					LowLevelRenderer->PresentAll();
+
+					/*
 					TRenderThread::Submit(
 						[&, this]
 						{
@@ -283,6 +291,8 @@ namespace Kepler
 							// Render
 							if (SwapChain)
 							{
+								// TODO: Move this into high level scene renderer
+								// - Pipeline sorting
 								pImmList->BeginDebugEvent("Clear Render State");
 								pImmList->ClearSamplers();
 								pImmList->EndDebugEvent();
@@ -305,13 +315,12 @@ namespace Kepler
 										pImmList->BindPipeline(MT.GetMaterial()->GetPipeline());
 										pImmList->BindSamplers(MT.GetMaterial()->GetSamplers());
 										pImmList->DrawIndexed(SM.GetStaticMesh()->GetIndexCount(), 0, 0);
-
 									}
 								);
 								pImmList->EndDebugEvent();
 								// END MESH PASS
 
-					
+
 								pImmList->BeginDebugEvent("Screen Quad Pass");
 								pImmList->StartDrawingToSwapChainImage(SwapChain);
 								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
@@ -319,7 +328,7 @@ namespace Kepler
 								pImmList->BindIndexBuffer(QuadIndexBuffer, 0);
 								pImmList->BindPipeline(ScreenQuadPipeline);
 
-								//Write quad sampler 
+								//Write quad sampler
 								QuadSamplers->Write("RenderTarget", QuadSamplerHandles[FrameIndex]);
 								// and
 								pImmList->BindSamplers(QuadSamplers);
@@ -330,6 +339,7 @@ namespace Kepler
 							}
 						});
 					LowLevelRenderer->PresentAll();
+					*/
 				}
 				else // minimized
 				{
@@ -412,8 +422,8 @@ namespace Kepler
 			TRef<TSound> Sound = AudioEngine->GetOrLoadSound("Game://Coin.wav");
 			Sound->Play();
 		}
-		
-		if(Event.Key == EKeyCode::Escape)
+
+		if (Event.Key == EKeyCode::Escape)
 			AudioEngine->Play("Game://cool.flac", ESoundCreateFlags::Streamed);
 
 		if (Event.Key == EKeyCode::F)

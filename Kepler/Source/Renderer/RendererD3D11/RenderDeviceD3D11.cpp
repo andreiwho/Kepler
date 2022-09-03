@@ -25,6 +25,7 @@ namespace Kepler
 {
 	TRenderDeviceD3D11* TRenderDeviceD3D11::Instance = nullptr;
 
+	//////////////////////////////////////////////////////////////////////////
 	TRenderDeviceD3D11::TRenderDeviceD3D11()
 	{
 		CHECK(!Instance);
@@ -42,6 +43,7 @@ namespace Kepler
 		ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRenderDeviceD3D11::~TRenderDeviceD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
@@ -49,18 +51,26 @@ namespace Kepler
 
 		if (ClassLinkage)
 			ClassLinkage->Release();
-#ifdef ENABLE_DEBUG
-		if (InfoQueue)
-			InfoQueue->Release();
-#endif
 		if (ImmediateContext)
 			ImmediateContext->Release();
 		if (Device)
 			Device->Release();
 		if (Factory)
 			Factory->Release();
+#ifdef ENABLE_DEBUG
+		if (InfoQueue)
+		{
+			CComPtr<IDXGIDebug> Debug;
+#ifdef FORCE_REPORT_LIVE_OBJECTS
+			HRCHECK_NOTHROW(InfoQueue->QueryInterface(&Debug));
+			HRCHECK_NOTHROW(Debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL));
+#endif
+			InfoQueue->Release();
+		}
+#endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
@@ -68,6 +78,7 @@ namespace Kepler
 		return MakeRef(New<TVertexBufferD3D11>(InAccessFlags, Data));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
@@ -75,6 +86,7 @@ namespace Kepler
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamMapping> Params)
 	{
 		CHECK(IsRenderThread());
@@ -82,6 +94,7 @@ namespace Kepler
 		return MakeRef(New<TParamBufferD3D11>(Params));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
@@ -89,6 +102,7 @@ namespace Kepler
 		return MakeRef(New<TSwapChainD3D11>(Window));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::Internal_InitInfoMessageStartIndex_Debug()
 	{
 #ifdef ENABLE_DEBUG
@@ -99,6 +113,7 @@ namespace Kepler
 #endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TDynArray<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifdef ENABLE_DEBUG
@@ -119,6 +134,7 @@ namespace Kepler
 #endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	bool TRenderDeviceD3D11::RT_FlushPendingDeleteResources()
 	{
 		CHECK(IsRenderThread());
@@ -143,16 +159,19 @@ namespace Kepler
 		return bHasDeletedAny;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::RegisterPendingDeleteResource(ID3D11DeviceChild* Resource)
 	{
 		PendingDeleteResources.Enqueue(std::move(Resource));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TTextureSampler2D> TRenderDeviceD3D11::CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return MakeRef(New<TTextureSampler2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
@@ -160,6 +179,7 @@ namespace Kepler
 		return MakeRef(New<TTransferBufferD3D11>(Size, InitialData));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
@@ -167,6 +187,7 @@ namespace Kepler
 		return MakeRef(New<TImage1D_D3D11>(InWidth, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
@@ -174,6 +195,7 @@ namespace Kepler
 		return MakeRef(New<TImage2D_D3D11>(InWidth, InHeight, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TImage3D> TRenderDeviceD3D11::CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
@@ -182,16 +204,19 @@ namespace Kepler
 
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TRenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return MakeRef(New<TRenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TDepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return MakeRef(New<TDepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	static TString GetAdapterName(IDXGIAdapter* Adapter)
 	{
 		CHECK(IsRenderThread());
@@ -205,6 +230,7 @@ namespace Kepler
 		return ConvertToAnsiString(Desc.Description);
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::CreateFactory()
 	{
 		CHECK(IsRenderThread());
@@ -215,6 +241,7 @@ namespace Kepler
 		HRCHECK(::CreateDXGIFactory2(Flags, IID_PPV_ARGS(&Factory)));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::CreateDevice()
 	{
 		CHECK(IsRenderThread());
@@ -252,6 +279,7 @@ namespace Kepler
 		Adapter->Release();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::InitializeInfoQueue()
 	{
 #ifdef ENABLE_DEBUG
@@ -267,6 +295,7 @@ namespace Kepler
 #endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TRenderDeviceD3D11::CreateClassLinkage()
 	{
 		CHECK(IsRenderThread());
@@ -275,6 +304,7 @@ namespace Kepler
 		HRCHECK(Device->CreateClassLinkage(&ClassLinkage));
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
 		: Stride(ElemSize)
 	{
@@ -289,18 +319,21 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	const void* TDataBlobD3D11::GetData() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferPointer();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	usize TDataBlobD3D11::GetSize() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferSize();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TDataBlobD3D11::Write(const void* Data, usize Size)
 	{
 		CHECK(Blob);
@@ -310,5 +343,7 @@ namespace Kepler
 			memcpy(Blob->GetBufferPointer(), Data, Size);
 		}
 	}
+
+	//////////////////////////////////////////////////////////////////////////
 }
 #endif

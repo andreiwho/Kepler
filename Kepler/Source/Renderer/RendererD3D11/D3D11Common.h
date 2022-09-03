@@ -10,8 +10,10 @@
 
 #ifdef USE_ASSERT
 # define HRCHECK(x) CHECK(SUCCEEDED(x))
+# define HRCHECK_NOTHROW(x) CHECK_NOTHROW(SUCCEEDED(x))
 #else
-# define HRCHECK(x) x
+# define HRCHECK(x) (void)x
+# define HRCHECK_NOTHROW(x) (void)x
 #endif
 
 namespace Kepler
