@@ -6,6 +6,10 @@
 #include "Exception.h"
 #include <spdlog/fmt/fmt.h>
 
+#ifdef ENABLE_PROFILING
+# include "optick.h"
+#endif
+
 #ifdef USE_ASSERT
 # if PLATFORM_DESKTOP
 #  ifdef WIN32
@@ -35,3 +39,13 @@
 #endif
 
 #define BIT(x) (1 << (x))
+
+#ifdef ENABLE_PROFILING
+# define KEPLER_PROFILE_FRAME(Name) OPTICK_FRAME((Name))
+# define KEPLER_PROFILE_SCOPE(...) OPTICK_EVENT(__VA_ARGS__) 
+# define KEPLER_PROFILE_INIT_THREAD(Name) OPTICK_THREAD((Name)) 
+#else
+# define KEPLER_PROFILE_FRAME(...)
+# define KEPLER_PROFILE_SCOPE(...)
+# define KEPLER_PROFILE_INIT_THREAD(...)
+#endif
