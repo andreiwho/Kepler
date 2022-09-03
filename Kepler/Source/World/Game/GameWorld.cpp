@@ -1,6 +1,7 @@
 #include "GameWorld.h"
 #include "GameEntity.h"
 #include "Components/TransformComponent.h"
+#include "Components/MaterialComponent.h"
 
 namespace Kepler
 {
@@ -67,6 +68,14 @@ namespace Kepler
 		{
 			return;
 		}
+
+		// Update components for entities
+		EntityRegistry.view<TMaterialComponent, TTransformComponent>().each(
+			[this](auto, TMaterialComponent& MC, TTransformComponent& TC) 
+			{
+				TRef<TMaterial> Material = MC.GetMaterial();
+				Material->WriteTransform(TC.GetTransform());
+			});
 
 		EntityRegistry.view<TGameEntity>().each(
 			[DeltaTime](TGameEntity& Entity)

@@ -23,6 +23,7 @@
 #include "World/Game/Components/StaticMeshComponent.h"
 #include "World/Game/Components/MaterialComponent.h"
 #include "Renderer/World/WorldRenderer.h"
+#include "Renderer/World/Camera.h"
 
 namespace Kepler
 {
@@ -233,21 +234,17 @@ namespace Kepler
 				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
 				{
 					// Update game state
-
-					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
-
 					PositionX += GGlobalTimer->Delta();
 
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
-					auto& Param = PlayerMaterial->GetParamReferenceForWriting<matrix4x4>("mViewProj");
+					TCamera Camera(45.0f, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight(), 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
+					PlayerMaterial->WriteCamera(Camera);
 
 					float Width = (float)MainWindow->GetWidth();
 					float Height = (float)MainWindow->GetHeight();
 					Width = Width > 0 ? Width : 1;
 					Height = Height > 0 ? Height : 1;
-					auto Projection = glm::perspectiveFovRH_ZO(glm::radians(45.0f), (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.1f, 100.0f);
-					auto View = glm::lookAtRH(float3(0.0f, -3.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
-
+			
 					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
 					auto Rotation = EntityRef.GetRotation();
@@ -256,12 +253,10 @@ namespace Kepler
 					Rotation.y = PositionX * 100.0f;
 					EntityRef.SetRotation(Rotation);
 
-					auto& TransformParam = PlayerMaterial->GetParamReferenceForWriting<matrix4x4>("mWorld");
-					TransformParam = glm::transpose(EntityRef.GetTransform().GenerateWorldMatrix());
-
 					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
-					Param = glm::transpose(Projection * View);
 					PlayerMaterial->WriteSampler("Albedo", Sampler);
+					
+					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the frame
 					TRenderThread::Submit([&, this]
@@ -270,76 +265,6 @@ namespace Kepler
 							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
 						});
 					LowLevelRenderer->PresentAll();
-
-					/*
-					TRenderThread::Submit(
-						[&, this]
-						{
-							static u32 FrameIndex = 0;
-
-							auto pImmList = LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList();
-							auto SwapChain = LowLevelRenderer->GetSwapChain(0);
-
-							// Update all materials
-							CurrentWorld->GetComponentView<TMaterialComponent>().each(
-								[pImmList](auto, TMaterialComponent& Component)
-								{
-									Component.GetMaterial()->RT_Update(pImmList);
-								});
-							// MvpBuffer->RT_UploadToGPU(pImmList);
-
-							// Render
-							if (SwapChain)
-							{
-								// TODO: Move this into high level scene renderer
-								// - Pipeline sorting
-								pImmList->BeginDebugEvent("Clear Render State");
-								pImmList->ClearSamplers();
-								pImmList->EndDebugEvent();
-
-								// MESH PASS
-								pImmList->BeginDebugEvent("Mesh Pass");
-								// Write to quad render target
-								pImmList->StartDrawingToRenderTargets(RenderTargets[FrameIndex], DepthTarget);
-								pImmList->ClearDepthTarget(DepthTarget);
-								pImmList->ClearRenderTarget(RenderTargets[FrameIndex], { 0.1f, 0.1f, 0.1f, 1.0f });
-								pImmList->SetViewport(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight(), 0.0f, 1.0f);
-								pImmList->SetScissor(0, 0, (float)MainWindow->GetWidth(), (float)MainWindow->GetHeight());
-
-								CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
-									[pImmList](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
-									{
-										pImmList->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), 0);
-										pImmList->BindVertexBuffers(SM.GetStaticMesh()->GetVertexBuffer(), 0, 0);
-										pImmList->BindIndexBuffer(SM.GetStaticMesh()->GetIndexBuffer(), 0);
-										pImmList->BindPipeline(MT.GetMaterial()->GetPipeline());
-										pImmList->BindSamplers(MT.GetMaterial()->GetSamplers());
-										pImmList->DrawIndexed(SM.GetStaticMesh()->GetIndexCount(), 0, 0);
-									}
-								);
-								pImmList->EndDebugEvent();
-								// END MESH PASS
-
-
-								pImmList->BeginDebugEvent("Screen Quad Pass");
-								pImmList->StartDrawingToSwapChainImage(SwapChain);
-								pImmList->ClearSwapChainImage(SwapChain, {0.1f, 0.1f, 0.1f, 1.0f});
-								pImmList->BindVertexBuffers(QuadVertexBuffer, 0, 0);
-								pImmList->BindIndexBuffer(QuadIndexBuffer, 0);
-								pImmList->BindPipeline(ScreenQuadPipeline);
-
-								//Write quad sampler
-								QuadSamplers->Write("RenderTarget", QuadSamplerHandles[FrameIndex]);
-								// and
-								pImmList->BindSamplers(QuadSamplers);
-								pImmList->DrawIndexed(QuadIndexBuffer->GetCount(), 0, 0);
-								pImmList->EndDebugEvent();
-
-								FrameIndex = (FrameIndex + 1) % 3;
-							}
-						});
-					LowLevelRenderer->PresentAll();
-					*/
 				}
 				else // minimized
 				{

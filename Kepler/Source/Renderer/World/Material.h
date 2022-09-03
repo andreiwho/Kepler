@@ -2,6 +2,8 @@
 #include "Renderer/Pipelines/ParamPack.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "../Elements/ParamBuffer.h"
+#include "WorldTransform.h"
+#include "Camera.h"
 
 namespace Kepler
 {
@@ -51,6 +53,10 @@ namespace Kepler
 		{
 			return MakeRef(Kepler::New<TMaterial>(InPipeline));
 		}
+
+		// Helper functions
+		void WriteTransform(TWorldTransform Transform);
+		void WriteCamera(TCamera Camera);
 
 	private:
 		TRef<TGraphicsPipeline> Pipeline;

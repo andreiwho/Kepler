@@ -30,4 +30,17 @@ namespace Kepler
 	{
 		Samplers->Write(Name, Data);
 	}
+
+	void TMaterial::WriteTransform(TWorldTransform Transform)
+	{
+		matrix4x4 Matrix = glm::transpose(Transform.GenerateWorldMatrix());
+		ParamBuffer->Write("Transform", &Matrix);
+	}
+
+	void TMaterial::WriteCamera(TCamera Camera)
+	{
+		matrix4x4 ViewProjection = glm::transpose(Camera.GenerateViewProjectionMatrix());
+		ParamBuffer->Write("ViewProjection", &ViewProjection);
+	}
+
 }

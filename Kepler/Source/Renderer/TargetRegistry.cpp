@@ -18,7 +18,6 @@ namespace Kepler
 
 	TRenderTargetGroup::~TRenderTargetGroup()
 	{
-		KEPLER_INFO(VALIDATE, "Log");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -70,7 +69,6 @@ namespace Kepler
 
 	TTargetRegistry::~TTargetRegistry()
 	{
-		KEPLER_INFO(VALIDATE, "This is log");
 	}
 
 	//////////////////////////////////////////////////////////////////////////

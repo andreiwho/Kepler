@@ -25,8 +25,8 @@ namespace Kepler
 		Configuration.DepthStencil.DepthAccess = EDepthBufferAccess::Read | EDepthBufferAccess::Write;
 
 		Configuration.ParamMapping = TPipelineParamMapping::New();
-		Configuration.ParamMapping->AddParam("mViewProj", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-		Configuration.ParamMapping->AddParam("mWorld", offsetof(TWorldViewProj, mWorld), 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		Configuration.ParamMapping->AddParam("ViewProjection", 0, 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		Configuration.ParamMapping->AddParam("Transform", offsetof(TWorldViewProj, mWorld), 0, EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 		Configuration.ParamMapping->AddTextureSampler("Albedo", EShaderStageFlags::Pixel, 0);
 
 		return Configuration;
