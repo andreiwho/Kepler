@@ -8,12 +8,15 @@ namespace Kepler
 {
 	class TVertexBuffer : public TBuffer
 	{
-	public:
+	protected:
 		TVertexBuffer() = default;
 		TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
-
+	
+	public:
 		inline usize GetSize() const { return Size; }
 		inline usize GetStride() const { return Stride; }
+
+		static TRef<TVertexBuffer> New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
 
 	protected:
 		EBufferAccessFlags AccessFlags{};

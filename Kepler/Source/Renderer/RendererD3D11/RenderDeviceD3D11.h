@@ -5,6 +5,7 @@
 #include "Core/Containers/DynArray.h"
 #include "Core/Containers/RingQueue.h"
 #include <mutex>
+#include "../Elements/RenderTarget.h"
 
 class IDXGIInfoQueue;
 
@@ -40,8 +41,15 @@ namespace Kepler
 		inline ID3D11ClassLinkage* GetClassLinkage() const { return ClassLinkage; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data) override;
+		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData) override;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) override;
-		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* Window) override;
+		virtual TRef<TSwapChain> CreateSwapChainForWindow(TWindow* Window) override;
+		virtual TRef<TImage1D> CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual TRef<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual TRef<TImage3D> CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual TRef<TRenderTarget2D> CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
+		virtual TRef<TDepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
+		virtual TRef<TTextureSampler2D> CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
 		TDynArray<TString> GetInfoQueueMessages() const;
@@ -64,7 +72,7 @@ namespace Kepler
 		u64 InfoMsgStartIndex = 0;
 		ID3D11ClassLinkage* ClassLinkage{};
 
-		TThreadSafeRingQueue<ID3D11DeviceChild*> PendingDeleteResources{10000};
+		TThreadSafeRingQueue<ID3D11DeviceChild*> PendingDeleteResources{ 10000 };
 
 		std::mutex ResourceMutex;
 	};

@@ -26,7 +26,7 @@ namespace Kepler
 		for (const EShaderStageFlags::Type Stage : Stages)
 		{
 			ModuleFutures.EmplaceBack(Async(
-				[PathRef = std::ref(Path), SourceRef = std::ref(Source), Stage]()
+				[PathRef = VFSResolvePath(Path), SourceRef = std::ref(Source), Stage]()
 				{
 					return CreateShaderModule(PathRef, Stage, SourceRef);
 				})
@@ -61,7 +61,7 @@ namespace Kepler
 			default:
 				break;
 			}
-			CHECK(false && "Unknown shader type");
+			CRASHMSG("Unknown shader type");
 		});
 
 		OutShaderModule.ByteCode = CompileHLSLCode(SourceName, EntryPoint, Flag, Source);
@@ -88,7 +88,7 @@ namespace Kepler
 			ShaderType = "cs_5_0";
 			break;
 		default:
-			CHECKMSG(false, "Unknown shader type");
+			CRASHMSG("Unknown shader type");
 			break;
 		}
 

@@ -52,12 +52,58 @@ namespace Kepler
 
 		CHECK(ActualSize > 0);
 		Params.Insert(Name, TPipelineParam(Offset, ActualSize, Type));
-		ShaderStages |= Stage;
+		ParamShaderStages |= Stage;
 	}
 
-	TRef<TPipelineParamPack> TPipelineParamMapping::CreatePack()
+	void TPipelineParamMapping::AddTextureSampler(const TString& Name, EShaderStageFlags Stage, u32 Register)
 	{
-		return MakeRef(New<TPipelineParamPack>(RefFromThis()));
+		CHECK(!Name.empty());
+		Samplers.Insert(Name, Register);
+		SamplerShaderStages |= Stage;
+	}
+
+	TRef<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
+	{
+		return MakeRef(Kepler::New<TPipelineParamPack>(RefFromThis()));
+	}
+
+	TRef<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
+	{
+		return MakeRef(Kepler::New<TPipelineSamplerPack>(RefFromThis()));
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	TPipelineSamplerPack::TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping)
+		:	Params(Mapping)
+	{
+		// Get register count and allocate space for the stuff
+		u32 MaxRegister = 0;
+		for (const auto& [_, Register] : Params->GetSamplers())
+		{
+			if (Register > MaxRegister)
+			{
+				MaxRegister = Register;
+			}
+		}
+		Samplers.Resize(1ull + MaxRegister);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TPipelineSamplerPack::Write(const TString& Name, TRef<TTextureSampler2D> Data)
+	{
+		CHECK(Params);
+		CHECK(Params->GetSamplers().Contains(Name));
+		const u32 Register = Params->GetSamplers()[Name];
+		Samplers[Register] = Data;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	TRef<TTextureSampler2D> TPipelineSamplerPack::GetSampler(const TString& Name)
+	{
+		CHECK(Params);
+		CHECK(Params->GetSamplers().Contains(Name));
+		const u32 Register = Params->GetSamplers()[Name];
+		return Samplers[Register];
 	}
 
 }

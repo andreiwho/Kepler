@@ -10,3 +10,15 @@
 [submodule "Kepler/ThirdParty/tinygltf"]
 	path = Kepler/ThirdParty/tinygltf
 	url = https://github.com/syoyo/tinygltf
+[submodule "Kepler/ThirdParty/imgui"]
+	path = Kepler/ThirdParty/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "Kepler/ThirdParty/miniaudio"]
+	path = Kepler/ThirdParty/miniaudio
+	url = https://github.com/mackron/miniaudio
+[submodule "Kepler/ThirdParty/entt"]
+	path = Kepler/ThirdParty/entt
+	url = https://github.com/skypjack/entt
+[submodule "Kepler/ThirdParty/optick"]
+	path = Kepler/ThirdParty/optick
+	url = https://github.com/bombomby/optick

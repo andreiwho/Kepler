@@ -9,10 +9,7 @@ namespace Kepler
 	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<TDataBlob> Data)
 		:	TVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
-		if (!Data)
-		{
-			return;
-		}
+		CHECK(Data);
 
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
 		CHECKMSG(Data->GetStride(), "When creating a vertex buffer using TDataBlob the ElemSize of the blob must be specified");

@@ -4,6 +4,7 @@ namespace Kepler
 {
 	void TThreadPool::WorkerMain()
 	{
+		KEPLER_PROFILE_INIT_THREAD("Worker");
 		while (bIsRunning)
 		{
 			std::function<void()> Task;
@@ -15,6 +16,7 @@ namespace Kepler
 				if (bTaskValid = Tasks.Dequeue(Task))
 				{
 					Lck.unlock();
+					// TODO: Fix cross-thread exception handling
 					Task();
 					Lck.lock();
 					--TotalTaskNum;

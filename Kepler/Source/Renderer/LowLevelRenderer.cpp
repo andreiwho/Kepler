@@ -1,21 +1,37 @@
 #include "LowLevelRenderer.h"
 #include "Platform/Window.h"
+#include "Pipelines/Default/ScreenQuadPipeline.h"
+#include "RenderTypes.h"
+#include "Async/Async.h"
 
 namespace Kepler
 {
+
+	TLowLevelRenderer* TLowLevelRenderer::Instance;
+
 	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::TLowLevelRenderer()
 	{
+		Instance = this;
 		TRenderThread::Submit([this]
 			{
+				KEPLER_PROFILE_INIT_THREAD("RenderThread");
 				RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
 		TRenderThread::Wait();
+
+		InitScreenQuad();
+		TargetRegistry = MakeShared<TTargetRegistry>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::~TLowLevelRenderer()
 	{
+		TargetRegistry.reset();
+		ScreenQuad.Pipeline.Release();
+		ScreenQuad.VertexBuffer.Release();
+		ScreenQuad.IndexBuffer.Release();
+		ScreenQuad.Samplers.Release();
 		TRenderThread::Submit(
 			[this]
 			{
@@ -56,6 +72,7 @@ namespace Kepler
 				}
 			});
 		TRenderThread::Wait();
+		SwapChainFrame = (SwapChainFrame + 1) % SwapChainFrameCount;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -90,6 +107,37 @@ namespace Kepler
 					SwapChain->Resize(InWindow->GetWidth(), InWindow->GetHeight());
 				}
 			});
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TLowLevelRenderer::InitScreenQuad()
+	{
+		struct TVertex
+		{
+			float3 Pos{};
+			float3 Col{};
+			float2 UV{};
+		};
+
+		TDynArray<TVertex> QuadVertices =
+		{
+			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		};
+
+		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
+
+		auto Task = TRenderThread::Submit(
+			[&, this]
+			{
+				ScreenQuad.Pipeline = MakeRef(New<TScreenQuadPipeline>());
+				ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
+				ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
+				ScreenQuad.Samplers = ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
+			});
+		Await(Task);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

@@ -7,18 +7,24 @@
 #include "Shader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 #include "ParamBuffer.h"
+#include "Buffer.h"
+#include "Image.h"
+#include "Renderer/Pipelines/ParamPack.h"
 
 namespace Kepler
 {
 	class TSwapChain;
+	class TRenderTarget2D;
+	class TDepthStencilTarget2D;
 
 	class TCommandList : public TRefCounted
 	{
 	public:
 		virtual ~TCommandList() = default;
 
-		virtual void StartDrawingToSwapChainImage(TSwapChain* SwapChain) = 0;
-		virtual void ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4]) = 0;
+		virtual void StartDrawingToSwapChainImage(TRef<TSwapChain> SwapChain, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+
+		virtual void ClearSwapChainImage(TRef<TSwapChain> SwapChain, float4 ClearColor) = 0;
 		
 		// A version for the single buffer (called like this for optimization reasons)
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) = 0;
@@ -34,6 +40,10 @@ namespace Kepler
 
 		virtual void BindShader(TRef<TShader> Shader) = 0;
 
+		virtual void BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot = 0) = 0;
+
+		virtual void ClearSamplers(u32 Slot = 0) = 0;
+
 		virtual void BindPipeline(TRef<TGraphicsPipeline> Pipeline) = 0;
 
 		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) = 0;
@@ -46,6 +56,18 @@ namespace Kepler
 		
 		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
 
+		virtual void StartDrawingToRenderTargets(TRef<TRenderTarget2D> RenderTarget, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+
+		virtual void StartDrawingToRenderTargets(const TDynArray<TRef<TRenderTarget2D>>& RenderTargets, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+
+		virtual void ClearRenderTarget(TRef<TRenderTarget2D> Target, float4 Color) = 0;
+
+		virtual void ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bCleanStencil = false) = 0;
+
+		virtual void BeginDebugEvent(const char* Name) = 0;
+
+		virtual void EndDebugEvent() = 0;
+		
 	protected:
 		bool bHasAttachedPipeline = false;
 	};
@@ -56,5 +78,9 @@ namespace Kepler
 		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
 
 		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
+
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+
+		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data) = 0;
 	};
 }

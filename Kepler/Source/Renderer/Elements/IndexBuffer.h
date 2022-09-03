@@ -8,13 +8,16 @@ namespace Kepler
 {
 	class TIndexBuffer : public TBuffer
 	{
-	public:
+	protected:
 		TIndexBuffer() = default;
 		TIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
-
+	
+	public:
 		inline usize GetSize() const { return Size; }
 		inline usize GetStride() const { return Stride; }
 		inline usize GetCount() const { return Size / Stride; }
+
+		static TRef<TIndexBuffer> New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
 
 	protected:
 		EBufferAccessFlags AccessFlags{};

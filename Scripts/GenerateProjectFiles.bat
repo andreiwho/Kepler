@@ -1,4 +1,4 @@
 @echo off
 @pushd ..
-cmake . -B_Generated
+cmake . -BIntermediate
 @popd

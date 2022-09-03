@@ -6,6 +6,10 @@
 #include "Exception.h"
 #include <spdlog/fmt/fmt.h>
 
+#ifdef ENABLE_PROFILING
+# include "optick.h"
+#endif
+
 #ifdef USE_ASSERT
 # if PLATFORM_DESKTOP
 #  ifdef WIN32
@@ -26,10 +30,22 @@
 # define CHECKMSG(x, msg) do { if(!(x)) { throw Kepler::TException(fmt::format("Assertion failed: '{}' \nin file {} \non line {}\n", msg, __FILE__, __LINE__), "CHECK FAILURE"); } } while(false)
 # define CHECKED(x) [](auto&& arg) { CHECK(!!(arg)); return arg; }(x)
 #else
-# define CHECK(x) x
-# define CHECK_NOTHROW(x) x
-# define CHECKMSG(x, msg) x
-# define CHECKED(x) x
+# define CHECK(x) (void)(x)
+# define CHECK_NOTHROW(x) (void)(x)
+# define CHECKMSG(x, msg) (void)(x)
+# define CHECKED(x) (x)
+# define CRASH() throw Kepler::TException("Exception raised")
+# define CRASHMSG(x) throw Kepler::TException(x)
 #endif
 
 #define BIT(x) (1 << (x))
+
+#ifdef ENABLE_PROFILING
+# define KEPLER_PROFILE_FRAME(Name) OPTICK_FRAME((Name))
+# define KEPLER_PROFILE_SCOPE(...) OPTICK_EVENT(__VA_ARGS__) 
+# define KEPLER_PROFILE_INIT_THREAD(Name) OPTICK_THREAD((Name)) 
+#else
+# define KEPLER_PROFILE_FRAME(...)
+# define KEPLER_PROFILE_SCOPE(...)
+# define KEPLER_PROFILE_INIT_THREAD(...)
+#endif

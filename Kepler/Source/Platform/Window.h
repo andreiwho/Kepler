@@ -20,6 +20,7 @@ namespace Kepler
 		inline bool IsCloseRequested() const { return bCloseRequested; }
 		void SetTitle(const TString& newTitle);
 		inline const TString& GetTitle() const { return Title; }
+		inline const TString& GetName() const { return Name; }
 		inline i32 GetWidth() const { return Width; }
 		inline i32 GetHeight() const { return Height; }
 		inline const TWindowParams& GetParams() const { return Params; }
@@ -40,6 +41,7 @@ namespace Kepler
 		virtual void SetFullscreen_Impl(bool bNewFullscreen) = 0;
 
 	private:
+		TString Name{};
 		TString Title{};
 		TWindowParams Params{};
 	};

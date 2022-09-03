@@ -108,9 +108,9 @@ namespace Kepler
 			RenderTargetView = nullptr;
 		}
 		
-		Width = InWidth;
-		Height = InHeight;
-		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		Width = InWidth > 0 ? InWidth : 1;
+		Height = InHeight > 0 ? InHeight : 1;
+		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 		CreateRenderTargets();
 	}
 }

@@ -11,10 +11,30 @@ add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE "glm")
 target_compile_definitions(glm INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
+add_subdirectory(stb_image)
+
+set(TINYGLTF_BUILD_BUILDER_EXAMPLE OFF CACHE BOOL "")
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "")
+set(TINYGLTF_BUILD_VALIDATOR_EXAMPLE OFF CACHE BOOL "")
+set(TINYGLTF_BUILD_GL_EXAMPLES OFF CACHE BOOL "")
+set(TINYGLTF_INSTALL OFF CACHE BOOL "")
+add_subdirectory(tinygltf)
+SetDefaultMSVCLib(tinygltf)
+
+add_library(miniaudio INTERFACE)
+target_include_directories(miniaudio INTERFACE miniaudio)
+
+add_subdirectory(entt)
+
+add_subdirectory(optick)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
+ stb_image
+ tinygltf
  update_mappings 
- uninstall)
+ uninstall
+ OptickCore)
 
 foreach(THIRD_PARTY_PROJECT ${THIRD_PARTY_PROJECTS})
  set_target_properties(${THIRD_PARTY_PROJECT} PROPERTIES FOLDER "ThirdParty")

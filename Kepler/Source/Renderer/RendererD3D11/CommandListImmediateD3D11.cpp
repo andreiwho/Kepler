@@ -7,9 +7,14 @@
 #include "HLSLShaderD3D11.h"
 #include "GraphicsPipelineHandleD3D11.h"
 #include "ParamBufferD3D11.h"
+#include "RenderTargetD3D11.h"
+#include "ImageD3D11.h"
+#include "TextureD3D11.h"
 
 namespace Kepler
 {
+	DEFINE_UNIQUE_LOG_CHANNEL(LogImmediateContext);
+
 	TCommandListImmediateD3D11* TCommandListImmediateD3D11::Instance = nullptr;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -26,26 +31,42 @@ namespace Kepler
 	TCommandListImmediateD3D11::~TCommandListImmediateD3D11()
 	{
 		CHECK_NOTHROW(IsRenderThread());
+		if (AnnotationInterface)
+		{
+			AnnotationInterface->Release();
+		}
 		Context->Release();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TCommandListImmediateD3D11::StartDrawingToSwapChainImage(TSwapChain* SwapChain)
+	void TCommandListImmediateD3D11::StartDrawingToSwapChainImage(TRef<TSwapChain> SwapChain, TRef<TDepthStencilTarget2D> DepthStencil)
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
-		TSwapChainD3D11* MySwapChain = static_cast<TSwapChainD3D11*>(SwapChain);
+		TRef<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(SwapChain);
 		ID3D11RenderTargetView* ppRTV[] = { CHECKED(MySwapChain->GetRenderTargetView()) };
-		Context->OMSetRenderTargets(ARRAYSIZE(ppRTV), ppRTV, nullptr);
+		ID3D11DepthStencilView* pDsv = nullptr;
+		if (DepthStencil)
+		{
+			if (auto MyDSV = RefCast<TDepthStencilTarget2D_D3D11>(DepthStencil))
+			{
+				pDsv = MyDSV->GetView();
+			}
+		}
+
+		Context->OMSetRenderTargets(ARRAYSIZE(ppRTV), ppRTV, pDsv);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TCommandListImmediateD3D11::ClearSwapChainImage(TSwapChain* SwapChain, float ClearColor[4])
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::ClearSwapChainImage(TRef<TSwapChain> SwapChain, float4 ClearColor)
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
-		TSwapChainD3D11* MySwapChain = static_cast<TSwapChainD3D11*>(SwapChain);
-		Context->ClearRenderTargetView(MySwapChain->GetRenderTargetView(), ClearColor);
+		TRef<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(SwapChain);
+		const float NewColor[4] = { ClearColor.r, ClearColor.g, ClearColor.b, ClearColor.a };
+		Context->ClearRenderTargetView(MySwapChain->GetRenderTargetView(), NewColor);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -148,6 +169,47 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot)
+	{
+		CHECK(IsRenderThread());
+
+		TDynArray<ID3D11SamplerState*> ppSamplers;
+		TDynArray<ID3D11ShaderResourceView*> ppShaderResources;
+
+		if (auto SamplerCount = Samplers->GetSamplers().GetLength())
+		{
+			ppSamplers.Resize(SamplerCount);
+			ppShaderResources.Resize(SamplerCount);
+			for (usize Index = 0; Index < SamplerCount; ++Index)
+			{
+				if (auto Sampler = RefCast<TTextureSampler2D_D3D11>(Samplers->GetSamplers()[Index]))
+				{
+					ppSamplers[Index] = Sampler->GetSampler();
+					ppShaderResources[Index] = Sampler->GetView();
+				}
+			}
+
+			Context->PSSetShaderResources(Slot, ppShaderResources.GetLength(), ppShaderResources.GetData());
+			Context->PSSetSamplers(Slot, ppSamplers.GetLength(), ppSamplers.GetData());
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::ClearSamplers(u32 Slot)
+	{
+		CHECK(IsRenderThread());
+		static constexpr UINT ResourceCount = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+		std::array<void*, ResourceCount> Nulls{};
+		for (auto& Null : Nulls) { Null = nullptr; }
+
+		// This is a little hack to do this fast and without allocations
+		Context->PSSetShaderResources(Slot, ResourceCount, (ID3D11ShaderResourceView**)Nulls.data());
+		Context->PSSetSamplers(Slot, ResourceCount, (ID3D11SamplerState**)Nulls.data());
+
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BindPipeline(TRef<TGraphicsPipeline> Pipeline)
 	{
 		CHECK(IsRenderThread());
@@ -189,7 +251,7 @@ namespace Kepler
 		Viewport.Height = Height;
 		Viewport.MinDepth = MinDepth;
 		Viewport.MaxDepth = MaxDepth;
-		
+
 		Context->RSSetViewports(1, &Viewport);
 	}
 
@@ -201,8 +263,91 @@ namespace Kepler
 		Rect.right = (LONG)X + (LONG)Width;
 		Rect.top = (LONG)Y;
 		Rect.bottom = (LONG)Y + (LONG)Height;
-		
+
 		Context->RSSetScissorRects(1, &Rect);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::StartDrawingToRenderTargets(TRef<TRenderTarget2D> RenderTarget, TRef<TDepthStencilTarget2D> DepthStencil)
+	{
+		CHECK(IsRenderThread());
+		if (!RenderTarget)
+		{
+			KEPLER_WARNING(LogImmediateContext, "Passed null to TCommandListImmediate::StartDrawingToRenderTargets");
+			return;
+		}
+
+		TRef<TRenderTarget2D_D3D11> MyTarget = RefCast<TRenderTarget2D_D3D11>(RenderTarget);
+		if (MyTarget)
+		{
+			ID3D11RenderTargetView* View = MyTarget->GetView();
+			ID3D11DepthStencilView* DepthStencilView = nullptr;
+			if (View)
+			{
+				if (auto MyDepthStencil = RefCast<TDepthStencilTarget2D_D3D11>(DepthStencil))
+				{
+					DepthStencilView = MyDepthStencil->GetView();
+				}
+				Context->OMSetRenderTargets(1, &View, DepthStencilView);
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::StartDrawingToRenderTargets(const TDynArray<TRef<TRenderTarget2D>>& RenderTargets, TRef<TDepthStencilTarget2D> DepthStencil)
+	{
+		CHECK(IsRenderThread());
+
+		TDynArray<ID3D11RenderTargetView*> ppRTVs;
+		ID3D11DepthStencilView* pDSV = nullptr;
+
+		if (RenderTargets.GetLength() > 0)
+		{
+			ppRTVs.Reserve(RenderTargets.GetLength());
+			for (TRef<TRenderTarget2D> Target : RenderTargets)
+			{
+				if (auto MyTarget = RefCast<TRenderTarget2D_D3D11>(Target))
+				{
+					ppRTVs.EmplaceBack(MyTarget->GetView());
+				}
+			}
+		}
+
+		if (auto MyDepthStencil = RefCast<TDepthStencilTarget2D_D3D11>(DepthStencil))
+		{
+			pDSV = MyDepthStencil->GetView();
+		}
+
+		Context->OMSetRenderTargets((UINT)ppRTVs.GetLength(), ppRTVs.GetData(), pDSV);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::ClearRenderTarget(TRef<TRenderTarget2D> Target, float4 Color)
+	{
+		if (auto MyTarget = RefCast<TRenderTarget2D_D3D11>(Target))
+		{
+			ID3D11RenderTargetView* View = MyTarget->GetView();
+			if (View)
+			{
+				FLOAT ClearColor[4] = { Color.r, Color.g, Color.b, Color.a };
+				Context->ClearRenderTargetView(View, ClearColor);
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bClearStencil)
+	{
+		CHECK(IsRenderThread());
+
+		if (auto MyTarget = RefCast<TDepthStencilTarget2D_D3D11>(Target))
+		{
+			ID3D11DepthStencilView* Dsv = MyTarget->GetView();
+			if (Dsv)
+			{
+				Context->ClearDepthStencilView(Dsv, bClearStencil ? D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL : D3D11_CLEAR_DEPTH, 1.0f, 0);
+			}
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -270,7 +415,7 @@ namespace Kepler
 		const usize VSOffset = BufferCount * 0;
 		const usize PSOffset = BufferCount * 1;
 		const usize CSOffset = BufferCount * 2;
-		
+
 		usize Index = 0;
 		for (const auto& Buffer : ParamBuffers)
 		{
@@ -325,6 +470,54 @@ namespace Kepler
 		{
 			Context->CSSetConstantBuffers(Slot, (UINT)BufferCount, Buffers.GetData() + CSOffset);
 		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	{
+		CHECK(IsRenderThread());
+
+		ID3D11Resource* pFrom = (ID3D11Resource*)From->GetNativeHandle();
+		ID3D11Resource* pTo = (ID3D11Resource*)To->GetNativeHandle();
+
+		CD3D11_BOX SrcBox(SrcOffset, 0, 0, SrcOffset + Size, 1, 1);
+		Context->CopySubresourceRegion(pTo, 0, DstOffset, 0, 0, pFrom, 0, &SrcBox);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data)
+	{
+		CHECK(IsRenderThread());
+		if (auto MyImage = RefCast<TImage2D_D3D11>(Into))
+		{
+			CD3D11_BOX CopyBox((LONG)X, (LONG)Y, 0, (LONG)X + (LONG)Width, (LONG)Y + (LONG)Height, 1);
+			Context->UpdateSubresource(MyImage->GetImage(), 0, &CopyBox, Data->GetData(), (UINT)Data->GetSize() / (Height > 0 ? Height : 1), 0);
+		}
+	}
+
+	void TCommandListImmediateD3D11::BeginDebugEvent(const char* Name)
+	{
+#ifdef ENABLE_DEBUG
+		if (!AnnotationInterface)
+		{
+			HRCHECK(Context->QueryInterface(&AnnotationInterface));
+		}
+
+		static constexpr SIZE_T MaxBufferSize = 256;
+		wchar_t NameBuffer[MaxBufferSize] = {};
+		mbstowcs(NameBuffer, Name, MaxBufferSize);
+		AnnotationInterface->BeginEvent(NameBuffer);
+#endif
+	}
+
+	void TCommandListImmediateD3D11::EndDebugEvent()
+	{
+#ifdef ENABLE_DEBUG
+		if (AnnotationInterface)
+		{
+			AnnotationInterface->EndEvent();
+		}
+#endif
 	}
 
 	//////////////////////////////////////////////////////////////////////////

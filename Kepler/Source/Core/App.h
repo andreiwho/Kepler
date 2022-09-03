@@ -6,12 +6,16 @@
 #include "Renderer/RenderThread.h"
 #include "Renderer/LowLevelRenderer.h"
 
+#include "Audio/AudioEngine.h"
+
 #include "Renderer/RenderDevice.h"
 
 #include <string>
 #include <memory>
 #include "Containers/DynArray.h"
 #include "Modules/ModuleStack.h"
+#include "World/WorldRegistry.h"
+#include "World/Game/GameWorld.h"
 
 namespace Kepler
 {
@@ -19,6 +23,8 @@ namespace Kepler
 	{
 		TCommandLineArguments() = default;
 		TCommandLineArguments(TDynArray<TString> const& CommandLine);
+
+		TString GameModuleDirectory = "";
 	};
 
 	struct TApplicationLaunchParams
@@ -45,13 +51,19 @@ namespace Kepler
 	private:
 		void InitApplicationModules();
 		void TerminateModuleStack();
+		void InitVFSAliases(const TApplicationLaunchParams& LaunchParams);
 
 		bool OnWindowClosed(const TWindowClosedEvent& Event);
 		bool OnWindowResized(const TWindowSizeEvent& Event);
-
+		bool OnKeyDown(const TKeyDownEvent& Event);
 	private:
 		TWindow* MainWindow{};
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
+		TSharedPtr<TAudioEngine> AudioEngine{};
+		TSharedPtr<TWorldRegistry> WorldRegistry{};
+
+		TRef<TGameWorld> CurrentWorld;
+
 		TModuleStack ModuleStack{};
 	};
 
