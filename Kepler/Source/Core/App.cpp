@@ -74,6 +74,8 @@ namespace Kepler
 
 	TApplication::~TApplication()
 	{
+		MeshLoader.ClearCache();
+		ImageLoader.ClearCache();
 		MaterialLoader.ClearLoadedMaterialCache();
 		CurrentWorld.Release();
 
@@ -184,8 +186,10 @@ namespace Kepler
 		TRef<TVertexBuffer> QuadVertexBuffer;
 		TRef<TIndexBuffer> QuadIndexBuffer;
 
+		auto NewMesh = MeshLoader.LoadStaticMesh("Game://Sphere.gltf");
+
 		auto Entity = CurrentWorld->CreateEntity("Entity");
-		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, Vertices, Indices);
+		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, NewMesh);
 
 		// TODO: Finish screen quad stuff
 		auto RenderTask = TRenderThread::Submit(

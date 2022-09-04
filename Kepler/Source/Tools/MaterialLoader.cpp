@@ -93,15 +93,9 @@ namespace Kepler
 
 				CHECK(Sampler.IsString());
 				auto LoadSampler = Sampler.GetString();
-
-				auto LoadedSampler = TRenderThread::Submit([&]
-					{
-						auto ImageData = Await(TImageLoader::Load(LoadSampler));
-						auto SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
-						SampledImage->Write(TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
-						return TTextureSampler2D::New(SampledImage);
-					});
-				Material->WriteSampler(Name, Await(LoadedSampler));
+				auto LoadedSampler = TImageLoader::Get()->LoadSamplerCached(LoadSampler);
+				CHECK(LoadedSampler);
+				Material->WriteSampler(Name, LoadedSampler);
 			}
 			return true;
 		}

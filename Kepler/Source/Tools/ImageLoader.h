@@ -12,9 +12,24 @@ namespace Kepler
 		u32 Width, Height, Components;
 	};
 
+	class TTextureSampler2D;
 	class TImageLoader
 	{
+		static TImageLoader* Instance;
 	public:
+		TImageLoader();
+		~TImageLoader();
+
+		void ClearCache();
+
+		static TImageLoader* Get() { return Instance; }
+
+		// This is the old version, which should not be used if the loaded sampler is your goal.
 		static std::future<TImageData> Load(const TString& Path);
+
+		TRef<TTextureSampler2D> LoadSamplerCached(const TString& Path);
+
+	private:
+		TChaoticMap<TString, TRef<TTextureSampler2D>> LoadedSamplers;
 	};
 }

@@ -17,6 +17,8 @@
 #include "Modules/ModuleStack.h"
 #include "World/WorldRegistry.h"
 #include "World/Game/GameWorld.h"
+#include "Tools/ImageLoader.h"
+#include "Tools/MeshLoader.h"
 
 namespace Kepler
 {
@@ -62,7 +64,10 @@ namespace Kepler
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
 		TSharedPtr<TAudioEngine> AudioEngine{};
 		TSharedPtr<TWorldRegistry> WorldRegistry{};
+
 		TMaterialLoader MaterialLoader;
+		TImageLoader ImageLoader;
+		TMeshLoader MeshLoader;
 
 		TRef<TGameWorld> CurrentWorld;
 

@@ -1,10 +1,31 @@
 #include "ImageLoader.h"
 
 #include <stb/stb_image.h>
+#include "Core/Macros.h"
+#include "Renderer/RenderGlobals.h"
+#include "Renderer/Elements/Image.h"
+#include "Renderer/LowLevelRenderer.h"
 
 namespace Kepler
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogImageLoader);
+
+	TImageLoader* TImageLoader::Instance = nullptr;
+
+	TImageLoader::TImageLoader()
+	{
+		Instance = this;
+	}
+
+	TImageLoader::~TImageLoader()
+	{
+		ClearCache();
+	}
+
+	void TImageLoader::ClearCache()
+	{
+		LoadedSamplers.Clear();
+	}
 
 	std::future<TImageData> TImageLoader::Load(const TString& Path)
 	{
@@ -29,4 +50,25 @@ namespace Kepler
 				};
 			});
 	}
+
+	TRef<TTextureSampler2D> TImageLoader::LoadSamplerCached(const TString& Path)
+	{
+		CHECK(!IsRenderThread());
+
+		auto ImageData = Await(Load(Path));
+		if (LoadedSamplers.Contains(Path))
+		{
+			return LoadedSamplers[Path];
+		}
+
+		auto Task = TRenderThread::Submit([&] 
+			{
+				auto SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				SampledImage->Write(TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
+				return TTextureSampler2D::New(SampledImage);
+			});
+		LoadedSamplers[Path] = Await(Task);
+		return LoadedSamplers[Path];
+	}
+
 }
