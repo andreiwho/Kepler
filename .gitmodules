@@ -22,3 +22,6 @@
 [submodule "Kepler/ThirdParty/optick"]
 	path = Kepler/ThirdParty/optick
 	url = https://github.com/bombomby/optick
+[submodule "Kepler/ThirdParty/rapidjson"]
+	path = Kepler/ThirdParty/rapidjson
+	url = https://github.com/Tencent/rapidjson
