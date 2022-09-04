@@ -2,10 +2,9 @@
 
 namespace Kepler
 {
-	TScreenQuadPipeline::TScreenQuadPipeline()
-		: TGraphicsPipeline()
+	TScreenQuadPipeline::TScreenQuadPipeline(const TString& CustomShaderPath)
 	{
-		TRef<TShader> Shader = LoadHLSLShader("EngineShaders://Core/ScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		TRef<TShader> Shader = LoadHLSLShader(!CustomShaderPath.empty() ? CustomShaderPath : "EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 		TGraphicsPipelineConfiguration Configuration = CreateConfiguration(Shader);
 		DeferredInit(Shader, Configuration);
 	}

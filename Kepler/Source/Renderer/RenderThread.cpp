@@ -20,6 +20,7 @@ namespace Kepler
 
 	void TRenderThread::Wait()
 	{
+		KEPLER_PROFILE_SCOPE();
 		Get()->WorkerPool.WaitForTasksToFinish();
 	}
 }

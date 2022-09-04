@@ -76,6 +76,7 @@ namespace Kepler
 
 	void TSwapChainD3D11::Present()
 	{
+		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
 		CHECK(SwapChain);
 		

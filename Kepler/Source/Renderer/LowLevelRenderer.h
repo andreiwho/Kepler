@@ -42,6 +42,7 @@ namespace Kepler
 		}
 
 		static constexpr u32 SwapChainFrameCount = 3;
+		static constexpr u32 FramesInFlight = 3;
 
 		void InitScreenQuad();
 

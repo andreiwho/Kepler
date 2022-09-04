@@ -25,6 +25,7 @@ namespace Kepler
 	bool TVirtualFileSystem::ResolvePath(const TString& PathToResolve, TString& OutPath)
 	{
 		CHECK(!PathToResolve.starts_with(' '));
+		CHECK(!PathToResolve.starts_with('/'));
 		CHECK(!TPath{ PathToResolve }.is_absolute());
 		CHECK(PathToResolve.find(PathSeparationToken) != TString::npos);
 
@@ -53,6 +54,21 @@ namespace Kepler
 		TString OutString;
 		CHECK(TVirtualFileSystem::Get()->ResolvePath(Path, OutString));
 		return OutString;
+	}
+
+	TString VFSGetParentPath(const TString& Path)
+	{
+		if (Path.empty())
+		{
+			return {};
+		}
+
+		TPath Handle = Path;
+		if (Handle.has_parent_path())
+		{
+			return Handle.parent_path().string();
+		}
+		return {};
 	}
 
 }

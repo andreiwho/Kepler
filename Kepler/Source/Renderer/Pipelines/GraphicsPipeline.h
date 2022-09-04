@@ -15,9 +15,17 @@ namespace Kepler
 	// - Uniform mapping
 	// - Bunch of states (DS, RS, IA, VI, etc)
 
+	enum class EPipelineCategory
+	{
+		Unknown,
+		DefaultUnlit,
+		PostProcess,
+	};
+
 	struct TGraphicsPipelineConfiguration
 	{
 		ERenderPassId RenderPassMask{ ERenderPassId::Geometry };
+		EPipelineCategory Category{ EPipelineCategory::Unknown };
 		
 		struct
 		{

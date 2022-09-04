@@ -109,6 +109,8 @@ namespace Kepler
 
 		TRef<TTextureSampler2D> GetSampler(const TString& Name);
 
+		TRef<TPipelineParamMapping> GetParamMappings() const { return Params; }
+
 		const TDynArray<TRef<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
 		
 	private:

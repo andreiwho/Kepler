@@ -61,29 +61,17 @@ namespace Kepler
 			EnqueueTask(
 				[Func = std::move(Task), Promise, this]
 				{
-					try
+					if constexpr (std::is_void_v<RETVAL>)
 					{
-						if constexpr (std::is_void_v<RETVAL>)
-						{
-							std::invoke(Func);
-							Promise->set_value();
-						}
-						else
-						{
-							Promise->set_value(std::invoke(Func));
-						}
+						std::invoke(Func);
+						Promise->set_value();
 					}
-					catch (const TException& Exception)
+					else
 					{
-						auto SavedException = std::make_shared<TException>(Exception);
-						TGlobalExceptionContainer::Get()->Push(std::move(SavedException));
+						auto Value = std::invoke(Func);
+						Promise->set_value(Value);
 					}
-					catch (const std::exception& Exception)
-					{
-						auto SavedException = std::make_shared<TException>(Exception.what(), "StdException");
-						TGlobalExceptionContainer::Get()->Push(std::move(SavedException));
-					}
-					
+
 				});
 			return Promise->get_future();
 		}
@@ -94,6 +82,7 @@ namespace Kepler
 
 		bool HasAnyExceptions() const;
 
+		[[deprecated("This function does nothing")]]
 		void RethrowExceptions_MainThread();
 
 	private:
@@ -126,6 +115,6 @@ namespace Kepler
 
 		std::atomic<bool> bWaiting = false;
 
-		TThreadSafeRingQueue<std::shared_ptr<TException>> Exceptions{ 32 };
+		TThreadSafeRingQueue<std::exception_ptr> Exceptions{ 32 };
 	};
 }

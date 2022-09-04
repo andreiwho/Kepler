@@ -5,6 +5,7 @@
 
 #include "HLSLShaderD3D11.h"
 #include "Renderer/RenderThread.h"
+#include "HLSLIncludeResolver.h"
 
 namespace Kepler
 {
@@ -92,7 +93,7 @@ namespace Kepler
 			break;
 		}
 
-		CComPtr<ID3DBlob> ErrorBlob;
+		CComPtr<ID3DBlob> ErrorBlob{};
 		CComPtr<ID3DBlob> Blob;
 		if (FAILED(D3DCompile(
 			Code.data(),

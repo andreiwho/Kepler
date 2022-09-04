@@ -5,6 +5,7 @@
 #include "Core/Malloc.h"
 #include "Renderer/RenderThread.h"
 #include "Renderer/LowLevelRenderer.h"
+#include "Tools/MaterialLoader.h"
 
 #include "Audio/AudioEngine.h"
 
@@ -61,6 +62,7 @@ namespace Kepler
 		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
 		TSharedPtr<TAudioEngine> AudioEngine{};
 		TSharedPtr<TWorldRegistry> WorldRegistry{};
+		TMaterialLoader MaterialLoader;
 
 		TRef<TGameWorld> CurrentWorld;
 

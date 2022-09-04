@@ -6,7 +6,7 @@ namespace Kepler
 	class TScreenQuadPipeline : public TGraphicsPipeline
 	{
 	public:
-		TScreenQuadPipeline();
+		TScreenQuadPipeline(const TString& CustomShaderPath = {});
 
 		static TGraphicsPipelineConfiguration CreateConfiguration(TRef<TShader> Shader);
 	};

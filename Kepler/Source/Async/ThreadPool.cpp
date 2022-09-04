@@ -1,4 +1,5 @@
 #include "ThreadPool.h"
+#include "Platform/Platform.h"
 
 namespace Kepler
 {
@@ -17,7 +18,24 @@ namespace Kepler
 				{
 					Lck.unlock();
 					// TODO: Fix cross-thread exception handling
-					Task();
+					try
+					{
+						Task();
+					}
+					catch (const TException& Exception)
+					{
+						if (TPlatform::HandleCrashReported(Exception.GetErrorMessage()))
+						{
+							return;
+						}
+					}
+					catch (const std::exception& Exception)
+					{
+						if (TPlatform::HandleCrashReported(Exception.what()))
+						{
+							return;
+						}
+					}
 					Lck.lock();
 					--TotalTaskNum;
 				}
@@ -131,17 +149,6 @@ namespace Kepler
 
 	void TThreadPool::RethrowExceptions_MainThread()
 	{
-		TGlobalExceptionContainer::Get()->Rethrow();
-/*
-* LEGACY
-		std::shared_ptr<TException> Exception;
-		std::stringstream ErrorStream;
-		while (Exceptions.Dequeue(Exception))
-		{
-			ErrorStream << Exception->GetErrorMessage() << std::endl;
-		}
-		throw TException(ErrorStream.str(), "RethrowExceptions_MainThread");
-	*/
 	}
 
 	bool TThreadPool::HasAnyExceptions() const

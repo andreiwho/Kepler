@@ -21,6 +21,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::Render(TViewport2D ViewportSize)
 	{
+		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
 		CurrentViewport = ViewportSize;
 
@@ -49,6 +50,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TWorldRenderer> TWorldRenderer::New(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR)
 	{
+		KEPLER_PROFILE_SCOPE();
 		return MakeRef(Kepler::New<TWorldRenderer>(WorldToRender, InLLR));
 	}
 
@@ -68,7 +70,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::CollectRenderableViews()
 	{
-
+		KEPLER_PROFILE_SCOPE();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

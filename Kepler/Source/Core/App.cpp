@@ -74,6 +74,7 @@ namespace Kepler
 
 	TApplication::~TApplication()
 	{
+		MaterialLoader.ClearLoadedMaterialCache();
 		CurrentWorld.Release();
 
 		WorldRegistry.reset();
@@ -192,13 +193,6 @@ namespace Kepler
 			{
 				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
 				MvpBuffer = TParamBuffer::New(UnlitPipeline->GetParamMapping());
-				auto ImageData = Await(TImageLoader::Load("Game://Ground.png"));
-				SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
-				SampledImage->Write(LowLevelRenderer->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
-				Sampler = TTextureSampler2D::New(SampledImage, 0, 0);
-				Samplers = UnlitPipeline->GetParamMapping()->CreateSamplerPack();
-				Samplers->Write("Albedo", Sampler);
-
 				// Screen quad
 				QuadImage = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource | EImageUsage::RenderTarget, 1, 3);
 				for (u32 Index = 0; Index < 3; ++Index)
@@ -215,7 +209,7 @@ namespace Kepler
 			});
 		Await(RenderTask);
 
-		CurrentWorld->AddComponent<TMaterialComponent>(Entity, UnlitPipeline);
+		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -229,7 +223,7 @@ namespace Kepler
 			while (Platform->HasActiveMainWindow())
 			{
 				KEPLER_PROFILE_FRAME("GameLoop")
-				MainTimer.Begin();
+					MainTimer.Begin();
 				Platform->Update();
 
 				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
@@ -245,7 +239,7 @@ namespace Kepler
 					float Height = (float)MainWindow->GetHeight();
 					Width = Width > 0 ? Width : 1;
 					Height = Height > 0 ? Height : 1;
-			
+
 					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
 					auto Rotation = EntityRef.GetRotation();
@@ -254,9 +248,6 @@ namespace Kepler
 					Rotation.y = PositionX * 100.0f;
 					EntityRef.SetRotation(Rotation);
 
-					// Param = Param * glm::translate(glm::identity<matrix4x4>(), float3(0.0f, glm::sin(PositionX), 0.0f));
-					PlayerMaterial->WriteSampler("Albedo", Sampler);
-					
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the frame
@@ -266,6 +257,7 @@ namespace Kepler
 							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
 						});
 					LowLevelRenderer->PresentAll();
+
 				}
 				else // minimized
 				{

@@ -55,6 +55,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TLowLevelRenderer::PresentAll()
 	{
+		KEPLER_PROFILE_SCOPE();
 		TRenderThread::Submit(
 			[this]
 			{
@@ -72,6 +73,8 @@ namespace Kepler
 				}
 			});
 		TRenderThread::Wait();
+
+
 		SwapChainFrame = (SwapChainFrame + 1) % SwapChainFrameCount;
 	}
 

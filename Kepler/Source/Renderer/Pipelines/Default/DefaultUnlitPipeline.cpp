@@ -2,10 +2,9 @@
 
 namespace Kepler
 {
-	TDefaultUnlitPipeline::TDefaultUnlitPipeline()
-		: TGraphicsPipeline()
+	TDefaultUnlitPipeline::TDefaultUnlitPipeline(const TString& CustomShaderPath)
 	{
-		TRef<TShader> Shader = LoadHLSLShader("EngineShaders://Core/DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+		TRef<TShader> Shader = LoadHLSLShader(!CustomShaderPath.empty() ? CustomShaderPath : "EngineShaders://DefaultUnlit.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 		TGraphicsPipelineConfiguration Configuration = CreateConfiguration(Shader);
 		DeferredInit(Shader, Configuration);
 	}

@@ -8,6 +8,7 @@ target_link_libraries("Kepler"
   "tinygltf"
   "EnTT"
   "OptickCore"
+  "rapidjson"
  PRIVATE 
   "glfw" 
   "stb_image" 

@@ -28,6 +28,9 @@ add_subdirectory(entt)
 
 add_subdirectory(optick)
 
+add_library(rapidjson INTERFACE)
+target_include_directories(rapidjson INTERFACE rapidjson/include)
+
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image

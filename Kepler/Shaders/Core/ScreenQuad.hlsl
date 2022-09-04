@@ -1,22 +1,16 @@
-#include "Core.hlsl"
-
-//////////////////////////////////////////////////////////////////
-TPixel VSMain(in TVertex Vertex)
+struct TVertex
 {
-	TPixel Output;
-	Output.Position = float4(Vertex.Position, 1.0f);
-	
-	Output.Color = Vertex.Color;
-	Output.UV0 = Vertex.UV0;
-	return Output;
-}
+	float3 Position : POSITION0;
+	float3 Color : COLOR0;
+	float2 UV0 : TEXCOORD0;
+};
 
+struct TPixel
+{
+	float4 Position : SV_Position;
+	float3 Color : COLOR0;
+	float2 UV0 : TEXCOORD0;
+};
 
-//////////////////////////////////////////////////////////////////
 SamplerState RenderResult : register(s0);
 Texture2D RenderResultTexture : register(t0);
-
-float4 PSMain(in TPixel Input) : SV_Target0
-{
-	return RenderResultTexture.Sample(RenderResult, Input.UV0);
-}

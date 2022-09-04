@@ -33,10 +33,16 @@ namespace Kepler
 	bool TPlatform::HandleCrashReported(const TString& Message)
 	{
 #ifdef PLATFORM_DESKTOP
-		return TPlatformGLFW::HandleCrashReported_Impl(Message);
+		static TAtomic<bool> bFired = false;
+		if (!bFired)
+		{
+			bFired.store(true);
+			return TPlatformGLFW::HandleCrashReported_Impl(Message);
+		}
 #else
 		return true;
 #endif
+		return false;
 	}
 
 	void TPlatform::OnPlatformEvent(const TPlatformEventBase& event)

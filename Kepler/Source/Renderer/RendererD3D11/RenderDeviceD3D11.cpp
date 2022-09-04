@@ -168,6 +168,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TTextureSampler2D> TRenderDeviceD3D11::CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
+		CHECK(IsRenderThread());
 		return MakeRef(New<TTextureSampler2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 

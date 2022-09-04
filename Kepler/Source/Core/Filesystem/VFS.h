@@ -37,4 +37,6 @@ namespace Kepler
 	// Other functions higher on the callstack need to deal with unresolved paths.
 	// Thus, resolving paths must happen right before any sort of interaction with the filesystem.
 	TString VFSResolvePath(const TString& Path);
+	
+	TString VFSGetParentPath(const TString& Path);
 }

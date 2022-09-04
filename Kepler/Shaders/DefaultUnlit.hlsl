@@ -1,11 +1,4 @@
-#include "Core.hlsl"
-
-//////////////////////////////////////////////////////////////////
-cbuffer TWorldViewProj : register(b0)
-{
-	float4x4 ViewProjection;
-	float4x4 Transform;
-};
+#include "Core/Unlit.hlsl"
 
 //////////////////////////////////////////////////////////////////
 TPixel VSMain(in TVertex Vertex)
@@ -20,11 +13,7 @@ TPixel VSMain(in TVertex Vertex)
 	return Output;
 }
 
-
 //////////////////////////////////////////////////////////////////
-SamplerState AlbedoSampler : register(s0);
-Texture2D AlbedoTexture : register(t0);
-
 float4 PSMain(in TPixel Input) : SV_Target0
 {
 	return AlbedoTexture.Sample(AlbedoSampler, Input.UV0);

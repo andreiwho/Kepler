@@ -6,7 +6,7 @@ namespace Kepler
 	class TDefaultUnlitPipeline : public TGraphicsPipeline
 	{
 	public:
-		TDefaultUnlitPipeline();
+		TDefaultUnlitPipeline(const TString& CustomShaderPath = {});
 
 		static TGraphicsPipelineConfiguration CreateConfiguration(TRef<TShader> Shader);
 	};
