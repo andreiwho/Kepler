@@ -9,7 +9,7 @@
 	url = https://github.com/g-truc/glm
 [submodule "Kepler/ThirdParty/imgui"]
 	path = Kepler/ThirdParty/imgui
-	url = https://github.com/ocornut/imgui
+	url = https://github.com/andreiwho/imgui
 [submodule "Kepler/ThirdParty/miniaudio"]
 	path = Kepler/ThirdParty/miniaudio
 	url = https://github.com/mackron/miniaudio
