@@ -1,6 +1,5 @@
 #include "MeshLoader.h"
 #include "Renderer/World/StaticMesh.h"
-#include <tiny_gltf.h>
 #include "Core/Filesystem/FileUtils.h"
 
 namespace Kepler

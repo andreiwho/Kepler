@@ -1,8 +1,6 @@
 #pragma once
 #include "Core/Core.h"
 
-#include "tiny_gltf.h"
-
 namespace Kepler
 {
 	class TStaticMesh;

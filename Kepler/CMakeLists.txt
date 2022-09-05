@@ -5,9 +5,10 @@ target_link_libraries("Kepler"
  PUBLIC 
   "spdlog" 
   "glm" 
-  "tinygltf"
   "EnTT"
   "OptickCore"
+  "zlibstatic"
+  "assimp"
   "rapidjson"
  PRIVATE 
   "glfw" 

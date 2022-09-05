@@ -13,13 +13,14 @@ target_compile_definitions(glm INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
 add_subdirectory(stb_image)
 
-set(TINYGLTF_BUILD_BUILDER_EXAMPLE OFF CACHE BOOL "")
-set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "")
-set(TINYGLTF_BUILD_VALIDATOR_EXAMPLE OFF CACHE BOOL "")
-set(TINYGLTF_BUILD_GL_EXAMPLES OFF CACHE BOOL "")
-set(TINYGLTF_INSTALL OFF CACHE BOOL "")
-add_subdirectory(tinygltf)
-SetDefaultMSVCLib(tinygltf)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "")
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "")
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "")
+set(BUILD_SHARED_LIBS OFF)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "")
+add_subdirectory(assimp)
+SetDefaultMSVCLib(assimp)
+SetDefaultMSVCLib(zlibstatic)
 
 add_library(miniaudio INTERFACE)
 target_include_directories(miniaudio INTERFACE miniaudio)
@@ -34,7 +35,9 @@ target_include_directories(rapidjson INTERFACE rapidjson/include)
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image
- tinygltf
+ UpdateAssimpLibsDebugSymbolsAndDLLs
+ assimp
+ zlibstatic
  update_mappings 
  uninstall
  OptickCore)
