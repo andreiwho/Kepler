@@ -56,7 +56,9 @@ namespace Kepler
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(LaunchParams);
 
-		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
+		TWindowParams WindowParams{};
+		WindowParams.bMaximized = true;
+		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", WindowParams));
 
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
@@ -119,37 +121,34 @@ namespace Kepler
 
 			while (Platform->HasActiveMainWindow())
 			{
-				KEPLER_PROFILE_FRAME("GameLoop")
-					MainTimer.Begin();
+				KEPLER_PROFILE_FRAME("GameLoop");
+				MainTimer.Begin();
 				Platform->Update();
 
 				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
 				{
 					// Update game state
-					PositionX += GGlobalTimer->Delta();
+					// PositionX += GGlobalTimer->Delta();
 
 #if ENABLE_EDITOR
-					auto ViewportSize = Editor->GetViewportSize(EViewportIndex::Viewport1);
+					const float2 ViewportSize = Editor->GetViewportSize(EViewportIndex::Viewport1);
 #else
-					auto ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
+					const float2 ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
 #endif
+
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
 					TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
 					PlayerMaterial->WriteCamera(Camera);
 
-					float Width = (float)MainWindow->GetWidth();
-					float Height = (float)MainWindow->GetHeight();
-					Width = Width > 0 ? Width : 1;
-					Height = Height > 0 ? Height : 1;
-
 					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
+					/*
 					auto Rotation = EntityRef.GetRotation();
 					Rotation.z = PositionX * 100.0f;
 					Rotation.x = -90.0f;
-					EntityRef.SetScale(float3(3));
 					EntityRef.SetRotation(Rotation);
-
+					*/
+					EntityRef.SetScale(float3(3));
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the frame
@@ -164,8 +163,20 @@ namespace Kepler
 					// ...
 					// Draw layer stack GUI
 
-					Editor->DrawEditor(); // THIS IS TEMP
-					
+
+					Editor->DrawEditor();
+					// TEMP
+					ImGui::Begin("Details");
+					{
+						auto Rotation = EntityRef.GetRotation();
+						if (ImGui::DragFloat3("Rotation", &Rotation.x, 0.1f))
+						{
+							EntityRef.SetRotation(Rotation);
+						}
+					}
+					ImGui::End();
+					// END TEMP
+
 					Editor->EndGUIPass();
 #endif
 					LowLevelRenderer->PresentAll();

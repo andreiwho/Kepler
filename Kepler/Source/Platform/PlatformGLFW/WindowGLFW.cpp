@@ -14,13 +14,16 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
 
 namespace Kepler
 {
-	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
-		: TWindow(Width, Height, Title, Params)
+	TWindowGLFW::TWindowGLFW(i32 InWidth, i32 InHeight, const TString& InTitle, const TWindowParams& Params)
+		: TWindow(InWidth, InHeight, InTitle, Params)
 	{
 		glfwWindowHint(GLFW_DECORATED, Params.bDecorated);
 		glfwWindowHint(GLFW_MAXIMIZED, Params.bMaximized);
-		Window = glfwCreateWindow(Width, Height, Title.c_str(), Params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+
+		Window = glfwCreateWindow(Width, Height, InTitle.c_str(), Params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 		assert(Window && "Failed to create GLFW window");
+
+		glfwGetFramebufferSize(Window, &Width, &Height);
 
 		SetupCallbacks();
 	}
