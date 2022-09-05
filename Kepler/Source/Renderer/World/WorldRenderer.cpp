@@ -107,14 +107,16 @@ namespace Kepler
 			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
 			{
 				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), 0);
-				pImmCtx->BindVertexBuffers(SM.GetStaticMesh()->GetVertexBuffer(), 0, 0);
-				pImmCtx->BindIndexBuffer(SM.GetStaticMesh()->GetIndexBuffer(), 0);
 				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline());
 				pImmCtx->BindSamplers(MT.GetMaterial()->GetSamplers());
-				pImmCtx->DrawIndexed(SM.GetStaticMesh()->GetIndexCount(), 0, 0);
+				for (const auto& Section : SM.GetStaticMesh()->GetSections())
+				{
+					pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
+					pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
+					pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+				}
 			}
 		);
-
 		pImmCtx->EndDebugEvent();
 	}
 

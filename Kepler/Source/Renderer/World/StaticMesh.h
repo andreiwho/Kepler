@@ -12,17 +12,28 @@ namespace Kepler
 		float2 UV0;
 	};
 
+	struct TStaticMeshSection
+	{
+		TDynArray<TStaticMeshVertex> Vertices{};
+		TDynArray<u32> Indices{};
+	};
+
 	class TStaticMesh : public TEnableRefFromThis<TStaticMesh>
 	{
 	public:
 		TStaticMesh() = default;
 		TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
 		TStaticMesh(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices);
+		TStaticMesh(const TDynArray<TStaticMeshSection>& InSections);
 
 	public:
+		struct TInternalSection
+		{
+			TRef<TVertexBuffer> VertexBuffer{};
+			TRef<TIndexBuffer> IndexBuffer{};
+		};
 
-		void SetVertices(const TDynArray<TStaticMeshVertex>& Vertices);
-		void SetIndices(const TDynArray<u32>& Indices);
+		void SetSections(const TDynArray<TStaticMeshSection>& Sections);
 
 		static TRef<TStaticMesh> New()
 		{
@@ -39,13 +50,15 @@ namespace Kepler
 			return MakeRef(Kepler::New<TStaticMesh>(Vertices, InIndices));
 		}
 
+		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& Sections)
+		{
+			return MakeRef(Kepler::New<TStaticMesh>(Sections));
+		}
 
-		inline TRef<TVertexBuffer> GetVertexBuffer() const { return VertexBuffer; }
-		inline TRef<TIndexBuffer> GetIndexBuffer() const { return IndexBuffer; }
-		inline usize GetIndexCount() const { return IndexBuffer->GetCount(); }
+		const TDynArray<TInternalSection>& GetSections() const { return Sections; }
 
 	private:
-		TRef<TVertexBuffer> VertexBuffer{};
-		TRef<TIndexBuffer> IndexBuffer{};
+		TDynArray<TInternalSection> Sections;
+	
 	};
 }

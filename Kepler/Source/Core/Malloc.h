@@ -83,7 +83,10 @@ namespace Kepler
 				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			DoAddRef(Memory);
+			if (Memory)
+			{
+				DoAddRef(Memory);
+			}
 		}
 
 		template<typename U>
@@ -95,7 +98,10 @@ namespace Kepler
 				DoRelease(Memory);
 			}
 			Memory = (T*)const_cast<U*>(Other.Raw());
-			DoAddRef(Memory);
+			if (Memory)
+			{
+				DoAddRef(Memory);
+			}
 		}
 
 		TRef& operator=(const TRef& Other) noexcept
@@ -105,7 +111,10 @@ namespace Kepler
 				DoRelease(Memory);
 			}
 			Memory = const_cast<T*>(Other.Raw());
-			DoAddRef(Memory);
+			if (Memory)
+			{
+				DoAddRef(Memory);
+			}
 			return *this;
 		}
 
@@ -118,7 +127,10 @@ namespace Kepler
 				DoRelease(Memory);
 			}
 			Memory = (T*)const_cast<U*>(Other.Raw());
-			DoAddRef(Memory);
+			if (Memory)
+			{
+				DoAddRef(Memory);
+			}
 			return *this;
 		}
 

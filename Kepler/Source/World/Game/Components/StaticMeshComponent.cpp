@@ -18,18 +18,14 @@ namespace Kepler
 	{
 	}
 
+	TStaticMeshComponent::TStaticMeshComponent(const TDynArray<TStaticMeshSection>& Sections)
+		: StaticMesh(TStaticMesh::New(Sections))
+	{
+
+	}
+
 	void TStaticMeshComponent::SetStaticMesh(TRef<TStaticMesh> NewMesh)
 	{
 		StaticMesh = NewMesh;
 	}
-
-	usize TStaticMeshComponent::GetIndexCount() const
-	{
-		if (StaticMesh)
-		{
-			return StaticMesh->GetIndexCount();
-		}
-		return 0;
-	}
-
 }

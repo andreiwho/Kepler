@@ -186,33 +186,10 @@ namespace Kepler
 		TRef<TVertexBuffer> QuadVertexBuffer;
 		TRef<TIndexBuffer> QuadIndexBuffer;
 
-		auto NewMesh = MeshLoader.LoadStaticMesh("Game://Sphere.gltf");
-
 		auto Entity = CurrentWorld->CreateEntity("Entity");
-		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, NewMesh);
 
-		// TODO: Finish screen quad stuff
-		auto RenderTask = TRenderThread::Submit(
-			[&, this]
-			{
-				UnlitPipeline = MakeRef(New<TDefaultUnlitPipeline>());
-				MvpBuffer = TParamBuffer::New(UnlitPipeline->GetParamMapping());
-				// Screen quad
-				QuadImage = TImage2D::New(1280, 720, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource | EImageUsage::RenderTarget, 1, 3);
-				for (u32 Index = 0; Index < 3; ++Index)
-				{
-					RenderTargets.AppendBack(TRenderTarget2D::New(QuadImage, 0, Index));
-					QuadSamplerHandles.AppendBack(TTextureSampler2D::New(QuadImage, 0, Index));
-				}
-				DepthImage = TImage2D::New(MainWindow->GetWidth(), MainWindow->GetHeight(), EFormat::D24_UNORM_S8_UINT, EImageUsage::DepthTarget);
-				DepthTarget = TDepthStencilTarget2D::New(DepthImage);
-				ScreenQuadPipeline = MakeRef(New<TScreenQuadPipeline>());
-				QuadVertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
-				QuadIndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
-				QuadSamplers = ScreenQuadPipeline->GetParamMapping()->CreateSamplerPack();
-			});
-		Await(RenderTask);
-
+		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx");
+		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
@@ -248,8 +225,8 @@ namespace Kepler
 
 					auto Rotation = EntityRef.GetRotation();
 					Rotation.z = PositionX * 100.0f;
-					Rotation.x = PositionX * 100.0f;
-					Rotation.y = PositionX * 100.0f;
+					Rotation.x = -90.0f;
+					EntityRef.SetScale(float3(3));
 					EntityRef.SetRotation(Rotation);
 
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);

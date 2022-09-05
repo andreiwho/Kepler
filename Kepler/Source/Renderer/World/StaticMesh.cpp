@@ -6,8 +6,7 @@ namespace Kepler
 {
 
 	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
-		:	VertexBuffer(InVertexBuffer)
-		,	IndexBuffer(InIndexBuffer)
+		:	Sections({TInternalSection{InVertexBuffer, InIndexBuffer}})
 	{
 	}
 
@@ -15,31 +14,34 @@ namespace Kepler
 	{
 		CHECK(!IsRenderThread());
 
-		SetVertices(Vertices);
-		SetIndices(InIndices);
-	}
-
-	void TStaticMesh::SetVertices(const TDynArray<TStaticMeshVertex>& Vertices)
-	{
-		CHECK(!IsRenderThread());
-
-		if (!VertexBuffer)
-		{
-			Await(TRenderThread::Submit(
-				[&Vertices, This = RefFromThis()]
-				{
-					This->VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
-				}));
-		}
-	}
-
-	void TStaticMesh::SetIndices(const TDynArray<u32>& Indices)
-	{
-		Await(TRenderThread::Submit(
-			[&Indices, This = RefFromThis()]
+		TInternalSection Section;
+		Await(TRenderThread::Submit([&Section, Vertices, InIndices]
 			{
-				This->IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
+				Section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
+				Section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(InIndices));
 			}));
+		Sections.EmplaceBack(std::move(Section));
+	}
+
+	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshSection>& InSections)
+	{
+		SetSections(InSections);
+	}
+
+	void TStaticMesh::SetSections(const TDynArray<TStaticMeshSection>& InSections)
+	{
+		Sections.Clear();
+		Sections.Reserve(InSections.GetLength());
+		for (const auto& Section : InSections)
+		{
+			TInternalSection OutSection;
+			Await(TRenderThread::Submit([&Section, &OutSection]
+				{
+					OutSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Section.Vertices));
+					OutSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Section.Indices));
+				}));
+			Sections.EmplaceBack(std::move(OutSection));
+		}
 	}
 
 }

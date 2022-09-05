@@ -2,7 +2,7 @@
     "Material": {
         "Pipeline": "DefaultUnlit",
         "Samplers": {
-            "Albedo": "Game://Ground_03.png"
+            "Albedo": "Game://Tex_Gun_Diffuse.png"
         }
     }
 }
