@@ -24,6 +24,7 @@
 #include "World/Game/Components/MaterialComponent.h"
 #include "Renderer/World/WorldRenderer.h"
 #include "Renderer/World/Camera.h"
+#include "Editor/EditorModule.h"
 
 namespace Kepler
 {
@@ -100,92 +101,6 @@ namespace Kepler
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
-
-		struct TWorldViewProj
-		{
-			matrix4x4 mViewProj = matrix4x4(1.0f);
-			matrix4x4 mWorld = matrix4x4(1.0f);
-		};
-
-		struct TVertex
-		{
-			float3 Pos{};
-			float3 Col{};
-			float2 UV{};
-		};
-
-		TDynArray<TStaticMeshVertex> Vertices = {
-			// Front
-			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Left
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Top
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Right
-			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Bottom
-			{{-0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Back
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		};
-
-		TDynArray<TVertex> QuadVertices =
-		{
-			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		};
-
-		TDynArray<u32> Indices = {
-			0,1,3,1,2,3,
-			4,5,7,5,6,7,
-			8,9,11,9,10,11,
-			12,13,15,13,14,15,
-			16,17,19,17,18,19,
-			20,21,23,21,22,23
-		};
-
-		TRef<TPipelineSamplerPack> Samplers;
-		TRef<TParamBuffer> MvpBuffer;
-		TRef<TImage2D> SampledImage;
-		TRef<TGraphicsPipeline> UnlitPipeline;
-		TRef<TTextureSampler2D> Sampler;
-
-		TRef<TPipelineSamplerPack> QuadSamplers;
-		TRef<TImage2D> QuadImage;
-
-		TRef<TImage2D> DepthImage;
-		TDynArray<TRef<TRenderTarget2D>> RenderTargets;
-		TDynArray<TRef<TTextureSampler2D>> QuadSamplerHandles;
-		TRef<TDepthStencilTarget2D> DepthTarget;
-		TRef<TGraphicsPipeline> ScreenQuadPipeline;
-		TRef<TVertexBuffer> QuadVertexBuffer;
-		TRef<TIndexBuffer> QuadIndexBuffer;
-
 		auto Entity = CurrentWorld->CreateEntity("Entity");
 
 		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
@@ -238,7 +153,6 @@ namespace Kepler
 							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
 						});
 					LowLevelRenderer->PresentAll();
-
 				}
 				else // minimized
 				{
@@ -285,11 +199,17 @@ namespace Kepler
 
 		ChildSetupModuleStack(ModuleStack);
 
+#ifdef ENABLE_EDITOR
+		Editor = MakeRef(New<TEditorModule>());
+		ModuleStack.PushModule(Editor, EModulePushStrategy::Overlay);
+#endif
+
 		ModuleStack.Init();
 	}
 
 	void TApplication::TerminateModuleStack()
 	{
+		Editor.Release();
 		ModuleStack.Terminate();
 		ModuleStack.Clear();
 	}

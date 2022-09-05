@@ -70,6 +70,10 @@ namespace Kepler
 		TMeshLoader MeshLoader;
 
 		TRef<TGameWorld> CurrentWorld;
+		
+#ifdef ENABLE_EDITOR
+		TRef<class TEditorModule> Editor;
+#endif
 
 		TModuleStack ModuleStack{};
 	};
