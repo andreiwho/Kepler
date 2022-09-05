@@ -41,8 +41,7 @@ namespace Kepler
 		// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;      // Enable Multi-Viewport / Platform Windows. 
 																	// This currently does not work with the render thread
 
-		// TODO: Override with own style
-		ImGui::StyleColorsDark();
+		SetupStyle();
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -107,7 +106,7 @@ namespace Kepler
 	void TEditorModule::DrawEditor()
 	{
 		DrawViewports();
-		// ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -145,7 +144,10 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::SetupStyle()
 	{
-
+		ImGuiIO& IO = ImGui::GetIO();
+		// IO.Fonts->AddFontFromFileTTF("../data/Fonts/Ruda-Bold.ttf", 15.0f);
+		
+		ImGui::StyleColorsDark();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -153,6 +155,7 @@ namespace Kepler
 	{
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport 1");
 		{
 			ImVec2 Region = ImGui::GetContentRegionAvail();
@@ -168,6 +171,7 @@ namespace Kepler
 				ImVec2(Image->GetWidth(), Image->GetHeight()));
 		}
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 }
