@@ -25,6 +25,7 @@
 #include "Renderer/World/WorldRenderer.h"
 #include "Renderer/World/Camera.h"
 #include "Editor/EditorModule.h"
+#include "imgui.h"
 
 namespace Kepler
 {
@@ -127,8 +128,13 @@ namespace Kepler
 					// Update game state
 					PositionX += GGlobalTimer->Delta();
 
+#if ENABLE_EDITOR
+					auto ViewportSize = Editor->GetViewportSize(EViewportIndex::Viewport1);
+#else
+					auto ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
+#endif
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
-					TCamera Camera(45.0f, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight(), 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
+					TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
 					PlayerMaterial->WriteCamera(Camera);
 
 					float Width = (float)MainWindow->GetWidth();
@@ -150,8 +156,18 @@ namespace Kepler
 					TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
-							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
+							Renderer->Render({ 0, 0, (u32)ViewportSize.x, (u32)ViewportSize.y });
 						});
+
+#ifdef ENABLE_EDITOR
+					Editor->BeginGUIPass();
+					// ...
+					// Draw layer stack GUI
+
+					Editor->DrawEditor(); // THIS IS TEMP
+					
+					Editor->EndGUIPass();
+#endif
 					LowLevelRenderer->PresentAll();
 				}
 				else // minimized
@@ -200,7 +216,7 @@ namespace Kepler
 		ChildSetupModuleStack(ModuleStack);
 
 #ifdef ENABLE_EDITOR
-		Editor = MakeRef(New<TEditorModule>());
+		Editor = MakeRef(New<TEditorModule>(MainWindow));
 		ModuleStack.PushModule(Editor, EModulePushStrategy::Overlay);
 #endif
 
@@ -209,7 +225,9 @@ namespace Kepler
 
 	void TApplication::TerminateModuleStack()
 	{
+#ifdef ENABLE_EDITOR
 		Editor.Release();
+#endif
 		ModuleStack.Terminate();
 		ModuleStack.Clear();
 	}

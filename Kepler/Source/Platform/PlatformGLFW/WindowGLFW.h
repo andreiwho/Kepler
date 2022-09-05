@@ -14,7 +14,7 @@ namespace Kepler
 
 		virtual void* GetNativeHandle() const override;
 		void RequestClose();
-
+		inline GLFWwindow* GetGLFWWindow() const { return Window; }
 		void Internal_UpdateSize(i32 width, i32 height);
 	private:
 		void SetupCallbacks();

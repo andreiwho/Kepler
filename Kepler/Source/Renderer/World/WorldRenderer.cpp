@@ -127,9 +127,25 @@ namespace Kepler
 		// For now just flush the mesh pass image
 		pImmCtx->BeginDebugEvent("Screen Quad Pass");
 		// Main swap chain
+#ifdef ENABLE_EDITOR
+		auto RenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
+			"EditorViewport",
+			CurrentViewport.Width,
+			CurrentViewport.Height,
+			EFormat::R8G8B8A8_UNORM,
+			TLowLevelRenderer::SwapChainFrameCount);
+
+		const u32 FrameIndex = LLR->GetFrameIndex();
+		TRef<TRenderTarget2D> CurrentRenderTarget = RenderTargetGroup->GetRenderTargetAtArrayLayer(FrameIndex);
+		pImmCtx->StartDrawingToRenderTargets(CurrentRenderTarget, nullptr);
+		pImmCtx->ClearRenderTarget(CurrentRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
+		pImmCtx->SetViewport(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height, 0.0f, 1.0f);
+		pImmCtx->SetScissor(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height);
+#else
 		auto SwapChain = LLR->GetSwapChain(0);
 		pImmCtx->StartDrawingToSwapChainImage(SwapChain);
 		pImmCtx->ClearSwapChainImage(SwapChain, { 0.1f, 0.1f, 0.1f, 1.0f });
+#endif
 		pImmCtx->BindVertexBuffers(LLR->ScreenQuad.VertexBuffer, 0, 0);
 		pImmCtx->BindIndexBuffer(LLR->ScreenQuad.IndexBuffer, 0);
 		pImmCtx->BindPipeline(LLR->ScreenQuad.Pipeline);

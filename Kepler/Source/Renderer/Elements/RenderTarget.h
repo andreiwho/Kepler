@@ -16,6 +16,7 @@ namespace Kepler
 		inline u32 GetWidth() const { return Image->GetWidth(); }
 		inline u32 GetHeight() const { return Image->GetHeight(); }
 		inline EFormat GetFormat() const { return Image->GetFormat(); }
+		virtual void* GetNativeHandle() const = 0;
 
 		static TRef<TRenderTarget2D> New(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
 	
