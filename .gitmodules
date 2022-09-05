@@ -22,3 +22,6 @@
 [submodule "Kepler/ThirdParty/rapidjson"]
 	path = Kepler/ThirdParty/rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "Kepler/ThirdParty/assimp"]
+	path = Kepler/ThirdParty/assimp
+	url = https://github.com/assimp/assimp
