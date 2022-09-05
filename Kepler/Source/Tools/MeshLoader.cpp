@@ -32,7 +32,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDynArray<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath)
+	TDynArray<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
 	{
 		Assimp::Importer Importer{};
 		TDynArray<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
@@ -42,7 +42,8 @@ namespace Kepler
 			aiProcess_Triangulate |
 			aiProcess_FlipUVs |
 			aiProcess_MakeLeftHanded |
-		aiProcess_GlobalScale);
+			aiProcess_GlobalScale |
+			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);
 
 		TDynArray<TStaticMeshSection> MeshSections;

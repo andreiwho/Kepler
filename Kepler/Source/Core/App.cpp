@@ -188,7 +188,7 @@ namespace Kepler
 
 		auto Entity = CurrentWorld->CreateEntity("Entity");
 
-		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx");
+		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 

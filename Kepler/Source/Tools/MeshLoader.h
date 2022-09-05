@@ -21,7 +21,7 @@ namespace Kepler
 
 		void ClearCache();
 
-		TDynArray<TStaticMeshSection> LoadStaticMeshSections(const TString& MeshPath);
+		TDynArray<TStaticMeshSection> LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection = false);
 
 	private:
 		bool ProcessNode(const aiScene* pScene, const aiNode* pNode, TDynArray<TStaticMeshSection>& OutSections);
