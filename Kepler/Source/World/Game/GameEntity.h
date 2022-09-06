@@ -24,6 +24,8 @@ namespace Kepler
 
 		TString GetName() const;
 
+		void SetName(const TString& Name);
+
 		id64 GetGUID() const;
 
 		inline TRef<TGameWorld> GetWorld() const { return World; }

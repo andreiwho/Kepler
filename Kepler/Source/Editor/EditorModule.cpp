@@ -30,7 +30,10 @@ namespace Kepler
 		CRASHMSG("Editor is not supported on this platform");
 #endif
 		KEPLER_INFO(LogEditor, "Initializing editor module");
-	
+		ImGui::SetAllocatorFunctions(
+			[](size_t Size, void* UserData) { return TMalloc::Get()->Allocate(Size); },
+			[](void* Data, void*) { TMalloc::Get()->Free(Data); }
+		);
 		// Initial ImGui config
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -40,6 +43,7 @@ namespace Kepler
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;      // Enable Multi-Viewport / Platform Windows. 
 																	// This currently does not work with the render thread
+
 
 		SetupStyle();
 
@@ -114,7 +118,7 @@ namespace Kepler
 	{
 		ImGui::Render();
 		Await(TRenderThread::Submit(
-			[] 
+			[]
 			{
 				auto LLR = TLowLevelRenderer::Get();
 				auto SwapChain = LLR->GetSwapChain(0);
@@ -146,7 +150,7 @@ namespace Kepler
 	{
 		ImGuiIO& IO = ImGui::GetIO();
 		// IO.Fonts->AddFontFromFileTTF("../data/Fonts/Ruda-Bold.ttf", 15.0f);
-		
+
 		ImGui::StyleColorsDark();
 	}
 
@@ -159,8 +163,8 @@ namespace Kepler
 		ImGui::Begin("Viewport 1");
 		{
 			ImVec2 Region = ImGui::GetContentRegionAvail();
-			ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(Region.x, Region.y);
 
+			ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(Region.x, Region.y);
 			auto LLR = TLowLevelRenderer::Get();
 
 			auto RenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");

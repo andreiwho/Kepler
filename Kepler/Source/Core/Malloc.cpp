@@ -42,6 +42,11 @@ namespace Kepler
 
 	void TMalloc::Free(const void* Block)
 	{
+		if (!Block)
+		{
+			return;
+		}
+
 		TMemoryPool* Pool = TMemoryPool::GetAllocationPool(Block);
 		CHECK(Pool != nullptr);
 		Pool->Deallocate(Block);

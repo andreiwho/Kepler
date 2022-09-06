@@ -82,6 +82,37 @@ namespace Kepler
 		return false;
 	}
 
+	void TPlatformGLFW::SetCursorMode(ECursorMode Mode)
+	{
+		TPlatform::SetCursorMode(Mode);
+		
+		if (!HasActiveMainWindow())
+		{
+			return;
+		}
+
+		TWindowGLFW* Window = (TWindowGLFW*)Windows[0].get();
+		if (!Window)
+		{
+			return;
+		}
+
+		switch (Mode)
+		{
+		case ECursorMode::Visible:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		case ECursorMode::HiddenFree:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			break;
+		case ECursorMode::HiddenLocked:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			break;
+		default:
+			break;
+		}
+	}
+
 	void TPlatformGLFW::DestroyClosedWindows()
 	{
 		for (auto& window : Windows)

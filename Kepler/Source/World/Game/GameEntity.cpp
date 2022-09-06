@@ -18,6 +18,11 @@ namespace Kepler
 		return World->GetEntityName(Entity);
 	}
 
+	void TGameEntity::SetName(const TString& Name)
+	{
+		World->GetComponent<TNameComponent>(Entity).Name = Name;
+	}
+
 	id64 TGameEntity::GetGUID() const
 	{
 		return World->GetEntityUUID(Entity);

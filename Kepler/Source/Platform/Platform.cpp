@@ -68,6 +68,11 @@ namespace Kepler
 		EventListener = listener;
 	}
 
+	void TPlatform::SetCursorMode(ECursorMode Mode)
+	{
+		CurrentCursorMode = Mode;
+	}
+
 	bool TPlatform::Internal_MouseMoved(const TMouseMoveEvent& e)
 	{
 		MouseState.OnMouseMove({ e.X, e.Y });

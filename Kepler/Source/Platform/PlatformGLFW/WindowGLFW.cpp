@@ -52,6 +52,11 @@ namespace Kepler
 		Height = InHeight;
 	}
 
+	void TWindowGLFW::SetCursorPosition(float2 NewPosition)
+	{
+		glfwSetCursorPos(Window, (float)NewPosition.x, (float)NewPosition.y);
+	}
+
 	void TWindowGLFW::SetupCallbacks()
 	{
 		glfwSetWindowUserPointer(Window, this);

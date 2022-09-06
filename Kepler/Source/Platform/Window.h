@@ -27,6 +27,7 @@ namespace Kepler
 		void SetMaximized(bool bNewMaximized);
 		void SetDecorated(bool bNewDecorated);
 		void SetFullscreen(bool bNewFullscreen);
+		virtual void SetCursorPosition(float2 NewPosition) = 0;
 
 		virtual void* GetNativeHandle() const = 0;
 

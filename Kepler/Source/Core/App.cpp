@@ -26,6 +26,7 @@
 #include "Renderer/World/Camera.h"
 #include "Editor/EditorModule.h"
 #include "imgui.h"
+#include "Editor/Widgets/Elements.h"
 
 namespace Kepler
 {
@@ -57,7 +58,7 @@ namespace Kepler
 		InitVFSAliases(LaunchParams);
 
 		TWindowParams WindowParams{};
-		WindowParams.bMaximized = true;
+		WindowParams.bMaximized = false;
 		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", WindowParams));
 
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
@@ -109,6 +110,7 @@ namespace Kepler
 		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+		CurrentWorld->GetEntityFromId(Entity).SetScale(float3(3.0f));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -142,13 +144,6 @@ namespace Kepler
 
 					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
-					/*
-					auto Rotation = EntityRef.GetRotation();
-					Rotation.z = PositionX * 100.0f;
-					Rotation.x = -90.0f;
-					EntityRef.SetRotation(Rotation);
-					*/
-					EntityRef.SetScale(float3(3));
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the frame
@@ -168,10 +163,36 @@ namespace Kepler
 					// TEMP
 					ImGui::Begin("Details");
 					{
-						auto Rotation = EntityRef.GetRotation();
-						if (ImGui::DragFloat3("Rotation", &Rotation.x, 0.1f))
+						if (TEditorElements::Container("Entity"))
 						{
-							EntityRef.SetRotation(Rotation);
+							char NameBuffer[TEditorElements::GMaxTextEditSymbols];
+							memset(NameBuffer, 0, sizeof(NameBuffer));
+							if (TEditorElements::EditText("Name", EntityRef.GetName().c_str(), NameBuffer))
+							{
+								NameBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+								EntityRef.SetName(NameBuffer);
+							}
+						}
+
+						if (TEditorElements::Container("Transform"))
+						{
+							auto Location = EntityRef.GetLocation();
+							if (TEditorElements::DragFloat3("Location", Location, 0.001f))
+							{
+								EntityRef.SetLocation(Location);
+							}
+
+							auto Rotation = EntityRef.GetRotation();
+							if (TEditorElements::DragFloat3("Rotation", Rotation, 0.1f))
+							{
+								EntityRef.SetRotation(Rotation);
+							}
+
+							auto Scale = EntityRef.GetScale();
+							if (TEditorElements::DragFloat3("Scale", Scale, 0.01f))
+							{
+								EntityRef.SetScale(Scale);
+							}
 						}
 					}
 					ImGui::End();
@@ -229,6 +250,7 @@ namespace Kepler
 #ifdef ENABLE_EDITOR
 		Editor = MakeRef(New<TEditorModule>(MainWindow));
 		ModuleStack.PushModule(Editor, EModulePushStrategy::Overlay);
+		TEditorElements::SetMainWindow(MainWindow);
 #endif
 
 		ModuleStack.Init();

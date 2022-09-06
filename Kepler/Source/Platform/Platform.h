@@ -14,6 +14,13 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
 
 namespace Kepler
 {
+	enum class ECursorMode
+	{
+		Visible,
+		HiddenFree,
+		HiddenLocked,
+	};
+
 	struct TPlatform
 	{
 		TPlatform();
@@ -35,6 +42,9 @@ namespace Kepler
 		inline const TMouseState& GetMouseState() const { return MouseState; }
 		virtual bool IsMainWindow(TWindow* Window) const { return true; }
 
+		inline ECursorMode GetCurrentCursorMode() const { return CurrentCursorMode; }
+		virtual void SetCursorMode(ECursorMode Mode);
+
 	private:
 		bool Internal_MouseMoved(const TMouseMoveEvent& e);
 		bool Internal_MouseButtonPressed(const TMouseButtonDownEvent& e);
@@ -55,6 +65,7 @@ namespace Kepler
 		IPlatformEventListener* EventListener{ nullptr };
 		TMouseState MouseState{};
 		TKeyboardState KeyboardState{};
+		ECursorMode CurrentCursorMode{ECursorMode::Visible};
 
 	public:
 		bool bMinimized = false;
