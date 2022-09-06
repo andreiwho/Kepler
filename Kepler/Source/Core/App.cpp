@@ -111,6 +111,7 @@ namespace Kepler
 		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 		CurrentWorld->GetEntityFromId(Entity).SetScale(float3(3.0f));
+		CurrentWorld->GetEntityFromId(Entity).SetRotation(float3(-90.0f, 0.0f, 45.0f));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);

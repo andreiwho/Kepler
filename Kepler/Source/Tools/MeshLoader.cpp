@@ -112,6 +112,9 @@ namespace Kepler
 			const aiVector3D& TexCoord = pMesh->mTextureCoords[0][Index];
 			Vertex.UV0 = float2(TexCoord.x, TexCoord.y);
 
+			const aiVector3D& Normal = pMesh->mNormals[Index];
+			Vertex.Normal = float3(Normal.x, Normal.y, Normal.z);
+
 			Section.Vertices.EmplaceBack(Vertex);
 		}
 
