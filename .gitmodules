@@ -25,3 +25,6 @@
 [submodule "Kepler/ThirdParty/assimp"]
 	path = Kepler/ThirdParty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "Kepler/ThirdParty/ImGuizmo"]
+	path = Kepler/ThirdParty/ImGuizmo
+	url = https://github.com/andreiwho/ImGuizmo
