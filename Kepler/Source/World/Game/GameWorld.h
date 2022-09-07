@@ -24,6 +24,8 @@ namespace Kepler
 
 		id64 GetEntityUUID(TGameEntityId Entity) const;
 
+		bool IsValidEntity(TGameEntityId Id) const;
+
 		template<typename T, typename ... ARGS>
 		T& AddComponent(TGameEntityId Entity, ARGS&&... InArgs)
 		{

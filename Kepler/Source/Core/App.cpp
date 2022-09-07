@@ -122,6 +122,8 @@ namespace Kepler
 			Platform->RegisterPlatformEventListener(this);
 			float PositionX = 0.0f;
 
+			Editor->SetEditedWorld(CurrentWorld);
+			Editor->SelectEntity(Entity);
 			while (Platform->HasActiveMainWindow())
 			{
 				KEPLER_PROFILE_FRAME("GameLoop");
@@ -148,6 +150,8 @@ namespace Kepler
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the frame
+					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
+					// This is a subject to consider though
 					TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
@@ -156,49 +160,8 @@ namespace Kepler
 
 #ifdef ENABLE_EDITOR
 					Editor->BeginGUIPass();
-					// ...
-					// Draw layer stack GUI
-
-
 					Editor->DrawEditor();
-					// TEMP
-					ImGui::Begin("Details");
-					{
-						if (TEditorElements::Container("Entity"))
-						{
-							char NameBuffer[TEditorElements::GMaxTextEditSymbols];
-							memset(NameBuffer, 0, sizeof(NameBuffer));
-							if (TEditorElements::EditText("Name", EntityRef.GetName().c_str(), NameBuffer))
-							{
-								NameBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
-								EntityRef.SetName(NameBuffer);
-							}
-						}
-
-						if (TEditorElements::Container("Transform"))
-						{
-							auto Location = EntityRef.GetLocation();
-							if (TEditorElements::DragFloat3("Location", Location, 0.001f))
-							{
-								EntityRef.SetLocation(Location);
-							}
-
-							auto Rotation = EntityRef.GetRotation();
-							if (TEditorElements::DragFloat3("Rotation", Rotation, 0.1f))
-							{
-								EntityRef.SetRotation(Rotation);
-							}
-
-							auto Scale = EntityRef.GetScale();
-							if (TEditorElements::DragFloat3("Scale", Scale, 0.01f))
-							{
-								EntityRef.SetScale(Scale);
-							}
-						}
-					}
-					ImGui::End();
-					// END TEMP
-
+					ModuleStack.OnRenderGUI();
 					Editor->EndGUIPass();
 #endif
 					LowLevelRenderer->PresentAll();

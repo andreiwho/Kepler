@@ -15,11 +15,16 @@
 #include "Renderer/LowLevelRenderer.h"
 #include "Renderer/RendererD3D11/RenderDeviceD3D11.h"
 #include "Async/Async.h"
+#include "Widgets/Elements.h"
+#include "World/Game/GameWorld.h"
+#include "World/Game/GameEntity.h"
+#include "Panels/DetailsPanel.h"
 
 namespace Kepler
 {
 	//////////////////////////////////////////////////////////////////////////
 	TEditorModule::TEditorModule(TWindow* pWindow)
+		: MainWindow(pWindow)
 	{
 		for (auto& Size : ViewportSizes)
 		{
@@ -43,8 +48,6 @@ namespace Kepler
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;      // Enable Multi-Viewport / Platform Windows. 
 																	// This currently does not work with the render thread
-
-
 		SetupStyle();
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -109,7 +112,10 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawEditor()
 	{
+		DrawMenuBar();
 		DrawViewports();
+		DrawDetailsPanel();
+
 		ImGui::ShowDemoWindow();
 	}
 
@@ -146,12 +152,47 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::SetEditedWorld(TRef<TGameWorld> InWorld)
+	{
+		EditedWorld = InWorld;
+	}
+
+	void TEditorModule::SelectEntity(TGameEntityId Id)
+	{
+		if (!EditedWorld || !EditedWorld->IsValidEntity(Id))
+		{
+			return;
+		}
+
+		SelectedEntity = Id;
+	}
+
+	void TEditorModule::UnselectEverything()
+	{
+		SelectedEntity = TGameEntityId{};
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::SetupStyle()
 	{
 		ImGuiIO& IO = ImGui::GetIO();
 		// IO.Fonts->AddFontFromFileTTF("../data/Fonts/Ruda-Bold.ttf", 15.0f);
 
 		ImGui::StyleColorsDark();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawMenuBar()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File", true))
+			{
+				ImGui::MenuItem("Noop", "No + Op");
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -178,4 +219,15 @@ namespace Kepler
 		ImGui::PopStyleVar();
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawDetailsPanel()
+	{
+		if (!EditedWorld)
+		{
+			return;
+		}
+
+		TEditorDetailsPanel Widget(EditedWorld, SelectedEntity);
+		Widget.Draw();
+	}
 }

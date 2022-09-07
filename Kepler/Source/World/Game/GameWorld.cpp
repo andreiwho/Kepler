@@ -39,6 +39,8 @@ namespace Kepler
 		return EntityRegistry.get<TGameEntity>(Id.Entity);
 	}
 
+
+
 	void TGameWorld::DestroyEntity(TGameEntityId Entity)
 	{
 		PendingDestroyEntities.EmplaceBack(Entity.Entity);
@@ -60,6 +62,11 @@ namespace Kepler
 			return EntityRegistry.get<TIdComponent>(Entity.Entity).Id;
 		}
 		return {};
+	}
+
+	bool TGameWorld::IsValidEntity(TGameEntityId Id) const
+	{
+		return EntityRegistry.valid(Id);
 	}
 
 	void TGameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)

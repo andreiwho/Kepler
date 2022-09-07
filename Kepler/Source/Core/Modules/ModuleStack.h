@@ -18,6 +18,10 @@ namespace Kepler
 		void Clear();
 		void HandlePlatformEvent(const TPlatformEventBase& Event);
 
+		void OnUpdate(float DeltaTime);
+		void OnRender();
+		void OnRenderGUI();
+
 		void Init();
 		void Terminate();
 

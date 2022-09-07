@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Modules/Module.h"
 #include "Core/Core.h"
+#include "World/Game/GameWorld.h"
 
 namespace Kepler
 {
@@ -25,12 +26,20 @@ namespace Kepler
 		void BeginGUIPass();
 		void DrawEditor();
 		void EndGUIPass();
+		void SetEditedWorld(TRef<TGameWorld> InWorld);
+		void SelectEntity(TGameEntityId Id);
+		void UnselectEverything();
 
 	private:
 		void SetupStyle();
+		void DrawMenuBar();
 		void DrawViewports();
+		void DrawDetailsPanel();
 
 	private:
+		TWindow* MainWindow{};
 		float2 ViewportSizes[(u32)EViewportIndex::Max]{};
+		TRef<TGameWorld> EditedWorld{};
+		TGameEntityId SelectedEntity{};
 	};
 }
