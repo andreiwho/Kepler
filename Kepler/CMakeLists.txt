@@ -11,6 +11,7 @@ target_link_libraries("Kepler"
   "assimp"
   "rapidjson"
   "imgui"
+  "ImGuizmo"
  PRIVATE 
   "glfw" 
   "stb_image" 

@@ -49,6 +49,19 @@ add_library(imgui
 target_include_directories(imgui PUBLIC imgui)
 target_link_libraries(imgui PRIVATE glfw)
 
+# IMGUIZMO
+add_library(ImGuizmo 
+ STATIC
+  ImGuizmo/GraphEditor.h
+  ImGuizmo/GraphEditor.cpp
+  ImGuizmo/ImGradient.h
+  ImGuizmo/ImGradient.cpp
+  ImGuizmo/ImGuizmo.h
+  ImGuizmo/ImGuizmo.cpp
+  )
+target_link_libraries(ImGuizmo PUBLIC imgui)
+target_include_directories(ImGuizmo PUBLIC ImGuizmo)
+
 if(WIN32)
  target_sources(imgui 
   PRIVATE 
@@ -65,6 +78,7 @@ set(THIRD_PARTY_PROJECTS
  UpdateAssimpLibsDebugSymbolsAndDLLs
  assimp
  imgui
+ ImGuizmo
  zlibstatic
  update_mappings 
  uninstall

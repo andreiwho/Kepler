@@ -19,6 +19,7 @@
 #include "World/Game/GameWorld.h"
 #include "World/Game/GameEntity.h"
 #include "Panels/DetailsPanel.h"
+#include "ImGuizmo.h"
 
 namespace Kepler
 {
@@ -107,6 +108,7 @@ namespace Kepler
 		ImGui_ImplGlfw_NewFrame();
 		Await(Task);
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
