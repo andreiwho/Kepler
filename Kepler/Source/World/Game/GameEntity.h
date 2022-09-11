@@ -54,7 +54,16 @@ namespace Kepler
 
 		inline bool IsCamera() const { return bIsCamera; }
 
+		inline void SetHideInSceneGraph(bool bHide)
+		{
+			bHideInSceneGraph = bHide;
+		}
+
+		inline bool ShouldHideInSceneGraph() const { return bHideInSceneGraph; }
+
 	private:
+		bool bHideInSceneGraph = false;
+
 		friend class TGameWorld;
 		TGameEntityId Internal_GetId() const { return Entity; }
 		

@@ -92,7 +92,10 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TEditorModule::~TEditorModule()
 	{
-		ImGui_ImplDX11_Shutdown();
+		Await(TRenderThread::Submit([]
+			{
+				ImGui_ImplDX11_Shutdown();
+			}));
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
@@ -125,7 +128,8 @@ namespace Kepler
 		// DrawGizmo();
 		DrawViewports();
 		DrawDetailsPanel();
-		// ImGui::ShowDemoWindow();
+		DrawSceneGraph();
+		ImGui::ShowDemoWindow();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -380,6 +384,44 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawSceneGraph()
+	{
+		ImGui::Begin("Scene Graph");
+		i32 Index = 0;
+		if (ImGui::TreeNodeEx((void*)(intptr_t)Index, ImGuiTreeNodeFlags_DefaultOpen, EditedWorld->GetName().c_str()))
+		{
+			EditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
+				[&, this](auto EntityId, TNameComponent& NC, TGameEntity& GE)
+				{
+					ImGuiTreeNodeFlags NodeFlags = ImGuiTreeNodeFlags_None;
+					if (!GE.ShouldHideInSceneGraph())
+					{
+						bool bNodeOpen = false;
+						if (SelectedEntity == TGameEntityId{ EntityId })
+						{
+							NodeFlags |= ImGuiTreeNodeFlags_Selected;
+						}
+
+						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)Index, NodeFlags, NC.Name.c_str());
+						if (ImGui::IsItemClicked())
+						{
+							SelectedEntity = TGameEntityId{ EntityId };
+						}	
+
+						if (bNodeOpen)
+						{
+							ImGui::TreePop();
+						}
+
+						Index++;
+					}
+				});
+			ImGui::TreePop();
+		}
+		ImGui::End();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawGizmo()
 	{
 		if (!EditedWorld)
@@ -436,6 +478,7 @@ namespace Kepler
 			EditorCameraEntity = EditedWorld->CreateCamera("_EditorCamera");
 			TTransformComponent& CameraTransform = EditedWorld->GetComponent<TTransformComponent>(EditorCameraEntity);
 			CameraTransform.SetLocation(float3(0.0f, -3.0f, 0.0f));
+			EditedWorld->GetEntityFromId(EditorCameraEntity).SetHideInSceneGraph(true);
 			// sCameraTransform.SetRotation(float3(0.0f, 0.0f, 90.0f));
 		}
 		EditedWorld->SetMainCamera(EditorCameraEntity);
@@ -449,7 +492,6 @@ namespace Kepler
 			Rotation.z -= MouseDelta.X * DeltaTime * EditorCameraSensitivity;
 			Rotation.x -= MouseDelta.Y * DeltaTime * EditorCameraSensitivity;
 			CameraTransform.SetRotation(Rotation);
-			KEPLER_INFO(LogEditor, "MouseDelta: {},{}", MouseDelta.X, MouseDelta.Y);
 
 			auto Location = CameraTransform.GetLocation();
 			if (TInput::GetKey(EKeyCode::LeftAlt))

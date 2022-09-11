@@ -12,11 +12,8 @@ namespace Kepler
 
 	public:
 		TGameEntityId() : Entity(entt::null) {}
-
-	private:
 		constexpr TGameEntityId(entt::entity InEntity) : Entity(InEntity) {}
 		inline operator entt::entity() const { return Entity; }
-
 		entt::entity Entity;
 	};
 }

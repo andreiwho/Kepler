@@ -62,6 +62,7 @@ namespace Kepler
 		void DrawViewportGizmoControls();
 		void DrawViewportCameraControls();
 		void DrawDetailsPanel();
+		void DrawSceneGraph();
 		void DrawGizmo();
 		void ControlEditorCamera(float DeltaTime);
 

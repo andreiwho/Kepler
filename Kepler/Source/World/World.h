@@ -24,6 +24,8 @@ namespace Kepler
 
 		void Internal_Update(float DeltaTime);
 
+		const TString& GetName() const { return Name; }
+
 	protected:
 		// The constructor
 		TWorld(const TString& Name);
