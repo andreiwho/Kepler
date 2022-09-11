@@ -106,13 +106,20 @@ namespace Kepler
 		TTimer MainTimer{};
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
-		auto Entity = CurrentWorld->CreateEntity("Entity");
 
+		auto Entity = CurrentWorld->CreateEntity("Entity");
 		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 		CurrentWorld->GetEntityFromId(Entity).SetScale(float3(3.0f));
 		CurrentWorld->GetEntityFromId(Entity).SetRotation(float3(0, 0.0f, 45.0f));
+
+		auto Entity1 = CurrentWorld->CreateEntity("Entity1");
+		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity1, MeshSections);
+		CurrentWorld->AddComponent<TMaterialComponent>(Entity1, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+		CurrentWorld->GetEntityFromId(Entity1).SetLocation(float3(2.0f, 0.0f, 1.0f));
+		CurrentWorld->GetEntityFromId(Entity1).SetScale(float3(3.0f));
+		CurrentWorld->GetEntityFromId(Entity1).SetRotation(float3(0, 0.0f, 0.0f));
 
 		auto MainCamera = CurrentWorld->CreateCamera("Camera");
 		CurrentWorld->GetComponent<TTransformComponent>(MainCamera).SetLocation(float3(0.0f, -3.0f, 1));
@@ -149,8 +156,6 @@ namespace Kepler
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
 					// TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
 					// PlayerMaterial->WriteCamera(Camera);
-
-					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 					ModuleStack.OnUpdate(GGlobalTimer->Delta());
