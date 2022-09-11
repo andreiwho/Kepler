@@ -2,6 +2,7 @@
 #include "Renderer/RenderGlobals.h"
 
 #include "imgui.h"
+#include <glm/gtc/type_ptr.hpp>
 
 #ifdef PLATFORM_DESKTOP
 # include "backends/imgui_impl_glfw.h"
@@ -20,6 +21,12 @@
 #include "World/Game/GameEntity.h"
 #include "Panels/DetailsPanel.h"
 #include "ImGuizmo.h"
+#include "World/Camera/CameraComponent.h"
+#include "World/Game/Components/TransformComponent.h"
+#include "imgui_internal.h"
+#include "Core/Timer.h"
+#include "Platform/Input.h"
+#include "Platform/Platform.h"
 
 namespace Kepler
 {
@@ -115,10 +122,16 @@ namespace Kepler
 	void TEditorModule::DrawEditor()
 	{
 		DrawMenuBar();
+		// DrawGizmo();
 		DrawViewports();
 		DrawDetailsPanel();
+		// ImGui::ShowDemoWindow();
+	}
 
-		ImGui::ShowDemoWindow();
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::OnUpdate(float DeltaTime)
+	{
+		ControlEditorCamera(DeltaTime);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -159,6 +172,7 @@ namespace Kepler
 		EditedWorld = InWorld;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::SelectEntity(TGameEntityId Id)
 	{
 		if (!EditedWorld || !EditedWorld->IsValidEntity(Id))
@@ -169,9 +183,20 @@ namespace Kepler
 		SelectedEntity = Id;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::UnselectEverything()
 	{
 		SelectedEntity = TGameEntityId{};
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::OnPlatformEvent(const TPlatformEventBase& Event)
+	{
+		TPlatformEventDispatcher Dispatcher(Event);
+		Dispatcher.Dispatch(this, &TEditorModule::OnKeyDown);
+		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonDown);
+		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonUp);
+		Dispatcher.Dispatch(this, &TEditorModule::OnMouseMove);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -205,6 +230,16 @@ namespace Kepler
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport 1");
 		{
+			if (ImGui::IsWindowHovered())
+			{
+				HoveredViewport = EViewportIndex::Viewport1;
+				bIsCursorInViewport = true;
+			}
+			else
+			{
+				bIsCursorInViewport = false;
+			}
+
 			ImVec2 Region = ImGui::GetContentRegionAvail();
 
 			ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(Region.x, Region.y);
@@ -216,9 +251,120 @@ namespace Kepler
 			ImGui::Image(
 				(ImTextureID)ViewportSampler->GetNativeHandle(),
 				ImVec2(Image->GetWidth(), Image->GetHeight()));
+
+			DrawGizmo();
+			DrawViewportGizmoControls();
+			DrawViewportCameraControls();
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawViewportGizmoControls()
+	{
+		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+		vMin.x += ImGui::GetWindowPos().x;
+		vMin.y += ImGui::GetWindowPos().y;
+		vMax.x += ImGui::GetWindowPos().x;
+		vMax.y += ImGui::GetWindowPos().y;
+
+		ImGui::SetCursorScreenPos(ImVec2(vMin.x + ViewportToolbarOffset.x, vMin.y + ViewportToolbarOffset.y));
+
+		ImGui::BeginGroup();
+		ImGui::Text("Operation");
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Translate", EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE))
+		{
+			EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
+		}
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Rotate", EditOperationIndex == ImGuizmo::OPERATION::ROTATE))
+		{
+			EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
+		}
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Scale", EditOperationIndex == ImGuizmo::OPERATION::SCALE))
+		{
+			EditOperationIndex = ImGuizmo::OPERATION::SCALE;
+		}
+
+		if (EditOperationIndex != ImGuizmo::OPERATION::SCALE)
+		{
+			ImGui::SameLine(0.0f, 32);
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::RadioButton("World", EditSpaceIndex == ImGuizmo::MODE::WORLD))
+			{
+				EditSpaceIndex = ImGuizmo::MODE::WORLD;
+			}
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Local", EditSpaceIndex == ImGuizmo::MODE::LOCAL))
+			{
+				EditSpaceIndex = ImGuizmo::MODE::LOCAL;
+			}
+
+			// Snapping
+			ImGui::SameLine(0.0f, 32);
+			ImGui::Checkbox("Snap", &bSnapEnabled);
+
+			if (bSnapEnabled)
+			{
+				ImGui::SameLine();
+				if (EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
+				{
+					const char* pEntries = " 1\0 2\0 5\0 10\0 25\0 50\0 100\0";
+
+					i32 CurrentValue = (i32)TranslationSnap;
+					ImGui::SetNextItemWidth(50.0f);
+					if (ImGui::Combo("##v", &CurrentValue, pEntries))
+					{
+						TranslationSnap = (ETranslationSnap)CurrentValue;
+					}
+				}
+				if (EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
+				{
+					const char* pEntries = " 1\0 10\0 30\0 45\0 90\0 180\0 ";
+
+					i32 CurrentValue = (i32)RotationSnap;
+					ImGui::SetNextItemWidth(50.0f);
+					if (ImGui::Combo("##v", &CurrentValue, pEntries))
+					{
+						RotationSnap = (ERotationSnap)CurrentValue;
+					}
+				}
+			}
+		}
+
+		ImGui::EndGroup();
+		// ImGui::SameLine();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawViewportCameraControls()
+	{
+		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+		vMin.x += ImGui::GetWindowPos().x;
+		vMin.y += ImGui::GetWindowPos().y;
+		vMax.x += ImGui::GetWindowPos().x;
+		vMax.y += ImGui::GetWindowPos().y;
+
+		ImGui::SetCursorScreenPos(ImVec2(vMin.x + ViewportToolbarOffset.x, vMax.y - ImGui::GetTextLineHeight() - ViewportToolbarOffset.y));
+		ImGui::Text("Camera");
+		ImGui::SameLine(0.0f, 32.0f);
+		ImGui::Text("Sensitivity");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(128);
+		ImGui::DragFloat("##Sensitivity", &EditorCameraSensitivity, 0.1f, 128.0f);
+		ImGui::SameLine(0.0f, 32.0f);
+		ImGui::Text("Movement Speed");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(128);
+		ImGui::DragFloat("##MovementSpeed", &EditorCameraSpeed, 0.1f, 128.0f);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -232,4 +378,262 @@ namespace Kepler
 		TEditorDetailsPanel Widget(EditedWorld, SelectedEntity);
 		Widget.Draw();
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::DrawGizmo()
+	{
+		if (!EditedWorld)
+		{
+			return;
+		}
+
+		if (HoveredViewport == EViewportIndex::Max)
+		{
+			return;
+		}
+
+		if (EditedWorld->IsValidEntity(SelectedEntity))
+		{
+			auto MainCameraId = EditedWorld->GetMainCamera();
+			// auto& MainCameraEntity = EditedWorld->GetEntityFromId(SelectedEntity);
+			TCamera& Camera = EditedWorld->GetComponent<TCameraComponent>(MainCameraId).GetCamera();
+
+			matrix4x4 ViewMatrix = Camera.GenerateViewMatrix();
+			matrix4x4 ProjectionMatrix = Camera.GenerateProjectionMatrix();
+
+			TTransformComponent& TransformComponent = EditedWorld->GetComponent<TTransformComponent>(SelectedEntity);
+			matrix4x4 Transform = TransformComponent.GetTransform().GenerateWorldMatrix();
+
+			ImGuizmo::SetDrawlist();
+			// Snapping
+			float3 SnapVec = CalculateSnapVec();
+
+			ImGuiIO& io = ImGui::GetIO();
+			ImGuizmo::SetRect(0, 0, GetViewportSize(HoveredViewport).x, GetViewportSize(HoveredViewport).y);
+			if (ImGuizmo::Manipulate(glm::value_ptr(ViewMatrix), glm::value_ptr(ProjectionMatrix),
+				static_cast<ImGuizmo::OPERATION>(EditOperationIndex),
+				static_cast<ImGuizmo::MODE>(EditSpaceIndex),
+				glm::value_ptr(Transform),
+				nullptr,
+				bSnapEnabled ? &SnapVec.x : nullptr))
+			{
+				float3 Location, Rotation, Scale;
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(Transform), &Location.x, &Rotation.x, &Scale.x);
+				TransformComponent.SetTransform(TWorldTransform{ Location, Rotation, Scale });
+			}
+		}
+	}
+
+	void TEditorModule::ControlEditorCamera(float DeltaTime)
+	{
+		if (!EditedWorld)
+		{
+			return;
+		}
+
+		if (!EditedWorld->IsValidEntity(EditorCameraEntity))
+		{
+			EditorCameraEntity = EditedWorld->CreateCamera("_EditorCamera");
+			TTransformComponent& CameraTransform = EditedWorld->GetComponent<TTransformComponent>(EditorCameraEntity);
+			CameraTransform.SetLocation(float3(0.0f, -3.0f, 0.0f));
+			// sCameraTransform.SetRotation(float3(0.0f, 0.0f, 90.0f));
+		}
+		EditedWorld->SetMainCamera(EditorCameraEntity);
+
+		if (bIsControllingCamera)
+		{
+			TTransformComponent& CameraTransform = EditedWorld->GetComponent<TTransformComponent>(EditorCameraEntity);
+			ImGuiIO& IO = ImGui::GetIO();
+			auto MouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
+			float3 Rotation = CameraTransform.GetRotation();
+			Rotation.z -= MouseDelta.X * DeltaTime * EditorCameraSensitivity;
+			Rotation.x -= MouseDelta.Y * DeltaTime * EditorCameraSensitivity;
+			CameraTransform.SetRotation(Rotation);
+			KEPLER_INFO(LogEditor, "MouseDelta: {},{}", MouseDelta.X, MouseDelta.Y);
+
+			auto Location = CameraTransform.GetLocation();
+			if (TInput::GetKey(EKeyCode::LeftAlt))
+			{
+				// Orbiting camera
+			}
+			else
+			{
+				// First person camera
+				if (TInput::GetKey(EKeyCode::W))
+				{
+					Location += CameraTransform.GetForwardVector() * DeltaTime * EditorCameraSpeed;
+				}
+				if (TInput::GetKey(EKeyCode::S))
+				{
+					Location -= CameraTransform.GetForwardVector() * DeltaTime * EditorCameraSpeed;
+				}
+				if (TInput::GetKey(EKeyCode::A))
+				{
+					Location -= CameraTransform.GetRightVector() * DeltaTime * EditorCameraSpeed;
+				}
+				if (TInput::GetKey(EKeyCode::D))
+				{
+					Location += CameraTransform.GetRightVector() * DeltaTime * EditorCameraSpeed;
+				}
+				if (TInput::GetKey(EKeyCode::E))
+				{
+					Location += CameraTransform.GetUpVector() * DeltaTime * EditorCameraSpeed;
+				}
+				if (TInput::GetKey(EKeyCode::Q))
+				{
+					Location -= CameraTransform.GetUpVector() * DeltaTime * EditorCameraSpeed;
+				}
+			}
+			CameraTransform.SetLocation(Location);
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorModule::OnKeyDown(const TKeyDownEvent& InEvent)
+	{
+		if (bIsControllingCamera)
+		{
+
+		}
+		else
+		{
+			switch (InEvent.Key)
+			{
+				// Switch gizmos
+			case EKeyCode::W:
+			{
+				EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
+			} break;
+			case EKeyCode::E:
+			{
+				EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
+			} break;
+			case EKeyCode::R:
+			{
+				EditOperationIndex = ImGuizmo::OPERATION::SCALE;
+				if (bSnapEnabled)
+				{
+					static std::once_flag Once;
+					std::call_once(Once, [] { KEPLER_WARNING(LogEditor, "Gizmo scaling currently doesn't support snapping"); });
+				}
+			} break;
+			// Switch spaces
+			case EKeyCode::T:
+			{
+				const ImGuizmo::MODE Mode = static_cast<ImGuizmo::MODE>(EditSpaceIndex);
+				if (Mode == ImGuizmo::MODE::LOCAL)
+				{
+					EditSpaceIndex = ImGuizmo::MODE::WORLD;
+				}
+				else
+				{
+					EditSpaceIndex = ImGuizmo::MODE::LOCAL;
+				}
+			} break;
+			case EKeyCode::Q:
+			{
+				bSnapEnabled = !bSnapEnabled;
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& InEvent)
+	{
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorModule::OnMouseButtonUp(const TMouseButtonUpEvent& InEvent)
+	{
+		if (bIsControllingCamera && InEvent.Button & EMouseButton::Right)
+		{
+			TPlatform::Get()->SetCursorMode(ECursorMode::Visible);
+			bIsControllingCamera = false;
+		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorModule::OnMouseMove(const TMouseMoveEvent& InEvent)
+	{
+		// Start moving camera only if mouse button pressed and mouse is dragged, otherwise, use context menu (probably...)
+		if (TInput::GetMouseButon(EMouseButton::Right) && bIsCursorInViewport)
+		{
+			TPlatform::Get()->SetCursorMode(ECursorMode::HiddenLocked);
+			bIsControllingCamera = true;
+		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	float3 TEditorModule::CalculateSnapVec() const
+	{
+		if (bSnapEnabled)
+		{
+			if (EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
+			{
+				switch (TranslationSnap)
+				{
+				case Kepler::ETranslationSnap::_1Unit:
+					return float3(0.01f);
+					break;
+				case Kepler::ETranslationSnap::_2Units:
+					return float3(0.02f);
+					break;
+				case Kepler::ETranslationSnap::_5Units:
+					return float3(0.05f);
+					break;
+				case Kepler::ETranslationSnap::_10Units:
+					return float3(0.1f);
+					break;
+				case Kepler::ETranslationSnap::_25Units:
+					return float3(0.25f);
+					break;
+				case Kepler::ETranslationSnap::_50Units:
+					return float3(0.5f);
+					break;
+				case Kepler::ETranslationSnap::_100Units:
+					return float3(1.0f);
+					break;
+				default:
+					break;
+				}
+			}
+			if (EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
+			{
+				switch (RotationSnap)
+				{
+				case Kepler::ERotationSnap::_1Degree:
+					return float3(1.0f);
+					break;
+				case Kepler::ERotationSnap::_10Degrees:
+					return float3(10.0f);
+					break;
+				case Kepler::ERotationSnap::_30Degrees:
+					return float3(30.0f);
+					break;
+				case Kepler::ERotationSnap::_45Degrees:
+					return float3(45.0f);
+					break;
+				case Kepler::ERotationSnap::_90Degrees:
+					return float3(90.0f);
+					break;
+				case Kepler::ERotationSnap::_180Degrees:
+					return float3(180.0f);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		return float3(0.0f);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 }

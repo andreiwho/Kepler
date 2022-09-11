@@ -57,12 +57,55 @@ namespace ImGui
 
 namespace Kepler
 {
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorElements::DragFloat1(CStr pLabel, float& OutFloat, float Speed, float Min, float Max)
+	{
+		ImGui::Text(pLabel);
+		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat, 1, Speed, Min, Max, "%.3f", 1.0f);
+
+		if (bValueChanged)
+		{
+			CheckWrappingCursor();
+		}
+
+		return bValueChanged;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorElements::DragFloat2(CStr pLabel, float2& OutFloat, float Speed, float Min, float Max)
+	{
+		ImGui::Text(pLabel);
+		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 2, Speed, Min, Max, "%.3f", 1.0f);
+
+		if (bValueChanged)
+		{
+			CheckWrappingCursor();
+		}
+
+		return bValueChanged;
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorElements::DragFloat3(CStr pLabel, float3& OutFloat, float Speed, float Min, float Max)
 	{
 		ImGui::Text(pLabel);
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 3, Speed, Min, Max, "%.3f", 1.0f);
 		
+		if (bValueChanged)
+		{
+			CheckWrappingCursor();
+		}
+
+		return bValueChanged;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TEditorElements::DragFloat4(CStr pLabel, float4& OutFloat, float Speed, float Min, float Max)
+	{
+		ImGui::Text(pLabel);
+		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 4, Speed, Min, Max, "%.3f", 1.0f);
+
 		if (bValueChanged)
 		{
 			CheckWrappingCursor();

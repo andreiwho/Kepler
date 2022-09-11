@@ -37,4 +37,10 @@ namespace Kepler
 		return ButtonStateMask & button;
 	}
 
+	void TMouseState::OnUpdate()
+	{
+		OldOffset = Offset;
+		Offset = TMouseVector2f(0.0f, 0.0f);
+	}
+
 }

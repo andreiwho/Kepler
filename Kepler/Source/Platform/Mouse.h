@@ -31,10 +31,13 @@ namespace Kepler
 
 		inline TMouseVector2f GetPosition() const { return Position; }
 		bool GetButtonState(EMouseButton button) const;
-	
+		inline TMouseVector2f GetOffset() const { return OldOffset; }
+		void OnUpdate();
+
 	private:
 		TMouseVector2f Position{};
 		TMouseVector2f Offset{};
+		TMouseVector2f OldOffset{};
 		ubyte ButtonStateMask{};
 	};
 }

@@ -80,13 +80,28 @@ namespace Kepler
 		glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+
+				const EMouseButton::EValue ActualButton = std::invoke([button]
+					{
+						switch (button)
+						{
+						case GLFW_MOUSE_BUTTON_LEFT:
+							return EMouseButton::Left;
+						case GLFW_MOUSE_BUTTON_RIGHT:
+							return EMouseButton::Right;
+						case GLFW_MOUSE_BUTTON_MIDDLE:
+							return EMouseButton::Middle;
+						}
+						return EMouseButton::Unknown;
+					});
+
 				if (action == GLFW_PRESS)
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 				else
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 			});
 

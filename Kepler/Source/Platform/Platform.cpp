@@ -70,6 +70,7 @@ namespace Kepler
 
 	void TPlatform::SetCursorMode(ECursorMode Mode)
 	{
+		OldCursorMode = CurrentCursorMode;
 		CurrentCursorMode = Mode;
 	}
 
@@ -97,7 +98,7 @@ namespace Kepler
 		return false;
 	}
 
-	bool TPlatform::Internal_KeyReleased(const TKeyDownEvent& e)
+	bool TPlatform::Internal_KeyReleased(const TKeyUpEvent& e)
 	{
 		KeyboardState.OnKeyReleased(e.Key);
 		return false;

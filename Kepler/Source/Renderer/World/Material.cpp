@@ -37,6 +37,7 @@ namespace Kepler
 		ParamBuffer->Write("Transform", &Matrix);
 	}
 
+	// BIG TODO: Use global renderer buffer in shaders to represent the camera state
 	void TMaterial::WriteCamera(TCamera Camera)
 	{
 		matrix4x4 ViewProjection = glm::transpose(Camera.GenerateViewProjectionMatrix());

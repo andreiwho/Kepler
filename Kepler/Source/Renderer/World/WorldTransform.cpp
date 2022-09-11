@@ -28,11 +28,11 @@ namespace Kepler
 	matrix4x4 TWorldTransform::GenerateWorldMatrix() const
 	{
 		matrix4x4 World = matrix4x4(1.0f);
-		World = glm::scale(World, Scale);
+		World = glm::translate(World, Location);
 		World = glm::rotate(World, glm::radians(Rotation.z), float3(0.0f, 0.0f, 1.0f));
 		World = glm::rotate(World, glm::radians(Rotation.y), float3(0.0f, 1.0f, 0.0f));
 		World = glm::rotate(World, glm::radians(Rotation.x), float3(1.0f, 0.0f, 0.0f));
-		World = glm::translate(World, Location);
+		World = glm::scale(World, Scale);
 		return World;
 	}
 }

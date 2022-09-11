@@ -50,6 +50,8 @@ namespace Kepler
 
 	void TPlatformGLFW::Update()
 	{
+		TPlatform::Update();
+
 		glfwPollEvents();
 		DestroyClosedWindows();
 
@@ -85,7 +87,11 @@ namespace Kepler
 	void TPlatformGLFW::SetCursorMode(ECursorMode Mode)
 	{
 		TPlatform::SetCursorMode(Mode);
-		
+		if (OldCursorMode == CurrentCursorMode)
+		{
+			return;
+		}
+
 		if (!HasActiveMainWindow())
 		{
 			return;
@@ -107,6 +113,7 @@ namespace Kepler
 			break;
 		case ECursorMode::HiddenLocked:
 			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 			break;
 		default:
 			break;

@@ -27,6 +27,7 @@
 #include "Editor/EditorModule.h"
 #include "imgui.h"
 #include "Editor/Widgets/Elements.h"
+#include "World/Game/Components/TransformComponent.h"
 
 namespace Kepler
 {
@@ -111,7 +112,11 @@ namespace Kepler
 		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
 		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 		CurrentWorld->GetEntityFromId(Entity).SetScale(float3(3.0f));
-		CurrentWorld->GetEntityFromId(Entity).SetRotation(float3(-90.0f, 0.0f, 45.0f));
+		CurrentWorld->GetEntityFromId(Entity).SetRotation(float3(0, 0.0f, 45.0f));
+
+		auto MainCamera = CurrentWorld->CreateCamera("Camera");
+		CurrentWorld->GetComponent<TTransformComponent>(MainCamera).SetLocation(float3(0.0f, -3.0f, 1));
+		CurrentWorld->GetComponent<TTransformComponent>(MainCamera).SetRotation(float3(-20, 0.0f, 0.0f));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -142,12 +147,13 @@ namespace Kepler
 #endif
 
 					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
-					TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
-					PlayerMaterial->WriteCamera(Camera);
+					// TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
+					// PlayerMaterial->WriteCamera(Camera);
 
 					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
 
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					ModuleStack.OnUpdate(GGlobalTimer->Delta());
 
 					// Render the frame
 					// We are not waiting here, because we also want the editor GUI to be drawn as well. 

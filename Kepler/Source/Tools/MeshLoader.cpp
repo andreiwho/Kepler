@@ -41,7 +41,7 @@ namespace Kepler
 		const aiScene* pScene = Importer.ReadFileFromMemory(Binary.GetData(), Binary.GetLength(),
 			aiProcess_Triangulate |
 			aiProcess_FlipUVs |
-			aiProcess_MakeLeftHanded |
+			aiProcess_FlipWindingOrder |
 			aiProcess_GlobalScale |
 			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);

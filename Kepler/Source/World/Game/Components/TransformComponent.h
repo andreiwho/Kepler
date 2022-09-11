@@ -20,6 +20,9 @@ namespace Kepler
 		inline float3 GetRotation() const { return Transform.GetRotation(); }
 		inline float3 GetScale() const { return Transform.GetScale(); }
 
+		float3 GetForwardVector() const;
+		float3 GetRightVector() const;
+		float3 GetUpVector() const;
 	private:
 		TWorldTransform Transform;
 	};

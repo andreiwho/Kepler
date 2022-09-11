@@ -3,13 +3,15 @@
 #include "World/Game/Components/MaterialComponent.h"
 #include "Renderer/TargetRegistry.h"
 #include "World/Game/Components/StaticMeshComponent.h"
+#include "World/Camera/CameraComponent.h"
+#include "World/Game/Components/TransformComponent.h"
 
 namespace Kepler
 {
 	//////////////////////////////////////////////////////////////////////////
 	TWorldRenderer::TWorldRenderer(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR)
-		:	CurrentWorld(WorldToRender)
-		,	LLR(InLLR)
+		: CurrentWorld(WorldToRender)
+		, LLR(InLLR)
 	{
 	}
 
@@ -59,6 +61,14 @@ namespace Kepler
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
+		auto Camera = CurrentWorld->GetMainCamera();
+		if (CurrentWorld->IsValidEntity(Camera) && CurrentWorld->IsCamera(Camera))
+		{
+			auto& MathCamera = CurrentWorld->GetComponent<TCameraComponent>(Camera).GetCamera();
+			MathCamera.SetFrustumWidth(CurrentViewport.Width);
+			MathCamera.SetFrustumHeight(CurrentViewport.Height);
+		}
+
 		CurrentWorld->GetComponentView<TMaterialComponent>().each(
 			[this, pImmCtx](auto, TMaterialComponent& Component)
 			{
@@ -83,10 +93,10 @@ namespace Kepler
 		// Note: Now it is a simple forward renderer, but it needs to become deferred...
 		// Configure mesh pass render target
 		auto RenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
-			"MeshPassTarget", 
-			CurrentViewport.Width, 
-			CurrentViewport.Height, 
-			EFormat::R8G8B8A8_UNORM, 
+			"MeshPassTarget",
+			CurrentViewport.Width,
+			CurrentViewport.Height,
+			EFormat::R8G8B8A8_UNORM,
 			TLowLevelRenderer::SwapChainFrameCount);
 		TRef<TRenderTarget2D> CurrentRenderTarget = RenderTargetGroup->GetRenderTargetAtArrayLayer(FrameIndex);
 

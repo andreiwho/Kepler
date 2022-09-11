@@ -33,7 +33,7 @@ namespace Kepler
 		static bool HandleCrashReported(const TString& Message);
 
 		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) = 0;
-		virtual void Update() = 0;
+		virtual void Update() { MouseState.OnUpdate(); };
 		virtual bool HasActiveMainWindow() const = 0;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event);
 		void RegisterPlatformEventListener(IPlatformEventListener* listener);
@@ -50,7 +50,7 @@ namespace Kepler
 		bool Internal_MouseButtonPressed(const TMouseButtonDownEvent& e);
 		bool Internal_MouseButtonReleased(const TMouseButtonUpEvent& e);
 		bool Internal_KeyPressed(const TKeyDownEvent& e);
-		bool Internal_KeyReleased(const TKeyDownEvent& e);
+		bool Internal_KeyReleased(const TKeyUpEvent& e);
 		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
 		bool Internal_WindowMinimized(const TWindowMinimizeEvent& Event);
 		bool Internal_WindowRestored(const TWindowRestoreEvent& Event);
@@ -58,6 +58,8 @@ namespace Kepler
 	protected:
 		bool bInitialized = false;
 		virtual void CloseAllWindows() = 0;
+		ECursorMode CurrentCursorMode{ECursorMode::Visible};
+		ECursorMode OldCursorMode{ECursorMode::Visible};
 
 	private:
 		static TPlatform* Instance;
@@ -65,7 +67,6 @@ namespace Kepler
 		IPlatformEventListener* EventListener{ nullptr };
 		TMouseState MouseState{};
 		TKeyboardState KeyboardState{};
-		ECursorMode CurrentCursorMode{ECursorMode::Visible};
 
 	public:
 		bool bMinimized = false;

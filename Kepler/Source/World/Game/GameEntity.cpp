@@ -11,6 +11,7 @@ namespace Kepler
 		, Entity(Id)
 	{
 		KEPLER_TRACE(LogEntity, "Created entity '{}' with Id: 0x{:x}", GetName(), GetGUID().Value);
+		bIsCamera = InWorld->IsCamera(Entity);
 	}
 
 	TString TGameEntity::GetName() const
