@@ -179,6 +179,20 @@ namespace Kepler
 				}
 			});
 
+		glfwSetWindowFocusCallback(Window, 
+			[](GLFWwindow* window, int focused)
+			{
+				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+				if (focused)
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowFocusedEvent(win));
+				}
+				else
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowUnfocusedEvent(win));
+				}
+			});
+
 		glfwSetWindowMaximizeCallback(Window, [](GLFWwindow* window, int maximized)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);

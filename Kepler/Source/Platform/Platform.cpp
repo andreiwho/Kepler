@@ -56,6 +56,8 @@ namespace Kepler
 		dispatcher.Dispatch(this, &TPlatform::Internal_WindowClosed);
 		dispatcher.Dispatch(this, &TPlatform::Internal_WindowMinimized);
 		dispatcher.Dispatch(this, &TPlatform::Internal_WindowRestored);
+		dispatcher.Dispatch(this, &TPlatform::Internal_WindowFocused);
+		dispatcher.Dispatch(this, &TPlatform::Internal_WindowUnfocused);
 
 		if (EventListener)
 		{
@@ -129,6 +131,24 @@ namespace Kepler
 		if (IsMainWindow(Event.Window) && bMinimized)
 		{
 			bMinimized = false;
+		}
+		return false;
+	}
+
+	bool TPlatform::Internal_WindowFocused(const TWindowFocusedEvent& Event)
+	{
+		if (IsMainWindow(Event.Window) && bUnfocused)
+		{
+			bUnfocused = false;
+		}
+		return false;
+	}
+
+	bool TPlatform::Internal_WindowUnfocused(const TWindowUnfocusedEvent& Event)
+	{
+		if (IsMainWindow(Event.Window))
+		{
+			bUnfocused = true;
 		}
 		return false;
 	}

@@ -163,11 +163,11 @@ namespace Kepler
 					// Render the frame
 					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
 					// This is a subject to consider though
-					TRenderThread::Submit([&, this]
+					Await(TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
 							Renderer->Render({ 0, 0, (u32)ViewportSize.x, (u32)ViewportSize.y });
-						});
+						}));
 
 #ifdef ENABLE_EDITOR
 					Editor->BeginGUIPass();
@@ -176,6 +176,12 @@ namespace Kepler
 					Editor->EndGUIPass();
 #endif
 					LowLevelRenderer->PresentAll();
+					
+					if (Platform->IsMainWindowUnfocused())
+					{
+						using namespace std::chrono_literals;
+						std::this_thread::sleep_for(20ms);
+					}
 				}
 				else // minimized
 				{

@@ -54,6 +54,8 @@ namespace Kepler
 		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
 		bool Internal_WindowMinimized(const TWindowMinimizeEvent& Event);
 		bool Internal_WindowRestored(const TWindowRestoreEvent& Event);
+		bool Internal_WindowFocused(const TWindowFocusedEvent& Event);
+		bool Internal_WindowUnfocused(const TWindowUnfocusedEvent& Event);
 
 	protected:
 		bool bInitialized = false;
@@ -70,6 +72,11 @@ namespace Kepler
 
 	public:
 		bool bMinimized = false;
+		bool bUnfocused = false;
 		bool IsMainWindowMinimized() const;
+		inline bool IsMainWindowUnfocused() const
+		{
+			return bUnfocused;
+		}
 	};
 }

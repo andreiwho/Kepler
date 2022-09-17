@@ -113,6 +113,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::BeginGUIPass()
 	{
+		KEPLER_PROFILE_SCOPE();
 		auto Task = TRenderThread::Submit(
 			[]
 			{
@@ -127,6 +128,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawEditor()
 	{
+		KEPLER_PROFILE_SCOPE();
 		DrawMenuBar();
 		// DrawGizmo();
 		DrawViewports();
@@ -139,12 +141,14 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::OnUpdate(float DeltaTime)
 	{
+		KEPLER_PROFILE_SCOPE();
 		ControlEditorCamera(DeltaTime);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::EndGUIPass()
 	{
+		KEPLER_PROFILE_SCOPE();
 		ImGui::Render();
 		Await(TRenderThread::Submit(
 			[]
@@ -177,12 +181,14 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::SetEditedWorld(TRef<TGameWorld> InWorld)
 	{
+		KEPLER_PROFILE_SCOPE();
 		EditedWorld = InWorld;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::SelectEntity(TGameEntityId Id)
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!EditedWorld || !EditedWorld->IsValidEntity(Id))
 		{
 			return;
@@ -200,6 +206,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::OnPlatformEvent(const TPlatformEventBase& Event)
 	{
+		KEPLER_PROFILE_SCOPE();
 		TPlatformEventDispatcher Dispatcher(Event);
 		Dispatcher.Dispatch(this, &TEditorModule::OnKeyDown);
 		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonDown);
@@ -290,6 +297,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawMenuBar()
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File", true))
@@ -304,6 +312,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawViewports()
 	{
+		KEPLER_PROFILE_SCOPE();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -342,6 +351,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawViewportGizmoControls()
 	{
+		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 
@@ -424,6 +434,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawViewportCameraControls()
 	{
+		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 
@@ -449,6 +460,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawDetailsPanel()
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!EditedWorld)
 		{
 			return;
@@ -461,6 +473,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawSceneGraph()
 	{
+		KEPLER_PROFILE_SCOPE();
 		ImGui::Begin("Scene Graph");
 		i32 Index = 0;
 		if (ImGui::TreeNodeEx((void*)(intptr_t)Index, ImGuiTreeNodeFlags_DefaultOpen, EditedWorld->GetName().c_str()))
@@ -498,6 +511,7 @@ namespace Kepler
 
 	void TEditorModule::DrawDebugTools()
 	{
+		KEPLER_PROFILE_SCOPE();
 		// Draw console
 		if (!LogPanel)
 		{
@@ -508,6 +522,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawGizmo()
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!EditedWorld)
 		{
 			return;
@@ -552,6 +567,7 @@ namespace Kepler
 
 	void TEditorModule::ControlEditorCamera(float DeltaTime)
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!EditedWorld)
 		{
 			return;
@@ -700,6 +716,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	float3 TEditorModule::CalculateSnapVec() const
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (bSnapEnabled)
 		{
 			if (EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)

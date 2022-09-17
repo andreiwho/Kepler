@@ -74,6 +74,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& Name, u32 Width, u32 Height, EFormat Format, u32 ArrayLayers)
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!RenderTargets.Contains(Name))
 		{
 			CHECK(Width != UINT32_MAX && Height != UINT32_MAX && Format.Value != EFormat::Unknown && ArrayLayers > 0);
