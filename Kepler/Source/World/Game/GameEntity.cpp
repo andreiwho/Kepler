@@ -98,4 +98,19 @@ namespace Kepler
 		World->GetComponent<TTransformComponent>(Entity).SetTransform(NewTransform);
 	}
 
+	float3 TGameEntity::GetForwardVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetForwardVector();
+	}
+
+	float3 TGameEntity::GetRightVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetRightVector();
+	}
+
+	float3 TGameEntity::GetUpVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetUpVector();
+	}
+
 }

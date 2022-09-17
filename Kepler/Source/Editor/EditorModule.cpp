@@ -20,6 +20,7 @@
 #include "World/Game/GameWorld.h"
 #include "World/Game/GameEntity.h"
 #include "Panels/DetailsPanel.h"
+#include "Panels/LogPanel.h"
 #include "ImGuizmo.h"
 #include "World/Camera/CameraComponent.h"
 #include "World/Game/Components/TransformComponent.h"
@@ -27,6 +28,7 @@
 #include "Core/Timer.h"
 #include "Platform/Input.h"
 #include "Platform/Platform.h"
+#include "World/Game/Helpers/EntityHelper.h"
 
 namespace Kepler
 {
@@ -92,6 +94,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TEditorModule::~TEditorModule()
 	{
+		LogPanel.reset();
 		Await(TRenderThread::Submit([]
 			{
 				ImGui_ImplDX11_Shutdown();
@@ -129,6 +132,7 @@ namespace Kepler
 		DrawViewports();
 		DrawDetailsPanel();
 		DrawSceneGraph();
+		DrawDebugTools();
 		ImGui::ShowDemoWindow();
 	}
 
@@ -234,7 +238,6 @@ namespace Kepler
 		Colors[ImGuiCol_TitleBgActive] = ImVec4(0.05f, 0.05f, 0.05f, 1.00f);
 		Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
 
-
 		Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 		Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
 		Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
@@ -246,15 +249,17 @@ namespace Kepler
 		Colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
 		Colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 		Colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-		Colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-		Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-		Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		Colors[ImGuiCol_Header] = ImVec4(0.21f, 0.21f, 0.21f, 0.31f);
+		Colors[ImGuiCol_HeaderHovered] = ImVec4(0.31f, 0.31f, 0.31f, 0.80f);
+		Colors[ImGuiCol_HeaderActive] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
 		Colors[ImGuiCol_Separator] = Colors[ImGuiCol_Border];
 		Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
 		Colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
 		Colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
 		Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
 		Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+
+		// Tabs
 		Colors[ImGuiCol_Tab] = ImLerp(Colors[ImGuiCol_Header], Colors[ImGuiCol_TitleBgActive], 0.80f);
 		Colors[ImGuiCol_TabHovered] = Colors[ImGuiCol_HeaderHovered];
 		Colors[ImGuiCol_TabActive] = ImLerp(Colors[ImGuiCol_HeaderActive], Colors[ImGuiCol_TitleBgActive], 0.60f);
@@ -262,6 +267,8 @@ namespace Kepler
 		Colors[ImGuiCol_TabUnfocusedActive] = ImLerp(Colors[ImGuiCol_TabActive], Colors[ImGuiCol_TitleBg], 0.40f);
 		Colors[ImGuiCol_DockingPreview] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
 		Colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+		
+		// Other
 		Colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 		Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
 		Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -489,6 +496,15 @@ namespace Kepler
 		ImGui::End();
 	}
 
+	void TEditorModule::DrawDebugTools()
+	{
+		// Draw console
+		if (!LogPanel)
+		{
+			LogPanel = MakeShared<TLogPanel>();
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorModule::DrawGizmo()
 	{
@@ -544,24 +560,24 @@ namespace Kepler
 		if (!EditedWorld->IsValidEntity(EditorCameraEntity))
 		{
 			EditorCameraEntity = EditedWorld->CreateCamera("_EditorCamera");
-			TTransformComponent& CameraTransform = EditedWorld->GetComponent<TTransformComponent>(EditorCameraEntity);
-			CameraTransform.SetLocation(float3(0.0f, -3.0f, 0.0f));
-			EditedWorld->GetEntityFromId(EditorCameraEntity).SetHideInSceneGraph(true);
-			// sCameraTransform.SetRotation(float3(0.0f, 0.0f, 90.0f));
+			TEntityHandle Camera{ EditedWorld, EditorCameraEntity };
+			
+			Camera->SetLocation(float3(0.0f, -3.0f, 0.0f));
+			Camera->SetHideInSceneGraph(true);
 		}
 		EditedWorld->SetMainCamera(EditorCameraEntity);
 
 		if (bIsControllingCamera)
 		{
-			TTransformComponent& CameraTransform = EditedWorld->GetComponent<TTransformComponent>(EditorCameraEntity);
+			TEntityHandle Camera{ EditedWorld, EditorCameraEntity };
 			ImGuiIO& IO = ImGui::GetIO();
 			auto MouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
-			float3 Rotation = CameraTransform.GetRotation();
+			float3 Rotation = Camera->GetRotation();
 			Rotation.z -= MouseDelta.X * DeltaTime * EditorCameraSensitivity;
 			Rotation.x -= MouseDelta.Y * DeltaTime * EditorCameraSensitivity;
-			CameraTransform.SetRotation(Rotation);
+			Camera->SetRotation(Rotation);
 
-			auto Location = CameraTransform.GetLocation();
+			auto Location = Camera->GetLocation();
 			if (TInput::GetKey(EKeyCode::LeftAlt))
 			{
 				// Orbiting camera
@@ -571,30 +587,30 @@ namespace Kepler
 				// First person camera
 				if (TInput::GetKey(EKeyCode::W))
 				{
-					Location += CameraTransform.GetForwardVector() * DeltaTime * EditorCameraSpeed;
+					Location += Camera->GetForwardVector() * DeltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::S))
 				{
-					Location -= CameraTransform.GetForwardVector() * DeltaTime * EditorCameraSpeed;
+					Location -= Camera->GetForwardVector() * DeltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::A))
 				{
-					Location -= CameraTransform.GetRightVector() * DeltaTime * EditorCameraSpeed;
+					Location -= Camera->GetRightVector() * DeltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::D))
 				{
-					Location += CameraTransform.GetRightVector() * DeltaTime * EditorCameraSpeed;
+					Location += Camera->GetRightVector() * DeltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::E))
 				{
-					Location += CameraTransform.GetUpVector() * DeltaTime * EditorCameraSpeed;
+					Location += Camera->GetUpVector() * DeltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::Q))
 				{
-					Location -= CameraTransform.GetUpVector() * DeltaTime * EditorCameraSpeed;
+					Location -= Camera->GetUpVector() * DeltaTime * EditorCameraSpeed;
 				}
 			}
-			CameraTransform.SetLocation(Location);
+			Camera->SetLocation(Location);
 		}
 	}
 

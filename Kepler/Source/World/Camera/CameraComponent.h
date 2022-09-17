@@ -12,8 +12,12 @@ namespace Kepler
 
 		inline TCamera& GetCamera() { return Camera; }
 		inline const TCamera& GetCamera() const { return Camera; }
-		
+
+		inline void SetRenderTargetName(const TString& NewName) { RenderTargetName = NewName; }
+		inline const TString& GetRenderTargetName() const { return RenderTargetName; }
+
 	private:
 		TCamera Camera;
+		TString RenderTargetName{ "MeshPassTarget" };
 	};
 }

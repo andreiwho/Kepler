@@ -41,6 +41,8 @@ namespace Kepler
 		// Name is required, Width, Height, Format are important only for the first time.
 		TRef<TRenderTargetGroup> GetRenderTargetGroup(const TString& Name, u32 Width = UINT32_MAX, u32 Height = UINT32_MAX, EFormat Format = EFormat::Unknown, u32 ArrayLayers = UINT32_MAX);
 
+		bool RenderTargetGroupExists(const TString& Name) const;
+
 		// Returns a depth target with a specified name, size and format
 		// - If size is different from the actual size, the depth target is recreated and returned
 		// - If no depth target exists with this name, the new one gets created

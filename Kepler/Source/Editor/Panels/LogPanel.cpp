@@ -17,6 +17,10 @@ namespace Kepler
 
 	void TLogPanel::ReceiveLog(const spdlog::details::log_msg& Msg, const spdlog::memory_buf_t& Formatted)
 	{
-		std::cout << fmt::to_string(Formatted);
+	}
+
+	void TLogPanel::Draw()
+	{
+
 	}
 }

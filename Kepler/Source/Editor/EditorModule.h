@@ -8,6 +8,7 @@ namespace Kepler
 	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor);
 
 	class TWindow;
+	class TLogPanel;
 
 	enum class EViewportIndex
 	{
@@ -63,6 +64,7 @@ namespace Kepler
 		void DrawViewportCameraControls();
 		void DrawDetailsPanel();
 		void DrawSceneGraph();
+		void DrawDebugTools();
 		void DrawGizmo();
 		void ControlEditorCamera(float DeltaTime);
 
@@ -83,6 +85,8 @@ namespace Kepler
 		bool bIsCursorInViewport = false;
 		float EditorCameraSensitivity = 32;
 		float EditorCameraSpeed = 2.0f;
+
+		TSharedPtr<TLogPanel> LogPanel;
 
 	private:
 		i32 EditOperationIndex = 0x7;	// Translate by default

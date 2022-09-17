@@ -8,6 +8,8 @@
 
 namespace Kepler
 {
+	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer);
+
 	//////////////////////////////////////////////////////////////////////////
 	TWorldRenderer::TWorldRenderer(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR)
 		: CurrentWorld(WorldToRender)
@@ -62,11 +64,27 @@ namespace Kepler
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 		auto Camera = CurrentWorld->GetMainCamera();
+		
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO: Change camera sizes prematurely.
+		// Need to define camera to render target relationships and use those to control camera frustums
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		if (CurrentWorld->IsValidEntity(Camera) && CurrentWorld->IsCamera(Camera))
 		{
-			auto& MathCamera = CurrentWorld->GetComponent<TCameraComponent>(Camera).GetCamera();
-			MathCamera.SetFrustumWidth(CurrentViewport.Width);
-			MathCamera.SetFrustumHeight(CurrentViewport.Height);
+			auto& CameraComponent = CurrentWorld->GetComponent<TCameraComponent>(Camera);
+			if (TTargetRegistry::Get()->RenderTargetGroupExists(CameraComponent.GetRenderTargetName()))
+			{
+				if (auto RenderTarget = TTargetRegistry::Get()->GetRenderTargetGroup(CameraComponent.GetRenderTargetName()))
+				{
+					auto& MathCamera = CurrentWorld->GetComponent<TCameraComponent>(Camera).GetCamera();
+					MathCamera.SetFrustumWidth(CurrentViewport.Width);
+					MathCamera.SetFrustumHeight(CurrentViewport.Height);
+				}
+				else
+				{
+					KEPLER_WARNING(LogWorldRenderer, "Requested render target '{}' for camera does not exist", CameraComponent.GetRenderTargetName());
+				}
+			}
 		}
 
 		CurrentWorld->GetComponentView<TMaterialComponent>().each(

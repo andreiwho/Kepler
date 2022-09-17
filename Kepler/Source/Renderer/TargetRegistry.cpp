@@ -89,6 +89,11 @@ namespace Kepler
 		return Target;
 	}
 
+	bool TTargetRegistry::RenderTargetGroupExists(const TString& Name) const
+	{
+		return RenderTargets.Contains(Name);
+	}
+
 	TRef<TDepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& Name, u32 Width, u32 Height, EFormat Format, bool bSampled)
 	{
 		// Create

@@ -61,6 +61,12 @@ namespace Kepler
 
 		inline bool ShouldHideInSceneGraph() const { return bHideInSceneGraph; }
 
+		float3 GetForwardVector() const;
+		
+		float3 GetRightVector() const;
+		
+		float3 GetUpVector() const;
+
 	private:
 		bool bHideInSceneGraph = false;
 
