@@ -11,7 +11,7 @@ namespace Kepler
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(TRef<TGraphicsPipeline> InPipeline);
+		TMaterial(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath);
 
 		void RT_Update(TRef<class TCommandListImmediate> pImmCmd);
 
@@ -49,18 +49,21 @@ namespace Kepler
 			return MakeRef(Kepler::New<TMaterial>());
 		}
 
-		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline)
+		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath)
 		{
-			return MakeRef(Kepler::New<TMaterial>(InPipeline));
+			return MakeRef(Kepler::New<TMaterial>(InPipeline, InParentAssetPath));
 		}
 
 		// Helper functions
 		void WriteTransform(TWorldTransform Transform);
 		void WriteCamera(TCamera Camera);
 
+		inline const TString& GetParentAssetPath() const { return ParentAssetPath; }
+
 	private:
 		TRef<TGraphicsPipeline> Pipeline;
 		TRef<TParamBuffer> ParamBuffer;
 		TRef<TPipelineSamplerPack> Samplers;
+		TString ParentAssetPath{};
 	};
 }

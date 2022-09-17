@@ -20,6 +20,11 @@ namespace Kepler
 				return nullptr;
 			}
 
+			if (!HasComponent<T>())
+			{
+				return nullptr;
+			}
+
 			return &GameWorld->GetComponent<T>(Id);
 		}
 
@@ -27,6 +32,11 @@ namespace Kepler
 		const T* GetComponent() const
 		{
 			if (!GameWorld || !Entity)
+			{
+				return nullptr;
+			}
+
+			if (!HasComponent<T>())
 			{
 				return nullptr;
 			}
@@ -45,7 +55,14 @@ namespace Kepler
 			return &GameWorld->AddComponent<T>(Id, std::forward<ARGS>(Args)...);
 		}
 
+		template<typename T>
+		inline bool HasComponent() const
+		{
+			return GameWorld->HasComponent<T>(Id);
+		}
+
 		inline operator bool() const { return !!Entity && !!GameWorld; }
+		inline operator TGameEntityId() const { return Id; }
 
 		TGameEntity* operator->() { return Entity; }
 		const TGameEntity* operator->() const { return Entity; }

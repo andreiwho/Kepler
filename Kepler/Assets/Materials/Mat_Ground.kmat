@@ -1,0 +1,8 @@
+{
+    "Material": {
+        "Pipeline": "DefaultUnlit",
+        "Samplers": {
+            "Albedo": "Game://Ground.png"
+        }
+    }
+}

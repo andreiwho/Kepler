@@ -550,6 +550,12 @@ namespace Kepler
 
 		if (EditedWorld->IsValidEntity(SelectedEntity))
 		{
+			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+			ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+			vMin.x += ImGui::GetWindowPos().x;
+			vMin.y += ImGui::GetWindowPos().y;
+
 			auto MainCameraId = EditedWorld->GetMainCamera();
 			// auto& MainCameraEntity = EditedWorld->GetEntityFromId(SelectedEntity);
 			TCamera& Camera = EditedWorld->GetComponent<TCameraComponent>(MainCameraId).GetCamera();
@@ -565,7 +571,7 @@ namespace Kepler
 			float3 SnapVec = CalculateSnapVec();
 
 			ImGuiIO& io = ImGui::GetIO();
-			ImGuizmo::SetRect(0, 0, GetViewportSize(HoveredViewport).x, GetViewportSize(HoveredViewport).y);
+			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x, vMax.y);
 			if (ImGuizmo::Manipulate(glm::value_ptr(ViewMatrix), glm::value_ptr(ProjectionMatrix),
 				static_cast<ImGuizmo::OPERATION>(EditOperationIndex),
 				static_cast<ImGuizmo::MODE>(EditSpaceIndex),

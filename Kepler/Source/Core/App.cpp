@@ -28,6 +28,7 @@
 #include "imgui.h"
 #include "Editor/Widgets/Elements.h"
 #include "World/Game/Components/TransformComponent.h"
+#include "World/Game/Helpers/EntityHelper.h"
 
 namespace Kepler
 {
@@ -107,23 +108,23 @@ namespace Kepler
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
 
-		auto Entity = CurrentWorld->CreateEntity("Entity");
+		auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Entity") };
 		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
-		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
-		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-		CurrentWorld->GetEntityFromId(Entity).SetScale(float3(3.0f));
-		CurrentWorld->GetEntityFromId(Entity).SetRotation(float3(0, 0.0f, 45.0f));
+		Entity.AddComponent<TStaticMeshComponent>(MeshSections);
+		Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+		Entity->SetScale(float3(3.0f));
+		Entity->SetRotation(float3(0, 0.0f, 45.0f));
 
-		auto Entity1 = CurrentWorld->CreateEntity("Entity1");
-		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity1, MeshSections);
-		CurrentWorld->AddComponent<TMaterialComponent>(Entity1, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-		CurrentWorld->GetEntityFromId(Entity1).SetLocation(float3(2.0f, 0.0f, 1.0f));
-		CurrentWorld->GetEntityFromId(Entity1).SetScale(float3(3.0f));
-		CurrentWorld->GetEntityFromId(Entity1).SetRotation(float3(0, 0.0f, 0.0f));
+		auto Entity1 = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Entity1") };
+		Entity1.AddComponent<TStaticMeshComponent>(MeshSections);
+		Entity1.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+		Entity1->SetLocation(float3(2.0f, 0.0f, 1.0f));
+		Entity1->SetScale(float3(3.0f));
+		Entity1->SetRotation(float3(0, 0.0f, 0.0f));
 
-		auto MainCamera = CurrentWorld->CreateCamera("Camera");
-		CurrentWorld->GetComponent<TTransformComponent>(MainCamera).SetLocation(float3(0.0f, -3.0f, 1));
-		CurrentWorld->GetComponent<TTransformComponent>(MainCamera).SetRotation(float3(-20, 0.0f, 0.0f));
+		auto MainCamera = TEntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
+		MainCamera->SetLocation(float3(0.0f, -3.0f, 1));
+		MainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -268,6 +269,7 @@ namespace Kepler
 
 	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
 	{
+		/*
 		if (Event.Key == EKeyCode::Space)
 		{
 			TRef<TSound> Sound = AudioEngine->GetOrLoadSound("Game://Coin.wav");
@@ -282,7 +284,7 @@ namespace Kepler
 
 		if (Event.Key == EKeyCode::Z)
 			AudioEngine->UnloadPlaybackCache(true);
-
+			*/
 		return false;
 	}
 }

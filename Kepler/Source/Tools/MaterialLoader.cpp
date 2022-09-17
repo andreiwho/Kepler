@@ -118,6 +118,11 @@ namespace Kepler
 
 	TRef<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path)
 	{
+		if (!TFileUtils::PathExists(Path))
+		{
+			return nullptr;
+		}
+
 		auto JsonFile = Await(TFileUtils::ReadTextFileAsync(Path));
 		rapidjson::Document Document;
 		Document.Parse(JsonFile.c_str());
@@ -126,7 +131,7 @@ namespace Kepler
 		CHECK(Document.HasMember("Material"));
 
 		auto Pipeline = TRenderThread::Submit([&Document] { return LoadGraphicsPipeline(Document["Material"]); });
-		auto Material = TMaterial::New(Await(Pipeline));
+		auto Material = TMaterial::New(Await(Pipeline), Path);
 
 		// Load material samplers
 		if (LoadMaterialSamplers(Document["Material"], Material))

@@ -77,8 +77,8 @@ namespace Kepler
 				if (auto RenderTarget = TTargetRegistry::Get()->GetRenderTargetGroup(CameraComponent.GetRenderTargetName()))
 				{
 					auto& MathCamera = CurrentWorld->GetComponent<TCameraComponent>(Camera).GetCamera();
-					MathCamera.SetFrustumWidth(CurrentViewport.Width);
-					MathCamera.SetFrustumHeight(CurrentViewport.Height);
+					MathCamera.SetFrustumWidth(RenderTarget->GetRenderTargetAtArrayLayer(0)->GetWidth());
+					MathCamera.SetFrustumHeight(RenderTarget->GetRenderTargetAtArrayLayer(0)->GetHeight());
 				}
 				else
 				{

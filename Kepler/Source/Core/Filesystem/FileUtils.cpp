@@ -50,4 +50,10 @@ namespace Kepler
 				return OutData;
 			});
 	}
+
+	bool TFileUtils::PathExists(const TString& Path)
+	{
+		return std::filesystem::exists(VFSResolvePath(Path));
+	}
+
 }

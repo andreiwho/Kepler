@@ -61,7 +61,6 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorElements::DragFloat1(CStr pLabel, float& OutFloat, float Speed, float Min, float Max)
 	{
-		ImGui::Text(pLabel);
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat, 1, Speed, Min, Max, "%.3f", 1.0f);
 
 		if (bValueChanged)
@@ -75,7 +74,6 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorElements::DragFloat2(CStr pLabel, float2& OutFloat, float Speed, float Min, float Max)
 	{
-		ImGui::Text(pLabel);
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 2, Speed, Min, Max, "%.3f", 1.0f);
 
 		if (bValueChanged)
@@ -89,7 +87,6 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorElements::DragFloat3(CStr pLabel, float3& OutFloat, float Speed, float Min, float Max)
 	{
-		ImGui::Text(pLabel);
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 3, Speed, Min, Max, "%.3f", 1.0f);
 		
 		if (bValueChanged)
@@ -103,7 +100,6 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorElements::DragFloat4(CStr pLabel, float4& OutFloat, float Speed, float Min, float Max)
 	{
-		ImGui::Text(pLabel);
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 4, Speed, Min, Max, "%.3f", 1.0f);
 
 		if (bValueChanged)
@@ -128,10 +124,48 @@ namespace Kepler
 			strcpy(pOutBuffer, pInitialText);
 		}
 
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		bool bReturn = ImGui::InputText("##v", pOutBuffer, GMaxTextEditSymbols, ImGuiInputTextFlags_EnterReturnsTrue);
-		ImGui::PopItemWidth();
 		return bReturn;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	namespace
+	{
+		i32 CurrentFieldId = 0;
+	}
+
+	bool TEditorElements::BeginFieldTable(CStr pLabel, i32 ColumnCount)
+	{
+		bool bBegan = ImGui::BeginTable(pLabel, ColumnCount, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable);
+		ImGui::PushID(0);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		return bBegan;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorElements::EndFieldTable()
+	{
+		ImGui::EndTable();
+		CurrentFieldId = 0;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorElements::NextFieldRow(CStr pLabel)
+	{
+		ImGui::PushID(CurrentFieldId++);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text(pLabel);
+		ImGui::TableNextColumn();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorElements::SetColumn(i32 Column)
+	{
+		ImGui::TableSetColumnIndex(Column);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

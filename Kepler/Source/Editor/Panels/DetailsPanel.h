@@ -14,6 +14,7 @@ namespace Kepler
 	private:
 		void DrawTransformComponentInfo();
 		void DrawCameraComponentInfo();
+		void DrawMaterialComponentInfo();
 		void DrawEntityInfo();
 
 	private:

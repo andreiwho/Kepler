@@ -4,8 +4,8 @@
 
 namespace Kepler
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline)
-		: Pipeline(InPipeline)
+	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath)
+		: Pipeline(InPipeline), ParentAssetPath(InParentAssetPath)
 	{
 		CHECK(!IsRenderThread());
 		Await(TRenderThread::Submit(

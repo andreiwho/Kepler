@@ -17,6 +17,12 @@ namespace Kepler
 
 		static bool Container(CStr pText);
 		static bool EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols]);
+
+		static bool BeginFieldTable(CStr pLabel, i32 ColumnCount);
+		static void EndFieldTable();
+		static void NextFieldRow(CStr pLabel);
+		static void SetColumn(i32 Column);
+
 	private:
 		static void CheckWrappingCursor();
 
