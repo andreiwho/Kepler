@@ -133,9 +133,10 @@ namespace Kepler
 		{
 			Platform->RegisterPlatformEventListener(this);
 			float PositionX = 0.0f;
-
+#ifdef ENABLE_EDITOR
 			Editor->SetEditedWorld(CurrentWorld);
 			Editor->SelectEntity(Entity);
+#endif
 			while (Platform->HasActiveMainWindow())
 			{
 				KEPLER_PROFILE_FRAME("GameLoop");
@@ -152,28 +153,26 @@ namespace Kepler
 #else
 					const float2 ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
 #endif
-
-					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
-					// TCamera Camera(45.0f, (u32)ViewportSize.x, (u32)ViewportSize.y, 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
-					// PlayerMaterial->WriteCamera(Camera);
-
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 					ModuleStack.OnUpdate(GGlobalTimer->Delta());
 
 					// Render the frame
 					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
 					// This is a subject to consider though
-					Await(TRenderThread::Submit([&, this]
+					auto RenderTask = TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
 							Renderer->Render({ 0, 0, (u32)ViewportSize.x, (u32)ViewportSize.y });
-						}));
-
+						});
 #ifdef ENABLE_EDITOR
+					Await(RenderTask);
+
 					Editor->BeginGUIPass();
 					Editor->DrawEditor();
 					ModuleStack.OnRenderGUI();
 					Editor->EndGUIPass();
+#else
+					(void)RenderTask;
 #endif
 					LowLevelRenderer->PresentAll();
 					
@@ -200,6 +199,7 @@ namespace Kepler
 						DisplayInfoTime = 0;
 						MainWindow->SetTitle(fmt::format("{} <{}>", MainWindow->GetName(), 1.0f / MainTimer.Delta()));
 					}
+					// KEPLER_TRACE(LogApp, "Loop time: {}", 1.0f / MainTimer.Delta());
 				}
 #endif
 			}

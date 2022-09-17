@@ -117,12 +117,27 @@ namespace Kepler
 		auto Task = TRenderThread::Submit(
 			[]
 			{
+				KEPLER_PROFILE_SCOPE();
 				ImGui_ImplDX11_NewFrame();
 			});
-		ImGui_ImplGlfw_NewFrame();
-		Await(Task);
-		ImGui::NewFrame();
-		ImGuizmo::BeginFrame();
+		{
+			KEPLER_PROFILE_SCOPE("GUI GLFW NEW FRAME");
+			ImGui_ImplGlfw_NewFrame();
+		}
+		{
+			KEPLER_PROFILE_SCOPE("GUI AWAIT RENDER");
+			Await(Task);
+		}
+
+		{
+			KEPLER_PROFILE_SCOPE("GUI IMGUI NEW FRAME");
+			ImGui::NewFrame();
+		}
+
+		{
+			KEPLER_PROFILE_SCOPE("GUI IMGUIZMO NEW FRAME");
+			ImGuizmo::BeginFrame();
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
