@@ -74,15 +74,22 @@ namespace Kepler
 		bool OnMouseMove(const TMouseMoveEvent& InEvent);
 		float3 CalculateSnapVec() const;
 
+		void TrySelectEntity();
+
 	private:
 		TWindow* MainWindow{};
 		float2 ViewportSizes[(u32)EViewportIndex::Max]{};
+		float2 ViewportPositions[(u32)EViewportIndex::Max]{};
+
 		TRef<TGameWorld> EditedWorld{};
 		TGameEntityId SelectedEntity{};
 		EViewportIndex HoveredViewport = EViewportIndex::Max;
 		TGameEntityId EditorCameraEntity{};
 		bool bIsControllingCamera = false;
 		bool bIsCursorInViewport = false;
+		bool bIsGizmoHovered = false;
+		bool bIsGizmoUsed = false;
+
 		float EditorCameraSensitivity = 32;
 		float EditorCameraSpeed = 2.0f;
 

@@ -19,6 +19,24 @@ namespace Kepler
 		EShaderStageFlags StageFlags;
 	};
 
+	class TShader;
+	class TShaderCache
+	{
+		static TShaderCache* Instance;
+	public:
+		static TShaderCache* Get() { return Instance; }
+
+		TShaderCache() { Instance = this; }
+
+		bool Exists(const TString& Name) const;
+		void Add(const TString& Name, TRef<TShader> Shader);
+		TRef<TShader> GetShader(const TString& Name) const;
+		void Invalidate();
+
+	private:
+		TChaoticMap<TString, TRef<TShader>> LoadedShaders;
+	};
+
 	class TShader : public TRefCounted
 	{
 	public:

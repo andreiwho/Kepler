@@ -345,7 +345,12 @@ namespace Kepler
 
 			ImVec2 Region = ImGui::GetContentRegionAvail();
 
+			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+			vMin.x += ImGui::GetWindowPos().x;
+			vMin.y += ImGui::GetWindowPos().y;
+
 			ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(Region.x, Region.y);
+			ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
 			auto LLR = TLowLevelRenderer::Get();
 
 			auto RenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
@@ -570,6 +575,9 @@ namespace Kepler
 			// Snapping
 			float3 SnapVec = CalculateSnapVec();
 
+			bIsGizmoHovered = ImGuizmo::IsOver();
+			bIsGizmoUsed = ImGuizmo::IsUsing();
+
 			ImGuiIO& io = ImGui::GetIO();
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x, vMax.y);
 			if (ImGuizmo::Manipulate(glm::value_ptr(ViewMatrix), glm::value_ptr(ProjectionMatrix),
@@ -708,6 +716,14 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	bool TEditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& InEvent)
 	{
+		// Read entity id under render target
+		if (InEvent.Button & EMouseButton::Left)
+		{
+			if (bIsCursorInViewport && !bIsControllingCamera && !bIsGizmoHovered && !bIsGizmoUsed)
+			{
+				TrySelectEntity();
+			}
+		}
 		return false;
 	}
 
@@ -797,6 +813,47 @@ namespace Kepler
 			}
 		}
 		return float3(0.0f);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TEditorModule::TrySelectEntity()
+	{
+		// Read render target
+		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
+		{
+			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
+			TRef<TRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			TRef<TImage2D> pTargetImage = pTarget->GetImage();
+			if (auto pImmCmd = TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
+			{
+				i32 IdColor = Await(TRenderThread::Submit([&, this]
+					{
+						usize Align;
+						i32* pData = (i32*)pImmCmd->MapImage2D(pTargetImage, Align);
+
+						float X, Y;
+						TInput::GetMousePosition(X, Y);
+						const auto ViewportPos = ViewportPositions[(u32)EViewportIndex::Viewport1];
+						X -= ViewportPos.x;
+						Y -= ViewportPos.y;
+
+						const auto Width = Align / sizeof(i32);
+						const auto OutIndex = (u32)Width * (u32)Y + (u32)X;
+						const i32 RetVal = pData[OutIndex];
+						pImmCmd->UnmapImage2D(pTargetImage);
+						return RetVal;
+					}));
+
+				if (IdColor != -1)
+				{
+					SelectedEntity = TGameEntityId{ (entt::entity)IdColor };
+				}
+			}
+		}
+		else
+		{
+			KEPLER_WARNING(LogEditor, "Tried to access IdTarget render target, which doesn't exist");
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

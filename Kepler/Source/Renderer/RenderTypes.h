@@ -327,6 +327,8 @@ namespace Kepler
 			ShaderResource = BIT(0),
 			RenderTarget = BIT(1),
 			DepthTarget = BIT(2),
+			AllowCPURead = BIT(3),
+			AllowCPUWrite = BIT(4)
 		};
 
 		u32 Mask{Undefined};

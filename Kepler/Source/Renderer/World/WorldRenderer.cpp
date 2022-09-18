@@ -64,7 +64,7 @@ namespace Kepler
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 		auto Camera = CurrentWorld->GetMainCamera();
-		
+
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// TODO: Change camera sizes prematurely.
 		// Need to define camera to render target relationships and use those to control camera frustums
@@ -101,6 +101,17 @@ namespace Kepler
 		KEPLER_PROFILE_SCOPE();
 	}
 
+	namespace
+	{
+		struct TDrawCall
+		{
+			TRef<TParamBuffer> ParamBuffer;
+			TRef<TGraphicsPipeline> Pipeline;
+			TRef<TPipelineSamplerPack> Samplers;
+			TRef<TStaticMesh> StaticMesh;
+		};
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TWorldRenderer::MeshPass(TRef<TCommandListImmediate> pImmCtx)
 	{
@@ -124,8 +135,19 @@ namespace Kepler
 			EFormat::D24_UNORM_S8_UINT,
 			false);
 
-		pImmCtx->StartDrawingToRenderTargets(CurrentRenderTarget, DepthTarget);
+		// Configure render target which will contain entity ids
+		auto IdTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
+			"IdTarget",
+			CurrentViewport.Width,
+			CurrentViewport.Height,
+			EFormat::R32_SINT,
+			1,
+			true);
+		auto IdTarget = IdTargetGroup->GetRenderTargetAtArrayLayer(0);
+
+		pImmCtx->StartDrawingToRenderTargets({ CurrentRenderTarget, IdTarget }, DepthTarget);
 		pImmCtx->ClearRenderTarget(CurrentRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
+		pImmCtx->ClearRenderTarget(IdTarget, float4(-1.0f));
 		pImmCtx->ClearDepthTarget(DepthTarget, false);
 		pImmCtx->SetViewport(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height, 0.0f, 1.0f);
 		pImmCtx->SetScissor(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height);
@@ -189,5 +211,4 @@ namespace Kepler
 		pImmCtx->DrawIndexed(LLR->ScreenQuad.IndexBuffer->GetCount(), 0, 0);
 		pImmCtx->EndDebugEvent();
 	}
-
 }

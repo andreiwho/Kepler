@@ -57,6 +57,22 @@ namespace Kepler
 		static TRef<TGraphicsPipelineHandle> CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
 	};
 
+	class TGraphicsPipeline;
+	class TGraphicsPipelineCache
+	{
+		static TGraphicsPipelineCache* Instance;
+	public:
+		static TGraphicsPipelineCache* Get() { return Instance; }
+		TGraphicsPipelineCache() { Instance = this; }
+
+		bool Exists(const TString& Name) const;
+		void Add(const TString& Name, TRef<TGraphicsPipeline> Pipeline);
+		TRef<TGraphicsPipeline> GetPipeline(const TString& Name) const;
+
+	private:
+		TChaoticMap<TString, TRef<TGraphicsPipeline>> Pipelines;
+	};
+
 	class TGraphicsPipeline : public TRefCounted
 	{
 	public:

@@ -60,6 +60,8 @@ namespace Kepler
 
 	private:
 		TRenderThread RenderThread{};
+		TSharedPtr<TShaderCache> ShaderCache{};
+		TSharedPtr<TGraphicsPipelineCache> PipelineCache{};
 		TSharedPtr<TTargetRegistry> TargetRegistry{};
 
 		TRef<TRenderDevice> RenderDevice{};

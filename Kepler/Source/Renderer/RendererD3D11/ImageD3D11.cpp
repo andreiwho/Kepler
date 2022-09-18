@@ -1,6 +1,7 @@
 #include "ImageD3D11.h"
 #include "RenderDeviceD3D11.h"
 #include "../RenderGlobals.h"
+#include "CommandListImmediateD3D11.h"
 
 namespace Kepler
 {
@@ -31,6 +32,10 @@ namespace Kepler
 		}
 
 		Desc.CPUAccessFlags = 0;
+		if (Usage & EImageUsage::AllowCPURead)
+		{
+			Desc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+		}
 		Desc.MiscFlags = 0;
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
@@ -89,6 +94,15 @@ namespace Kepler
 		if (Device)
 		{
 			HRCHECK(Device->GetDevice()->CreateTexture2D(&Desc, nullptr, &Image));
+
+			if (Usage & EImageUsage::AllowCPURead)
+			{
+				// Create readback image	
+				Desc.Usage = D3D11_USAGE_STAGING;
+				Desc.BindFlags = 0;
+				Desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+				HRCHECK(Device->GetDevice()->CreateTexture2D(&Desc, nullptr, &ReadbackImage));
+			}
 		}
 	}
 
@@ -98,11 +112,24 @@ namespace Kepler
 		{
 			return;
 		}
+
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
 			Device->RegisterPendingDeleteResource(Image);
+
+			if (ReadbackImage)
+			{
+				Device->RegisterPendingDeleteResource(ReadbackImage);
+			}
 		}
+	}
+
+	void TImage2D_D3D11::RequireReadbackCopy(TRef<class TCommandListImmediate> pImmCtx)
+	{
+		auto MyCtx = RefCast<TCommandListImmediateD3D11>(pImmCtx);
+		ID3D11DeviceContext4* pCtx = MyCtx->GetContext();
+		pCtx->CopyResource(ReadbackImage, Image);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -134,6 +161,10 @@ namespace Kepler
 		}
 
 		Desc.CPUAccessFlags = 0;
+		if (Usage & EImageUsage::AllowCPURead)
+		{
+			Desc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+		}
 		Desc.MiscFlags = 0;
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();

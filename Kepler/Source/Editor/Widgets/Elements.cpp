@@ -137,7 +137,6 @@ namespace Kepler
 	bool TEditorElements::BeginFieldTable(CStr pLabel, i32 ColumnCount)
 	{
 		bool bBegan = ImGui::BeginTable(pLabel, ColumnCount, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable);
-		ImGui::PushID(0);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		return bBegan;
@@ -153,7 +152,6 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorElements::NextFieldRow(CStr pLabel)
 	{
-		ImGui::PushID(CurrentFieldId++);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();

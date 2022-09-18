@@ -57,6 +57,7 @@ namespace Kepler
 		// Helper functions
 		void WriteTransform(TWorldTransform Transform);
 		void WriteCamera(TCamera Camera);
+		void WriteId(i32 Id);
 
 		inline const TString& GetParentAssetPath() const { return ParentAssetPath; }
 

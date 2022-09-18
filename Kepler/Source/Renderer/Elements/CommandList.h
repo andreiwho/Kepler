@@ -17,7 +17,7 @@ namespace Kepler
 	class TRenderTarget2D;
 	class TDepthStencilTarget2D;
 
-	class TCommandList : public TRefCounted
+	class TCommandList : public TEnableRefFromThis<TCommandList>
 	{
 	public:
 		virtual ~TCommandList() = default;
@@ -76,6 +76,10 @@ namespace Kepler
 	{
 	public:
 		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
+
+		virtual void* MapImage2D(TRef<TImage2D> Image, usize& OutAlignment) = 0;
+
+		virtual void UnmapImage2D(TRef<TImage2D> Image) = 0;
 
 		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
 

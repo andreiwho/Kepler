@@ -9,15 +9,15 @@ namespace Kepler
 	class TRenderTargetGroup : public TRefCounted
 	{
 	public:
-		TRenderTargetGroup(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers = 1);
+		TRenderTargetGroup(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers = 1, bool bAllowCPURead = false);
 		~TRenderTargetGroup();
 
 		TRef<TRenderTarget2D> GetRenderTargetAtArrayLayer(u32 Index) const;
 		TRef<TTextureSampler2D> GetTextureSamplerAtArrayLayer(u32 Index) const;
 
-		void Resize(u32 InWidth, u32 InHeight, EFormat InFormat);
+		void Resize(u32 InWidth, u32 InHeight, EFormat InFormat, bool bAllowCPURead);
 
-		static TRef<TRenderTargetGroup> New(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers = 1);
+		static TRef<TRenderTargetGroup> New(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers = 1, bool bAllowCPURead = false);
 
 	private:
 		TDynArray<TRef<TRenderTarget2D>> RenderTargets;
@@ -39,7 +39,7 @@ namespace Kepler
 		// - If size is different from the actual size, the render target is recreated and returned
 		// - If no render target exists with this name, the new one gets created
 		// Name is required, Width, Height, Format are important only for the first time.
-		TRef<TRenderTargetGroup> GetRenderTargetGroup(const TString& Name, u32 Width = UINT32_MAX, u32 Height = UINT32_MAX, EFormat Format = EFormat::Unknown, u32 ArrayLayers = UINT32_MAX);
+		TRef<TRenderTargetGroup> GetRenderTargetGroup(const TString& Name, u32 Width = UINT32_MAX, u32 Height = UINT32_MAX, EFormat Format = EFormat::Unknown, u32 ArrayLayers = UINT32_MAX, bool bAllowCPURead = false);
 
 		bool RenderTargetGroupExists(const TString& Name) const;
 

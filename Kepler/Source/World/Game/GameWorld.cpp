@@ -100,11 +100,12 @@ namespace Kepler
 
 		// Update components for entities
 		EntityRegistry.view<TMaterialComponent, TTransformComponent>().each(
-			[this](auto, TMaterialComponent& MC, TTransformComponent& TC) 
+			[this](auto Id, TMaterialComponent& MC, TTransformComponent& TC) 
 			{
 				TRef<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());
 				Material->WriteCamera(GetComponent<TCameraComponent>(MainCamera).GetCamera());
+				Material->WriteId((i32)Id);
 			});
 
 		EntityRegistry.view<TGameEntity>().each(

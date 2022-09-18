@@ -108,23 +108,30 @@ namespace Kepler
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
 
-		auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Entity") };
-		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
-		Entity.AddComponent<TStaticMeshComponent>(MeshSections);
-		Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-		Entity->SetScale(float3(3.0f));
-		Entity->SetRotation(float3(0, 0.0f, 45.0f));
-
-		auto Entity1 = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Entity1") };
-		Entity1.AddComponent<TStaticMeshComponent>(MeshSections);
-		Entity1.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-		Entity1->SetLocation(float3(2.0f, 0.0f, 1.0f));
-		Entity1->SetScale(float3(3.0f));
-		Entity1->SetRotation(float3(0, 0.0f, 0.0f));
-
 		auto MainCamera = TEntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
 		MainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		MainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
+
+		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
+		i32 X = 0;
+		i32 Y = 0;
+		for (i32 Index = 0; Index < 100; ++Index)
+		{
+			if (X > 10)
+			{
+				X = 0;
+				Y++;
+			} 
+
+			auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", Index)) };
+			Entity.AddComponent<TStaticMeshComponent>(MeshSections);
+			Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+			Entity->SetScale(float3(3.0f));
+			Entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
+			Entity->SetLocation(float3(X, Y, 0.0f));
+
+			X++;
+		}
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -136,8 +143,8 @@ namespace Kepler
 			float PositionX = 0.0f;
 #ifdef ENABLE_EDITOR
 			Editor->SetEditedWorld(CurrentWorld);
-			Editor->SelectEntity(Entity);
 #endif
+
 			while (Platform->HasActiveMainWindow())
 			{
 				KEPLER_PROFILE_FRAME("GameLoop");

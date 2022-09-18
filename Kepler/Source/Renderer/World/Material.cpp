@@ -44,4 +44,8 @@ namespace Kepler
 		ParamBuffer->Write("ViewProjection", &ViewProjection);
 	}
 
+	void TMaterial::WriteId(i32 Id)
+	{
+		ParamBuffer->Write("EntityId", &Id);
+	}
 }

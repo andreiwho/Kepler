@@ -19,6 +19,8 @@ namespace Kepler
 				RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
 		TRenderThread::Wait();
+		ShaderCache = MakeShared<TShaderCache>();
+		PipelineCache = MakeShared<TGraphicsPipelineCache>();
 
 		InitScreenQuad();
 		TargetRegistry = MakeShared<TTargetRegistry>();
@@ -28,6 +30,8 @@ namespace Kepler
 	TLowLevelRenderer::~TLowLevelRenderer()
 	{
 		TargetRegistry.reset();
+		ShaderCache.reset();
+		PipelineCache.reset();
 		ScreenQuad.Pipeline.Release();
 		ScreenQuad.VertexBuffer.Release();
 		ScreenQuad.IndexBuffer.Release();

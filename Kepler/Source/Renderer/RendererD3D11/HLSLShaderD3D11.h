@@ -39,5 +39,6 @@ namespace Kepler
 		// Reflection interface
 		void InitReflection(const TDynArray<TShaderModule>& Modules);
 		TVertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule);
+		TRef<TPipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, TRef<TPipelineParamMapping> ToMerge);
 	};
 }

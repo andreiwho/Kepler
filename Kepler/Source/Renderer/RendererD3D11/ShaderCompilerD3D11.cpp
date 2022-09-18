@@ -11,6 +11,11 @@ namespace Kepler
 {
 	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
 	{
+		if (TShaderCache::Get()->Exists(Path))
+		{
+			return TShaderCache::Get()->GetShader(Path);
+		}
+
 		TString Source;
 		try
 		{
@@ -41,7 +46,9 @@ namespace Kepler
 			Modules.EmplaceBack(Await(Future));
 		}
 
-		return New<THLSLShaderD3D11>(Path, Modules);
+		auto OutShader = New<THLSLShaderD3D11>(Path, Modules);
+		TShaderCache::Get()->Add(Path, OutShader);
+		return OutShader;
 	}
 
 	TShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flag, const TString& Source)
@@ -95,11 +102,23 @@ namespace Kepler
 
 		CComPtr<ID3DBlob> ErrorBlob{};
 		CComPtr<ID3DBlob> Blob;
+		D3D_SHADER_MACRO Macros[] = {
+			{
+				"ENABLE_EDITOR",
+#ifdef ENABLE_EDITOR
+				"1"
+#else
+				"0"
+#endif
+			},
+			{nullptr, nullptr}
+		};
+
 		if (FAILED(D3DCompile(
 			Code.data(),
 			Code.size(),
 			SourceName.c_str(),
-			nullptr, 
+			Macros, 
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			EntryPoint.c_str(),
 			ShaderType.c_str(),

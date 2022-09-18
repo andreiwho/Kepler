@@ -4,8 +4,10 @@
 
 namespace Kepler
 {
+	class TPipelineParamMapping;
 	struct TShaderModuleReflection : public TRefCounted
 	{
 		TVertexLayout VertexLayout{};
+		TRef<TPipelineParamMapping> ParamMapping;
 	};
 }
