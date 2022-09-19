@@ -148,7 +148,7 @@ namespace Kepler
 		pImmCtx->StartDrawingToRenderTargets({ CurrentRenderTarget, IdTarget }, DepthTarget);
 		pImmCtx->ClearRenderTarget(CurrentRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
 		pImmCtx->ClearRenderTarget(IdTarget, float4(-1.0f));
-		pImmCtx->ClearDepthTarget(DepthTarget, false);
+		pImmCtx->ClearDepthTarget(DepthTarget, true);
 		pImmCtx->SetViewport(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height, 0.0f, 1.0f);
 		pImmCtx->SetScissor(0, 0, (float)CurrentViewport.Width, (float)CurrentViewport.Height);
 

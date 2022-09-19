@@ -15,7 +15,7 @@ namespace Kepler
 
 		void ClearLoadedMaterialCache();
 
-		TRef<TMaterial> LoadMaterial(const TString& Path);
+		TRef<TMaterial> LoadMaterial(const TString& Path, bool bForce = false);
 
 		inline static TMaterialLoader* Get() { return Instance; }
 	};

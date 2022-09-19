@@ -13,10 +13,8 @@
 #include "Renderer/Elements/IndexBuffer.h"
 #include "Renderer/Elements/HLSLShader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
-#include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
 #include "Renderer/Pipelines/ParamPack.h"
 #include "Tools/ImageLoader.h"
-#include "Renderer/Pipelines/Default/ScreenQuadPipeline.h"
 #include "World/Game/GameEntity.h"
 #include "Renderer/World/WorldTransform.h"
 #include "Renderer/World/StaticMesh.h"
@@ -112,7 +110,7 @@ namespace Kepler
 		MainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		MainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
-		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
+		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
 		i32 X = 0;
 		i32 Y = 0;
 		for (i32 Index = 0; Index < 100; ++Index)

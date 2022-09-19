@@ -113,6 +113,8 @@ namespace Kepler
 				}
 				return Op;
 			});
+		Desc.StencilWriteMask = 0xFF;
+		Desc.StencilReadMask = 0xFF;
 
 		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
 		CHECK(Device);

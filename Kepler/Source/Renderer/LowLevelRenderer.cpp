@@ -1,8 +1,8 @@
 #include "LowLevelRenderer.h"
 #include "Platform/Window.h"
-#include "Pipelines/Default/ScreenQuadPipeline.h"
 #include "RenderTypes.h"
 #include "Async/Async.h"
+#include "HLSLShaderCompiler.h"
 
 namespace Kepler
 {
@@ -139,7 +139,16 @@ namespace Kepler
 		auto Task = TRenderThread::Submit(
 			[&, this]
 			{
-				ScreenQuad.Pipeline = MakeRef(New<TScreenQuadPipeline>());
+				auto Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+				auto Shader = Compiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+				CHECK(Shader);
+
+				TGraphicsPipelineConfiguration Config{};
+				Config.DepthStencil.bDepthEnable = false;
+				Config.VertexInput.VertexLayout = Shader->GetReflection()->VertexLayout;
+				Config.ParamMapping = Shader->GetReflection()->ParamMapping;
+
+				ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(Shader, Config));
 				ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
 				ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				ScreenQuad.Samplers = ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();

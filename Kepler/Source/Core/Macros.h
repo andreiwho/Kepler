@@ -22,6 +22,9 @@
 # endif
 #endif
 
+#define KEPLER_DEPRECATED
+#define KEPLER_DEPRECATED_MSG(...) [[deprecated(__VA_ARGS__)]]
+
 #ifdef USE_ASSERT
 # define CHECK_NOTHROW(x) do { if(!(x)) { fprintf(stderr, "Assertion failed: '%s' in file %s on line %d\n", #x, __FILE__, __LINE__); exit(EXIT_FAILURE); } } while(false)
 # define CHECK(x) do { if(!(x)) { DEBUG_BREAK; throw Kepler::TException(fmt::format("Assertion failed: '{}' \nin file {} \non line {}\n", #x, __FILE__, __LINE__), "CHECK FAILURE"); } } while(false)

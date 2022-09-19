@@ -150,7 +150,7 @@ namespace Kepler
 					TEditorElements::NextFieldRow("Reload");
 					if (ImGui::Button("Reload Material"))
 					{
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(PathBuffer))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(PathBuffer, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
