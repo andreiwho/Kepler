@@ -20,6 +20,7 @@ namespace Kepler
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) override;
 
 		static TCommandListImmediateD3D11* Get() { return CHECKED(Instance); }
+		inline ID3D11DeviceContext4* GetContext() const { return Context; }
 
 		// Command list interface
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) override;
@@ -47,6 +48,10 @@ namespace Kepler
 
 		virtual void BeginDebugEvent(const char* Name) override;
 		virtual void EndDebugEvent() override;
+
+		virtual void* MapImage2D(TRef<TImage2D> Image, usize& OutAlignment) override;
+		virtual void UnmapImage2D(TRef<TImage2D> Image) override;
+
 	private:
 		ID3D11DeviceContext4* Context{};
 		ID3DUserDefinedAnnotation* AnnotationInterface{};

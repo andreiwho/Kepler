@@ -15,6 +15,7 @@ namespace Kepler
 
 		inline TRef<TImage2D> GetImage() const { return Image; }
 
+		virtual void* GetNativeHandle() const = 0;
 	protected:
 		TRef<TImage2D> Image;
 	};

@@ -14,6 +14,13 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
 
 namespace Kepler
 {
+	enum class ECursorMode
+	{
+		Visible,
+		HiddenFree,
+		HiddenLocked,
+	};
+
 	struct TPlatform
 	{
 		TPlatform();
@@ -26,7 +33,7 @@ namespace Kepler
 		static bool HandleCrashReported(const TString& Message);
 
 		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) = 0;
-		virtual void Update() = 0;
+		virtual void Update() { MouseState.OnUpdate(); };
 		virtual bool HasActiveMainWindow() const = 0;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event);
 		void RegisterPlatformEventListener(IPlatformEventListener* listener);
@@ -35,19 +42,26 @@ namespace Kepler
 		inline const TMouseState& GetMouseState() const { return MouseState; }
 		virtual bool IsMainWindow(TWindow* Window) const { return true; }
 
+		inline ECursorMode GetCurrentCursorMode() const { return CurrentCursorMode; }
+		virtual void SetCursorMode(ECursorMode Mode);
+
 	private:
 		bool Internal_MouseMoved(const TMouseMoveEvent& e);
 		bool Internal_MouseButtonPressed(const TMouseButtonDownEvent& e);
 		bool Internal_MouseButtonReleased(const TMouseButtonUpEvent& e);
 		bool Internal_KeyPressed(const TKeyDownEvent& e);
-		bool Internal_KeyReleased(const TKeyDownEvent& e);
+		bool Internal_KeyReleased(const TKeyUpEvent& e);
 		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
 		bool Internal_WindowMinimized(const TWindowMinimizeEvent& Event);
 		bool Internal_WindowRestored(const TWindowRestoreEvent& Event);
+		bool Internal_WindowFocused(const TWindowFocusedEvent& Event);
+		bool Internal_WindowUnfocused(const TWindowUnfocusedEvent& Event);
 
 	protected:
 		bool bInitialized = false;
 		virtual void CloseAllWindows() = 0;
+		ECursorMode CurrentCursorMode{ECursorMode::Visible};
+		ECursorMode OldCursorMode{ECursorMode::Visible};
 
 	private:
 		static TPlatform* Instance;
@@ -58,6 +72,11 @@ namespace Kepler
 
 	public:
 		bool bMinimized = false;
+		bool bUnfocused = false;
 		bool IsMainWindowMinimized() const;
+		inline bool IsMainWindowUnfocused() const
+		{
+			return bUnfocused;
+		}
 	};
 }

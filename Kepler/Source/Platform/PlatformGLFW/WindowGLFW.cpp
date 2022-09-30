@@ -14,13 +14,16 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
 
 namespace Kepler
 {
-	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
-		: TWindow(Width, Height, Title, Params)
+	TWindowGLFW::TWindowGLFW(i32 InWidth, i32 InHeight, const TString& InTitle, const TWindowParams& Params)
+		: TWindow(InWidth, InHeight, InTitle, Params)
 	{
 		glfwWindowHint(GLFW_DECORATED, Params.bDecorated);
 		glfwWindowHint(GLFW_MAXIMIZED, Params.bMaximized);
-		Window = glfwCreateWindow(Width, Height, Title.c_str(), Params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+
+		Window = glfwCreateWindow(Width, Height, InTitle.c_str(), Params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 		assert(Window && "Failed to create GLFW window");
+
+		glfwGetFramebufferSize(Window, &Width, &Height);
 
 		SetupCallbacks();
 	}
@@ -49,6 +52,11 @@ namespace Kepler
 		Height = InHeight;
 	}
 
+	void TWindowGLFW::SetCursorPosition(float2 NewPosition)
+	{
+		glfwSetCursorPos(Window, (float)NewPosition.x, (float)NewPosition.y);
+	}
+
 	void TWindowGLFW::SetupCallbacks()
 	{
 		glfwSetWindowUserPointer(Window, this);
@@ -72,13 +80,28 @@ namespace Kepler
 		glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+
+				const EMouseButton::EValue ActualButton = std::invoke([button]
+					{
+						switch (button)
+						{
+						case GLFW_MOUSE_BUTTON_LEFT:
+							return EMouseButton::Left;
+						case GLFW_MOUSE_BUTTON_RIGHT:
+							return EMouseButton::Right;
+						case GLFW_MOUSE_BUTTON_MIDDLE:
+							return EMouseButton::Middle;
+						}
+						return EMouseButton::Unknown;
+					});
+
 				if (action == GLFW_PRESS)
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 				else
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 			});
 
@@ -153,6 +176,20 @@ namespace Kepler
 				else
 				{
 					TPlatform::Get()->OnPlatformEvent(TWindowRestoreEvent(win));
+				}
+			});
+
+		glfwSetWindowFocusCallback(Window, 
+			[](GLFWwindow* window, int focused)
+			{
+				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+				if (focused)
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowFocusedEvent(win));
+				}
+				else
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowUnfocusedEvent(win));
 				}
 			});
 

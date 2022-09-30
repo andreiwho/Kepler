@@ -73,6 +73,30 @@ namespace Kepler
 		}
 	}
 
+	void TModuleStack::OnUpdate(float DeltaTime)
+	{
+		for (TRef<TApplicationModule> Module : Modules)
+		{
+			Module->OnUpdate(DeltaTime);
+		}
+	}
+
+	void TModuleStack::OnRender()
+	{
+		for (TRef<TApplicationModule> Module : Modules)
+		{
+			Module->OnRender();
+		}
+	}
+
+	void TModuleStack::OnRenderGUI()
+	{
+		for (TRef<TApplicationModule> Module : Modules)
+		{
+			Module->OnRenderGUI();
+		}
+	}
+
 	void TModuleStack::Init()
 	{
 		for (TRef<TApplicationModule> Module : Modules)

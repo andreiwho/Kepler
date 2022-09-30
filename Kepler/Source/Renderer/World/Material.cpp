@@ -4,8 +4,8 @@
 
 namespace Kepler
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline)
-		: Pipeline(InPipeline)
+	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath)
+		: Pipeline(InPipeline), ParentAssetPath(InParentAssetPath)
 	{
 		CHECK(!IsRenderThread());
 		Await(TRenderThread::Submit(
@@ -37,10 +37,15 @@ namespace Kepler
 		ParamBuffer->Write("Transform", &Matrix);
 	}
 
+	// BIG TODO: Use global renderer buffer in shaders to represent the camera state
 	void TMaterial::WriteCamera(TCamera Camera)
 	{
 		matrix4x4 ViewProjection = glm::transpose(Camera.GenerateViewProjectionMatrix());
 		ParamBuffer->Write("ViewProjection", &ViewProjection);
 	}
 
+	void TMaterial::WriteId(i32 Id)
+	{
+		ParamBuffer->Write("EntityId", &Id);
+	}
 }

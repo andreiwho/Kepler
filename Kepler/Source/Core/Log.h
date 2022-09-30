@@ -64,6 +64,10 @@ namespace Kepler
 
 		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> Loggers;
 		std::mutex LoggerCreationFence;
+
+#ifdef ENABLE_EDITOR
+		std::shared_ptr<class TEditorLogSink> EditorSink;
+#endif
 	};
 }
 

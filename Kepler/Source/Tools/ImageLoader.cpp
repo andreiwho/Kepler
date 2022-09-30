@@ -55,12 +55,12 @@ namespace Kepler
 	{
 		CHECK(!IsRenderThread());
 
-		auto ImageData = Await(Load(Path));
 		if (LoadedSamplers.Contains(Path))
 		{
 			return LoadedSamplers[Path];
 		}
 
+		auto ImageData = Await(Load(Path));
 		auto Task = TRenderThread::Submit([&] 
 			{
 				auto SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);

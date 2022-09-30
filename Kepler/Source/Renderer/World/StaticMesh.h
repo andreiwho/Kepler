@@ -10,6 +10,7 @@ namespace Kepler
 		float3 Position;
 		float3 Color;
 		float2 UV0;
+		float3 Normal;
 	};
 
 	struct TStaticMeshSection

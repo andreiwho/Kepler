@@ -1,0 +1,18 @@
+{
+    "Material": {
+        "Pipeline": {
+            "Shader": "EngineShaders://DefaultUnlit.hlsl",
+            "Rasterizer": {
+                "CullMode": "Back"
+            },
+            "DepthStencil": {
+                "DepthAccess": "Write",
+                "bStencilEnable": true,
+                "StencilAccess": "ReadWrite"
+            }
+        },
+        "Samplers": {
+            "Albedo": "Game://Ground.png"
+        }
+    }
+}

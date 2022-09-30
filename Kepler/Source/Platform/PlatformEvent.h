@@ -30,6 +30,9 @@ namespace Kepler
 			MouseEnter = BIT(13),
 			MouseLeave = BIT(14),
 			WindowClosed = BIT(15),
+
+			WindowFocused = BIT(16),
+			WindowUnfocused = BIT(17)
 		} Value;
 
 		EPlatformEventType(EValue  value)
@@ -45,11 +48,11 @@ namespace Kepler
 	{
 		enum EValue : u32
 		{
-			Input = BIT(17),
-			Mouse = BIT(18) | Input,
-			Keyboard = BIT(19) | Input,
-			Window = BIT(19),
-			Other = BIT(20),
+			Input = BIT(18),
+			Mouse = BIT(19) | Input,
+			Keyboard = BIT(20) | Input,
+			Window = BIT(21),
+			Other = BIT(22),
 		} Value;
 
 		EPlatformEventCategory(EValue  value)
@@ -163,6 +166,8 @@ namespace Kepler
 	INTERNAL_DEFINE_PLATFORM_EVENT_2P(WindowSize, Window, i32, Width, i32, Height);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowMaximize, Window);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowMinimize, Window);
+	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowFocused, Window);
+	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowUnfocused, Window);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowRestore, Window);
 	INTERNAL_DEFINE_PLATFORM_EVENT_0P(WindowClosed, Window);
 

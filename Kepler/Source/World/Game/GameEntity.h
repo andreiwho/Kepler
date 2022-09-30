@@ -24,6 +24,8 @@ namespace Kepler
 
 		TString GetName() const;
 
+		void SetName(const TString& Name);
+
 		id64 GetGUID() const;
 
 		inline TRef<TGameWorld> GetWorld() const { return World; }
@@ -50,7 +52,24 @@ namespace Kepler
 
 		void SetTransform(TWorldTransform NewTransform);
 
+		inline bool IsCamera() const { return bIsCamera; }
+
+		inline void SetHideInSceneGraph(bool bHide)
+		{
+			bHideInSceneGraph = bHide;
+		}
+
+		inline bool ShouldHideInSceneGraph() const { return bHideInSceneGraph; }
+
+		float3 GetForwardVector() const;
+		
+		float3 GetRightVector() const;
+		
+		float3 GetUpVector() const;
+
 	private:
+		bool bHideInSceneGraph = false;
+
 		friend class TGameWorld;
 		TGameEntityId Internal_GetId() const { return Entity; }
 		
@@ -60,7 +79,8 @@ namespace Kepler
 		float LifeSpan = -1.0f;
 		float LifeTime = 0.0f;
 
-		bool bShouldUpdate = false;
-		bool bPendingDestroy = false;
+		u8 bShouldUpdate : 1 = false;
+		u8 bPendingDestroy : 1 = false;
+		u8 bIsCamera : 1 = false;
 	};
 }

@@ -13,10 +13,8 @@
 #include "Renderer/Elements/IndexBuffer.h"
 #include "Renderer/Elements/HLSLShader.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
-#include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
 #include "Renderer/Pipelines/ParamPack.h"
 #include "Tools/ImageLoader.h"
-#include "Renderer/Pipelines/Default/ScreenQuadPipeline.h"
 #include "World/Game/GameEntity.h"
 #include "Renderer/World/WorldTransform.h"
 #include "Renderer/World/StaticMesh.h"
@@ -24,6 +22,11 @@
 #include "World/Game/Components/MaterialComponent.h"
 #include "Renderer/World/WorldRenderer.h"
 #include "Renderer/World/Camera.h"
+#include "Editor/EditorModule.h"
+#include "imgui.h"
+#include "Editor/Widgets/Elements.h"
+#include "World/Game/Components/TransformComponent.h"
+#include "World/Game/Helpers/EntityHelper.h"
 
 namespace Kepler
 {
@@ -54,7 +57,9 @@ namespace Kepler
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(LaunchParams);
 
-		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler"));
+		TWindowParams WindowParams{};
+		WindowParams.bMaximized = false;
+		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", WindowParams));
 
 		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
@@ -101,96 +106,30 @@ namespace Kepler
 		GGlobalTimer = &MainTimer;
 		float DisplayInfoTime = 0.0f;
 
-		struct TWorldViewProj
+		auto MainCamera = TEntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
+		MainCamera->SetLocation(float3(0.0f, -3.0f, 1));
+		MainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
+
+		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
+		i32 X = 0;
+		i32 Y = 0;
+		for (i32 Index = 0; Index < 100; ++Index)
 		{
-			matrix4x4 mViewProj = matrix4x4(1.0f);
-			matrix4x4 mWorld = matrix4x4(1.0f);
-		};
+			if (X > 10)
+			{
+				X = 0;
+				Y++;
+			} 
 
-		struct TVertex
-		{
-			float3 Pos{};
-			float3 Col{};
-			float2 UV{};
-		};
+			auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", Index)) };
+			Entity.AddComponent<TStaticMeshComponent>(MeshSections);
+			Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+			Entity->SetScale(float3(3.0f));
+			Entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
+			Entity->SetLocation(float3(X, Y, 0.0f));
 
-		TDynArray<TStaticMeshVertex> Vertices = {
-			// Front
-			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Left
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{-0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{-0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Top
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f, -0.5f,  0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Right
-			{{ 0.5f, -0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Bottom
-			{{-0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 0.5f, -0.5f, -0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-			// Back
-			{{ 0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{-0.5f,  0.5f,  0.5f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{-0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{ 0.5f,  0.5f, -0.5f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		};
-
-		TDynArray<TVertex> QuadVertices =
-		{
-			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		};
-
-		TDynArray<u32> Indices = {
-			0,1,3,1,2,3,
-			4,5,7,5,6,7,
-			8,9,11,9,10,11,
-			12,13,15,13,14,15,
-			16,17,19,17,18,19,
-			20,21,23,21,22,23
-		};
-
-		TRef<TPipelineSamplerPack> Samplers;
-		TRef<TParamBuffer> MvpBuffer;
-		TRef<TImage2D> SampledImage;
-		TRef<TGraphicsPipeline> UnlitPipeline;
-		TRef<TTextureSampler2D> Sampler;
-
-		TRef<TPipelineSamplerPack> QuadSamplers;
-		TRef<TImage2D> QuadImage;
-
-		TRef<TImage2D> DepthImage;
-		TDynArray<TRef<TRenderTarget2D>> RenderTargets;
-		TDynArray<TRef<TTextureSampler2D>> QuadSamplerHandles;
-		TRef<TDepthStencilTarget2D> DepthTarget;
-		TRef<TGraphicsPipeline> ScreenQuadPipeline;
-		TRef<TVertexBuffer> QuadVertexBuffer;
-		TRef<TIndexBuffer> QuadIndexBuffer;
-
-		auto Entity = CurrentWorld->CreateEntity("Entity");
-
-		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
-		CurrentWorld->AddComponent<TStaticMeshComponent>(Entity, MeshSections);
-		CurrentWorld->AddComponent<TMaterialComponent>(Entity, MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+			X++;
+		}
 
 		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
 		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
@@ -200,45 +139,54 @@ namespace Kepler
 		{
 			Platform->RegisterPlatformEventListener(this);
 			float PositionX = 0.0f;
+#ifdef ENABLE_EDITOR
+			Editor->SetEditedWorld(CurrentWorld);
+#endif
 
 			while (Platform->HasActiveMainWindow())
 			{
-				KEPLER_PROFILE_FRAME("GameLoop")
-					MainTimer.Begin();
+				KEPLER_PROFILE_FRAME("GameLoop");
+				MainTimer.Begin();
 				Platform->Update();
 
 				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
 				{
 					// Update game state
-					PositionX += GGlobalTimer->Delta();
+					// PositionX += GGlobalTimer->Delta();
 
-					TRef<TMaterial> PlayerMaterial = CurrentWorld->GetComponent<TMaterialComponent>(Entity).GetMaterial();
-					TCamera Camera(45.0f, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight(), 0.1f, 100.0f, float3(0.0f, -3.0f, 0.0f));
-					PlayerMaterial->WriteCamera(Camera);
-
-					float Width = (float)MainWindow->GetWidth();
-					float Height = (float)MainWindow->GetHeight();
-					Width = Width > 0 ? Width : 1;
-					Height = Height > 0 ? Height : 1;
-
-					TGameEntity& EntityRef = CurrentWorld->GetEntityFromId(Entity);
-
-					auto Rotation = EntityRef.GetRotation();
-					Rotation.z = PositionX * 100.0f;
-					Rotation.x = -90.0f;
-					EntityRef.SetScale(float3(3));
-					EntityRef.SetRotation(Rotation);
-
+#if ENABLE_EDITOR
+					const float2 ViewportSize = Editor->GetViewportSize(EViewportIndex::Viewport1);
+#else
+					const float2 ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
+#endif
 					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					ModuleStack.OnUpdate(GGlobalTimer->Delta());
 
 					// Render the frame
-					TRenderThread::Submit([&, this]
+					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
+					// This is a subject to consider though
+					auto RenderTask = TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
-							Renderer->Render({ 0, 0, (u32)MainWindow->GetWidth(), (u32)MainWindow->GetHeight() });
+							Renderer->Render({ 0, 0, (u32)ViewportSize.x, (u32)ViewportSize.y });
 						});
-					LowLevelRenderer->PresentAll();
+#ifdef ENABLE_EDITOR
+					Await(RenderTask);
 
+					Editor->BeginGUIPass();
+					Editor->DrawEditor();
+					ModuleStack.OnRenderGUI();
+					Editor->EndGUIPass();
+#else
+					(void)RenderTask;
+#endif
+					LowLevelRenderer->PresentAll();
+					
+					if (Platform->IsMainWindowUnfocused())
+					{
+						using namespace std::chrono_literals;
+						std::this_thread::sleep_for(20ms);
+					}
 				}
 				else // minimized
 				{
@@ -257,6 +205,7 @@ namespace Kepler
 						DisplayInfoTime = 0;
 						MainWindow->SetTitle(fmt::format("{} <{}>", MainWindow->GetName(), 1.0f / MainTimer.Delta()));
 					}
+					// KEPLER_TRACE(LogApp, "Loop time: {}", 1.0f / MainTimer.Delta());
 				}
 #endif
 			}
@@ -285,11 +234,20 @@ namespace Kepler
 
 		ChildSetupModuleStack(ModuleStack);
 
+#ifdef ENABLE_EDITOR
+		Editor = MakeRef(New<TEditorModule>(MainWindow));
+		ModuleStack.PushModule(Editor, EModulePushStrategy::Overlay);
+		TEditorElements::SetMainWindow(MainWindow);
+#endif
+
 		ModuleStack.Init();
 	}
 
 	void TApplication::TerminateModuleStack()
 	{
+#ifdef ENABLE_EDITOR
+		Editor.Release();
+#endif
 		ModuleStack.Terminate();
 		ModuleStack.Clear();
 	}
@@ -316,6 +274,7 @@ namespace Kepler
 
 	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
 	{
+		/*
 		if (Event.Key == EKeyCode::Space)
 		{
 			TRef<TSound> Sound = AudioEngine->GetOrLoadSound("Game://Coin.wav");
@@ -330,7 +289,7 @@ namespace Kepler
 
 		if (Event.Key == EKeyCode::Z)
 			AudioEngine->UnloadPlaybackCache(true);
-
+			*/
 		return false;
 	}
 }

@@ -25,6 +25,7 @@ namespace Kepler
 		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
 		static bool HandleCrashReported_Impl(const TString& Message);
 		inline virtual bool IsMainWindow(TWindow* Window) const override { return !Windows.IsEmpty() && (Windows[0].get() == Window); }
+		virtual void SetCursorMode(ECursorMode Mode) override;
 
 	private:
 		void DestroyClosedWindows();

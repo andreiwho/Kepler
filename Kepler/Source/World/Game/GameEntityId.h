@@ -9,11 +9,11 @@ namespace Kepler
 	{
 		friend class TGameWorld;
 		friend class TGameEntity;
-	private:
-		TGameEntityId() : Entity(entt::null) {}
-		TGameEntityId(entt::entity InEntity) : Entity(InEntity) {}
-		inline operator entt::entity() const { return Entity; }
 
+	public:
+		TGameEntityId() : Entity(entt::null) {}
+		constexpr TGameEntityId(entt::entity InEntity) : Entity(InEntity) {}
+		inline operator entt::entity() const { return Entity; }
 		entt::entity Entity;
 	};
 }

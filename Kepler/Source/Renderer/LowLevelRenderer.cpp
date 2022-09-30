@@ -1,8 +1,8 @@
 #include "LowLevelRenderer.h"
 #include "Platform/Window.h"
-#include "Pipelines/Default/ScreenQuadPipeline.h"
 #include "RenderTypes.h"
 #include "Async/Async.h"
+#include "HLSLShaderCompiler.h"
 
 namespace Kepler
 {
@@ -19,6 +19,8 @@ namespace Kepler
 				RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
 		TRenderThread::Wait();
+		ShaderCache = MakeShared<TShaderCache>();
+		PipelineCache = MakeShared<TGraphicsPipelineCache>();
 
 		InitScreenQuad();
 		TargetRegistry = MakeShared<TTargetRegistry>();
@@ -28,6 +30,8 @@ namespace Kepler
 	TLowLevelRenderer::~TLowLevelRenderer()
 	{
 		TargetRegistry.reset();
+		ShaderCache.reset();
+		PipelineCache.reset();
 		ScreenQuad.Pipeline.Release();
 		ScreenQuad.VertexBuffer.Release();
 		ScreenQuad.IndexBuffer.Release();
@@ -124,10 +128,10 @@ namespace Kepler
 
 		TDynArray<TVertex> QuadVertices =
 		{
-			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+			{{ 1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
 		};
 
 		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
@@ -135,7 +139,16 @@ namespace Kepler
 		auto Task = TRenderThread::Submit(
 			[&, this]
 			{
-				ScreenQuad.Pipeline = MakeRef(New<TScreenQuadPipeline>());
+				auto Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+				auto Shader = Compiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+				CHECK(Shader);
+
+				TGraphicsPipelineConfiguration Config{};
+				Config.DepthStencil.bDepthEnable = false;
+				Config.VertexInput.VertexLayout = Shader->GetReflection()->VertexLayout;
+				Config.ParamMapping = Shader->GetReflection()->ParamMapping;
+
+				ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(Shader, Config));
 				ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
 				ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
 				ScreenQuad.Samplers = ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();

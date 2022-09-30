@@ -25,8 +25,8 @@ namespace Kepler
 	struct TGraphicsPipelineConfiguration
 	{
 		ERenderPassId RenderPassMask{ ERenderPassId::Geometry };
-		EPipelineCategory Category{ EPipelineCategory::Unknown };
-		
+		KEPLER_DEPRECATED EPipelineCategory Category{ EPipelineCategory::Unknown };
+
 		struct
 		{
 			EPrimitiveTopology Topology = EPrimitiveTopology::TriangleList;
@@ -43,11 +43,10 @@ namespace Kepler
 		struct
 		{
 			bool bDepthEnable = true;
-			EDepthBufferAccess DepthAccess = EDepthBufferAccess::None;
+			EDepthBufferAccess DepthAccess = EDepthBufferAccess::Write;
 			bool bStencilEnable = false;
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
 		} DepthStencil;
-
 		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
@@ -57,6 +56,22 @@ namespace Kepler
 		static TRef<TGraphicsPipelineHandle> CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
 	};
 
+	class TGraphicsPipeline;
+	class TGraphicsPipelineCache
+	{
+		static TGraphicsPipelineCache* Instance;
+	public:
+		static TGraphicsPipelineCache* Get() { return Instance; }
+		TGraphicsPipelineCache() { Instance = this; }
+
+		bool Exists(const TString& Name) const;
+		void Add(const TString& Name, TRef<TGraphicsPipeline> Pipeline);
+		TRef<TGraphicsPipeline> GetPipeline(const TString& Name) const;
+
+	private:
+		TChaoticMap<TString, TRef<TGraphicsPipeline>> Pipelines;
+	};
+
 	class TGraphicsPipeline : public TRefCounted
 	{
 	public:
@@ -64,7 +79,7 @@ namespace Kepler
 		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
 		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);
-	
+
 		TRef<TShader> GetShader() const { return Shader; }
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
 

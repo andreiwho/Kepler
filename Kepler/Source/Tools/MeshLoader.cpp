@@ -41,7 +41,7 @@ namespace Kepler
 		const aiScene* pScene = Importer.ReadFileFromMemory(Binary.GetData(), Binary.GetLength(),
 			aiProcess_Triangulate |
 			aiProcess_FlipUVs |
-			aiProcess_MakeLeftHanded |
+			aiProcess_FlipWindingOrder |
 			aiProcess_GlobalScale |
 			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);
@@ -111,6 +111,9 @@ namespace Kepler
 
 			const aiVector3D& TexCoord = pMesh->mTextureCoords[0][Index];
 			Vertex.UV0 = float2(TexCoord.x, TexCoord.y);
+
+			const aiVector3D& Normal = pMesh->mNormals[Index];
+			Vertex.Normal = float3(Normal.x, Normal.y, Normal.z);
 
 			Section.Vertices.EmplaceBack(Vertex);
 		}

@@ -12,6 +12,7 @@ namespace Kepler
 
 		inline ID3D11ShaderResourceView* GetView() const { return View; }
 		inline ID3D11SamplerState* GetSampler() const { return Sampler; }
+		virtual void* GetNativeHandle() const { return GetView(); };
 
 	private:
 		ID3D11ShaderResourceView* View{};

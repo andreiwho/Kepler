@@ -50,6 +50,8 @@ namespace Kepler
 
 	void TPlatformGLFW::Update()
 	{
+		TPlatform::Update();
+
 		glfwPollEvents();
 		DestroyClosedWindows();
 
@@ -80,6 +82,42 @@ namespace Kepler
 			return true;
 		}
 		return false;
+	}
+
+	void TPlatformGLFW::SetCursorMode(ECursorMode Mode)
+	{
+		TPlatform::SetCursorMode(Mode);
+		if (OldCursorMode == CurrentCursorMode)
+		{
+			return;
+		}
+
+		if (!HasActiveMainWindow())
+		{
+			return;
+		}
+
+		TWindowGLFW* Window = (TWindowGLFW*)Windows[0].get();
+		if (!Window)
+		{
+			return;
+		}
+
+		switch (Mode)
+		{
+		case ECursorMode::Visible:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		case ECursorMode::HiddenFree:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			break;
+		case ECursorMode::HiddenLocked:
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(Window->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			break;
+		default:
+			break;
+		}
 	}
 
 	void TPlatformGLFW::DestroyClosedWindows()

@@ -2,6 +2,7 @@
 #include "GameEntity.h"
 #include "Components/TransformComponent.h"
 #include "Components/MaterialComponent.h"
+#include "../Camera/CameraComponent.h"
 
 namespace Kepler
 {
@@ -28,10 +29,25 @@ namespace Kepler
 		EntityRegistry.emplace<TIdComponent>(EntityId);
 		EntityRegistry.emplace<TTransformComponent>(EntityId);
 		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		return EntityId;
+	}
 
-		TGameEntityId Id{};
-		Id.Entity = EntityId;
-		return Id;
+	TGameEntityId TGameWorld::CreateCamera(const TString& Name, float Fov, float Width, float Height, float Near, float Far)
+	{
+		const entt::entity EntityId = EntityRegistry.create();
+		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
+		NameComp.Name = Name;
+		EntityRegistry.emplace<TIdComponent>(EntityId);
+		EntityRegistry.emplace<TTransformComponent>(EntityId);
+		EntityRegistry.emplace<TCameraComponent>(EntityId, Fov, Width, Height, Near, Far);
+		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+
+		if (!IsValidEntity(MainCamera))
+		{
+			SetMainCamera(EntityId);
+		}
+
+		return EntityId;
 	}
 
 	TGameEntity& TGameWorld::GetEntityFromId(TGameEntityId Id)
@@ -62,6 +78,11 @@ namespace Kepler
 		return {};
 	}
 
+	bool TGameWorld::IsValidEntity(TGameEntityId Id) const
+	{
+		return EntityRegistry.valid(Id);
+	}
+
 	void TGameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
 	{
 		KEPLER_PROFILE_SCOPE();
@@ -70,12 +91,21 @@ namespace Kepler
 			return;
 		}
 
+		if (IsValidEntity(MainCamera))
+		{
+			auto& CameraEntity = GetEntityFromId(MainCamera);
+			auto& Camera = GetComponent<TCameraComponent>(MainCamera).GetCamera();
+			Camera.SetTransform(CameraEntity.GetTransform());
+		}
+
 		// Update components for entities
 		EntityRegistry.view<TMaterialComponent, TTransformComponent>().each(
-			[this](auto, TMaterialComponent& MC, TTransformComponent& TC) 
+			[this](auto Id, TMaterialComponent& MC, TTransformComponent& TC) 
 			{
 				TRef<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());
+				Material->WriteCamera(GetComponent<TCameraComponent>(MainCamera).GetCamera());
+				Material->WriteId((i32)Id);
 			});
 
 		EntityRegistry.view<TGameEntity>().each(
@@ -86,6 +116,21 @@ namespace Kepler
 		);
 
 		FlushPendingDestroys();
+	}
+
+	void TGameWorld::SetMainCamera(TGameEntityId Camera)
+	{
+		if (IsValidEntity(Camera))
+		{
+			MainCamera = Camera;
+			return;
+		}
+		KEPLER_WARNING(LogGameWorld, "GameWorld::SetMainCamera - passed null as camera.");
+	}
+
+	bool TGameWorld::IsCamera(TGameEntityId Entity) const
+	{
+		return HasComponent<TCameraComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()

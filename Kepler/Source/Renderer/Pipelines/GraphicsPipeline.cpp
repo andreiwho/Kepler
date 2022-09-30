@@ -34,6 +34,24 @@ namespace Kepler
 		Shader = InShader;
 		Configuration = InConfiguration;
 	}
+
+	TGraphicsPipelineCache* TGraphicsPipelineCache::Instance;
+
+	bool TGraphicsPipelineCache::Exists(const TString& Name) const
+	{
+		return Pipelines.Contains(Name);
+	}
+
+	void TGraphicsPipelineCache::Add(const TString& Name, TRef<TGraphicsPipeline> Pipeline)
+	{
+		Pipelines.Insert(Name, Pipeline);
+	}
+
+	TRef<TGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
+	{
+		CHECK(Pipelines.Contains(Name));
+		return Pipelines[Name];
+	}
 }
 
 // Some internals

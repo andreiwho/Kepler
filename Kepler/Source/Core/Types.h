@@ -35,6 +35,9 @@ namespace Kepler
 	using TWideString = std::wstring;
 	using TPath = std::filesystem::path;
 
+	using CStr = const char*;
+	using WStr = const wchar_t*;
+
 	TString ConvertToAnsiString(const TWideString& WideString);
 	TWideString ConvertToWideString(const TString& AnsiString);
 

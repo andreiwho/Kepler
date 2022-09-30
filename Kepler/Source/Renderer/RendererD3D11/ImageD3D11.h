@@ -25,9 +25,12 @@ namespace Kepler
 		~TImage2D_D3D11();
 
 		inline auto GetImage() const { return Image; }
+		inline auto GetReadbackImage() const { return ReadbackImage; }
+		void RequireReadbackCopy(TRef<class TCommandListImmediate> pImmCtx);
 
 	private:
 		ID3D11Texture2D* Image{};
+		ID3D11Texture2D* ReadbackImage{};
 	};
 
 	//////////////////////////////////////////////////////////////////////////

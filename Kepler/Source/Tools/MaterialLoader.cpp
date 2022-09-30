@@ -3,12 +3,11 @@
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
-#include "Renderer/Pipelines/Default/DefaultUnlitPipeline.h"
-#include "Renderer/Pipelines/Default/ScreenQuadPipeline.h"
 #include "Renderer/RenderThread.h"
 #include "ImageLoader.h"
 #include "Renderer/Elements/Texture.h"
 #include "Renderer/LowLevelRenderer.h"
+#include "Renderer/HLSLShaderCompiler.h"
 
 #ifdef GetObject
 # undef GetObject
@@ -44,35 +43,151 @@ namespace Kepler
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		TRef<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object)
+		EPrimitiveTopology ParsePrimitiveTopology(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("Triangles") == String)
+			{
+				return EPrimitiveTopology::TriangleList;
+			}
+			if (TString("Lines") == String)
+			{
+				return EPrimitiveTopology::LineList;
+			}
+			if (TString("Points") == String)
+			{
+				return EPrimitiveTopology::PointList;
+			}
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		EPrimitiveFillMode ParseFillMode(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("Solid") == String)
+			{
+				return EPrimitiveFillMode::Solid;
+			}
+			if (TString("Wireframe") == String)
+			{
+				return EPrimitiveFillMode::Wireframe;
+			}
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		EPrimitiveCullMode ParseCullMode(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("None") == String)
+			{
+				return EPrimitiveCullMode::None;
+			}
+			if (TString("Front") == String)
+			{
+				return EPrimitiveCullMode::Front;
+			}
+			if (TString("Back") == String)
+			{
+				return EPrimitiveCullMode::Back;
+			}
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		template<typename Enum>
+		Enum ParseAccessFlags(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("None") == String)
+			{
+				return Enum::None;
+			}
+			if (TString("Read") == String)
+			{
+				return Enum::Read;
+			}
+			if (TString("Write") == String)
+			{
+				return Enum::Write;
+			}
+			if (TString("ReadWrite") == String)
+			{
+				return Enum::Read | Enum::Write;
+			}
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		TRef<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
 		{
 			CHECK(Object.IsObject());
 			CHECK(Object.HasMember("Pipeline"));
 
-			TString CustomShader{};
-			if (Object.HasMember("CustomShader"))
-			{
-				CustomShader = Object["CustomShader"].GetString();
-			}
+			const auto& Pipeline = Object["Pipeline"];
+			CHECK(Pipeline.IsObject() && Pipeline.HasMember("Shader"));
 
-			EPipelineCategory Category = ParsePipelineCategory(Object);
-			CHECK(Category != EPipelineCategory::Unknown);
+			// Read the shader
+			const auto Shader = Pipeline["Shader"].GetString();
+			auto ShaderCompiler = THLSLShaderCompiler::CreateShaderCompiler();
+			auto ShaderRef = ShaderCompiler->CompileShader(Shader, EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+			CHECK(ShaderRef);
 
-			switch (Category)
+			// Conigure the pipeline
+			TGraphicsPipelineConfiguration PipelineConfig{};
+			// Vertex Input stage
+			PipelineConfig.VertexInput.VertexLayout = ShaderRef->GetReflection()->VertexLayout;
+			PipelineConfig.VertexInput.Topology =
+				Pipeline.HasMember("Primitive")
+				? ParsePrimitiveTopology(Pipeline["Primitive"])
+				: EPrimitiveTopology::TriangleList;
+			// Rasterizer stage
+			if (Pipeline.HasMember("Rasterizer"))
 			{
-			case EPipelineCategory::Unknown:
-				CRASH();
-				break;
-			case EPipelineCategory::DefaultUnlit:
-				return MakeRef(New<TDefaultUnlitPipeline>(CustomShader));
-				break;
-			case EPipelineCategory::PostProcess:
-				return MakeRef(New<TScreenQuadPipeline>(CustomShader));
-				break;
-			default:
-				break;
+				const auto& Rasterizer = Pipeline["Rasterizer"];
+				if (Rasterizer.HasMember("FillMode"))
+				{
+					PipelineConfig.Rasterizer.FillMode = ParseFillMode(Rasterizer["FillMode"]);
+				}
+				if (Rasterizer.HasMember("CullMode"))
+				{
+					PipelineConfig.Rasterizer.CullMode = ParseCullMode(Rasterizer["CullMode"]);
+				}
+				if (Rasterizer.HasMember("bEnableScissor"))
+				{
+					const auto& EnableScissor = Rasterizer["bEnableScissor"];
+					CHECK(EnableScissor.IsBool());
+					PipelineConfig.Rasterizer.bEnableScissor = EnableScissor.GetBool();
+				}
 			}
-			CRASH();
+			// Depth stencil stage
+			if (Pipeline.HasMember("DepthStencil"))
+			{
+				const auto& DepthStencil = Pipeline["DepthStencil"];
+				if (DepthStencil.HasMember("bDepthEnable"))
+				{
+					PipelineConfig.DepthStencil.bDepthEnable = DepthStencil["bDepthEnable"].GetBool();
+				}
+				if (DepthStencil.HasMember("bStencilEnable"))
+				{
+					PipelineConfig.DepthStencil.bStencilEnable = DepthStencil["bStencilEnable"].GetBool();
+				}
+				if (DepthStencil.HasMember("DepthAccess"))
+				{
+					PipelineConfig.DepthStencil.DepthAccess = ParseAccessFlags<EDepthBufferAccess>(DepthStencil["DepthAccess"]);
+				}
+				if (DepthStencil.HasMember("StencilAccess"))
+				{
+					PipelineConfig.DepthStencil.StencilAccess = ParseAccessFlags<EStencilBufferAccess>(DepthStencil["StencilAccess"]);
+				}
+			}
+			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;
+			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
 		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, TRef<TMaterial> Material)
@@ -84,7 +199,7 @@ namespace Kepler
 
 			const auto& Samplers = MaterialInfo["Samplers"];
 			auto SamplersArray = Samplers.GetObject();
-			
+
 			auto Mappings = Material->GetSamplers()->GetParamMappings();
 			for (const auto& [Name, Sampler] : Mappings->GetSamplers())
 			{
@@ -116,23 +231,44 @@ namespace Kepler
 	{
 	}
 
-	TRef<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path)
+	TRef<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path, bool bForce)
 	{
+		if (!TFileUtils::PathExists(Path))
+		{
+			return nullptr;
+		}
+
 		auto JsonFile = Await(TFileUtils::ReadTextFileAsync(Path));
 		rapidjson::Document Document;
 		Document.Parse(JsonFile.c_str());
+		if (Document.HasParseError())
+		{
+			const auto ParseError = Document.GetParseError();
+			CRASHMSG("Failed to parse json");
+		}
 
 		CHECK(Document.IsObject());
 		CHECK(Document.HasMember("Material"));
 
-		auto Pipeline = TRenderThread::Submit([&Document] { return LoadGraphicsPipeline(Document["Material"]); });
-		auto Material = TMaterial::New(Await(Pipeline));
-
-		// Load material samplers
-		if (LoadMaterialSamplers(Document["Material"], Material))
+		TRef<TMaterial> Material;
+		if (!bForce)
 		{
-			// Material has all samplers specified
+			if (TGraphicsPipelineCache::Get()->Exists(Path))
+			{
+				auto Pipeline = TGraphicsPipelineCache::Get()->GetPipeline(Path);
+				Material = TMaterial::New(Pipeline, Path);
+			}
 		}
+		
+		if (bForce || !Material)
+		{
+			auto Pipeline = Await(TRenderThread::Submit([&Document, &Path, bForce] { return LoadGraphicsPipeline(Document["Material"], Path, bForce); }));
+			TGraphicsPipelineCache::Get()->Add(Path, Pipeline);
+			Material = TMaterial::New(Pipeline, Path);
+			LoadMaterialSamplers(Document["Material"], Material);
+		}
+
+		LoadMaterialSamplers(Document["Material"], Material);
 		return Material;
 	}
 

@@ -12,7 +12,7 @@ namespace Kepler
 		~TRenderTarget2D_D3D11();
 
 		inline ID3D11RenderTargetView* GetView() const { return RenderTarget; }
-
+		virtual void* GetNativeHandle() const override { return GetView(); }
 	private:
 		ID3D11RenderTargetView* RenderTarget{};
 	};

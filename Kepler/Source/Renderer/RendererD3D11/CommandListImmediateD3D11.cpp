@@ -495,6 +495,7 @@ namespace Kepler
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::BeginDebugEvent(const char* Name)
 	{
 #ifdef ENABLE_DEBUG
@@ -510,6 +511,7 @@ namespace Kepler
 #endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////
 	void TCommandListImmediateD3D11::EndDebugEvent()
 	{
 #ifdef ENABLE_DEBUG
@@ -518,6 +520,28 @@ namespace Kepler
 			AnnotationInterface->EndEvent();
 		}
 #endif
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void* TCommandListImmediateD3D11::MapImage2D(TRef<TImage2D> Image, usize& OutAlignment)
+	{
+		CHECK(IsRenderThread());
+		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
+		MyImage->RequireReadbackCopy(RefCast<TCommandListImmediate>(RefFromThis()));
+
+		D3D11_MAPPED_SUBRESOURCE Subresource;
+		HRESULT HR = Context->Map(MyImage->GetReadbackImage(), 0, D3D11_MAP_READ, 0, &Subresource);
+		HRCHECK(HR);
+		OutAlignment = Subresource.RowPitch;
+		return Subresource.pData;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TCommandListImmediateD3D11::UnmapImage2D(TRef<TImage2D> Image)
+	{
+		CHECK(IsRenderThread());
+		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
+		Context->Unmap(MyImage->GetReadbackImage(), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
