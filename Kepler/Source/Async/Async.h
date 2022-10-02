@@ -13,17 +13,9 @@ namespace ke
 	}
 
 	template<typename Type>
-	inline decltype(auto) Await(std::future<Type>&& fut)
+	inline decltype(auto) Await(std::future<Type>&& future)
 	{
-		try
-		{
-			return fut.get();
-		}
-		catch (const TException& exc)
-		{
-			TGlobalExceptionContainer::Get()->Push(std::make_shared<TException>(exc));
-			throw;
-		}
+		return future.get();
 	}
 
 	template<typename Type>

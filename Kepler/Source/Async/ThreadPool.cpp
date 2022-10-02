@@ -10,7 +10,11 @@ namespace ke
 		{
 			std::function<void()> task;
 			std::unique_lock<std::mutex> lck(m_TaskMutex);
-			m_TasksAvailableFence.wait(lck, [this] { return m_Tasks.GetLength() > 0 || !m_bIsRunning; });
+			m_TasksAvailableFence.wait(lck, 
+				[this] 
+				{ 
+					return m_Tasks.GetLength() > 0 || !m_bIsRunning; 
+				});
 			if (m_bIsRunning && !m_bPaused)
 			{
 				bool bTaskValid = false;
@@ -22,16 +26,16 @@ namespace ke
 					{
 						task();
 					}
-					catch (const TException& Exception)
+					catch (const TException& exc)
 					{
-						if (TPlatform::HandleCrashReported(Exception.GetErrorMessage()))
+						if (TPlatform::HandleCrashReported(exc.GetErrorMessage()))
 						{
 							return;
 						}
 					}
-					catch (const std::exception& Exception)
+					catch (const std::exception& exc)
 					{
-						if (TPlatform::HandleCrashReported(Exception.what()))
+						if (TPlatform::HandleCrashReported(exc.what()))
 						{
 							return;
 						}
@@ -82,7 +86,11 @@ namespace ke
 	{
 		m_bWaiting = true;
 		std::unique_lock lck(m_TaskMutex);
-		m_TaskDoneFence.wait(lck, [this] { return (m_TotalTaskNum == (m_bPaused ? m_Tasks.GetLength() : 0)); });
+		m_TaskDoneFence.wait(lck, 
+			[this] 
+			{ 
+				return (m_TotalTaskNum == (m_bPaused ? m_Tasks.GetLength() : 0)); 
+			});
 		m_bWaiting = false;
 	}
 
