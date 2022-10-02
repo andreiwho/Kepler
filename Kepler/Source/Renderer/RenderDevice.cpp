@@ -6,19 +6,19 @@
 # include "RendererD3D11/RenderDeviceD3D11.h"
 #endif
 
-namespace Kepler
+namespace ke
 {
-	TRef<Kepler::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI OverrideAPI)
+	TRef<ke::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI OverrideAPI)
 	{
 		switch (OverrideAPI)
 		{
-		case Kepler::ERenderAPI::Default:
+		case ke::ERenderAPI::Default:
 #ifdef WIN32
 			return CreateRenderDevice(ERenderAPI::DirectX11);
 #endif
 			break;
 #ifdef WIN32
-		case Kepler::ERenderAPI::DirectX11:
+		case ke::ERenderAPI::DirectX11:
 			KEPLER_TRACE(LogRender, "Creating RenderDevice for DirectX11 API");
 			GRenderAPI = ERenderAPI::DirectX11;
 			return MakeRef(New<TRenderDeviceD3D11>());
@@ -35,8 +35,8 @@ namespace Kepler
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
-		case Kepler::ERenderAPI::DirectX11:
-			return MakeRef(Kepler::New<TDataBlobD3D11>(Data, Size, ElemSize));
+		case ke::ERenderAPI::DirectX11:
+			return MakeRef(ke::New<TDataBlobD3D11>(Data, Size, ElemSize));
 #endif
 		default:
 			break;

@@ -7,7 +7,7 @@
 #endif
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 	TPlatform* TPlatform::Instance = nullptr;
 

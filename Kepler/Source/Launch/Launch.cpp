@@ -10,16 +10,16 @@
 # include <crtdbg.h>
 #endif
 
-namespace Kepler
+namespace ke
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 Argc, char** ppArgv)
 	{
 		TDynArray<TString> CommandLineArguments;
-		for (i32 Index = 1; Index < Argc; ++Index)
+		for (i32 idx = 1; idx < Argc; ++idx)
 		{
-			if (char const* const arg = ppArgv[Index])
+			if (char const* const arg = ppArgv[idx])
 			{
-				CommandLineArguments.EmplaceBack(ppArgv[Index]);
+				CommandLineArguments.EmplaceBack(ppArgv[idx]);
 			}
 		}
 		return TCommandLineArguments(CommandLineArguments);
@@ -54,7 +54,7 @@ namespace Kepler
 				AppInstance->Run();
 			}
 		}
-		catch (const Kepler::TException& Exception)
+		catch (const ke::TException& Exception)
 		{
 			KEPLER_CRITICAL(LogInit, "{}", Exception.GetErrorMessage());
 			TPlatform::HandleCrashReported(Exception.GetErrorMessage());
@@ -76,5 +76,5 @@ extern int main(int argc, char** argv)
 #if defined(ENABLE_DEBUG) && defined(WIN32)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	return Kepler::Main(argc, argv);
+	return ke::Main(argc, argv);
 }

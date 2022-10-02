@@ -3,42 +3,42 @@
 
 #include <string>
 
-namespace Kepler
+namespace ke
 {
 
 	TString EPlatformEventType::ToString() const
 	{
 		switch (Value)
 		{
-		case Kepler::EPlatformEventType::MouseMove:
+		case ke::EPlatformEventType::MouseMove:
 			return "MouseMove";
-		case Kepler::EPlatformEventType::MouseButtonDown:
+		case ke::EPlatformEventType::MouseButtonDown:
 			return "MouseButtonDown";
-		case Kepler::EPlatformEventType::MouseButtonUp:
+		case ke::EPlatformEventType::MouseButtonUp:
 			return "MouseButtonUp";
-		case Kepler::EPlatformEventType::MouseScrollWheel:
+		case ke::EPlatformEventType::MouseScrollWheel:
 			return "MouseScrollWheel";
-		case Kepler::EPlatformEventType::KeyDown:
+		case ke::EPlatformEventType::KeyDown:
 			return "KeyDown";
-		case Kepler::EPlatformEventType::KeyUp:
+		case ke::EPlatformEventType::KeyUp:
 			return "KeyUp";
-		case Kepler::EPlatformEventType::KeyHold:
+		case ke::EPlatformEventType::KeyHold:
 			return "KeyHold";
-		case Kepler::EPlatformEventType::Char:
+		case ke::EPlatformEventType::Char:
 			return "Char";
-		case Kepler::EPlatformEventType::WindowMove:
+		case ke::EPlatformEventType::WindowMove:
 			return "WindowMove";
-		case Kepler::EPlatformEventType::WindowSize:
+		case ke::EPlatformEventType::WindowSize:
 			return "WindowSize";
-		case Kepler::EPlatformEventType::WindowMaximize:
+		case ke::EPlatformEventType::WindowMaximize:
 			return "WindowMaximize";
-		case Kepler::EPlatformEventType::WindowMinimize:
+		case ke::EPlatformEventType::WindowMinimize:
 			return "WindowMinimize";
-		case Kepler::EPlatformEventType::WindowRestore:
+		case ke::EPlatformEventType::WindowRestore:
 			return "WindowRestore";
-		case Kepler::EPlatformEventType::MouseEnter:
+		case ke::EPlatformEventType::MouseEnter:
 			return "MouseEnter";
-		case Kepler::EPlatformEventType::MouseLeave:
+		case ke::EPlatformEventType::MouseLeave:
 			return "MouseLeave";
 		}
 		return "Unknown";
@@ -48,15 +48,15 @@ namespace Kepler
 	{
 		switch (Value)
 		{
-		case Kepler::EPlatformEventCategory::Input:
+		case ke::EPlatformEventCategory::Input:
 			return "Input";
-		case Kepler::EPlatformEventCategory::Mouse:
+		case ke::EPlatformEventCategory::Mouse:
 			return "Mouse | Input";
-		case Kepler::EPlatformEventCategory::Keyboard:
+		case ke::EPlatformEventCategory::Keyboard:
 			return "Keyboard | Input";
-		case Kepler::EPlatformEventCategory::Window:
+		case ke::EPlatformEventCategory::Window:
 			return "Window";
-		case Kepler::EPlatformEventCategory::Other:
+		case ke::EPlatformEventCategory::Other:
 			return "Other";
 		}
 		return "Unknown";

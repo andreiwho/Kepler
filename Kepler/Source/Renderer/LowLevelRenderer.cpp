@@ -4,7 +4,7 @@
 #include "Async/Async.h"
 #include "HLSLShaderCompiler.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TLowLevelRenderer* TLowLevelRenderer::Instance;

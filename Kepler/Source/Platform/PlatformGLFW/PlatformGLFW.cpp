@@ -18,7 +18,7 @@
 #  undef CreateWindow
 #endif
 
-namespace Kepler
+namespace ke
 {
 	TPlatformGLFW::TPlatformGLFW()
 	{

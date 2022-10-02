@@ -2,7 +2,7 @@
 #include "Renderer/Elements/Image.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TImage1D_D3D11 : public TImage1D

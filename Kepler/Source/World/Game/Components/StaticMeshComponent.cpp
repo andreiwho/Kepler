@@ -1,6 +1,6 @@
 #include "StaticMeshComponent.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TStaticMeshComponent::TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh)

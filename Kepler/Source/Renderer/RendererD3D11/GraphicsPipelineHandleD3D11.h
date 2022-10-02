@@ -2,7 +2,7 @@
 #include "D3D11Common.h"
 #include "Renderer/Pipelines/GraphicsPipeline.h"
 
-namespace Kepler
+namespace ke
 {
 	class TGraphicsPipelineHandleD3D11 : public TGraphicsPipelineHandle
 	{

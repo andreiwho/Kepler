@@ -3,7 +3,7 @@
 #include "../RenderGlobals.h"
 #include "CommandListImmediateD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	// IMAGE1D

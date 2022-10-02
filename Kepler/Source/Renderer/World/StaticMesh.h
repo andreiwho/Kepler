@@ -3,7 +3,7 @@
 #include "Renderer/Elements/VertexBuffer.h"
 #include "Renderer/Elements/IndexBuffer.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TStaticMeshVertex
 	{
@@ -38,22 +38,22 @@ namespace Kepler
 
 		static TRef<TStaticMesh> New()
 		{
-			return MakeRef(Kepler::New<TStaticMesh>());
+			return MakeRef(ke::New<TStaticMesh>());
 		}
 
 		static TRef<TStaticMesh> New(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(InVertexBuffer, InIndexBuffer));
+			return MakeRef(ke::New<TStaticMesh>(InVertexBuffer, InIndexBuffer));
 		}
 
 		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(Vertices, InIndices));
+			return MakeRef(ke::New<TStaticMesh>(Vertices, InIndices));
 		}
 
 		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& Sections)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(Sections));
+			return MakeRef(ke::New<TStaticMesh>(Sections));
 		}
 
 		const TDynArray<TInternalSection>& GetSections() const { return Sections; }

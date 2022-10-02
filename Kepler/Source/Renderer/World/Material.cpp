@@ -2,7 +2,7 @@
 #include "../RenderGlobals.h"
 #include "Async/Async.h"
 
-namespace Kepler
+namespace ke
 {
 	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath)
 		: Pipeline(InPipeline), ParentAssetPath(InParentAssetPath)

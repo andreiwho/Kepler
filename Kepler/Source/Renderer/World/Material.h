@@ -5,7 +5,7 @@
 #include "WorldTransform.h"
 #include "Camera.h"
 
-namespace Kepler
+namespace ke
 {
 	class TMaterial : public TEnableRefFromThis<TMaterial>
 	{
@@ -46,12 +46,12 @@ namespace Kepler
 
 		static TRef<TMaterial> New()
 		{
-			return MakeRef(Kepler::New<TMaterial>());
+			return MakeRef(ke::New<TMaterial>());
 		}
 
 		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline, const TString& InParentAssetPath)
 		{
-			return MakeRef(Kepler::New<TMaterial>(InPipeline, InParentAssetPath));
+			return MakeRef(ke::New<TMaterial>(InPipeline, InParentAssetPath));
 		}
 
 		// Helper functions

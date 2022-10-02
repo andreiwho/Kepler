@@ -11,7 +11,7 @@
 #include "Image.h"
 #include "Renderer/Pipelines/ParamPack.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSwapChain;
 	class TRenderTarget2D;

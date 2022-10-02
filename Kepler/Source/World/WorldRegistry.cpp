@@ -1,9 +1,9 @@
 #include "WorldRegistry.h"
 
-namespace Kepler
+namespace ke
 {
 	
-	Kepler::TWorldRegistry* TWorldRegistry::Instance;
+	ke::TWorldRegistry* TWorldRegistry::Instance;
 
 	TWorldRegistry::TWorldRegistry()
 	{

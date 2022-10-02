@@ -1,7 +1,7 @@
 #include "EditorLogSink.h"
 #include "EditorLogReceiver.h"
 
-namespace Kepler
+namespace ke
 {
 	
 	void TEditorLogSink::sink_it_(const spdlog::details::log_msg& Msg)
@@ -36,5 +36,5 @@ namespace Kepler
 		return !!Receiver;
 	}
 
-	Kepler::TEditorLogReceiver* TEditorLogSink::Receiver;
+	ke::TEditorLogReceiver* TEditorLogSink::Receiver;
 }

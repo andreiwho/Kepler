@@ -4,12 +4,12 @@
 
 #include <unordered_map>
 
-namespace Kepler
+namespace ke
 {
 	template<typename TKey, typename TValue>
 	class TChaoticMap
 	{
-		using TMapType = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, Kepler::TMallocator<std::pair<const TKey, TValue>>>;
+		using TMapType = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, ke::TMallocator<std::pair<const TKey, TValue>>>;
 	public:
 		TChaoticMap() = default;
 		TChaoticMap(const TChaoticMap& Other) noexcept : UnderlyingContainer(Other.UnderlyingContainer) {}

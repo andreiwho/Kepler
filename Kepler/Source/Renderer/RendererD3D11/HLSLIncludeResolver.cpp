@@ -3,7 +3,7 @@
 #include "Core/Filesystem/FileUtils.h"
 #include "Async/Async.h"
 
-namespace Kepler
+namespace ke
 {
 
 	THLSLIncludeResolverD3D11::THLSLIncludeResolverD3D11(const TString& InMyPath) 

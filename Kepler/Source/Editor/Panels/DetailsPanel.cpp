@@ -7,7 +7,7 @@
 #include "World/Game/Components/MaterialComponent.h"
 #include "Tools/MaterialLoader.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TEditorDetailsPanel::TEditorDetailsPanel(TRef<TGameWorld> InWorldContext, TGameEntityId InSelectedEntity)

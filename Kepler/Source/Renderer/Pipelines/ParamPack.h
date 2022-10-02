@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TPipelineParam
@@ -43,7 +43,7 @@ namespace Kepler
 
 		static TRef<TPipelineParamMapping> New()
 		{
-			return MakeRef(Kepler::New<TPipelineParamMapping>());
+			return MakeRef(ke::New<TPipelineParamMapping>());
 		}
 
 	private:

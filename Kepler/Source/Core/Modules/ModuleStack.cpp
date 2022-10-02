@@ -1,6 +1,6 @@
 #include "ModuleStack.h"
 
-namespace Kepler
+namespace ke
 {
 	void TModuleStack::PushModule(TRef<TApplicationModule> Module, EModulePushStrategy Strategy /*= EModulePushStrategy::Normal*/)
 	{
@@ -11,12 +11,12 @@ namespace Kepler
 
 		switch (Strategy)
 		{
-		case Kepler::EModulePushStrategy::Normal:
+		case ke::EModulePushStrategy::Normal:
 		{
 			Modules.EmplaceBack(Module);
 		}
 		break;
-		case Kepler::EModulePushStrategy::Overlay:
+		case ke::EModulePushStrategy::Overlay:
 		{
 			TDynArray<TRef<TApplicationModule>> NewModules;
 			NewModules.Reserve(Modules.GetLength() + 1);

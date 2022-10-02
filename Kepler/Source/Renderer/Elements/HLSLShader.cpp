@@ -1,6 +1,6 @@
 #include "HLSLShader.h"
 
-namespace Kepler
+namespace ke
 {
 	THLSLShader::THLSLShader(const TString& Name, const TDynArray<TShaderModule>& Modules)
 		:	TShader(Name, Modules)

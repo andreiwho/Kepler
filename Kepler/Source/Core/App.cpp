@@ -28,7 +28,7 @@
 #include "World/Game/Components/TransformComponent.h"
 #include "World/Game/Helpers/EntityHelper.h"
 
-namespace Kepler
+namespace ke
 {
 	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& CommandLine)
 	{
@@ -37,18 +37,18 @@ namespace Kepler
 		CHECKMSG(CommandLine.GetLength() > 0, "The first param of the command line must be the application directory");
 		GameModuleDirectory = CommandLine[0];
 
-		usize Index = 0;
+		usize idx = 0;
 		for (const auto& Argument : CommandLine)
 		{
-			if (Index == 0)
+			if (idx == 0)
 			{
 				continue;
-				Index++;
+				idx++;
 			}
 			// Do someting 
 			// ...
 			// Increment the index
-			Index++;
+			idx++;
 		}
 	}
 
@@ -113,7 +113,7 @@ namespace Kepler
 		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
 		i32 X = 0;
 		i32 Y = 0;
-		for (i32 Index = 0; Index < 100; ++Index)
+		for (i32 idx = 0; idx < 100; ++idx)
 		{
 			if (X > 10)
 			{
@@ -121,7 +121,7 @@ namespace Kepler
 				Y++;
 			} 
 
-			auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", Index)) };
+			auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			Entity.AddComponent<TStaticMeshComponent>(MeshSections);
 			Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
 			Entity->SetScale(float3(3.0f));

@@ -3,7 +3,7 @@
 #include "GameEntityId.h"
 #include "Renderer/World/WorldTransform.h"
 
-namespace Kepler
+namespace ke
 {
 	class TGameWorld;
 

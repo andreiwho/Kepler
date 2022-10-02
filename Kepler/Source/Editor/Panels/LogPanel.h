@@ -1,7 +1,7 @@
 #pragma once
 #include "../Misc/EditorLogReceiver.h"
 
-namespace Kepler
+namespace ke
 {
 	class TLogPanel : public TEditorLogReceiver
 	{

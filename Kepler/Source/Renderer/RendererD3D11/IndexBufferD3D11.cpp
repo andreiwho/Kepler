@@ -2,7 +2,7 @@
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogIndexBuffer);
 
@@ -56,7 +56,7 @@ namespace Kepler
 		// This is used to ensure that the data buffer will live long enough on the render thread to copy the buffer data into the buffer
 		TempDataBlob.Release();
 
-		KEPLER_TRACE(LogIndexBuffer, "Created Index Buffer with size {} and stride {} and count {}", Size, Stride, GetCount());
+		KEPLER_TRACE(LogIndexBuffer, "Created idx Buffer with size {} and stride {} and count {}", Size, Stride, GetCount());
 	}
 
 	TIndexBufferD3D11::~TIndexBufferD3D11()

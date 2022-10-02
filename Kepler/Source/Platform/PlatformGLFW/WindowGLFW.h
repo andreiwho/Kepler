@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace Kepler
+namespace ke
 {
 	class TWindowGLFW : public TWindow
 	{

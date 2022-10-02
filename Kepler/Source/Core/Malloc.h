@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace Kepler
+namespace ke
 {
 	extern std::unique_ptr<TMemoryPool> GGlobalMemoryPool;
 
@@ -279,7 +279,7 @@ namespace Kepler
 	}
 
 	template<typename T>
-	struct TDefaultDeleter { void operator()(T* mem) { Kepler::Delete<T>(mem); } };
+	struct TDefaultDeleter { void operator()(T* mem) { ke::Delete<T>(mem); } };
 
 	template<typename T> using TScope = std::unique_ptr<T, TDefaultDeleter<T>>;
 	template<typename T, typename... Args>

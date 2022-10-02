@@ -7,7 +7,7 @@
 #include "Renderer/Elements/VertexLayout.h"
 #include "Renderer/Pipelines/ParamPack.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TShaderHandleD3D11 : public TShaderHandle
 	{

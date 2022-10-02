@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
 
-namespace Kepler
+namespace ke
 {
 	class TStaticMeshComponent
 	{

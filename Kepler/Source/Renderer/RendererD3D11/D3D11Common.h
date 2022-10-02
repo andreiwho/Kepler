@@ -16,7 +16,7 @@
 # define HRCHECK_NOTHROW(x) (void)x
 #endif
 
-namespace Kepler
+namespace ke
 {
 	struct TCommonImageState
 	{

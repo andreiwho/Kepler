@@ -8,7 +8,7 @@
 #include <future>
 #include <condition_variable>
 
-namespace Kepler
+namespace ke
 {
 	extern bool IsRenderThread();
 

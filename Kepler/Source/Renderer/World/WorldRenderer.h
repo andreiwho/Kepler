@@ -5,7 +5,7 @@
 #include "World/Game/GameWorld.h"
 #include "../LowLevelRenderer.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TViewport2D
 	{

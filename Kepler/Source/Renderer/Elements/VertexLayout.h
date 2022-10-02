@@ -4,7 +4,7 @@
 #include "Core/Containers/DynArray.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TVertexAttribute
 	{

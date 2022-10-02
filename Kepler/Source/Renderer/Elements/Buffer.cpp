@@ -3,7 +3,7 @@
 #include "Renderer/RenderGlobals.h"
 #include "Renderer/RenderDevice.h"
 
-namespace Kepler
+namespace ke
 {
 	TTransferBuffer::TTransferBuffer(usize InSize, TRef<TDataBlob> InitialData)
 		:	Size(InSize)

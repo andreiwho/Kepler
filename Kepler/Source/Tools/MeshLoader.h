@@ -8,7 +8,7 @@ class aiMesh;
 class aiNode;
 class aiScene;
 
-namespace Kepler
+namespace ke
 {
 	class TMeshLoader
 	{

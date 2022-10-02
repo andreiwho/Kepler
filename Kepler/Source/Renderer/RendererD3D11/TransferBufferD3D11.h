@@ -3,7 +3,7 @@
 #include "Renderer/RenderTypes.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTransferBufferD3D11 : public TTransferBuffer
 	{

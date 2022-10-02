@@ -21,7 +21,7 @@
 #include "RenderTargetD3D11.h"
 #include "TextureD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	TRenderDeviceD3D11* TRenderDeviceD3D11::Instance = nullptr;
 
@@ -74,7 +74,7 @@ namespace Kepler
 	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TVertexBufferD3D11>(InAccessFlags, Data));
 	}
 
@@ -82,7 +82,7 @@ namespace Kepler
 	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
 	}
 
@@ -90,7 +90,7 @@ namespace Kepler
 	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamMapping> Params)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TParamBufferD3D11>(Params));
 	}
 
@@ -98,7 +98,7 @@ namespace Kepler
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TSwapChainD3D11>(Window));
 	}
 
@@ -119,12 +119,12 @@ namespace Kepler
 #ifdef ENABLE_DEBUG
 		TDynArray<TString> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
-		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
+		for (u64 idx = InfoMsgStartIndex; idx < InfoMsgEndIndex; ++idx)
 		{
 			SIZE_T MessageLength{};
-			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, nullptr, &MessageLength));
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, idx, nullptr, &MessageLength));
 			DXGI_INFO_QUEUE_MESSAGE* pMessage = (DXGI_INFO_QUEUE_MESSAGE*)TMalloc::Get()->Allocate(MessageLength);
-			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, pMessage, &MessageLength));
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, idx, pMessage, &MessageLength));
 			OutMessages.EmplaceBack(pMessage->pDescription);
 			TMalloc::Get()->Free(pMessage);
 		}
@@ -146,7 +146,7 @@ namespace Kepler
 #ifdef ENABLE_DEBUG
 			u32 NumDeletedResources{ (u32)PendingDeleteResources.GetLength() };
 #endif
-			std::lock_guard Lck{ ResourceMutex };
+			std::lock_guard lck{ ResourceMutex };
 			while (PendingDeleteResources.Dequeue(pResource))
 			{
 				pResource->Release();
@@ -176,7 +176,7 @@ namespace Kepler
 	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TTransferBufferD3D11>(Size, InitialData));
 	}
 
@@ -184,7 +184,7 @@ namespace Kepler
 	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TImage1D_D3D11>(InWidth, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
@@ -192,7 +192,7 @@ namespace Kepler
 	TRef<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TImage2D_D3D11>(InWidth, InHeight, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
@@ -200,7 +200,7 @@ namespace Kepler
 	TRef<TImage3D> TRenderDeviceD3D11::CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TImage3D_D3D11>(InWidth, InHeight, InDepth, InFormat, InUsage, MipLevels, InArraySize));
 
 	}

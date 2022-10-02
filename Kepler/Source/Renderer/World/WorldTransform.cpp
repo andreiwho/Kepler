@@ -1,6 +1,6 @@
 #include "WorldTransform.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TWorldTransform::TWorldTransform(float3 InLocation, float3 InRotation, float3 InScale)

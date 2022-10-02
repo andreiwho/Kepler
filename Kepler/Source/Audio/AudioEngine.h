@@ -3,7 +3,7 @@
 #include "AudioCommon.h"
 #include "Sound.h"
 
-namespace Kepler
+namespace ke
 {
 	class TAudioEngine
 	{

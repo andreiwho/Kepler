@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Core/Containers/ChaosMap.h"
 
-namespace Kepler
+namespace ke
 {
 	class TVirtualFileSystem
 	{

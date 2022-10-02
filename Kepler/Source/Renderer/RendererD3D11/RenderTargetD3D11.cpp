@@ -4,7 +4,7 @@
 #include "ImageD3D11.h"
 #include "RenderDeviceD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TRenderTarget2D_D3D11::TRenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)

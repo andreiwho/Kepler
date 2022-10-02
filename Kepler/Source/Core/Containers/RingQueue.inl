@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Kepler
+namespace ke
 {
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
 	bool TRingQueue<T, ThreadPolicy>::Enqueue(T&& Value)
@@ -62,7 +62,7 @@ namespace Kepler
 
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool Kepler::TRingQueue<T, ThreadPolicy>::InternalDequeue(T& OutValue)
+	bool ke::TRingQueue<T, ThreadPolicy>::InternalDequeue(T& OutValue)
 	{
 		if (!Memory)
 		{

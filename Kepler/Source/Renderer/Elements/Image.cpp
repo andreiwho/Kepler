@@ -4,7 +4,7 @@
 #include "../RenderDevice.h"
 #include "CommandList.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TImage::TImage(EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)

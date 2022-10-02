@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TImage : public TEnableRefFromThis<TImage>

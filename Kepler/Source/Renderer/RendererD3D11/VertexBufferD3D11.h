@@ -2,7 +2,7 @@
 #include "Renderer/Elements/VertexBuffer.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TVertexBufferD3D11 : public TVertexBuffer
 	{

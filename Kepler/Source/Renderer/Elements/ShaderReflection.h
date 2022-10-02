@@ -2,7 +2,7 @@
 #include "VertexLayout.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
 	class TPipelineParamMapping;
 	struct TShaderModuleReflection : public TRefCounted

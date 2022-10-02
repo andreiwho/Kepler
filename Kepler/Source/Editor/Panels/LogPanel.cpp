@@ -2,7 +2,7 @@
 #include "../Misc/EditorLogSink.h"
 #include <iostream>
 
-namespace Kepler
+namespace ke
 {
 
 	TLogPanel::TLogPanel()

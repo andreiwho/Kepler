@@ -20,7 +20,7 @@
 #include "Tools/ImageLoader.h"
 #include "Tools/MeshLoader.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TCommandLineArguments
 	{

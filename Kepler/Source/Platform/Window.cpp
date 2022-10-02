@@ -1,6 +1,6 @@
 #include "Window.h"
 
-namespace Kepler
+namespace ke
 {
 	TWindow::TWindow(i32 width, i32 height, const TString& title, const TWindowParams& params)
 		:	Width(width), Height(height), Title(title), Name(title)

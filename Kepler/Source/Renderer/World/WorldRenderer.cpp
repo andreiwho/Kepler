@@ -6,7 +6,7 @@
 #include "World/Camera/CameraComponent.h"
 #include "World/Game/Components/TransformComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer);
 
@@ -55,7 +55,7 @@ namespace Kepler
 	TRef<TWorldRenderer> TWorldRenderer::New(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR)
 	{
 		KEPLER_PROFILE_SCOPE();
-		return MakeRef(Kepler::New<TWorldRenderer>(WorldToRender, InLLR));
+		return MakeRef(ke::New<TWorldRenderer>(WorldToRender, InLLR));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TCamera::TCamera(float InFOVDegrees, float InWidth, float InHeight, float InNearClip, float InFarClip, float3 InLocation, float3 InTarget)

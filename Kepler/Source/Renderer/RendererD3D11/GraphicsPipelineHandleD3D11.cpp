@@ -4,7 +4,7 @@
 #include "../RenderTypes.h"
 #include <type_traits>
 
-namespace Kepler
+namespace ke
 {
 
 	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)

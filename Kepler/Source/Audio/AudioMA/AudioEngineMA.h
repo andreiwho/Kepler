@@ -4,7 +4,7 @@
 #include "MACommon.h"
 #include "SoundMA.h"
 
-namespace Kepler
+namespace ke
 {
 	class TAudioEngineMA : public TAudioEngine
 	{

@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Platform/PlatformEvent.h"
 
-namespace Kepler
+namespace ke
 {
 	class TApplicationModule : public TRefCounted
 	{

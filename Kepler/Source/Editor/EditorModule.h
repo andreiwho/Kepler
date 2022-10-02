@@ -3,7 +3,7 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor);
 
@@ -43,7 +43,7 @@ namespace Kepler
 		TEditorModule(TWindow* pWindow);
 		~TEditorModule();
 
-		float2 GetViewportSize(EViewportIndex Index);
+		float2 GetViewportSize(EViewportIndex idx);
 
 		void BeginGUIPass();
 		void DrawEditor();

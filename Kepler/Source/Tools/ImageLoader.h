@@ -4,7 +4,7 @@
 #include "Async/Async.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TImageData
 	{

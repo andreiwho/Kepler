@@ -11,7 +11,7 @@
 #include "ImageD3D11.h"
 #include "TextureD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogImmediateContext);
 
@@ -116,7 +116,7 @@ namespace Kepler
 			pStrides.Reserve(VertexBuffers.GetLength());
 			pOffsets.Reserve(VertexBuffers.GetLength());
 
-			usize Index = 0;
+			usize idx = 0;
 			for (const auto& Buffer : VertexBuffers)
 			{
 				if (Buffer)
@@ -125,10 +125,10 @@ namespace Kepler
 					{
 						ppBuffers.EmplaceBack(MyBuffer->GetBuffer());
 						pStrides.EmplaceBack((u32)MyBuffer->GetStride());
-						pOffsets.EmplaceBack(bOffsetsHasEntries ? (u32)Offsets[Index] : (u32)0);
+						pOffsets.EmplaceBack(bOffsetsHasEntries ? (u32)Offsets[idx] : (u32)0);
 					}
 				}
-				Index++;
+				idx++;
 			}
 
 			CHECK((pStrides.GetLength() == ppBuffers.GetLength()) && (pOffsets.GetLength() == ppBuffers.GetLength()));
@@ -181,12 +181,12 @@ namespace Kepler
 		{
 			ppSamplers.Resize(SamplerCount);
 			ppShaderResources.Resize(SamplerCount);
-			for (usize Index = 0; Index < SamplerCount; ++Index)
+			for (usize idx = 0; idx < SamplerCount; ++idx)
 			{
-				if (auto Sampler = RefCast<TTextureSampler2D_D3D11>(Samplers->GetSamplers()[Index]))
+				if (auto Sampler = RefCast<TTextureSampler2D_D3D11>(Samplers->GetSamplers()[idx]))
 				{
-					ppSamplers[Index] = Sampler->GetSampler();
-					ppShaderResources[Index] = Sampler->GetView();
+					ppSamplers[idx] = Sampler->GetSampler();
+					ppShaderResources[idx] = Sampler->GetView();
 				}
 			}
 
@@ -416,7 +416,7 @@ namespace Kepler
 		const usize PSOffset = BufferCount * 1;
 		const usize CSOffset = BufferCount * 2;
 
-		usize Index = 0;
+		usize idx = 0;
 		for (const auto& Buffer : ParamBuffers)
 		{
 			const EShaderStageFlags Stages = Buffer->GetShaderStages();
@@ -434,7 +434,7 @@ namespace Kepler
 					{
 						bAllocatedVSBuffers = true;
 					}
-					Buffers[VSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+					Buffers[VSOffset + idx] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
 				}
 
 				if (Stages & EShaderStageFlags::Pixel)
@@ -443,7 +443,7 @@ namespace Kepler
 					{
 						bAllocatedPSBuffers = true;
 					}
-					Buffers[PSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+					Buffers[PSOffset + idx] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
 				}
 
 				if (Stages & EShaderStageFlags::Compute)
@@ -452,10 +452,10 @@ namespace Kepler
 					{
 						bAllocatedCSBuffers = true;
 					}
-					Buffers[CSOffset + Index] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
+					Buffers[CSOffset + idx] = (ID3D11Buffer*)MyBuffer->GetNativeHandle();
 				}
 			}
-			Index++;
+			idx++;
 		}
 
 		if (bAllocatedVSBuffers)

@@ -1,6 +1,6 @@
 #include "Shader.h"
 
-namespace Kepler
+namespace ke
 {
 	TShaderCache* TShaderCache::Instance;
 

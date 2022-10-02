@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/WorldTransform.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTransformComponent
 	{

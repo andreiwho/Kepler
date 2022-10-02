@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 
-namespace Kepler
+namespace ke
 {
 	class TEditorDetailsPanel
 	{

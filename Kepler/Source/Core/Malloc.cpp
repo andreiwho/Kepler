@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace Kepler
+namespace ke
 {
 	std::unique_ptr<TMemoryPool> GGlobalMemoryPool = nullptr;
 	TMalloc* TMalloc::Instance = nullptr;

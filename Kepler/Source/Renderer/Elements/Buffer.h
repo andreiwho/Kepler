@@ -2,7 +2,7 @@
 #include "Core/Malloc.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 
 	class TBuffer : public TEnableRefFromThis<TBuffer>

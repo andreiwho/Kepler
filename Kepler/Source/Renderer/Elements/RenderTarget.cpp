@@ -2,7 +2,7 @@
 #include "Renderer/RenderGlobals.h"
 #include "Renderer/RenderDevice.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TRenderTarget2D::TRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevl, u32 ArrayLayer)

@@ -2,7 +2,7 @@
 #include "Renderer/Elements/ParamBuffer.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TParamBufferD3D11 : public TParamBuffer
 	{

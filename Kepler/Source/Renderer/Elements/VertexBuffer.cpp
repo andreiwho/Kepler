@@ -2,7 +2,7 @@
 #include "../RenderGlobals.h"
 #include "../RenderDevice.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TVertexBuffer::TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)

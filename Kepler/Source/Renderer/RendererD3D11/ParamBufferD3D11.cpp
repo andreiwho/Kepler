@@ -4,7 +4,7 @@
 #include "../Elements/CommandList.h"
 #include "CommandListImmediateD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer);
 

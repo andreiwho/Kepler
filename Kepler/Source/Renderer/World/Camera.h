@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "WorldTransform.h"
 
-namespace Kepler
+namespace ke
 {
 	class TCamera
 	{

@@ -3,7 +3,7 @@
 #include "Renderer/RenderTypes.h"
 #include "Image.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TRenderTarget2D : public TEnableRefFromThis<TRenderTarget2D>

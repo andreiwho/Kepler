@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "AudioCommon.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSound : public TRefCounted
 	{

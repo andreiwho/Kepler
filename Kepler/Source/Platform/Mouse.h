@@ -3,7 +3,7 @@
 
 struct EMouseButton
 {
-	enum EValue : Kepler::ubyte
+	enum EValue : ke::ubyte
 	{
 		Unknown = BIT(7),
 		Left = BIT(0),
@@ -15,7 +15,7 @@ struct EMouseButton
 	inline operator EValue() const { return Value; }
 };
 
-namespace Kepler
+namespace ke
 {
 	struct TMouseVector2f
 	{

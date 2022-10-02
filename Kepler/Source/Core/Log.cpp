@@ -4,7 +4,7 @@
 #include <cassert>
 #include "Editor/Misc/EditorLogSink.h"
 
-namespace Kepler
+namespace ke
 {
 	TLog* TLog::Instance = nullptr;
 
@@ -16,7 +16,7 @@ namespace Kepler
 
 	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& Name)
 	{
-		std::lock_guard Lck{ LoggerCreationFence };
+		std::lock_guard lck{ LoggerCreationFence };
 		if (Loggers.contains(Name))
 		{
 			return Loggers.at(Name);

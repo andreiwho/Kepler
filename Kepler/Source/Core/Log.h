@@ -7,7 +7,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace Kepler
+namespace ke
 {
 	// C++ 20 supports compile time std::string
 #define PRODUCE_INTERNAL_LOG_NAME(Name) T ## Name ## LogChannel
@@ -72,12 +72,12 @@ namespace Kepler
 }
 
 #ifdef ENABLE_LOGGING
-# define KEPLER_TRACE(Channel, Format, ...)      Kepler::TLog::Trace<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__) 
-# define KEPLER_INFO(Channel, Format, ...) 		 Kepler::TLog::Info<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
-# define KEPLER_WARNING(Channel, Format, ...) 	 Kepler::TLog::Warn<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
-# define KEPLER_ERROR(Channel, Format, ...) 	 Kepler::TLog::Error<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
-# define KEPLER_ERROR_STOP(Channel, Format, ...)  Kepler::TLog::Error<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__); DEBUG_BREAK
-# define KEPLER_CRITICAL(Channel, Format, ...) 	 Kepler::TLog::Critical<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
+# define KEPLER_TRACE(Channel, Format, ...)      ke::TLog::Trace<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__) 
+# define KEPLER_INFO(Channel, Format, ...) 		 ke::TLog::Info<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
+# define KEPLER_WARNING(Channel, Format, ...) 	 ke::TLog::Warn<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
+# define KEPLER_ERROR(Channel, Format, ...) 	 ke::TLog::Error<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
+# define KEPLER_ERROR_STOP(Channel, Format, ...)  ke::TLog::Error<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__); DEBUG_BREAK
+# define KEPLER_CRITICAL(Channel, Format, ...) 	 ke::TLog::Critical<PRODUCE_INTERNAL_LOG_NAME(Channel)>(Format, __VA_ARGS__)
 #else
 # define KEPLER_TRACE(Channel, Format, ...)     
 # define KEPLER_INFO(Channel, Format, ...) 		

@@ -1,7 +1,7 @@
 #include "VFS.h"
 #include "Core/Core.h"
 
-namespace Kepler
+namespace ke
 {
 	TVirtualFileSystem* TVirtualFileSystem::Instance;
 

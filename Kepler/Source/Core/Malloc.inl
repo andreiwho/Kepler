@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 
-namespace Kepler
+namespace ke
 {
 	template<typename T, typename ... Args>
 	T* New(Args&&... args)

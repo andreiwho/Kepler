@@ -4,7 +4,7 @@
 
 #include <mutex>
 
-namespace Kepler
+namespace ke
 {
 	enum class ERingQueueThreadPolicy
 	{

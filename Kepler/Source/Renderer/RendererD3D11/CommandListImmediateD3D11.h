@@ -3,7 +3,7 @@
 #include "Renderer/Elements/CommandList.h"
 #include "VertexBufferD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSwapChain;
 

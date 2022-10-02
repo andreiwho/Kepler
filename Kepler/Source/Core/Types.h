@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Kepler
+namespace ke
 {
 	using u8 = uint8_t;
 	using ubyte = u8;
@@ -77,8 +77,8 @@ namespace Kepler
 namespace std
 {
 	template<>
-	struct hash<Kepler::id64>
+	struct hash<ke::id64>
 	{
-		[[nodiscard]] size_t operator()(const Kepler::id64& Id) const noexcept { return Id.Value; }
+		[[nodiscard]] size_t operator()(const ke::id64& Id) const noexcept { return Id.Value; }
 	};
 }

@@ -7,7 +7,7 @@
 #include <future>
 
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderCompiler);
 

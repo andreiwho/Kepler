@@ -1,7 +1,7 @@
 #include "Sound.h"
 #include "Audio/AudioMA/SoundMA.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TSound::TSound(const TString& InPath, ESoundCreateFlags InCreateFlags)
@@ -13,8 +13,8 @@ namespace Kepler
 	{
 		switch (GAudioEngineAPI)
 		{
-		case Kepler::EAudioEngineAPI::MiniAudio:
-			return MakeRef(Kepler::New<TSoundMA>(InPath, CreateFlags));
+		case ke::EAudioEngineAPI::MiniAudio:
+			return MakeRef(ke::New<TSoundMA>(InPath, CreateFlags));
 		}
 		return nullptr;
 	}

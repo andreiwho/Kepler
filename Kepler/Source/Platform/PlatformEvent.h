@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace Kepler
+namespace ke
 {
 	struct EPlatformEventType
 	{

@@ -7,7 +7,7 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogRender);
 
 #include <thread>
 
-namespace Kepler
+namespace ke
 {
 	class TRenderDevice;
 

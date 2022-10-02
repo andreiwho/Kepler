@@ -2,7 +2,7 @@
 #include "../RenderDevice.h"
 #include "../RenderGlobals.h"
 
-namespace Kepler
+namespace ke
 {
 	TIndexBuffer::TIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
 		: AccessFlags(InAccessFlags)

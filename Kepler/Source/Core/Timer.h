@@ -1,6 +1,6 @@
 #pragma once
 #include <chrono>
-namespace Kepler
+namespace ke
 {
 	class TTimer
 	{

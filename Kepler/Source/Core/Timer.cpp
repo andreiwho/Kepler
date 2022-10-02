@@ -2,7 +2,7 @@
 #ifdef PLATFORM_DESKTOP
 # include <GLFW/glfw3.h>
 #endif
-namespace Kepler
+namespace ke
 {
 	TTimer* GGlobalTimer = nullptr;
 	

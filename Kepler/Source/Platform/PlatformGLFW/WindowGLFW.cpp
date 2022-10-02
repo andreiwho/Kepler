@@ -12,7 +12,7 @@
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
 
-namespace Kepler
+namespace ke
 {
 	TWindowGLFW::TWindowGLFW(i32 InWidth, i32 InHeight, const TString& InTitle, const TWindowParams& Params)
 		: TWindow(InWidth, InHeight, InTitle, Params)

@@ -1,6 +1,6 @@
 #include "Kepler.h"
 
-using namespace Kepler;
+using namespace ke;
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogTestbed);
 
@@ -13,7 +13,7 @@ public:
 	}
 };
 
-class TTestbed : public Kepler::TApplication
+class TTestbed : public ke::TApplication
 {
 	using Base = TApplication;
 
@@ -30,7 +30,7 @@ protected:
 	}
 };
 
-TSharedPtr<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
+TSharedPtr<TApplication> ke::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
 	TSharedPtr<TApplication> App = MakeShared<TTestbed>(LaunchParams);
 	// ... Do some processing if needed

@@ -3,7 +3,7 @@
 
 #include <memory_resource>
 
-namespace Kepler
+namespace ke
 {
 	struct TMemoryPoolBlockHeader
 	{

@@ -1,6 +1,6 @@
 #include "Mouse.h"
 
-namespace Kepler
+namespace ke
 {
 
 	void TMouseState::OnButtonPressed(EMouseButton button)

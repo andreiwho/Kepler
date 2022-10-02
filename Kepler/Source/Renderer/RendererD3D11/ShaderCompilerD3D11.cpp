@@ -7,7 +7,7 @@
 #include "Renderer/RenderThread.h"
 #include "HLSLIncludeResolver.h"
 
-namespace Kepler
+namespace ke
 {
 	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
 	{
@@ -60,11 +60,11 @@ namespace Kepler
 		{
 			switch (Flag)
 			{
-			case Kepler::EShaderStageFlags::Vertex:
+			case ke::EShaderStageFlags::Vertex:
 				return "VSMain";
-			case Kepler::EShaderStageFlags::Pixel:
+			case ke::EShaderStageFlags::Pixel:
 				return "PSMain";
-			case Kepler::EShaderStageFlags::Compute:
+			case ke::EShaderStageFlags::Compute:
 				return "CSMain";
 			default:
 				break;
@@ -86,13 +86,13 @@ namespace Kepler
 		TString ShaderType;
 		switch (Type)
 		{
-		case Kepler::EShaderStageFlags::Vertex:
+		case ke::EShaderStageFlags::Vertex:
 			ShaderType = "vs_5_0";
 			break;
-		case Kepler::EShaderStageFlags::Pixel:
+		case ke::EShaderStageFlags::Pixel:
 			ShaderType = "ps_5_0";
 			break;
-		case Kepler::EShaderStageFlags::Compute:
+		case ke::EShaderStageFlags::Compute:
 			ShaderType = "cs_5_0";
 			break;
 		default:

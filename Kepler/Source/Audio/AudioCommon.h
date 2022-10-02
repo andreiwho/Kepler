@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Core/Macros.h"
 
-namespace Kepler
+namespace ke
 {
 	enum class EAudioEngineAPI
 	{

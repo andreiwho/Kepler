@@ -3,7 +3,7 @@
 #include "Async/Async.h"
 #include <string>
 
-namespace Kepler
+namespace ke
 {
 	struct TFileUtils
 	{

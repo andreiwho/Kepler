@@ -3,7 +3,7 @@
 #include "World/Game/GameEntity.h"
 #include "World/Game/GameWorld.h"
 
-namespace Kepler
+namespace ke
 {
 	// NEVER SAVE THIS VALUE
 	// For in-place use only

@@ -1,6 +1,6 @@
 #include "TargetRegistry.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	// RENDER TARGET GROUP
@@ -25,17 +25,17 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 Index) const
+	TRef<TRenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
 	{
-		CHECK(Index < ArrayLayers);
-		return RenderTargets[Index];
+		CHECK(idx < ArrayLayers);
+		return RenderTargets[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 Index) const
+	TRef<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
 	{
-		CHECK(Index < ArrayLayers);
-		return TextureSamplers[Index];
+		CHECK(idx < ArrayLayers);
+		return TextureSamplers[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -51,12 +51,12 @@ namespace Kepler
 				EImageUsage::RenderTarget | (bAllowCPURead ? EImageUsage::AllowCPURead : EImageUsage::ShaderResource), 
 				1, 
 				ArrayLayers);
-			for (u32 Index = 0; Index < ArrayLayers; ++Index)
+			for (u32 idx = 0; idx < ArrayLayers; ++idx)
 			{
-				RenderTargets[Index] = TRenderTarget2D::New(TargetImage, 0, Index);
+				RenderTargets[idx] = TRenderTarget2D::New(TargetImage, 0, idx);
 				if (!bAllowCPURead)
 				{
-					TextureSamplers[Index] = TTextureSampler2D::New(TargetImage, 0, Index);
+					TextureSamplers[idx] = TTextureSampler2D::New(TargetImage, 0, idx);
 				}
 			}
 		}
@@ -65,7 +65,7 @@ namespace Kepler
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TRenderTargetGroup> TRenderTargetGroup::New(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers, bool bAllowCPURead)
 	{
-		return MakeRef(Kepler::New<TRenderTargetGroup>(InWidth, InHeight, InFormat, InArrayLayers));
+		return MakeRef(ke::New<TRenderTargetGroup>(InWidth, InHeight, InFormat, InArrayLayers));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

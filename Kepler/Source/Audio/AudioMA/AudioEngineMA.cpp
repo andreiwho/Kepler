@@ -3,7 +3,7 @@
 
 #include "AudioEngineMA.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TAudioEngineMA::TAudioEngineMA()

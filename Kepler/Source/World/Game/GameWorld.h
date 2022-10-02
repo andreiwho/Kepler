@@ -4,7 +4,7 @@
 
 #include <entt/entt.hpp>
 
-namespace Kepler
+namespace ke
 {
 	class TGameEntity;
 

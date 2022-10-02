@@ -2,7 +2,7 @@
 #include "Audio/Sound.h"
 #include "MACommon.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSoundMA : public TSound
 	{

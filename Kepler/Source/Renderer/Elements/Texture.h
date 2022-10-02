@@ -3,7 +3,7 @@
 #include "Renderer/RenderTypes.h"
 #include "Image.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTextureSampler2D : public TEnableRefFromThis<TTextureSampler2D>
 	{

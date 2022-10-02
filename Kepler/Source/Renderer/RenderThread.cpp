@@ -2,7 +2,7 @@
 #include "Core/Log.h"
 #include "Renderer/RenderGlobals.h"
 
-namespace Kepler
+namespace ke
 {
 	TRenderThread* TRenderThread::Instance = nullptr;
 

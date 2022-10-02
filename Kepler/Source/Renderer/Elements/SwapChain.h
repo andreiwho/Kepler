@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSwapChain : public TRefCounted
 	{

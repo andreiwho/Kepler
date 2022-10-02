@@ -4,7 +4,7 @@
 #include "Elements/Texture.h"
 
 
-namespace Kepler
+namespace ke
 {
 	class TRenderTargetGroup : public TRefCounted
 	{
@@ -12,8 +12,8 @@ namespace Kepler
 		TRenderTargetGroup(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers = 1, bool bAllowCPURead = false);
 		~TRenderTargetGroup();
 
-		TRef<TRenderTarget2D> GetRenderTargetAtArrayLayer(u32 Index) const;
-		TRef<TTextureSampler2D> GetTextureSamplerAtArrayLayer(u32 Index) const;
+		TRef<TRenderTarget2D> GetRenderTargetAtArrayLayer(u32 idx) const;
+		TRef<TTextureSampler2D> GetTextureSamplerAtArrayLayer(u32 idx) const;
 
 		void Resize(u32 InWidth, u32 InHeight, EFormat InFormat, bool bAllowCPURead);
 

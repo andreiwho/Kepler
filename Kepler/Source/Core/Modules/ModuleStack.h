@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Module.h"
 
-namespace Kepler
+namespace ke
 {
 	enum class EModulePushStrategy
 	{

@@ -12,7 +12,7 @@
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
 
-namespace Kepler
+namespace ke
 {
 	enum class ECursorMode
 	{

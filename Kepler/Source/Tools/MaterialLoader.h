@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Renderer/World/Material.h"
 
-namespace Kepler
+namespace ke
 {
 	class TMaterialLoader
 	{

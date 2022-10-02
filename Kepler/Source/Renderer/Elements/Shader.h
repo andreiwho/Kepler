@@ -4,7 +4,7 @@
 #include <string>
 #include "ShaderReflection.h"
 
-namespace Kepler
+namespace ke
 {
 	// This is a basic class for all kinds of shader handles 
 	// - For D3D11 it is TShaderHandleD3D11, which holds the ID3D11VertexShader*, ID3D11PixelShader* and other kinds of handles

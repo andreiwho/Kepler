@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Core.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TEditorElements
 	{

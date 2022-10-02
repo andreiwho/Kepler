@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Types.h"
 
-namespace Kepler
+namespace ke
 {
 	i32 Main(i32 argc, char** argv);
 }

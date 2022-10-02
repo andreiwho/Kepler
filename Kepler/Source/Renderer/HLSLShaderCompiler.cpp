@@ -7,7 +7,7 @@
 # include "RendererD3D11/ShaderCompilerD3D11.h"
 #endif
 
-namespace Kepler
+namespace ke
 {
 	TRef<THLSLShaderCompiler> THLSLShaderCompiler::CreateShaderCompiler()
 	{

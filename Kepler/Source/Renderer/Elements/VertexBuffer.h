@@ -4,7 +4,7 @@
 #include "Renderer/RenderTypes.h"
 #include "Buffer.h"
 
-namespace Kepler
+namespace ke
 {
 	class TVertexBuffer : public TBuffer
 	{

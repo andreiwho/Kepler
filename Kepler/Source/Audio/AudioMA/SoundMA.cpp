@@ -1,7 +1,7 @@
 #include "SoundMA.h"
 #include "AudioEngineMA.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogSoundMA);
 
@@ -37,9 +37,9 @@ namespace Kepler
 		}
 		CHECK(MaxBufferCount > 0);
 		SoundBuffer.Resize(MaxBufferCount);
-		for (u32 Index = 0; Index < MaxBufferCount; ++Index)
+		for (u32 idx = 0; idx < MaxBufferCount; ++idx)
 		{
-			MACHECK(ma_sound_init_from_file(Engine->GetEngineHandle(), InPath.c_str(), LoadFlags, nullptr, DoneFence, &SoundBuffer[Index]));
+			MACHECK(ma_sound_init_from_file(Engine->GetEngineHandle(), InPath.c_str(), LoadFlags, nullptr, DoneFence, &SoundBuffer[idx]));
 		}
 
 		if (CreateFlags & ESoundCreateFlags::Looping)

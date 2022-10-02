@@ -2,7 +2,7 @@
 #include "Core/Filesystem/VFS.h"
 #include <fstream>
 
-namespace Kepler
+namespace ke
 {
 	std::future<TString> TFileUtils::ReadTextFileAsync(const TString& Path)
 	{

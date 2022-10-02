@@ -2,7 +2,7 @@
 #include <spdlog/fmt/fmt.h>
 #include <sstream>
 
-namespace Kepler
+namespace ke
 {
 	TException::TException(const std::string& Message, const std::string& Name)
 		: ErrorMessage(fmt::format("{} -> {}", Name, Message))
@@ -14,7 +14,7 @@ namespace Kepler
 
 	void TGlobalExceptionContainer::Rethrow()
 	{
-		std::lock_guard Lck{ ExceptionsMutex };
+		std::lock_guard lck{ ExceptionsMutex };
 		if (Exceptions.empty())
 		{
 			return;

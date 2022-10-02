@@ -2,7 +2,7 @@
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer);
 

@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include <string>
 
-namespace Kepler
+namespace ke
 {
 	struct TWindowParams
 	{

@@ -2,7 +2,7 @@
 #include "Renderer/Elements/IndexBuffer.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TIndexBufferD3D11 : public TIndexBuffer
 	{

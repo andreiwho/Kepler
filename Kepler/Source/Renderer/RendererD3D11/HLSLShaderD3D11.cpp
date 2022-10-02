@@ -6,7 +6,7 @@
 #include "Async/Async.h"
 #include "../Elements/ShaderReflection.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection);
 
@@ -216,10 +216,10 @@ namespace Kepler
 		const UINT InputParamCount = ShaderDesc.InputParameters;
 
 		usize ElemOffset = 0;
-		for (UINT Index = 0; Index < InputParamCount; ++Index)
+		for (UINT idx = 0; idx < InputParamCount; ++idx)
 		{
 			D3D11_SIGNATURE_PARAMETER_DESC InputParamDesc;
-			HRCHECK(pReflection->GetInputParameterDesc(Index, &InputParamDesc));
+			HRCHECK(pReflection->GetInputParameterDesc(idx, &InputParamDesc));
 
 			TVertexAttribute Attribute{};
 			Attribute.AttributeName = InputParamDesc.SemanticName;
@@ -242,10 +242,10 @@ namespace Kepler
 		HRCHECK(pReflection->GetDesc(&Desc));
 		
 		TRef<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
-		for (UINT Index = 0; Index < Desc.ConstantBuffers; ++Index)
+		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
 			// Reflect constant buffers
-			ID3D11ShaderReflectionConstantBuffer* pBuffer = pReflection->GetConstantBufferByIndex(Index);
+			ID3D11ShaderReflectionConstantBuffer* pBuffer = pReflection->GetConstantBufferByIndex(idx);
 			CHECK(pBuffer);
 			D3D11_SHADER_BUFFER_DESC BufferDesc;
 			HRCHECK(pBuffer->GetDesc(&BufferDesc));
@@ -267,10 +267,10 @@ namespace Kepler
 			}
 		}
 
-		for (UINT Index = 0; Index < Desc.BoundResources; ++Index)
+		for (UINT idx = 0; idx < Desc.BoundResources; ++idx)
 		{
 			D3D11_SHADER_INPUT_BIND_DESC BindDesc;
-			HRCHECK(pReflection->GetResourceBindingDesc(Index, &BindDesc));
+			HRCHECK(pReflection->GetResourceBindingDesc(idx, &BindDesc));
 
 			if (BindDesc.Type == D3D_SHADER_INPUT_TYPE::D3D10_SIT_SAMPLER)
 			{

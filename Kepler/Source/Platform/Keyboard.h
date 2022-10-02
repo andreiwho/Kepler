@@ -135,7 +135,7 @@ struct EKeyCode
 };
 
 #include <bitset>
-namespace Kepler
+namespace ke
 {
 	class TKeyboardState
 	{

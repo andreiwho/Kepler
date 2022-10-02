@@ -1,6 +1,6 @@
 #include "Keyboard.h"
 
-namespace Kepler
+namespace ke
 {
 
 	void TKeyboardState::OnKeyPressed(EKeyCode code)

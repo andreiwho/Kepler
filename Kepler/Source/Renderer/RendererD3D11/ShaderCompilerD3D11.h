@@ -4,7 +4,7 @@
 #include "Async/Async.h"
 #include "../Elements/VertexLayout.h"
 
-namespace Kepler
+namespace ke
 {
 	class THLSLShaderCompilerD3D11 : public THLSLShaderCompiler
 	{

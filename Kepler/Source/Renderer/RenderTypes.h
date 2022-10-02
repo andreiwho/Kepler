@@ -2,7 +2,7 @@
 #include "Core/Malloc.h"
 #include "Core/Containers/DynArray.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	enum class ERenderAPI
@@ -139,11 +139,11 @@ namespace Kepler
 				{
 					switch (Value)
 					{
-					case Kepler::EShaderStageFlags::Vertex:
+					case ke::EShaderStageFlags::Vertex:
 						return "Vertex";
-					case Kepler::EShaderStageFlags::Pixel:
+					case ke::EShaderStageFlags::Pixel:
 						return "Pixel";
-					case Kepler::EShaderStageFlags::Compute:
+					case ke::EShaderStageFlags::Compute:
 						return "Compute";
 					default:
 						break;

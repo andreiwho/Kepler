@@ -4,7 +4,7 @@
 #include <vector>
 #include <mutex>
 
-namespace Kepler
+namespace ke
 {
 	class TException : public std::runtime_error
 	{
@@ -26,7 +26,7 @@ namespace Kepler
 
 		void Push(std::shared_ptr<TException> Exception) 
 		{ 
-			std::lock_guard Lck{ ExceptionsMutex };
+			std::lock_guard lck{ ExceptionsMutex };
 			Exceptions.push_back(Exception); 
 		}
 		void Rethrow();

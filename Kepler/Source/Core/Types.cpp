@@ -5,7 +5,7 @@
 #include <random>
 #include <type_traits>
 
-namespace Kepler
+namespace ke
 {
 
 	TString ConvertToAnsiString(const TWideString& WideString)

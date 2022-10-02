@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Shader.h"
 
-namespace Kepler
+namespace ke
 {
 	class THLSLShader : public TShader 
 	{

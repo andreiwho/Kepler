@@ -6,7 +6,7 @@
 #include "Renderer/Elements/Image.h"
 #include "Renderer/LowLevelRenderer.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogImageLoader);
 

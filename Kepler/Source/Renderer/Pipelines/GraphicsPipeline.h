@@ -6,7 +6,7 @@
 #include "Core/Malloc.h"
 #include "ParamPack.h"
 
-namespace Kepler
+namespace ke
 {
 	class TCommandListImmediate;
 

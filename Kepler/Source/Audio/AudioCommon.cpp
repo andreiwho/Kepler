@@ -1,6 +1,6 @@
 #include "AudioCommon.h"
 
-namespace Kepler
+namespace ke
 {
 	EAudioEngineAPI GAudioEngineAPI = EAudioEngineAPI::Default;
 }

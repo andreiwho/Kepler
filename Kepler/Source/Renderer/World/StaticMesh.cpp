@@ -2,7 +2,7 @@
 #include "Renderer/RenderGlobals.h"
 #include "Async/Async.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)

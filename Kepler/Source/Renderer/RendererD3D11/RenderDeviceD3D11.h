@@ -9,7 +9,7 @@
 
 class IDXGIInfoQueue;
 
-namespace Kepler
+namespace ke
 {
 	class TDataBlobD3D11 : public TDataBlob
 	{

@@ -2,7 +2,7 @@
 #include "Renderer/Elements/RenderTarget.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TRenderTarget2D_D3D11 : public TRenderTarget2D

@@ -13,7 +13,7 @@
 #include "Elements/RenderTarget.h"
 #include "Elements/Texture.h"
 
-namespace Kepler
+namespace ke
 {
 	class TRenderDevice : public TRefCounted
 	{

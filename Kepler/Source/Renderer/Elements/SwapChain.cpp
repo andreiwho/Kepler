@@ -4,7 +4,7 @@
 #include "../RenderThread.h"
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TSwapChain::TSwapChain(class TWindow* Window)

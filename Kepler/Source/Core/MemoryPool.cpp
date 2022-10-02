@@ -1,6 +1,6 @@
 #include "MemoryPool.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TMemoryPool::TMemoryPool(usize InitialSize)

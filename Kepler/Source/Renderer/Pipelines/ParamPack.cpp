@@ -1,7 +1,7 @@
 #include "ParamPack.h"
 #include <set>
 
-namespace Kepler
+namespace ke
 {
 	TPipelineParamPack::TPipelineParamPack(TRef<TPipelineParamMapping> Mapping)
 		:	Params(Mapping)
@@ -64,12 +64,12 @@ namespace Kepler
 
 	TRef<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
 	{
-		return MakeRef(Kepler::New<TPipelineParamPack>(RefFromThis()));
+		return MakeRef(ke::New<TPipelineParamPack>(RefFromThis()));
 	}
 
 	TRef<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
 	{
-		return MakeRef(Kepler::New<TPipelineSamplerPack>(RefFromThis()));
+		return MakeRef(ke::New<TPipelineSamplerPack>(RefFromThis()));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

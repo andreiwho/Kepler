@@ -30,7 +30,7 @@
 #include "Platform/Platform.h"
 #include "World/Game/Helpers/EntityHelper.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TEditorModule::TEditorModule(TWindow* pWindow)
@@ -72,7 +72,7 @@ namespace Kepler
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
-		case Kepler::ERenderAPI::DirectX11:
+		case ke::ERenderAPI::DirectX11:
 		{
 			auto InitTask = TRenderThread::Submit([]
 				{
@@ -105,9 +105,9 @@ namespace Kepler
 		KEPLER_INFO(LogEditor, "Terminating editor module");
 	}
 
-	float2 TEditorModule::GetViewportSize(EViewportIndex Index)
+	float2 TEditorModule::GetViewportSize(EViewportIndex idx)
 	{
-		return ViewportSizes[(u32)Index];
+		return ViewportSizes[(u32)idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -495,8 +495,8 @@ namespace Kepler
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::Begin("Scene Graph");
-		i32 Index = 0;
-		if (ImGui::TreeNodeEx((void*)(intptr_t)Index, ImGuiTreeNodeFlags_DefaultOpen, EditedWorld->GetName().c_str()))
+		i32 idx = 0;
+		if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, EditedWorld->GetName().c_str()))
 		{
 			EditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
 				[&, this](auto EntityId, TNameComponent& NC, TGameEntity& GE)
@@ -510,7 +510,7 @@ namespace Kepler
 							NodeFlags |= ImGuiTreeNodeFlags_Selected;
 						}
 
-						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)Index, NodeFlags, NC.Name.c_str());
+						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, NodeFlags, NC.Name.c_str());
 						if (ImGui::IsItemClicked())
 						{
 							SelectedEntity = TGameEntityId{ EntityId };
@@ -521,7 +521,7 @@ namespace Kepler
 							ImGui::TreePop();
 						}
 
-						Index++;
+						idx++;
 					}
 				});
 			ImGui::TreePop();
@@ -760,25 +760,25 @@ namespace Kepler
 			{
 				switch (TranslationSnap)
 				{
-				case Kepler::ETranslationSnap::_1Unit:
+				case ke::ETranslationSnap::_1Unit:
 					return float3(0.01f);
 					break;
-				case Kepler::ETranslationSnap::_2Units:
+				case ke::ETranslationSnap::_2Units:
 					return float3(0.02f);
 					break;
-				case Kepler::ETranslationSnap::_5Units:
+				case ke::ETranslationSnap::_5Units:
 					return float3(0.05f);
 					break;
-				case Kepler::ETranslationSnap::_10Units:
+				case ke::ETranslationSnap::_10Units:
 					return float3(0.1f);
 					break;
-				case Kepler::ETranslationSnap::_25Units:
+				case ke::ETranslationSnap::_25Units:
 					return float3(0.25f);
 					break;
-				case Kepler::ETranslationSnap::_50Units:
+				case ke::ETranslationSnap::_50Units:
 					return float3(0.5f);
 					break;
-				case Kepler::ETranslationSnap::_100Units:
+				case ke::ETranslationSnap::_100Units:
 					return float3(1.0f);
 					break;
 				default:
@@ -789,22 +789,22 @@ namespace Kepler
 			{
 				switch (RotationSnap)
 				{
-				case Kepler::ERotationSnap::_1Degree:
+				case ke::ERotationSnap::_1Degree:
 					return float3(1.0f);
 					break;
-				case Kepler::ERotationSnap::_10Degrees:
+				case ke::ERotationSnap::_10Degrees:
 					return float3(10.0f);
 					break;
-				case Kepler::ERotationSnap::_30Degrees:
+				case ke::ERotationSnap::_30Degrees:
 					return float3(30.0f);
 					break;
-				case Kepler::ERotationSnap::_45Degrees:
+				case ke::ERotationSnap::_45Degrees:
 					return float3(45.0f);
 					break;
-				case Kepler::ERotationSnap::_90Degrees:
+				case ke::ERotationSnap::_90Degrees:
 					return float3(90.0f);
 					break;
-				case Kepler::ERotationSnap::_180Degrees:
+				case ke::ERotationSnap::_180Degrees:
 					return float3(180.0f);
 					break;
 				default:

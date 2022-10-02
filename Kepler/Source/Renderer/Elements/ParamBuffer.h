@@ -4,7 +4,7 @@
 #include "../Pipelines/ParamPack.h"
 #include "Buffer.h"
 
-namespace Kepler
+namespace ke
 {
 	class TParamBuffer : public TBuffer
 	{

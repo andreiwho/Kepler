@@ -3,7 +3,7 @@
 #include "Core/Malloc.h"
 #include <initializer_list>
 
-namespace Kepler
+namespace ke
 {
 	template<typename T, typename TAllocator = TMallocator<T>>
 	class TDynArray
@@ -77,16 +77,16 @@ namespace Kepler
 
 		inline usize AppendBack(const T& Elem)
 		{
-			usize Index = GetLength();
+			usize idx = GetLength();
 			UnderlyingContainer.push_back(Elem);
-			return Index;
+			return idx;
 		}
 
 		inline usize AppendBack(T&& Elem)
 		{
-			usize Index = GetLength();
+			usize idx = GetLength();
 			UnderlyingContainer.push_back(std::forward<T>(Elem));
-			return Index;
+			return idx;
 		}
 
 		template<typename ... ARGS>
@@ -111,14 +111,14 @@ namespace Kepler
 
 		inline auto GetData() const { return UnderlyingContainer.data(); }
 
-		inline T& operator[](usize Index)
+		inline T& operator[](usize idx)
 		{ 
-			return UnderlyingContainer[Index];
+			return UnderlyingContainer[idx];
 		} 
 
-		inline const T& operator[](usize Index) const
+		inline const T& operator[](usize idx) const
 		{
-			return UnderlyingContainer.at(Index);
+			return UnderlyingContainer.at(idx);
 		}
 
 		template<typename TPred>

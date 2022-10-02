@@ -1,7 +1,7 @@
 #pragma once
 #include <spdlog/sinks/base_sink.h>
 
-namespace Kepler
+namespace ke
 {
 	class TEditorLogReceiver;
 

@@ -8,7 +8,7 @@
 #include "Pipelines/GraphicsPipeline.h"
 #include "World/StaticMesh.h"
 
-namespace Kepler
+namespace ke
 {
 	class TLowLevelRenderer : public TRefCounted
 	{
@@ -32,11 +32,11 @@ namespace Kepler
 	public:
 		inline TRef<TRenderDevice> GetRenderDevice() const { return RenderDevice; }
 
-		inline TRef<TSwapChain> GetSwapChain(u32 Index) const
+		inline TRef<TSwapChain> GetSwapChain(u32 idx) const
 		{
-			if (SwapChains.GetLength() > Index)
+			if (SwapChains.GetLength() > idx)
 			{
-				return SwapChains[Index];
+				return SwapChains[idx];
 			}
 			return nullptr;
 		}

@@ -4,7 +4,7 @@
 #include "Components/MaterialComponent.h"
 #include "../Camera/CameraComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld);
 
