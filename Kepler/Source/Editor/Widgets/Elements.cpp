@@ -170,19 +170,19 @@ namespace ke
 	void TEditorElements::CheckWrappingCursor()
 	{
 		ImGuiIO& IO = ImGui::GetIO();
-		if (IO.MousePos.x >= IO.DisplaySize.x - WrappingInterval)
+		if (IO.MousePos.x >= IO.DisplaySize.x - s_WrappingInterval)
 		{
 			// Wrap mouse cursor
-			float2 NewPos = float2(WrappingInterval + 1, IO.MousePos.y);
-			MainWindow->SetCursorPosition(NewPos);
+			float2 NewPos = float2(s_WrappingInterval + 1, IO.MousePos.y);
+			s_MainWindow->SetCursorPosition(NewPos);
 			IO.MousePos = { NewPos.x, NewPos.y };
 			IO.MousePosPrev = { NewPos.x, NewPos.y };
 		}
-		if (IO.MousePos.x <= WrappingInterval)
+		if (IO.MousePos.x <= s_WrappingInterval)
 		{
 			// Wrap mouse cursor
-			float2 NewPos = float2(IO.DisplaySize.x - WrappingInterval - 1, IO.MousePos.y);
-			MainWindow->SetCursorPosition(NewPos);
+			float2 NewPos = float2(IO.DisplaySize.x - s_WrappingInterval - 1, IO.MousePos.y);
+			s_MainWindow->SetCursorPosition(NewPos);
 			IO.MousePos = { NewPos.x, NewPos.y };
 			IO.MousePosPrev = { NewPos.x, NewPos.y };
 		}
@@ -190,6 +190,6 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	class TWindow* TEditorElements::MainWindow;
-	float TEditorElements::WrappingInterval = 20.0f;
+	class TWindow* TEditorElements::s_MainWindow;
+	float TEditorElements::s_WrappingInterval = 20.0f;
 }

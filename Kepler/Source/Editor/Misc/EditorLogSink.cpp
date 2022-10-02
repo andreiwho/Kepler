@@ -4,16 +4,16 @@
 namespace ke
 {
 	
-	void TEditorLogSink::sink_it_(const spdlog::details::log_msg& Msg)
+	void TEditorLogSink::sink_it_(const spdlog::details::log_msg& msg)
 	{
 		if (!HasLogReceiver())
 		{
 			return;
 		}
 
-		spdlog::memory_buf_t Formatted;
-		spdlog::sinks::base_sink<std::mutex>::formatter_->format(Msg, Formatted);
-		Receiver->ReceiveLog(Msg, Formatted);
+		spdlog::memory_buf_t formatted;
+		spdlog::sinks::base_sink<std::mutex>::formatter_->format(msg, formatted);
+		s_Receiver->ReceiveLog(msg, formatted);
 	}
 
 	void TEditorLogSink::flush_()
@@ -23,18 +23,18 @@ namespace ke
 
 	void TEditorLogSink::RegisterLogReceiver(TEditorLogReceiver* pReceiver)
 	{
-		Receiver = pReceiver;
+		s_Receiver = pReceiver;
 	}
 
 	void TEditorLogSink::UnregisterLogReceiver(TEditorLogReceiver* pReceiver)
 	{
-		Receiver = nullptr;
+		s_Receiver = nullptr;
 	}
 
 	bool TEditorLogSink::HasLogReceiver()
 	{
-		return !!Receiver;
+		return !!s_Receiver;
 	}
 
-	ke::TEditorLogReceiver* TEditorLogSink::Receiver;
+	ke::TEditorLogReceiver* TEditorLogSink::s_Receiver;
 }

@@ -10,9 +10,9 @@
 namespace ke
 {
 
-	TEditorDetailsPanel::TEditorDetailsPanel(TRef<TGameWorld> InWorldContext, TGameEntityId InSelectedEntity)
-		: WorldContext(InWorldContext)
-		, SelectedEntity(InSelectedEntity)
+	TEditorDetailsPanel::TEditorDetailsPanel(TRef<TGameWorld> pWorld, TGameEntityId selectedEntity)
+		: m_pWorld(pWorld)
+		, m_SelectedEntity(selectedEntity)
 	{
 	}
 
@@ -21,13 +21,13 @@ namespace ke
 		// TEMP
 		ImGui::Begin("Details");
 		{
-			if (WorldContext && WorldContext->IsValidEntity(SelectedEntity))
+			if (m_pWorld && m_pWorld->IsValidEntity(m_SelectedEntity))
 			{
 				DrawEntityInfo();
 				DrawTransformComponentInfo();
 				DrawMaterialComponentInfo();
 
-				if (WorldContext->IsCamera(SelectedEntity))
+				if (m_pWorld->IsCamera(m_SelectedEntity))
 				{
 					DrawCameraComponentInfo();
 				}
@@ -39,18 +39,18 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawEntityInfo()
 	{
-		TGameEntity& EntityRef = WorldContext->GetEntityFromId(SelectedEntity);
+		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("ENTITY"))
 		{
 			if (TEditorElements::BeginFieldTable("entity", 2))
 			{
 				TEditorElements::NextFieldRow("Name");
-				char NameBuffer[TEditorElements::GMaxTextEditSymbols];
-				memset(NameBuffer, 0, sizeof(NameBuffer));
-				if (TEditorElements::EditText("Name", EntityRef.GetName().c_str(), NameBuffer))
+				char nameBuffer[TEditorElements::GMaxTextEditSymbols];
+				memset(nameBuffer, 0, sizeof(nameBuffer));
+				if (TEditorElements::EditText("Name", entity.GetName().c_str(), nameBuffer))
 				{
-					NameBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
-					EntityRef.SetName(NameBuffer);
+					nameBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+					entity.SetName(nameBuffer);
 				}
 				TEditorElements::EndFieldTable();
 			}
@@ -60,30 +60,30 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawTransformComponentInfo()
 	{
-		TGameEntity& EntityRef = WorldContext->GetEntityFromId(SelectedEntity);
+		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("TRANSFORM"))
 		{
 			if (TEditorElements::BeginFieldTable("transform", 2))
 			{
 				TEditorElements::NextFieldRow("Location");
-				auto Location = EntityRef.GetLocation();
-				if (TEditorElements::DragFloat3("Location", Location, 0.001f))
+				auto location = entity.GetLocation();
+				if (TEditorElements::DragFloat3("Location", location, 0.001f))
 				{
-					EntityRef.SetLocation(Location);
+					entity.SetLocation(location);
 				}
 
 				TEditorElements::NextFieldRow("Rotation");
-				auto Rotation = EntityRef.GetRotation();
-				if (TEditorElements::DragFloat3("Rotation", Rotation, 0.1f))
+				auto rotation = entity.GetRotation();
+				if (TEditorElements::DragFloat3("Rotation", rotation, 0.1f))
 				{
-					EntityRef.SetRotation(Rotation);
+					entity.SetRotation(rotation);
 				}
 
 				TEditorElements::NextFieldRow("Scale");
-				auto Scale = EntityRef.GetScale();
-				if (TEditorElements::DragFloat3("Scale", Scale, 0.01f))
+				auto scale = entity.GetScale();
+				if (TEditorElements::DragFloat3("Scale", scale, 0.01f))
 				{
-					EntityRef.SetScale(Scale);
+					entity.SetScale(scale);
 				}
 				TEditorElements::EndFieldTable();
 			}
@@ -93,24 +93,24 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawCameraComponentInfo()
 	{
-		TCamera& Camera = WorldContext->GetComponent<TCameraComponent>(SelectedEntity).GetCamera();
+		TCamera& camera = m_pWorld->GetComponent<TCameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
 		{
 			if (TEditorElements::BeginFieldTable("camera", 2))
 			{
 				TEditorElements::NextFieldRow("Field of View");
-				auto FieldOfView = Camera.GetFOV();
-				if (TEditorElements::DragFloat1("Field Of View", FieldOfView, 0.001f))
+				auto fov = camera.GetFOV();
+				if (TEditorElements::DragFloat1("Field Of View", fov, 0.001f))
 				{
-					Camera.SetFOV(FieldOfView);
+					camera.SetFOV(fov);
 				}
 
 				TEditorElements::NextFieldRow("Near/Far Clip");
-				auto FrustumDepth = float2(Camera.GetNearClip(), Camera.GetFarClip());
-				if (TEditorElements::DragFloat2("Near/Far Clip", FrustumDepth, 0.1f))
+				auto frustomDepth = float2(camera.GetNearClip(), camera.GetFarClip());
+				if (TEditorElements::DragFloat2("Near/Far Clip", frustomDepth, 0.1f))
 				{
-					Camera.SetNearClip(FrustumDepth.x);
-					Camera.SetFarClip(FrustumDepth.y);
+					camera.SetNearClip(frustomDepth.x);
+					camera.SetFarClip(frustomDepth.y);
 				}
 				TEditorElements::EndFieldTable();
 			}
@@ -120,28 +120,28 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawMaterialComponentInfo()
 	{
-		TEntityHandle Entity = TEntityHandle{ WorldContext, SelectedEntity };
-		if (!Entity)
+		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		if (!entity)
 		{
 			return;
 		}
 
-		if (auto pMaterialComponent = Entity.GetComponent<TMaterialComponent>())
+		if (auto pMaterialComponent = entity.GetComponent<TMaterialComponent>())
 		{
 			if (TEditorElements::Container("MATERIAL"))
 			{
 				if (TEditorElements::BeginFieldTable("material", 2))
 				{
 					TEditorElements::NextFieldRow("Path");
-					char PathBuffer[TEditorElements::GMaxTextEditSymbols];
-					memset(PathBuffer, 0, sizeof(PathBuffer));
+					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
+					memset(pathBuffer, 0, sizeof(pathBuffer));
 					if (TEditorElements::EditText("Path",
 						pMaterialComponent->GetMaterialParentAssetPath().c_str(), 
-						PathBuffer))
+						pathBuffer))
 					{
-						PathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
 
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(PathBuffer))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
@@ -150,7 +150,7 @@ namespace ke
 					TEditorElements::NextFieldRow("Reload");
 					if (ImGui::Button("Reload Material"))
 					{
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(PathBuffer, true))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}

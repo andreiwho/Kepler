@@ -8,7 +8,7 @@ namespace ke
 	class TEditorLogSink : public spdlog::sinks::base_sink<std::mutex>
 	{
 	protected:
-		virtual void sink_it_(const spdlog::details::log_msg& Msg) override;
+		virtual void sink_it_(const spdlog::details::log_msg& msg) override;
 		virtual void flush_() override;
 
 	public:
@@ -17,6 +17,6 @@ namespace ke
 		static bool HasLogReceiver();
 
 	private:
-		static TEditorLogReceiver* Receiver;
+		static TEditorLogReceiver* s_Receiver;
 	};
 }

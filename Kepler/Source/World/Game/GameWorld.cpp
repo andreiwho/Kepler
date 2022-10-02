@@ -94,8 +94,8 @@ namespace ke
 		if (IsValidEntity(MainCamera))
 		{
 			auto& CameraEntity = GetEntityFromId(MainCamera);
-			auto& Camera = GetComponent<TCameraComponent>(MainCamera).GetCamera();
-			Camera.SetTransform(CameraEntity.GetTransform());
+			auto& camera = GetComponent<TCameraComponent>(MainCamera).GetCamera();
+			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
 		// Update components for entities
