@@ -9,7 +9,7 @@ namespace ke
 		{
 			return;
 		}
-		KeyStates[code] = true;
+		m_KeyStates[code] = true;
 	}
 
 	void TKeyboardState::OnKeyReleased(EKeyCode code)
@@ -19,7 +19,7 @@ namespace ke
 		{
 			return;
 		}
-		KeyStates[code] = false;
+		m_KeyStates[code] = false;
 	}
 
 }

@@ -9,14 +9,14 @@ namespace ke
 	class TWindowGLFW : public TWindow
 	{
 	public:
-		TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params = {});
+		TWindowGLFW(i32 width, i32 height, const TString& title, const TWindowParams& params = {});
 		~TWindowGLFW();
 
 		virtual void* GetNativeHandle() const override;
 		void RequestClose();
-		inline GLFWwindow* GetGLFWWindow() const { return Window; }
+		inline GLFWwindow* GetGLFWWindow() const { return m_Window; }
 		void Internal_UpdateSize(i32 width, i32 height);
-		virtual void SetCursorPosition(float2 NewPosition) override;
+		virtual void SetCursorPosition(float2 newPosition) override;
 
 	private:
 		void SetupCallbacks();
@@ -31,7 +31,7 @@ namespace ke
 		virtual void SetFullscreen_Impl(bool bNewFullscreen) override;
 
 	private:
-		GLFWwindow* Window{};
+		GLFWwindow* m_Window{};
 	};
 }
 #endif

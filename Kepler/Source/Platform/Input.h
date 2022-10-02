@@ -11,4 +11,5 @@ public:
 	static bool GetKey(EKeyCode key);
 	static bool GetMouseButon(EMouseButton button);
 	static void GetMousePosition(float& outX, float& outY);
+	static ke::float2 GetMousePosition();
 };

@@ -20,3 +20,10 @@ void TInput::GetMousePosition(float& outX, float& outY)
 	outX = position.X;
 	outY = position.Y;
 }
+
+ke::float2 TInput::GetMousePosition()
+{
+	ke::float2 outPosition;
+	GetMousePosition(outPosition.x, outPosition.y);
+	return outPosition;
+}
