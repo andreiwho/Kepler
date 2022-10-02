@@ -7,19 +7,19 @@ namespace ke
 	class TSoundMA : public TSound
 	{
 	public:
-		TSoundMA(const TString& InPath, ESoundCreateFlags CreateFlags = ESoundCreateFlags::None);
+		TSoundMA(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
 		~TSoundMA();
 
 		virtual bool IsPlaying() const override;
 		virtual bool IsFinished() const override;
 		virtual void Rewind() override;
-		virtual void Play(float3 Position = float3()) override;
+		virtual void Play(float3 position = float3()) override;
 		virtual void WaitForLoad() override;
 		virtual void Stop() override;
 
 	private:
-		TDynArray<ma_sound> SoundBuffer;
-		ma_fence* DoneFence{nullptr};
-		u32 CurrentSound = 0;
+		TDynArray<ma_sound> m_SoundBuffer;
+		ma_fence* m_DoneFence{nullptr};
+		u32 m_CurrentSound = 0;
 	};
 }

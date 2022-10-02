@@ -12,21 +12,15 @@ namespace ke
 		TAudioEngineMA();
 		~TAudioEngineMA();
 
-		inline ma_engine* GetEngineHandle() { return &Engine; }
-
-		virtual void PlayInline(const TString& Path) override;
-
-		virtual void Play(const TString& Path, ESoundCreateFlags LoadFlags) override;
-
-		virtual void PlayAt(const TString& Path, float3 Position, ESoundCreateFlags LoadFlags = 0) override;
-
+		inline ma_engine* GetEngineHandle() { return &m_Engine; }
+		virtual void PlayInline(const TString& path) override;
+		virtual void Play(const TString& path, ESoundCreateFlags flags) override;
+		virtual void PlayAt(const TString& path, float3 position, ESoundCreateFlags flags = 0) override;
 		virtual void UnloadPlaybackCache(bool bAlsoForPlaying) override;
-	
-		virtual TRef<TSound> GetOrLoadSound(const TString& InPath, ESoundCreateFlags LoadFlags = 0) override;
+		virtual TRef<TSound> GetOrLoadSound(const TString& path, ESoundCreateFlags flags = 0) override;
 
 	private:
-		ma_engine Engine;
-
-		TChaoticMap<TString, TRef<TSoundMA>> Sounds;
+		ma_engine m_Engine;
+		TChaoticMap<TString, TRef<TSoundMA>> m_Sounds;
 	};
 }
