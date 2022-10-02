@@ -158,7 +158,7 @@ namespace ke
 					// This is a subject to consider though
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
-							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(m_CurrentWorld, m_LowLevelRenderer);
+							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(m_CurrentWorld);
 							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 #ifdef ENABLE_EDITOR

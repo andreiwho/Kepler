@@ -16,42 +16,42 @@ namespace ke
 		TRenderThread::Submit([this]
 			{
 				KEPLER_PROFILE_INIT_THREAD("RenderThread");
-				RenderDevice = TRenderDevice::CreateRenderDevice();
+				m_RenderDevice = TRenderDevice::CreateRenderDevice();
 			});
 		TRenderThread::Wait();
-		ShaderCache = MakeShared<TShaderCache>();
-		PipelineCache = MakeShared<TGraphicsPipelineCache>();
+		m_ShaderCache = MakeShared<TShaderCache>();
+		m_PipelineCache = MakeShared<TGraphicsPipelineCache>();
 
 		InitScreenQuad();
-		TargetRegistry = MakeShared<TTargetRegistry>();
+		m_TargetRegistry = MakeShared<TTargetRegistry>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	TLowLevelRenderer::~TLowLevelRenderer()
 	{
-		TargetRegistry.reset();
-		ShaderCache.reset();
-		PipelineCache.reset();
-		ScreenQuad.Pipeline.Release();
-		ScreenQuad.VertexBuffer.Release();
-		ScreenQuad.IndexBuffer.Release();
-		ScreenQuad.Samplers.Release();
+		m_TargetRegistry.reset();
+		m_ShaderCache.reset();
+		m_PipelineCache.reset();
+		m_ScreenQuad.Pipeline.Release();
+		m_ScreenQuad.VertexBuffer.Release();
+		m_ScreenQuad.IndexBuffer.Release();
+		m_ScreenQuad.Samplers.Release();
 		TRenderThread::Submit(
 			[this]
 			{
-				SwapChains.Clear();
-				RenderDevice.Release();
+				m_SwapChains.Clear();
+				m_RenderDevice.Release();
 			});
 		TRenderThread::Wait();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* InWindow)
+	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
-			[this, InWindow]()
+			[this, pWindow]()
 			{
-				SwapChains.EmplaceBack(RenderDevice->CreateSwapChainForWindow(InWindow));
+				m_SwapChains.EmplaceBack(m_RenderDevice->CreateSwapChainForWindow(pWindow));
 			}
 		);
 	}
@@ -63,55 +63,55 @@ namespace ke
 		TRenderThread::Submit(
 			[this]
 			{
-				for (const auto& SwapChain : SwapChains)
+				for (const auto& swapChain : m_SwapChains)
 				{
-					SwapChain->Present();
+					swapChain->Present();
 				}
 
-				if (++FrameCounter % FlushPendingDeleteResourcesInterval == 0)
+				if (++m_FrameCounter % m_FlushPendingDeleteResourcesInterval == 0)
 				{
-					if (RenderDevice)
+					if (m_RenderDevice)
 					{
-						RenderDevice->RT_FlushPendingDeleteResources();
+						m_RenderDevice->RT_FlushPendingDeleteResources();
 					}
 				}
 			});
 		TRenderThread::Wait();
 
 
-		SwapChainFrame = (SwapChainFrame + 1) % SwapChainFrameCount;
+		m_SwapChainFrame = (m_SwapChainFrame + 1) % m_SwapChainFrameCount;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* InWindow)
+	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
-			[this, InWindow]
+			[this, pWindow]
 			{
-				auto FoundSwapChain = std::find_if(std::begin(SwapChains), std::end(SwapChains),
-					[InWindow](const auto& SwapChain)
+				auto foundSwapChain = std::find_if(std::begin(m_SwapChains), std::end(m_SwapChains),
+					[pWindow](const auto& swapChain)
 					{
-						return SwapChain->GetAssociatedWindow() == InWindow;
+						return swapChain->GetAssociatedWindow() == pWindow;
 					}
 				);
-				if (FoundSwapChain != SwapChains.end())
+				if (foundSwapChain != m_SwapChains.end())
 				{
-					SwapChains.Remove(FoundSwapChain);
+					m_SwapChains.Remove(foundSwapChain);
 				}
-				SwapChains.Shrink();
+				m_SwapChains.Shrink();
 			});
 		TRenderThread::Wait();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::OnWindowResized(class TWindow* InWindow)
+	void TLowLevelRenderer::OnWindowResized(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
-			[this, InWindow]
+			[this, pWindow]
 			{
-				if (auto SwapChain = FindAssociatedSwapChain(InWindow))
+				if (auto pSwapChain = FindAssociatedSwapChain(pWindow))
 				{
-					SwapChain->Resize(InWindow->GetWidth(), InWindow->GetHeight());
+					pSwapChain->Resize(pWindow->GetWidth(), pWindow->GetHeight());
 				}
 			});
 	}
@@ -134,40 +134,40 @@ namespace ke
 			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
 		};
 
-		TDynArray<u32> Indices = { 0,1,3,1,2,3 };
+		TDynArray<u32> indices = { 0,1,3,1,2,3 };
 
-		auto Task = TRenderThread::Submit(
+		auto task = TRenderThread::Submit(
 			[&, this]
 			{
-				auto Compiler = THLSLShaderCompiler::CreateShaderCompiler();
-				auto Shader = Compiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
-				CHECK(Shader);
+				auto pCompiler = THLSLShaderCompiler::CreateShaderCompiler();
+				auto pShader = pCompiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
+				CHECK(pShader);
 
-				TGraphicsPipelineConfiguration Config{};
-				Config.DepthStencil.bDepthEnable = false;
-				Config.VertexInput.VertexLayout = Shader->GetReflection()->VertexLayout;
-				Config.ParamMapping = Shader->GetReflection()->ParamMapping;
+				TGraphicsPipelineConfiguration config{};
+				config.DepthStencil.bDepthEnable = false;
+				config.VertexInput.VertexLayout = pShader->GetReflection()->VertexLayout;
+				config.ParamMapping = pShader->GetReflection()->ParamMapping;
 
-				ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(Shader, Config));
-				ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
-				ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
-				ScreenQuad.Samplers = ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
+				m_ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(pShader, config));
+				m_ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
+				m_ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(indices));
+				m_ScreenQuad.Samplers = m_ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
 			});
-		Await(Task);
+		Await(task);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* InWindow) const
+	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
 	{
-		auto FoundSwapChain = SwapChains.Find(
-			[InWindow](const auto& SwapChain)
+		auto foundSwapChain = m_SwapChains.Find(
+			[pWindow](const auto& pSwapChain)
 			{
-				return SwapChain->GetAssociatedWindow() == InWindow;
+				return pSwapChain->GetAssociatedWindow() == pWindow;
 			}
 		);
-		if (FoundSwapChain)
+		if (foundSwapChain)
 		{
-			return *FoundSwapChain;
+			return *foundSwapChain;
 		}
 		return nullptr;
 	}

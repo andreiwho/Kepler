@@ -5,18 +5,18 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	// RENDER TARGET GROUP
 	//////////////////////////////////////////////////////////////////////////
-	TRenderTargetGroup::TRenderTargetGroup(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers, bool bAllowCPURead)
-		:	Width(0)
-		,	Height(0)
-		,	Format(InFormat)
-		,	ArrayLayers(InArrayLayers)
+	TRenderTargetGroup::TRenderTargetGroup(u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
+		:	m_Width(0)
+		,	m_Height(0)
+		,	m_Format(format)
+		,	m_ArrayLayers(layers)
 	{
-		RenderTargets.Resize(ArrayLayers);
+		m_RenderTargets.Resize(m_ArrayLayers);
 		if (!bAllowCPURead)
 		{
-			TextureSamplers.Resize(ArrayLayers);
+			m_TextureSamplers.Resize(m_ArrayLayers);
 		}
-		Resize(InWidth, InHeight, InFormat, bAllowCPURead);
+		Resize(width, height, format, bAllowCPURead);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -27,45 +27,46 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TRenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
 	{
-		CHECK(idx < ArrayLayers);
-		return RenderTargets[idx];
+		CHECK(idx < m_ArrayLayers);
+		return m_RenderTargets[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
 	{
-		CHECK(idx < ArrayLayers);
-		return TextureSamplers[idx];
+		CHECK(idx < m_ArrayLayers);
+		return m_TextureSamplers[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TRenderTargetGroup::Resize(u32 InWidth, u32 InHeight, EFormat InFormat, bool bAllowCPURead)
+	void TRenderTargetGroup::Resize(u32 width, u32 height, EFormat format, bool bAllowCPURead)
 	{
-		if (Width != InWidth || Height != InHeight || Format.Value != InFormat)
+		if (m_Width != width || m_Height != height || m_Format.Value != format)
 		{
-			Width = InWidth > 0 ? InWidth : 1;
-			Height = InHeight > 0 ? InHeight : 1;
-			Format = InFormat;
+			m_Width = width > 0 ? width : 1;
+			m_Height = height > 0 ? height : 1;
+			m_Format = format;
 
-			TRef<TImage2D> TargetImage = TImage2D::New(Width, Height, InFormat, 
-				EImageUsage::RenderTarget | (bAllowCPURead ? EImageUsage::AllowCPURead : EImageUsage::ShaderResource), 
+			TRef<TImage2D> pTargetImage = TImage2D::New(m_Width, m_Height, format, 
+				EImageUsage::RenderTarget 
+				| (bAllowCPURead ? EImageUsage::AllowCPURead : EImageUsage::ShaderResource), 
 				1, 
-				ArrayLayers);
-			for (u32 idx = 0; idx < ArrayLayers; ++idx)
+				m_ArrayLayers);
+			for (u32 idx = 0; idx < m_ArrayLayers; ++idx)
 			{
-				RenderTargets[idx] = TRenderTarget2D::New(TargetImage, 0, idx);
+				m_RenderTargets[idx] = TRenderTarget2D::New(pTargetImage, 0, idx);
 				if (!bAllowCPURead)
 				{
-					TextureSamplers[idx] = TTextureSampler2D::New(TargetImage, 0, idx);
+					m_TextureSamplers[idx] = TTextureSampler2D::New(pTargetImage, 0, idx);
 				}
 			}
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTargetGroup> TRenderTargetGroup::New(u32 InWidth, u32 InHeight, EFormat InFormat, u32 InArrayLayers, bool bAllowCPURead)
+	TRef<TRenderTargetGroup> TRenderTargetGroup::New(u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
 	{
-		return MakeRef(ke::New<TRenderTargetGroup>(InWidth, InHeight, InFormat, InArrayLayers));
+		return MakeRef(ke::New<TRenderTargetGroup>(width, height, format, layers));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -85,61 +86,61 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& Name, u32 Width, u32 Height, EFormat Format, u32 ArrayLayers, bool bAllowCPURead)
+	TRef<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& name, u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (!RenderTargets.Contains(Name))
+		if (!m_RenderTargets.Contains(name))
 		{
-			CHECK(Width != UINT32_MAX && Height != UINT32_MAX && Format.Value != EFormat::Unknown && ArrayLayers > 0);
-			RenderTargets[Name] = TRenderTargetGroup::New(Width, Height, Format, ArrayLayers);
+			CHECK(width != UINT32_MAX && height != UINT32_MAX && format.Value != EFormat::Unknown && layers > 0);
+			m_RenderTargets[name] = TRenderTargetGroup::New(width, height, format, layers);
 		}
 
 		// This may cause a performance problem, or may not. Needs to be checked
-		TRef<TRenderTargetGroup> Target = RenderTargets[Name];
-		if (Width != UINT32_MAX || Height != UINT32_MAX || Format != EFormat::Unknown)
+		TRef<TRenderTargetGroup> pTarget = m_RenderTargets[name];
+		if (width != UINT32_MAX || height != UINT32_MAX || format != EFormat::Unknown)
 		{
-			Target->Resize(Width, Height, Format, bAllowCPURead);
+			pTarget->Resize(width, height, format, bAllowCPURead);
 		}
-		return Target;
+		return pTarget;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TTargetRegistry::RenderTargetGroupExists(const TString& Name) const
+	bool TTargetRegistry::RenderTargetGroupExists(const TString& name) const
 	{
-		return RenderTargets.Contains(Name);
+		return m_RenderTargets.Contains(name);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TDepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& Name, u32 Width, u32 Height, EFormat Format, bool bSampled)
+	TRef<TDepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
 	{
 		// Create
-		auto NewWidth = Width > 0 ? Width : 1;
-		auto NewHeight = Height > 0 ? Height : 1;
-		if (!DepthTargets.Contains(Name))
+		auto newWidth = width > 0 ? width : 1;
+		auto newHeight = height > 0 ? height : 1;
+		if (!m_DepthTargets.Contains(name))
 		{
-			CHECK(Width != UINT32_MAX && Height != UINT32_MAX && Format.Value != EFormat::Unknown);
+			CHECK(width != UINT32_MAX && height != UINT32_MAX && format.Value != EFormat::Unknown);
 			EImageUsage Flags = EImageUsage::DepthTarget;
 			if (bSampled)
 			{
 				Flags.Mask |= EImageUsage::ShaderResource;
 			}
 
-			TRef<TImage2D> DepthImage = TImage2D::New(NewWidth, NewHeight, Format, Flags);
-			DepthTargets[Name] = TDepthStencilTarget2D::New(DepthImage);
+			TRef<TImage2D> DepthImage = TImage2D::New(newWidth, newHeight, format, Flags);
+			m_DepthTargets[name] = TDepthStencilTarget2D::New(DepthImage);
 		}
 
 		// Acquire | Resize
-		TRef<TDepthStencilTarget2D> DepthTarget = DepthTargets[Name];
-		if (NewWidth != UINT32_MAX || NewHeight != UINT32_MAX)
+		TRef<TDepthStencilTarget2D> depthTarget = m_DepthTargets[name];
+		if (newWidth != UINT32_MAX || newHeight != UINT32_MAX)
 		{
-			if (DepthTarget->GetWidth() != NewWidth || DepthTarget->GetHeight() != NewHeight)
+			if (depthTarget->GetWidth() != newWidth || depthTarget->GetHeight() != newHeight)
 			{
-				TRef<TImage2D> DepthImage = TImage2D::New(NewWidth, NewHeight, DepthTarget->GetFormat(), DepthTarget->GetImage()->GetUsage());
-				DepthTarget = TDepthStencilTarget2D::New(DepthImage);
-				DepthTargets[Name] = DepthTarget;
+				TRef<TImage2D> depthImage = TImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
+				depthTarget = TDepthStencilTarget2D::New(depthImage);
+				m_DepthTargets[name] = depthTarget;
 			}
 		}
-		return DepthTarget;
+		return depthTarget;
 	}
 
 }

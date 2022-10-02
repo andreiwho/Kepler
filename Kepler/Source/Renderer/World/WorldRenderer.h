@@ -16,12 +16,12 @@ namespace ke
 	class TWorldRenderer : public TRefCounted
 	{
 	public:
-		TWorldRenderer(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR);
+		TWorldRenderer(TRef<TGameWorld> pWorld);
 		~TWorldRenderer();
 		
 		void Render(TViewport2D ViewportSize);
 
-		static TRef<TWorldRenderer> New(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR);
+		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
 
 	private:
 		void RT_UpdateMaterialComponents(TRef<TCommandListImmediate> pImmCtx);
@@ -30,8 +30,8 @@ namespace ke
 		void FlushPass(TRef<TCommandListImmediate> pImmCtx);
 
 	private:
-		TViewport2D CurrentViewport{};
-		TRef<TGameWorld> CurrentWorld;
-		TSharedPtr<TLowLevelRenderer> LLR;
+		TViewport2D m_CurrentViewport{};
+		TRef<TGameWorld> m_CurrentWorld;
+		TLowLevelRenderer* m_LLR;
 	};
 }

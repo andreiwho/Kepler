@@ -40,7 +40,7 @@ namespace ke
 #endif
 		CreateClassLinkage();
 
-		ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
+		m_ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -181,28 +181,11 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
-	{
-		CHECK(IsRenderThread());
-		std::lock_guard lck{ ResourceMutex };
-		return MakeRef(New<TImage1D_D3D11>(InWidth, InFormat, InUsage, MipLevels, InArraySize));
-	}
-
-	//////////////////////////////////////////////////////////////////////////
 	TRef<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TImage2D_D3D11>(InWidth, InHeight, InFormat, InUsage, MipLevels, InArraySize));
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	TRef<TImage3D> TRenderDeviceD3D11::CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
-	{
-		CHECK(IsRenderThread());
-		std::lock_guard lck{ ResourceMutex };
-		return MakeRef(New<TImage3D_D3D11>(InWidth, InHeight, InDepth, InFormat, InUsage, MipLevels, InArraySize));
-
 	}
 
 	//////////////////////////////////////////////////////////////////////////

@@ -18,31 +18,31 @@ namespace ke
 		TLowLevelRenderer();
 		~TLowLevelRenderer();
 
-		void InitRenderStateForWindow(class TWindow* InWindow);
+		void InitRenderStateForWindow(class TWindow* pWindow);
 		void PresentAll();
-		void DestroyRenderStateForWindow(class TWindow* InWindow);
-		void OnWindowResized(class TWindow* InWindow);
+		void DestroyRenderStateForWindow(class TWindow* pWindow);
+		void OnWindowResized(class TWindow* pWindow);
 
 		inline u8 GetFrameIndex() const
 		{
-			return SwapChainFrame.load(std::memory_order_relaxed);
+			return m_SwapChainFrame.load(std::memory_order_relaxed);
 		}
 
 		static TLowLevelRenderer* Get() { return Instance; }
 	public:
-		inline TRef<TRenderDevice> GetRenderDevice() const { return RenderDevice; }
+		inline TRef<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
 
 		inline TRef<TSwapChain> GetSwapChain(u32 idx) const
 		{
-			if (SwapChains.GetLength() > idx)
+			if (m_SwapChains.GetLength() > idx)
 			{
-				return SwapChains[idx];
+				return m_SwapChains[idx];
 			}
 			return nullptr;
 		}
 
-		static constexpr u32 SwapChainFrameCount = 3;
-		static constexpr u32 FramesInFlight = 3;
+		static constexpr u32 m_SwapChainFrameCount = 3;
+		static constexpr u32 m_FramesInFlight = 3;
 
 		void InitScreenQuad();
 
@@ -53,21 +53,21 @@ namespace ke
 			TRef<TVertexBuffer> VertexBuffer{};
 			TRef<TIndexBuffer> IndexBuffer{};
 			TRef<TPipelineSamplerPack> Samplers{};
-		} ScreenQuad{};
+		} m_ScreenQuad{};
 
 	private:
-		TRef<TSwapChain> FindAssociatedSwapChain(class TWindow* InWindow) const;
+		TRef<TSwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
 
 	private:
-		TRenderThread RenderThread{};
-		TSharedPtr<TShaderCache> ShaderCache{};
-		TSharedPtr<TGraphicsPipelineCache> PipelineCache{};
-		TSharedPtr<TTargetRegistry> TargetRegistry{};
+		TRenderThread m_RenderThread{};
+		TSharedPtr<TShaderCache> m_ShaderCache{};
+		TSharedPtr<TGraphicsPipelineCache> m_PipelineCache{};
+		TSharedPtr<TTargetRegistry> m_TargetRegistry{};
 
-		TRef<TRenderDevice> RenderDevice{};
-		TDynArray<TRef<TSwapChain>> SwapChains;
-		TAtomic<u64> FrameCounter = 0;
-		TAtomic<u8> SwapChainFrame = 0;
-		const u64 FlushPendingDeleteResourcesInterval = 16;
+		TRef<TRenderDevice> m_RenderDevice{};
+		TDynArray<TRef<TSwapChain>> m_SwapChains;
+		TAtomic<u64> m_FrameCounter = 0;
+		TAtomic<u8> m_SwapChainFrame = 0;
+		const u64 m_FlushPendingDeleteResourcesInterval = 16;
 	};
 }

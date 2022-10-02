@@ -16,6 +16,6 @@ namespace ke
 	public:
 		static TRef<THLSLShaderCompiler> CreateShaderCompiler();
 
-		virtual TRef<TShader> CompileShader(const TString& Path, EShaderStageFlags TypeMask) = 0;
+		virtual TRef<TShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
 	};
 }

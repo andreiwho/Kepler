@@ -160,18 +160,18 @@ namespace ke
 	class TDataBlob : public TRefCounted
 	{
 	public:
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0, usize Stride = 0);
+		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
 
 		template<typename T>
-		static TRef<TDataBlob> New(const TDynArray<T>& Data)
+		static TRef<TDataBlob> New(const TDynArray<T>& data)
 		{
-			return CreateGraphicsDataBlob(Data.GetData(), Data.GetLength() * sizeof(T), sizeof(T));
+			return CreateGraphicsDataBlob(data.GetData(), data.GetLength() * sizeof(T), sizeof(T));
 		}
 
 		virtual const void* GetData() const = 0;
 		virtual usize GetSize() const = 0;
 		virtual usize GetStride() const = 0;
-		virtual void Write(const void* Data, usize Size) = 0;
+		virtual void Write(const void* pData, usize size) = 0;
 	};
 
 	//////////////////////////////////////////////////////////////////////////

@@ -3,36 +3,36 @@
 namespace ke
 {
 
-	TWorldTransform::TWorldTransform(float3 InLocation, float3 InRotation, float3 InScale)
-		: Location(InLocation)
-		, Rotation(InRotation)
-		, Scale(InScale)
+	TWorldTransform::TWorldTransform(float3 location, float3 rotation, float3 scale)
+		: m_Location(location)
+		, m_Rotation(rotation)
+		, m_Scale(scale)
 	{
 	}
 
-	void TWorldTransform::SetLocation(float3 InLocation)
+	void TWorldTransform::SetLocation(float3 location)
 	{
-		Location = InLocation;
+		m_Location = location;
 	}
 
-	void TWorldTransform::SetRotation(float3 InRotation)
+	void TWorldTransform::SetRotation(float3 rotation)
 	{
-		Rotation = InRotation;
+		m_Rotation = rotation;
 	}
 
-	void TWorldTransform::SetScale(float3 InScale)
+	void TWorldTransform::SetScale(float3 scale)
 	{
-		Scale = InScale;
+		m_Scale = scale;
 	}
 
 	matrix4x4 TWorldTransform::GenerateWorldMatrix() const
 	{
-		matrix4x4 World = matrix4x4(1.0f);
-		World = glm::translate(World, Location);
-		World = glm::rotate(World, glm::radians(Rotation.z), float3(0.0f, 0.0f, 1.0f));
-		World = glm::rotate(World, glm::radians(Rotation.y), float3(0.0f, 1.0f, 0.0f));
-		World = glm::rotate(World, glm::radians(Rotation.x), float3(1.0f, 0.0f, 0.0f));
-		World = glm::scale(World, Scale);
-		return World;
+		matrix4x4 worldMat = matrix4x4(1.0f);
+		worldMat = glm::translate(worldMat, m_Location);
+		worldMat = glm::rotate(worldMat, glm::radians(m_Rotation.z), float3(0.0f, 0.0f, 1.0f));
+		worldMat = glm::rotate(worldMat, glm::radians(m_Rotation.y), float3(0.0f, 1.0f, 0.0f));
+		worldMat = glm::rotate(worldMat, glm::radians(m_Rotation.x), float3(1.0f, 0.0f, 0.0f));
+		worldMat = glm::scale(worldMat, m_Scale);
+		return worldMat;
 	}
 }

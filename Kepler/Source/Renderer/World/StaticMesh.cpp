@@ -5,42 +5,42 @@
 namespace ke
 {
 
-	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
-		:	Sections({TInternalSection{InVertexBuffer, InIndexBuffer}})
+	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
+		:	m_Sections({TInternalSection{pVertexBuffer, pIndexBuffer}})
 	{
 	}
 
-	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshVertex>& vertices, const TDynArray<u32>& indices)
 	{
 		CHECK(!IsRenderThread());
 
-		TInternalSection Section;
-		Await(TRenderThread::Submit([&Section, Vertices, InIndices]
+		TInternalSection section;
+		Await(TRenderThread::Submit([&section, vertices, indices]
 			{
-				Section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
-				Section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(InIndices));
+				section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(vertices));
+				section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(indices));
 			}));
-		Sections.EmplaceBack(std::move(Section));
+		m_Sections.EmplaceBack(std::move(section));
 	}
 
-	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshSection>& InSections)
+	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshSection>& sections)
 	{
-		SetSections(InSections);
+		SetSections(sections);
 	}
 
-	void TStaticMesh::SetSections(const TDynArray<TStaticMeshSection>& InSections)
+	void TStaticMesh::SetSections(const TDynArray<TStaticMeshSection>& sections)
 	{
-		Sections.Clear();
-		Sections.Reserve(InSections.GetLength());
-		for (const auto& Section : InSections)
+		m_Sections.Clear();
+		m_Sections.Reserve(sections.GetLength());
+		for (const auto& section : sections)
 		{
-			TInternalSection OutSection;
-			Await(TRenderThread::Submit([&Section, &OutSection]
+			TInternalSection outSection;
+			Await(TRenderThread::Submit([&section, &outSection]
 				{
-					OutSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Section.Vertices));
-					OutSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Section.Indices));
+					outSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(section.Vertices));
+					outSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(section.Indices));
 				}));
-			Sections.EmplaceBack(std::move(OutSection));
+			m_Sections.EmplaceBack(std::move(outSection));
 		}
 	}
 

@@ -8,9 +8,9 @@
 
 namespace ke
 {
-	TRef<ke::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI OverrideAPI)
+	TRef<ke::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI overrideApi)
 	{
-		switch (OverrideAPI)
+		switch (overrideApi)
 		{
 		case ke::ERenderAPI::Default:
 #ifdef WIN32
@@ -30,13 +30,13 @@ namespace ke
 		CRASHMSG("Failed to create render device. Unknown render API");
 	}
 
-	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* Data, usize Size, usize ElemSize)
+	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
 	{
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
 		case ke::ERenderAPI::DirectX11:
-			return MakeRef(ke::New<TDataBlobD3D11>(Data, Size, ElemSize));
+			return MakeRef(ke::New<TDataBlobD3D11>(pData, size, elemSize));
 #endif
 		default:
 			break;

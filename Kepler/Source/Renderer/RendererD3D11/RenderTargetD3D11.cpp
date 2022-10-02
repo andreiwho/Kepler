@@ -21,13 +21,13 @@ namespace ke
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			HRCHECK(Device->GetDevice()->CreateRenderTargetView(Texture, &Desc, &RenderTarget));
+			HRCHECK(Device->GetDevice()->CreateRenderTargetView(Texture, &Desc, &m_RenderTarget));
 		}
 	}
 
 	TRenderTarget2D_D3D11::~TRenderTarget2D_D3D11()
 	{
-		if (!RenderTarget)
+		if (!m_RenderTarget)
 		{
 			return;
 		}
@@ -35,7 +35,7 @@ namespace ke
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			Device->RegisterPendingDeleteResource(RenderTarget);
+			Device->RegisterPendingDeleteResource(m_RenderTarget);
 		}
 	}
 

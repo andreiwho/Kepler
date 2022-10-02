@@ -10,7 +10,7 @@ namespace ke
 	{
 		CHECK(!Instance);
 		Instance = this;
-		WorkerPool.SubmitTask([] { GRenderThreadID = std::this_thread::get_id(); });
+		m_InternalPool.SubmitTask([] { GRenderThreadID = std::this_thread::get_id(); });
 	}
 
 	TRenderThread::~TRenderThread()
@@ -21,6 +21,6 @@ namespace ke
 	void TRenderThread::Wait()
 	{
 		KEPLER_PROFILE_SCOPE();
-		Get()->WorkerPool.WaitForTasksToFinish();
+		Get()->m_InternalPool.WaitForTasksToFinish();
 	}
 }

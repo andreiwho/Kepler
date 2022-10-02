@@ -5,6 +5,7 @@
 
 namespace ke
 {
+	// TODO: Make standard vertex
 	struct TStaticMeshVertex
 	{
 		float3 Position;
@@ -23,9 +24,9 @@ namespace ke
 	{
 	public:
 		TStaticMesh() = default;
-		TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
-		TStaticMesh(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices);
-		TStaticMesh(const TDynArray<TStaticMeshSection>& InSections);
+		TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer);
+		TStaticMesh(const TDynArray<TStaticMeshVertex>& vertices, const TDynArray<u32>& indices);
+		TStaticMesh(const TDynArray<TStaticMeshSection>& sections);
 
 	public:
 		struct TInternalSection
@@ -34,32 +35,32 @@ namespace ke
 			TRef<TIndexBuffer> IndexBuffer{};
 		};
 
-		void SetSections(const TDynArray<TStaticMeshSection>& Sections);
+		void SetSections(const TDynArray<TStaticMeshSection>& sections);
 
 		static TRef<TStaticMesh> New()
 		{
 			return MakeRef(ke::New<TStaticMesh>());
 		}
 
-		static TRef<TStaticMesh> New(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
+		static TRef<TStaticMesh> New(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
 		{
-			return MakeRef(ke::New<TStaticMesh>(InVertexBuffer, InIndexBuffer));
+			return MakeRef(ke::New<TStaticMesh>(pVertexBuffer, pIndexBuffer));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshVertex>& pVertices, const TDynArray<u32>& pIndices)
 		{
-			return MakeRef(ke::New<TStaticMesh>(Vertices, InIndices));
+			return MakeRef(ke::New<TStaticMesh>(pVertices, pIndices));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& Sections)
+		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& sections)
 		{
-			return MakeRef(ke::New<TStaticMesh>(Sections));
+			return MakeRef(ke::New<TStaticMesh>(sections));
 		}
 
-		const TDynArray<TInternalSection>& GetSections() const { return Sections; }
+		const TDynArray<TInternalSection>& GetSections() const { return m_Sections; }
 
 	private:
-		TDynArray<TInternalSection> Sections;
+		TDynArray<TInternalSection> m_Sections;
 	
 	};
 }
