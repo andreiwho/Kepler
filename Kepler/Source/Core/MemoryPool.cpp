@@ -4,65 +4,65 @@ namespace ke
 {
 
 	TMemoryPool::TMemoryPool(usize InitialSize)
-		:	ContiguousMemoryResource(InitialSize)
-		,	PoolManager(&ContiguousMemoryResource)
+		:	m_ContiguousMemoryResource(InitialSize)
+		,	m_PoolManager(&m_ContiguousMemoryResource)
 	{
 	}
 
-	void* TMemoryPool::Allocate(usize Size)
+	void* TMemoryPool::Allocate(usize size)
 	{
-		const usize SizeWithHeader = Size + sizeof(TMemoryPoolBlockHeader);
-		TMemoryPoolBlockHeader* NewMemoryBlock = (TMemoryPoolBlockHeader*)PoolManager.allocate(SizeWithHeader);
-		if (NewMemoryBlock)
+		const usize sizeWithHeader = size + sizeof(TMemoryPoolBlockHeader);
+		TMemoryPoolBlockHeader* pNewBlock = (TMemoryPoolBlockHeader*)m_PoolManager.allocate(sizeWithHeader);
+		if (pNewBlock)
 		{
-			NewMemoryBlock->Pool = this;
-			NewMemoryBlock->Size = Size;
-			return (ubyte*)NewMemoryBlock + sizeof(TMemoryPoolBlockHeader);
+			pNewBlock->Pool = this;
+			pNewBlock->Size = size;
+			return (ubyte*)pNewBlock + sizeof(TMemoryPoolBlockHeader);
 		}
 		return nullptr;
 	}
 
-	void TMemoryPool::Deallocate(const void* Block)
+	void TMemoryPool::Deallocate(const void* pBlock)
 	{
-		if (!Block)
+		if (!pBlock)
 		{
 			return;
 		}
 
 		// Being naughty here :)
-		TMemoryPoolBlockHeader* Header = GetAllocationHeader(Block);
-		if (Header)
+		TMemoryPoolBlockHeader* pHeader = GetAllocationHeader(pBlock);
+		if (pHeader)
 		{
-			PoolManager.deallocate(Header, Header->Size + sizeof(TMemoryPoolBlockHeader));
+			m_PoolManager.deallocate(pHeader, pHeader->Size + sizeof(TMemoryPoolBlockHeader));
 		}
 	}
 
-	usize TMemoryPool::GetAllocationSize(const void* Block)
+	usize TMemoryPool::GetAllocationSize(const void* pBlock)
 	{
-		if (!Block)
+		if (!pBlock)
 		{
 			return 0;
 		}
 
 		// Being naughty here :)
-		TMemoryPoolBlockHeader* Header = GetAllocationHeader(Block);
-		return Header->Size;
+		TMemoryPoolBlockHeader* pHeader = GetAllocationHeader(pBlock);
+		return pHeader->Size;
 	}
 
-	TMemoryPool* TMemoryPool::GetAllocationPool(const void* Block)
+	TMemoryPool* TMemoryPool::GetAllocationPool(const void* pBlock)
 	{
-		if (!Block)
+		if (!pBlock)
 		{
 			return nullptr;
 		}
 
-		TMemoryPoolBlockHeader* Header = GetAllocationHeader(Block);
-		return Header->Pool;
+		TMemoryPoolBlockHeader* pHeader = GetAllocationHeader(pBlock);
+		return pHeader->Pool;
 	}
 
-	TMemoryPoolBlockHeader* TMemoryPool::GetAllocationHeader(const void* Block)
+	TMemoryPoolBlockHeader* TMemoryPool::GetAllocationHeader(const void* pBlock)
 	{
-		return (TMemoryPoolBlockHeader*)((ubyte*)Block - sizeof(TMemoryPoolBlockHeader));
+		return (TMemoryPoolBlockHeader*)((ubyte*)pBlock - sizeof(TMemoryPoolBlockHeader));
 	}
 
 }

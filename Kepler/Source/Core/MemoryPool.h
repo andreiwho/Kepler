@@ -14,24 +14,24 @@ namespace ke
 	class TMemoryPool
 	{
 	public:
-		TMemoryPool(usize InitialSize);
+		TMemoryPool(usize size);
 
-		void* Allocate(usize Size);
-		void Deallocate(const void* Block);
+		void* Allocate(usize size);
+		void Deallocate(const void* pBlock);
 
 	public:
-		static usize GetAllocationSize(const void* Block);
-		static TMemoryPool* GetAllocationPool(const void* Block);
+		static usize GetAllocationSize(const void* pBlock);
+		static TMemoryPool* GetAllocationPool(const void* pBlock);
 
 	private:
-		static TMemoryPoolBlockHeader* GetAllocationHeader(const void* Block);
+		static TMemoryPoolBlockHeader* GetAllocationHeader(const void* pBlock);
 
 	private:
-		ubyte* Memory{};
-		usize Capacity{};
-		usize Size{};
+		ubyte* m_pMemory{};
+		usize m_Capacity{};
+		usize m_Size{};
 
-		std::pmr::monotonic_buffer_resource ContiguousMemoryResource;
-		std::pmr::synchronized_pool_resource PoolManager;
+		std::pmr::monotonic_buffer_resource m_ContiguousMemoryResource;
+		std::pmr::synchronized_pool_resource m_PoolManager;
 	};
 }

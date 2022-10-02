@@ -8,20 +8,20 @@
 namespace ke
 {
 
-	TString ConvertToAnsiString(const TWideString& WideString)
+	TString ConvertToAnsiString(const TWideString& wide)
 	{
-		TString OutString;
-		OutString.resize(WideString.length());
-		CHECK(std::wcstombs(OutString.data(), WideString.data(), OutString.length()));
-		return OutString;
+		TString outStr;
+		outStr.resize(wide.length());
+		CHECK(std::wcstombs(outStr.data(), wide.data(), outStr.length()));
+		return outStr;
 	}
 
-	TWideString ConvertToWideString(const TString& AnsiString)
+	TWideString ConvertToWideString(const TString& ansi)
 	{
-		TWideString OutString;
-		OutString.resize(AnsiString.length());
-		CHECK(std::mbstowcs(OutString.data(), AnsiString.data(), OutString.length()));
-		return OutString;
+		TWideString outStr;
+		outStr.resize(ansi.length());
+		CHECK(std::mbstowcs(outStr.data(), ansi.data(), outStr.length()));
+		return outStr;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -30,10 +30,10 @@ namespace ke
 	{
 		static u64 Types_RandomU64()
 		{
-			static std::random_device Dev{};
-			static std::mt19937_64 RandomGenerator(Dev());
-			static std::uniform_int_distribution<u64> Distribution{};
-			return Distribution(RandomGenerator);
+			static std::random_device device{};
+			static std::mt19937_64 gen(device());
+			static std::uniform_int_distribution<u64> dist{};
+			return dist(gen);
 		}
 	}
 
@@ -42,8 +42,8 @@ namespace ke
 	{
 	}
 
-	id64::id64(const TString& HashableString)
-		: Value(std::hash<TString>{}(HashableString))
+	id64::id64(const TString& str)
+		: Value(std::hash<TString>{}(str))
 	{
 	}
 

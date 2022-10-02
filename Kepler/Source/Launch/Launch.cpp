@@ -28,7 +28,6 @@ namespace ke
 	int Main(i32 Argc, char** ppArgv)
 	{
 		// Log must be the first one always (after malloc)
-		TGlobalExceptionContainer Exceptions{};
 		TMalloc Malloc{};
 		TLog GlobalLog;
 		TVirtualFileSystem FileSystem;

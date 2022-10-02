@@ -12,91 +12,92 @@ namespace ke
 		using TMapType = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, ke::TMallocator<std::pair<const TKey, TValue>>>;
 	public:
 		TChaoticMap() = default;
-		TChaoticMap(const TChaoticMap& Other) noexcept : UnderlyingContainer(Other.UnderlyingContainer) {}
-		TChaoticMap& operator=(const TChaoticMap& Other) noexcept
+		TChaoticMap(const TChaoticMap& other) noexcept 
+			: m_Container(other.m_Container) {}
+		TChaoticMap& operator=(const TChaoticMap& other) noexcept
 		{
-			UnderlyingContainer = Other.UnderlyingContainer;
+			m_Container = other.m_Container;
 			return *this;
 		}
 
-		TChaoticMap(TChaoticMap&& Other) noexcept : UnderlyingContainer(std::move(Other.UnderlyingContainer)) {}
-		TChaoticMap& operator=(TChaoticMap&& Other) noexcept
+		TChaoticMap(TChaoticMap&& other) noexcept : m_Container(std::move(other.m_Container)) {}
+		TChaoticMap& operator=(TChaoticMap&& other) noexcept
 		{
-			UnderlyingContainer = std::move(Other.UnderlyingContainer);
+			m_Container = std::move(other.m_Container);
 			return *this;
 		}
 
-		void Reserve(usize Size)
+		void Reserve(usize size)
 		{
-			UnderlyingContainer.reserve(Size);
+			m_Container.reserve(size);
 		}
 
 		void Clear()
 		{
-			UnderlyingContainer.clear();
+			m_Container.clear();
 		}
 
 		template<typename TIterType>
-		void Remove(TIterType At)
+		void Remove(TIterType at)
 		{
-			UnderlyingContainer.erase(At);
+			m_Container.erase(at);
 		}
 
-		void Insert(const TKey& Key, TValue&& Value)
+		void Insert(const TKey& key, TValue&& val)
 		{
-			UnderlyingContainer[Key] = std::move(Value);
+			m_Container[key] = std::move(val);
 		}
 
-		void Insert(const TKey& Key, const TValue& Value)
+		void Insert(const TKey& key, const TValue& val)
 		{
-			UnderlyingContainer[Key] = Value;
+			m_Container[key] = val;
 		}
 
-		TValue& operator[](const TKey& Key) noexcept
+		TValue& operator[](const TKey& key) noexcept
 		{
-			return UnderlyingContainer[Key];
+			return m_Container[key];
 		}
 
-		const TValue& operator[](const TKey& Key) const noexcept
+		const TValue& operator[](const TKey& key) const noexcept
 		{
-			return UnderlyingContainer.at(Key);
+			return m_Container.at(key);
 		}
 
 		usize GetLength() const
 		{
-			return UnderlyingContainer.size();
+			return m_Container.size();
 		}
 
-		inline bool IsEmpty() const { return UnderlyingContainer.empty(); }
+		inline bool IsEmpty() const { return m_Container.empty(); }
 
-		inline decltype(auto) FindIterator(const TKey& Key) const
+		inline decltype(auto) FindIterator(const TKey& key) const
 		{
-			return UnderlyingContainer.find(Key);
+			return m_Container.find(key);
 		}
 
-		inline bool Contains(const TKey& Key) const
+		inline bool Contains(const TKey& key) const
 		{
-			return FindIterator(Key) != UnderlyingContainer.end();
+			return FindIterator(key) != m_Container.end();
 		}
 
-		inline const TValue* Find(const TKey& Key) const
+		inline const TValue* Find(const TKey& key) const
 		{
-			if (Contains(Key))
+			if (Contains(key))
 			{
-				return &UnderlyingContainer.at(Key);
+				return &m_Container.at(key);
 			}
 			return nullptr;
 		}
 
-		inline TMapType& GetUnderlyingContainer() { return UnderlyingContainer; }
-		inline const TMapType& GetUnderlyingContainer() const { return UnderlyingContainer; }
+		inline TMapType& GetUnderlyingContainer() { return m_Container; }
+		inline const TMapType& GetUnderlyingContainer() const { return m_Container; }
 
-		inline decltype(auto) begin() { return UnderlyingContainer.begin(); }
-		inline decltype(auto) end() { return UnderlyingContainer.end(); }
-		inline decltype(auto) begin() const { return UnderlyingContainer.begin(); }
-		inline decltype(auto) end() const { return UnderlyingContainer.end(); }
+		inline decltype(auto) begin() { return m_Container.begin(); }
+		inline decltype(auto) end() { return m_Container.end(); }
+		inline decltype(auto) begin() const { return m_Container.begin(); }
+		inline decltype(auto) end() const { return m_Container.end(); }
 
 	private:
-		TMapType UnderlyingContainer;
+		TMapType m_Container;
 	};
 }

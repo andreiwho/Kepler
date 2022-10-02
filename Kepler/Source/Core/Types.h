@@ -38,8 +38,8 @@ namespace ke
 	using CStr = const char*;
 	using WStr = const wchar_t*;
 
-	TString ConvertToAnsiString(const TWideString& WideString);
-	TWideString ConvertToWideString(const TString& AnsiString);
+	TString ConvertToAnsiString(const TWideString& wide);
+	TWideString ConvertToWideString(const TString& ansi);
 
 	// a 64 bit identifier, which claims to be unique
 	struct id64
@@ -79,6 +79,6 @@ namespace std
 	template<>
 	struct hash<ke::id64>
 	{
-		[[nodiscard]] size_t operator()(const ke::id64& Id) const noexcept { return Id.Value; }
+		[[nodiscard]] size_t operator()(const ke::id64& id) const noexcept { return id.Value; }
 	};
 }

@@ -16,57 +16,57 @@ namespace ke
 	class TRingQueue
 	{
 	public:
-		TRingQueue(usize InCapacity)
-			:	Capacity(InCapacity)
-			,	Length(0)
-			,	Head(0)
-			,	Tail(0)
+		TRingQueue(usize capacity)
+			:	m_Capacity(capacity)
+			,	m_Length(0)
+			,	m_Head(0)
+			,	m_Tail(0)
 		{
-			if (InCapacity > 0)
+			if (capacity > 0)
 			{
-				Memory = (T*)TMalloc::Get()->Allocate(Capacity * sizeof(T));
+				m_pMemory = (T*)TMalloc::Get()->Allocate(m_Capacity * sizeof(T));
 			}
 		}
 
 		~TRingQueue()
 		{
-			TMalloc::Get()->Free(Memory);
+			TMalloc::Get()->Free(m_pMemory);
 		}
 
-		bool Enqueue(T&& Value);
+		bool Enqueue(T&& value);
 
-		bool Dequeue(T& OutValue);
+		bool Dequeue(T& outValue);
 
-		bool Peek(T& OutValue) const;
+		bool Peek(T& outValue) const;
 
 		inline usize GetLength() const 
 		{ 
 			if constexpr (ThreadPolicy == ERingQueueThreadPolicy::Safe)
 			{
-				std::lock_guard lck{ Mutex };
-				return Length; 
+				std::lock_guard lck{ m_Mutex };
+				return m_Length; 
 			}
 			else
 			{
-				return Length;
+				return m_Length;
 			}
 		}
-		inline usize GetCapacity() const { return Capacity; }
+		inline usize GetCapacity() const { return m_Capacity; }
 
 	private:
-		bool InternalEnqueue(T&& Value);
+		bool InternalEnqueue(T&& value);
 
-		bool InternalDequeue(T& OutValue);
+		bool InternalDequeue(T& outValue);
 
-		bool InternalPeek(T& OutValue) const;
+		bool InternalPeek(T& outValue) const;
 
 	private:
-		T* Memory{};
-		usize Capacity{};
-		usize Length{};
-		usize Head{};
-		usize Tail{};
-		mutable std::mutex Mutex{};
+		T* m_pMemory{};
+		usize m_Capacity{};
+		usize m_Length{};
+		usize m_Head{};
+		usize m_Tail{};
+		mutable std::mutex m_Mutex{};
 	};
 
 	template<typename T>

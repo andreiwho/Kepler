@@ -25,7 +25,7 @@ namespace ke
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(TDynArray<TString> const& CommandLine);
+		TCommandLineArguments(TDynArray<TString> const& cmdLine);
 
 		TString GameModuleDirectory = "";
 	};
@@ -42,41 +42,41 @@ namespace ke
 	class TApplication : public IPlatformEventListener
 	{
 	public:
-		TApplication(const TApplicationLaunchParams& LaunchParams);
+		TApplication(const TApplicationLaunchParams& launchParams);
 		virtual ~TApplication();
 
 		virtual void Run();
 
 	protected:
-		virtual void ChildSetupModuleStack(TModuleStack& ModuleStack) {}
-		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
+		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
+		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
 
 	private:
 		void InitApplicationModules();
 		void TerminateModuleStack();
-		void InitVFSAliases(const TApplicationLaunchParams& LaunchParams);
+		void InitVFSAliases(const TApplicationLaunchParams& launchParams);
 
-		bool OnWindowClosed(const TWindowClosedEvent& Event);
-		bool OnWindowResized(const TWindowSizeEvent& Event);
-		bool OnKeyDown(const TKeyDownEvent& Event);
+		bool OnWindowClosed(const TWindowClosedEvent& event);
+		bool OnWindowResized(const TWindowSizeEvent& event);
+		bool OnKeyDown(const TKeyDownEvent& evemt);
 	private:
-		TWindow* MainWindow{};
-		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
-		TSharedPtr<TAudioEngine> AudioEngine{};
-		TSharedPtr<TWorldRegistry> WorldRegistry{};
+		TWindow* m_MainWindow{};
+		TSharedPtr<TLowLevelRenderer> m_LowLevelRenderer{};
+		TSharedPtr<TAudioEngine> m_AudioEngine{};
+		TSharedPtr<TWorldRegistry> m_WorldRegistry{};
 
-		TMaterialLoader MaterialLoader;
-		TImageLoader ImageLoader;
-		TMeshLoader MeshLoader;
+		TMaterialLoader m_MaterialLoader;
+		TImageLoader m_ImageLoader;
+		TMeshLoader m_MeshLoader;
 
-		TRef<TGameWorld> CurrentWorld;
+		TRef<TGameWorld> m_CurrentWorld;
 		
 #ifdef ENABLE_EDITOR
-		TRef<class TEditorModule> Editor;
+		TRef<class TEditorModule> m_Editor;
 #endif
 
-		TModuleStack ModuleStack{};
+		TModuleStack m_ModuleStack{};
 	};
 
-	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
+	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
 }

@@ -27,69 +27,69 @@ namespace ke
 		}
 	}
 
-	void* TMalloc::Allocate(usize Size, TMemoryPool* MemoryPool)
+	void* TMalloc::Allocate(usize size, TMemoryPool* pPool)
 	{
-		TMemoryPool* AllocationPool = MemoryPool;
-		if (!MemoryPool)
+		TMemoryPool* pAllocPool = pPool;
+		if (!pPool)
 		{
-			AllocationPool = GGlobalMemoryPool.get();
+			pAllocPool = GGlobalMemoryPool.get();
 		}
 
-		void* NewData = AllocationPool->Allocate(Size);
-		assert(NewData && "TMalloc::Allocate - failed");
-		return NewData;
+		void* pNewData = pAllocPool->Allocate(size);
+		assert(pNewData && "TMalloc::Allocate - failed");
+		return pNewData;
 	}
 
-	void TMalloc::Free(const void* Block)
+	void TMalloc::Free(const void* pBlock)
 	{
-		if (!Block)
+		if (!pBlock)
 		{
 			return;
 		}
 
-		TMemoryPool* Pool = TMemoryPool::GetAllocationPool(Block);
-		CHECK(Pool != nullptr);
-		Pool->Deallocate(Block);
+		TMemoryPool* pPool = TMemoryPool::GetAllocationPool(pBlock);
+		CHECK(pPool != nullptr);
+		pPool->Deallocate(pBlock);
 	}
 
-	usize TMalloc::GetSize(const void* Block) const
+	usize TMalloc::GetSize(const void* pBlock) const
 	{
-		return TMemoryPool::GetAllocationSize(Block);
+		return TMemoryPool::GetAllocationSize(pBlock);
 	}
 
-	usize MemorySize(void* Data)
+	usize MemorySize(void* pData)
 	{
-		return CHECKED(TMalloc::Get())->GetSize(Data);
+		return CHECKED(TMalloc::Get())->GetSize(pData);
 	}
 
-	void DoRelease(void* RefCounted)
+	void DoRelease(void* pRefCounted)
 	{
-		((TRefCounted*)RefCounted)->Release();
+		((TRefCounted*)pRefCounted)->Release();
 	}
 
-	void DoAddRef(void* RefCounted)
+	void DoAddRef(void* pRefCounted)
 	{
-		((TRefCounted*)RefCounted)->AddRef();
+		((TRefCounted*)pRefCounted)->AddRef();
 	}
 
-	usize DoGetRefCount(void* RefCounted)
+	usize DoGetRefCount(void* pRefCounted)
 	{
-		return ((TRefCounted*)RefCounted)->GetRefCount();
+		return ((TRefCounted*)pRefCounted)->GetRefCount();
 	}
 
 	void TRefCounted::AddRef() const
 	{
-		RefCount++;
+		m_RefCount++;
 	}
 
 	void TRefCounted::Release() const
 	{
-		if (RefCount > 0)
+		if (m_RefCount > 0)
 		{
-			RefCount--;
+			m_RefCount--;
 		}
 
-		if (RefCount == 0)
+		if (m_RefCount == 0)
 		{
 			Delete(this);
 		}

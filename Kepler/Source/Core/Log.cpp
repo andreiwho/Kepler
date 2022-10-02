@@ -14,41 +14,41 @@ namespace ke
 		Instance = this;
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& Name)
+	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& name)
 	{
-		std::lock_guard lck{ LoggerCreationFence };
-		if (Loggers.contains(Name))
+		std::lock_guard lck{ m_LoggerCreationFence };
+		if (m_Loggers.contains(name))
 		{
-			return Loggers.at(Name);
+			return m_Loggers.at(name);
 		}
-		return CreateLogger(Name);
+		return CreateLogger(name);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& Name)
+	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& name)
 	{
 #ifdef ENABLE_EDITOR
-		if (!EditorSink)
+		if (!m_EditorSink)
 		{
-			EditorSink = std::make_shared<TEditorLogSink>();
+			m_EditorSink = std::make_shared<TEditorLogSink>();
 		}
 #endif
-		std::shared_ptr<spdlog::logger> Logger = spdlog::stdout_color_mt(Name);
-		if (!Logger)
+		std::shared_ptr<spdlog::logger> pLogger = spdlog::stdout_color_mt(name);
+		if (!pLogger)
 		{
 			return nullptr;
 		}
-		Loggers[Name] = Logger;
+		m_Loggers[name] = pLogger;
 #ifdef ENABLE_EDITOR
-		Logger->sinks().push_back(EditorSink);
+		pLogger->sinks().push_back(m_EditorSink);
 #endif
- 		return ApplyDefaultLoggerConfig(Logger);
+ 		return ApplyDefaultLoggerConfig(pLogger);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger)
+	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> pLogger)
 	{
-		Logger->set_level(spdlog::level::trace);
-		Logger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
-		return Logger;
+		pLogger->set_level(spdlog::level::trace);
+		pLogger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
+		return pLogger;
 	}
 
 }

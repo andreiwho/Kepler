@@ -30,15 +30,15 @@
 
 namespace ke
 {
-	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& CommandLine)
+	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& cmdLine)
 	{
 		// Parse command line args
 		// Game module name must always be the first arg
-		CHECKMSG(CommandLine.GetLength() > 0, "The first param of the command line must be the application directory");
-		GameModuleDirectory = CommandLine[0];
+		CHECKMSG(cmdLine.GetLength() > 0, "The first param of the command line must be the application directory");
+		GameModuleDirectory = cmdLine[0];
 
 		usize idx = 0;
-		for (const auto& Argument : CommandLine)
+		for (const auto& arg : cmdLine)
 		{
 			if (idx == 0)
 			{
@@ -52,41 +52,41 @@ namespace ke
 		}
 	}
 
-	TApplication::TApplication(const TApplicationLaunchParams& LaunchParams)
+	TApplication::TApplication(const TApplicationLaunchParams& launchParams)
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
-		InitVFSAliases(LaunchParams);
+		InitVFSAliases(launchParams);
 
-		TWindowParams WindowParams{};
-		WindowParams.bMaximized = false;
-		MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", WindowParams));
+		TWindowParams windowParams{};
+		windowParams.bMaximized = false;
+		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", windowParams));
 
-		LowLevelRenderer = MakeShared<TLowLevelRenderer>();
-		LowLevelRenderer->InitRenderStateForWindow(MainWindow);
-		AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
+		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
+		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
+		m_AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
-		WorldRegistry = MakeShared<TWorldRegistry>();
+		m_WorldRegistry = MakeShared<TWorldRegistry>();
 	}
 
-	void TApplication::InitVFSAliases(const TApplicationLaunchParams& LaunchParams)
+	void TApplication::InitVFSAliases(const TApplicationLaunchParams& launchParams)
 	{
 		// Initialize VFS
 		VFSRegisterPathAlias("Engine", "Kepler/Assets");
 		VFSRegisterPathAlias("EngineShaders", "Kepler/Shaders");
-		VFSRegisterPathAlias("Game", fmt::format("{}/Assets", LaunchParams.CommandLine.GameModuleDirectory));
+		VFSRegisterPathAlias("Game", fmt::format("{}/Assets", launchParams.CommandLine.GameModuleDirectory));
 	}
 
 	TApplication::~TApplication()
 	{
-		MeshLoader.ClearCache();
-		ImageLoader.ClearCache();
-		MaterialLoader.ClearLoadedMaterialCache();
-		CurrentWorld.Release();
+		m_MeshLoader.ClearCache();
+		m_ImageLoader.ClearCache();
+		m_MaterialLoader.ClearLoadedMaterialCache();
+		m_CurrentWorld.Release();
 
-		WorldRegistry.reset();
-		AudioEngine.reset();
-		LowLevelRenderer.reset();
+		m_WorldRegistry.reset();
+		m_AudioEngine.reset();
+		m_LowLevelRenderer.reset();
 		KEPLER_INFO(LogApp, "Finishing application termination");
 	}
 
@@ -97,92 +97,83 @@ namespace ke
 		InitApplicationModules();
 
 		// Create the world
-		CurrentWorld = WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
-
-		TWorldTransform Transform;
+		m_CurrentWorld = m_WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
 
 		// Begin main loop
-		TTimer MainTimer{};
-		GGlobalTimer = &MainTimer;
-		float DisplayInfoTime = 0.0f;
+		TTimer mainTimer{};
+		GGlobalTimer = &mainTimer;
+		float displayInfoTime = 0.0f;
 
-		auto MainCamera = TEntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
-		MainCamera->SetLocation(float3(0.0f, -3.0f, 1));
-		MainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
+		auto mainCamera = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
+		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
+		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
-		auto MeshSections = MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
-		i32 X = 0;
-		i32 Y = 0;
+		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
+		i32 x = 0;
+		i32 y = 0;
 		for (i32 idx = 0; idx < 100; ++idx)
 		{
-			if (X > 10)
+			if (x > 10)
 			{
-				X = 0;
-				Y++;
-			} 
+				x = 0;
+				y++;
+			}
 
-			auto Entity = TEntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
-			Entity.AddComponent<TStaticMeshComponent>(MeshSections);
-			Entity.AddComponent<TMaterialComponent>(MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-			Entity->SetScale(float3(3.0f));
-			Entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
-			Entity->SetLocation(float3(X, Y, 0.0f));
+			auto entity = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
+			entity.AddComponent<TStaticMeshComponent>(mesh);
+			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+			entity->SetScale(float3(3.0f));
+			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
+			entity->SetLocation(float3(x, y, 0.0f));
 
-			X++;
+			x++;
 		}
 
-		constexpr float3 Vec(7.0f, 1.0f, 0.0f);
-		constexpr float4 Vec1(0.0f, 0.0f, 0.0f, 1.0f);
-		float3 Result = glm::normalize(Vec * float3(Vec1) * 15.0f);
-
-		if (TPlatform* Platform = TPlatform::Get())
+		if (TPlatform* pPlatform = TPlatform::Get())
 		{
-			Platform->RegisterPlatformEventListener(this);
-			float PositionX = 0.0f;
+			pPlatform->RegisterPlatformEventListener(this);
+			float posX = 0.0f;
 #ifdef ENABLE_EDITOR
-			Editor->SetEditedWorld(CurrentWorld);
+			m_Editor->SetEditedWorld(m_CurrentWorld);
 #endif
 
-			while (Platform->HasActiveMainWindow())
+			while (pPlatform->HasActiveMainWindow())
 			{
 				KEPLER_PROFILE_FRAME("GameLoop");
-				MainTimer.Begin();
-				Platform->Update();
+				mainTimer.Begin();
+				pPlatform->Update();
 
-				if (!Platform->IsMainWindowMinimized() && Platform->HasActiveMainWindow())
+				if (!pPlatform->IsMainWindowMinimized() && pPlatform->HasActiveMainWindow())
 				{
-					// Update game state
-					// PositionX += GGlobalTimer->Delta();
-
 #if ENABLE_EDITOR
-					const float2 ViewportSize = Editor->GetViewportSize(EViewportIndex::Viewport1);
+					const float2 vpSize = m_Editor->GetViewportSize(EViewportIndex::Viewport1);
 #else
-					const float2 ViewportSize = float2(MainWindow->GetWidth(), MainWindow->GetHeight());
+					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
-					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
-					ModuleStack.OnUpdate(GGlobalTimer->Delta());
+					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
 
 					// Render the frame
 					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
 					// This is a subject to consider though
-					auto RenderTask = TRenderThread::Submit([&, this]
+					auto renderTask = TRenderThread::Submit([&, this]
 						{
-							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(CurrentWorld, LowLevelRenderer);
-							Renderer->Render({ 0, 0, (u32)ViewportSize.x, (u32)ViewportSize.y });
+							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(m_CurrentWorld, m_LowLevelRenderer);
+							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 #ifdef ENABLE_EDITOR
-					Await(RenderTask);
+					Await(renderTask);
 
-					Editor->BeginGUIPass();
-					Editor->DrawEditor();
-					ModuleStack.OnRenderGUI();
-					Editor->EndGUIPass();
+					m_Editor->BeginGUIPass();
+					m_Editor->DrawEditor();
+					m_ModuleStack.OnRenderGUI();
+					m_Editor->EndGUIPass();
 #else
-					(void)RenderTask;
+					(void)renderTask;
 #endif
-					LowLevelRenderer->PresentAll();
-					
-					if (Platform->IsMainWindowUnfocused())
+					m_LowLevelRenderer->PresentAll();
+
+					if (pPlatform->IsMainWindowUnfocused())
 					{
 						using namespace std::chrono_literals;
 						std::this_thread::sleep_for(20ms);
@@ -194,18 +185,17 @@ namespace ke
 					std::this_thread::sleep_for(10ms);
 				}
 
-				MainTimer.End();
+				mainTimer.End();
 
 #ifdef ENABLE_DEBUG
-				if (Platform->HasActiveMainWindow())
+				if (pPlatform->HasActiveMainWindow())
 				{
-					DisplayInfoTime += MainTimer.Delta();
-					if (DisplayInfoTime >= 1.0f)
+					displayInfoTime += mainTimer.Delta();
+					if (displayInfoTime >= 1.0f)
 					{
-						DisplayInfoTime = 0;
-						MainWindow->SetTitle(fmt::format("{} <{}>", MainWindow->GetName(), 1.0f / MainTimer.Delta()));
+						displayInfoTime = 0;
+						m_MainWindow->SetTitle(fmt::format("{} <{}>", m_MainWindow->GetName(), 1.0f / mainTimer.Delta()));
 					}
-					// KEPLER_TRACE(LogApp, "Loop time: {}", 1.0f / MainTimer.Delta());
 				}
 #endif
 			}
@@ -214,16 +204,16 @@ namespace ke
 		TerminateModuleStack();
 	}
 
-	void TApplication::OnPlatformEvent(const TPlatformEventBase& Event)
+	void TApplication::OnPlatformEvent(const TPlatformEventBase& event)
 	{
-		TPlatformEventDispatcher Dispatcher{ Event };
-		Dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
-		Dispatcher.Dispatch(this, &TApplication::OnWindowResized);
-		Dispatcher.Dispatch(this, &TApplication::OnKeyDown);
+		TPlatformEventDispatcher dispatcher{ event };
+		dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
+		dispatcher.Dispatch(this, &TApplication::OnWindowResized);
+		dispatcher.Dispatch(this, &TApplication::OnKeyDown);
 
-		if (!Event.Handled)
+		if (!event.Handled)
 		{
-			ModuleStack.HandlePlatformEvent(Event);
+			m_ModuleStack.HandlePlatformEvent(event);
 		}
 	}
 
@@ -232,64 +222,48 @@ namespace ke
 		// Initialize engine modules
 		// ...
 
-		ChildSetupModuleStack(ModuleStack);
+		ChildSetupModuleStack(m_ModuleStack);
 
 #ifdef ENABLE_EDITOR
-		Editor = MakeRef(New<TEditorModule>(MainWindow));
-		ModuleStack.PushModule(Editor, EModulePushStrategy::Overlay);
-		TEditorElements::SetMainWindow(MainWindow);
+		m_Editor = MakeRef(New<TEditorModule>(m_MainWindow));
+		m_ModuleStack.PushModule(m_Editor, EModulePushStrategy::Overlay);
+		TEditorElements::SetMainWindow(m_MainWindow);
 #endif
 
-		ModuleStack.Init();
+		m_ModuleStack.Init();
 	}
 
 	void TApplication::TerminateModuleStack()
 	{
 #ifdef ENABLE_EDITOR
-		Editor.Release();
+		m_Editor.Release();
 #endif
-		ModuleStack.Terminate();
-		ModuleStack.Clear();
+		m_ModuleStack.Terminate();
+		m_ModuleStack.Clear();
 	}
 
-	bool TApplication::OnWindowClosed(const TWindowClosedEvent& Event)
+	bool TApplication::OnWindowClosed(const TWindowClosedEvent& event)
 	{
-		if (LowLevelRenderer)
+		if (m_LowLevelRenderer)
 		{
-			LowLevelRenderer->DestroyRenderStateForWindow(Event.Window);
+			m_LowLevelRenderer->DestroyRenderStateForWindow(event.Window);
 			return true;
 		}
 		return false;
 	}
 
-	bool TApplication::OnWindowResized(const TWindowSizeEvent& Event)
+	bool TApplication::OnWindowResized(const TWindowSizeEvent& event)
 	{
-		if (LowLevelRenderer)
+		if (m_LowLevelRenderer)
 		{
-			LowLevelRenderer->OnWindowResized(Event.Window);
+			m_LowLevelRenderer->OnWindowResized(event.Window);
 			return true;
 		}
 		return false;
 	}
 
-	bool TApplication::OnKeyDown(const TKeyDownEvent& Event)
+	bool TApplication::OnKeyDown(const TKeyDownEvent& event)
 	{
-		/*
-		if (Event.Key == EKeyCode::Space)
-		{
-			TRef<TSound> Sound = AudioEngine->GetOrLoadSound("Game://Coin.wav");
-			Sound->Play();
-		}
-
-		if (Event.Key == EKeyCode::Escape)
-			AudioEngine->Play("Game://cool.flac", ESoundCreateFlags::Streamed);
-
-		if (Event.Key == EKeyCode::F)
-			AudioEngine->Play("Game://prog3.mp3", ESoundCreateFlags::Streamed);
-
-		if (Event.Key == EKeyCode::Z)
-			AudioEngine->UnloadPlaybackCache(true);
-			*/
 		return false;
 	}
 }

@@ -10,63 +10,62 @@ namespace ke
 		Instance = this;
 	}
 
-	void TVirtualFileSystem::RegisterVirtualPathAlias(const TString& Name, const TString& Path)
+	void TVirtualFileSystem::RegisterVirtualPathAlias(const TString& name, const TString& path)
 	{
-		CHECK(!Name.starts_with(' '));
-		CHECK(!Path.starts_with(' '));
-		CHECK(!PathAliases.Contains(Name));
+		CHECK(!name.starts_with(' '));
+		CHECK(!path.starts_with(' '));
+		CHECK(!m_Aliases.Contains(name));
 
-		TString NewPath = std::filesystem::relative(Path, GetCurrentWorkingDirectory()).string();
-		std::replace(NewPath.begin(), NewPath.end(), '\\', '/');
-		
-		PathAliases.Insert(Name, NewPath);
+		TString newPath = std::filesystem::relative(path, GetCurrentWorkingDirectory()).string();
+		std::replace(newPath.begin(), newPath.end(), '\\', '/');
+		m_Aliases.Insert(name, newPath);
 	}
 
-	bool TVirtualFileSystem::ResolvePath(const TString& PathToResolve, TString& OutPath)
+	bool TVirtualFileSystem::ResolvePath(const TString& path, TString& outPath)
 	{
-		CHECK(!PathToResolve.starts_with(' '));
-		CHECK(!PathToResolve.starts_with('/'));
-		CHECK(!TPath{ PathToResolve }.is_absolute());
-		CHECK(PathToResolve.find(PathSeparationToken) != TString::npos);
+		CHECK(!path.starts_with(' '));
+		CHECK(!path.starts_with('/'));
+		CHECK(!TPath{ path }.is_absolute());
+		CHECK(path.find(m_VFSToken) != TString::npos);
 
-		TString NewPath = PathToResolve;
-		usize FirstSlash = PathToResolve.find_first_of(PathSeparationToken);
-		if (FirstSlash != std::string::npos)
+		TString newPath = path;
+		usize firstSlashIndex = path.find_first_of(m_VFSToken);
+		if (firstSlashIndex != std::string::npos)
 		{
-			TString Alias = PathToResolve.substr(0, FirstSlash);
-			if (PathAliases.Contains(Alias))
+			TString alias = path.substr(0, firstSlashIndex);
+			if (m_Aliases.Contains(alias))
 			{
-				NewPath.replace(0, FirstSlash + strlen(PathSeparationToken), PathAliases[Alias] + '/');
-				OutPath = std::move(NewPath);
+				newPath.replace(0, firstSlashIndex + strlen(m_VFSToken), m_Aliases[alias] + '/');
+				outPath = std::move(newPath);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	void VFSRegisterPathAlias(const TString& Name, const TString& Path)
+	void VFSRegisterPathAlias(const TString& name, const TString& path)
 	{
-		TVirtualFileSystem::Get()->RegisterVirtualPathAlias(Name, Path);
+		TVirtualFileSystem::Get()->RegisterVirtualPathAlias(name, path);
 	}
 
-	TString VFSResolvePath(const TString& Path)
+	TString VFSResolvePath(const TString& path)
 	{
-		TString OutString;
-		CHECK(TVirtualFileSystem::Get()->ResolvePath(Path, OutString));
-		return OutString;
+		TString outStr;
+		CHECK(TVirtualFileSystem::Get()->ResolvePath(path, outStr));
+		return outStr;
 	}
 
-	TString VFSGetParentPath(const TString& Path)
+	TString VFSGetParentPath(const TString& path)
 	{
-		if (Path.empty())
+		if (path.empty())
 		{
 			return {};
 		}
 
-		TPath Handle = Path;
-		if (Handle.has_parent_path())
+		TPath handle = path;
+		if (handle.has_parent_path())
 		{
-			return Handle.parent_path().string();
+			return handle.parent_path().string();
 		}
 		return {};
 	}

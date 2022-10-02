@@ -13,12 +13,12 @@ namespace ke
 	class TModuleStack
 	{
 	public:
-		void PushModule(TRef<TApplicationModule> Module, EModulePushStrategy Strategy = EModulePushStrategy::Normal);
-		void RemoveModule(TRef<TApplicationModule> Module);
+		void PushModule(TRef<TApplicationModule> pModule, EModulePushStrategy strategy = EModulePushStrategy::Normal);
+		void RemoveModule(TRef<TApplicationModule> pModule);
 		void Clear();
-		void HandlePlatformEvent(const TPlatformEventBase& Event);
+		void HandlePlatformEvent(const TPlatformEventBase& event);
 
-		void OnUpdate(float DeltaTime);
+		void OnUpdate(float deltaTime);
 		void OnRender();
 		void OnRenderGUI();
 
@@ -26,6 +26,6 @@ namespace ke
 		void Terminate();
 
 	private:
-		TDynArray<TRef<TApplicationModule>> Modules{};
+		TDynArray<TRef<TApplicationModule>> m_Modules{};
 	};
 }

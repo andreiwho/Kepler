@@ -28,45 +28,45 @@ namespace ke
 		static TLog* Get() { return CHECKED(Instance); }
 
 		template<typename TChannel, typename ... ARGS>
-		static void Trace(fmt::format_string<ARGS...> Format, ARGS&&... Args)
+		static void Trace(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->trace(Format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->trace(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
-		static void Info(fmt::format_string<ARGS...> Format, ARGS&&... Args)
+		static void Info(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->info(Format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->info(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
-		static void Warn(fmt::format_string<ARGS...> Format, ARGS&&... Args)
+		static void Warn(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->warn(Format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->warn(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
-		static void Error(fmt::format_string<ARGS...> Format, ARGS&&... Args)
+		static void Error(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->error(Format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->error(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
-		static void Critical(fmt::format_string<ARGS...> Format, ARGS&&... Args)
+		static void Critical(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->critical(Format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->critical(format, std::forward<ARGS>(Args)...);
 		}
 
 	private:
-		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& Name);
-		std::shared_ptr<spdlog::logger> CreateLogger(const TString& Name);
-		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger);
+		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& name);
+		std::shared_ptr<spdlog::logger> CreateLogger(const TString& name);
+		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> logger);
 
-		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> Loggers;
-		std::mutex LoggerCreationFence;
+		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> m_Loggers;
+		std::mutex m_LoggerCreationFence;
 
 #ifdef ENABLE_EDITOR
-		std::shared_ptr<class TEditorLogSink> EditorSink;
+		std::shared_ptr<class TEditorLogSink> m_EditorSink;
 #endif
 	};
 }

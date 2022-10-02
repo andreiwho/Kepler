@@ -12,8 +12,8 @@ namespace ke
 		float Delta() const;
 		
 	private:
-		double StartTime{};
-		float DeltaTime{};
+		double m_StartTime{};
+		float m_DeltaTime{};
 	};
 
 	extern TTimer* GGlobalTimer;
