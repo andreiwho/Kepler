@@ -4,13 +4,15 @@
             "Shader": "EngineShaders://DefaultUnlit.hlsl",
             "PrimitiveTopology": "Triangles",
             "Rasterizer": {
+                "bDisabled": false,
                 "FillMode": "Solid",
                 "CullMode": "Back",
                 "bEnableScissor": false
             },
             "DepthStencil": {
                 "bDepthEnable": true,
-                "DepthAccess": "ReadWrite",
+                "DepthAccess": "Read",
+                "DepthFunc": "LEqual",
                 "bStencilEnable": false,
                 "StencilAccess": "None"
             }

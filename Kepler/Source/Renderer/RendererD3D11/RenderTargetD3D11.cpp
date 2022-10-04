@@ -41,7 +41,7 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer) 
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
 		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
@@ -52,6 +52,11 @@ namespace ke
 		CHECK(Texture);
 
 		CD3D11_DEPTH_STENCIL_VIEW_DESC Desc(Texture, D3D11_DSV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, ArrayLayer, 1);
+		if (bReadOnly)
+		{
+			Desc.Flags = D3D11_DSV_FLAG::D3D11_DSV_READ_ONLY_DEPTH;
+		}
+
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{

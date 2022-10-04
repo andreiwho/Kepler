@@ -138,9 +138,28 @@ namespace ke
 				TRef<TImage2D> depthImage = TImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
 				depthTarget = DepthStencilTarget2D::New(depthImage);
 				m_DepthTargets[name] = depthTarget;
+
+				if (m_ReadOnlyDepthTargets.Contains(name))
+				{
+					m_ReadOnlyDepthTargets.Remove(m_ReadOnlyDepthTargets.FindIterator(name));
+				}
 			}
 		}
 		return depthTarget;
+	}
+
+	TRef<DepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
+	{
+		if (m_ReadOnlyDepthTargets.Contains(name))
+		{
+			return m_ReadOnlyDepthTargets[name];
+		}
+
+		CHECK(m_DepthTargets.Contains(name));
+		TRef<TImage2D> pTargetImage = CHECKED(m_DepthTargets[name]->GetImage());
+		TRef<DepthStencilTarget2D> pOutTarget = DepthStencilTarget2D::NewReadOnly(pTargetImage);
+		m_ReadOnlyDepthTargets[name] = pOutTarget;
+		return pOutTarget;
 	}
 
 }

@@ -44,6 +44,10 @@ namespace ke
 		CD3D11_RASTERIZER_DESC Desc(D3D11_DEFAULT);
 		Desc.ScissorEnable = Config.Rasterizer.bEnableScissor;
 
+		if (Config.Rasterizer.bRasterDisabled)
+		{
+			return;
+		}
 		Desc.FillMode = std::invoke(
 			[&Config]
 			{
@@ -93,6 +97,32 @@ namespace ke
 					return D3D11_DEPTH_WRITE_MASK_ZERO;
 				}
 			});
+
+		Desc.DepthFunc = std::invoke(
+			[&Config]
+			{
+				switch (Config.DepthStencil.DepthFunc)
+				{
+				case EDepthComparissonMode::None:
+					return D3D11_COMPARISON_NEVER;
+				case EDepthComparissonMode::Less:
+					return D3D11_COMPARISON_LESS;
+				case EDepthComparissonMode::LEqual:
+					return D3D11_COMPARISON_LESS_EQUAL;
+				case EDepthComparissonMode::Greater:
+					return D3D11_COMPARISON_GREATER;
+				case EDepthComparissonMode::GEqual:
+					return D3D11_COMPARISON_GREATER_EQUAL;
+				case EDepthComparissonMode::Equal:
+					return D3D11_COMPARISON_EQUAL;
+				case EDepthComparissonMode::Always:
+					return D3D11_COMPARISON_ALWAYS;
+				default:
+					break;
+				}
+				return D3D11_COMPARISON_LESS;
+			});
+
 		Desc.StencilEnable = Config.DepthStencil.bStencilEnable;
 		Desc.FrontFace = std::invoke([&Config]
 			{

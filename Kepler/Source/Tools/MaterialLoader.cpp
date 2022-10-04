@@ -19,6 +19,16 @@ namespace ke
 
 	namespace
 	{
+		TString CaseInsensitive(const TString& string)
+		{
+			TString outString = string;
+			for (auto& ch : outString)
+			{
+				ch = std::tolower(ch);
+			}
+			return outString;
+		}
+
 		//////////////////////////////////////////////////////////////////////////
 		EPipelineCategory ParsePipelineCategory(const rapidjson::Value& Object)
 		{
@@ -74,6 +84,41 @@ namespace ke
 			if (TString("Wireframe") == String)
 			{
 				return EPrimitiveFillMode::Wireframe;
+			}
+			CRASH();
+		}
+
+		EDepthComparissonMode ParseDepthMode(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto string = Object.GetString();
+			if (TString("None") == string)
+			{
+				return EDepthComparissonMode::None;
+			}
+			if (TString("Less") == string)
+			{
+				return EDepthComparissonMode::Less;
+			}
+			if (TString("LEqual") == string)
+			{
+				return EDepthComparissonMode::LEqual;
+			}
+			if (TString("Equal") == string)
+			{
+				return EDepthComparissonMode::Equal;
+			}
+			if (TString("Greater") == string)
+			{
+				return EDepthComparissonMode::Greater;
+			}
+			if (TString("GEqual") == string)
+			{
+				return EDepthComparissonMode::GEqual;
+			}
+			if (TString("Always") == string)
+			{
+				return EDepthComparissonMode::Always;
 			}
 			CRASH();
 		}
@@ -150,6 +195,12 @@ namespace ke
 			if (Pipeline.HasMember("Rasterizer"))
 			{
 				const auto& Rasterizer = Pipeline["Rasterizer"];
+				if (Rasterizer.HasMember("bDisabled"))
+				{
+					const auto& Disabled = Rasterizer["bDisabled"];
+					CHECK(Disabled.IsBool());
+					PipelineConfig.Rasterizer.bRasterDisabled = Disabled.GetBool();
+				}
 				if (Rasterizer.HasMember("FillMode"))
 				{
 					PipelineConfig.Rasterizer.FillMode = ParseFillMode(Rasterizer["FillMode"]);
@@ -184,6 +235,10 @@ namespace ke
 				if (DepthStencil.HasMember("StencilAccess"))
 				{
 					PipelineConfig.DepthStencil.StencilAccess = ParseAccessFlags<EStencilBufferAccess>(DepthStencil["StencilAccess"]);
+				}
+				if (DepthStencil.HasMember("DepthFunc"))
+				{
+					PipelineConfig.DepthStencil.DepthFunc = ParseDepthMode(DepthStencil["DepthFunc"]);
 				}
 			}
 			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;

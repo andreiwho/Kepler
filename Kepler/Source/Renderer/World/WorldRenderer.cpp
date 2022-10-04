@@ -5,6 +5,8 @@
 #include "World/Game/Components/StaticMeshComponent.h"
 #include "World/Camera/CameraComponent.h"
 #include "World/Game/Components/TransformComponent.h"
+#include "../HLSLShaderCompiler.h"
+#include "../Pipelines/GraphicsPipeline.h"
 
 namespace ke
 {
@@ -15,9 +17,14 @@ namespace ke
 		: m_CurrentWorld(pWorld)
 		, m_LLR(TLowLevelRenderer::Get())
 	{
-		if (!StaticState.bInitialized)
+		if (!StaticState) [[unlikely]]
 		{
-			StaticState.Init();
+			StaticState = ke::New<TStaticState>();
+		}
+
+		if (!StaticState->bInitialized) [[unlikely]]
+		{
+			StaticState->Init();
 		}
 	}
 
@@ -27,6 +34,20 @@ namespace ke
 		TRef<TPipelineParamMapping> RS_CameraParams = TPipelineParamMapping::New();
 		RS_CameraParams->AddParam("ViewProjection", offsetof(RS_CameraBufferStruct, ViewProjection), sizeof(RS_CameraBufferStruct::ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
+
+		// Setup pipeline
+		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
+			->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
+
+		TGraphicsPipelineConfiguration config{};
+		config.VertexInput.Topology = EPrimitiveTopology::TriangleList;
+		config.VertexInput.VertexLayout = prePassShader->GetReflection()->VertexLayout;
+		config.ParamMapping = prePassShader->GetReflection()->ParamMapping;
+		config.DepthStencil.bDepthEnable = true;
+		config.DepthStencil.DepthAccess = EDepthBufferAccess::Write;
+		config.Rasterizer.bRasterDisabled = true;
+
+		StaticState->PrePassPipeline = MakeRef(ke::New<TGraphicsPipeline>(prePassShader, config));
 		bInitialized = true;
 	}
 
@@ -36,8 +57,6 @@ namespace ke
 		{
 			return;
 		}
-
-		RS_CameraBuffer = nullptr;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -64,8 +83,16 @@ namespace ke
 		}
 		pImmCtx->EndDebugEvent();
 
+		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);
+		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
+
+		// Bind static camera
+		StaticState->RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(StaticState->RS_CameraBuffer, RS_Camera);
+
 		// Collect renderable objects
 		// ...
+		PrePass(pImmCtx);
 
 		// Draw meshes
 		MeshPass(pImmCtx);
@@ -74,25 +101,10 @@ namespace ke
 		FlushPass(pImmCtx);
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	TRef<TWorldRenderer> TWorldRenderer::New(TRef<TGameWorld> pWorld)
+	void TWorldRenderer::UpdateRendererMainThread(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
-		return MakeRef(ke::New<TWorldRenderer>(pWorld));
-	}
-
-	void TWorldRenderer::ClearStaticState()
-	{
-
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx)
-	{
-		KEPLER_PROFILE_SCOPE();
-		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 		auto camera = m_CurrentWorld->GetMainCamera();
-
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
 		{
 			auto& cameraComp = m_CurrentWorld->GetComponent<CameraComponent>(camera);
@@ -106,7 +118,7 @@ namespace ke
 
 					// Write it here, though there may be a better place for it
 					const auto viewProj = glm::transpose(mathCamera.GenerateViewProjectionMatrix());
-					StaticState.RS_CameraBuffer->Write("ViewProjection", &viewProj);
+					StaticState->RS_CameraBuffer->Write("ViewProjection", &viewProj);
 				}
 				else
 				{
@@ -114,6 +126,33 @@ namespace ke
 				}
 			}
 		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	TRef<TWorldRenderer> TWorldRenderer::New(TRef<TGameWorld> pWorld)
+	{
+		KEPLER_PROFILE_SCOPE();
+		return MakeRef(ke::New<TWorldRenderer>(pWorld));
+	}
+
+	void TWorldRenderer::ClearStaticState()
+	{
+		if (StaticState)
+		{
+			StaticState->Clear();
+
+			// MSVC makes fun of me, so 'inlining' the ke::Delete function here
+			StaticState->~TStaticState();
+			TMalloc* Alloc = TMalloc::Get();
+			Alloc->Free(StaticState);
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void TWorldRenderer::RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx)
+	{
+		KEPLER_PROFILE_SCOPE();
+		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 
 		m_CurrentWorld->GetComponentView<TMaterialComponent>().each(
 			[this, pImmCtx](auto, TMaterialComponent& component)
@@ -127,6 +166,36 @@ namespace ke
 	void TWorldRenderer::CollectRenderableViews()
 	{
 		KEPLER_PROFILE_SCOPE();
+	}
+
+	void TWorldRenderer::PrePass(TRef<GraphicsCommandListImmediate> pImmCtx)
+	{
+		KEPLER_PROFILE_SCOPE();
+		pImmCtx->BeginDebugEvent("PrePass");
+
+		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth",
+			m_CurrentViewport.Width,
+			m_CurrentViewport.Height,
+			EFormat::D24_UNORM_S8_UINT,
+			false);
+
+		pImmCtx->StartDrawingToRenderTargets(nullptr, pDepthTarget);
+		pImmCtx->ClearDepthTarget(pDepthTarget, true);
+
+		pImmCtx->BindPipeline(StaticState->PrePassPipeline);
+		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
+			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
+			{
+				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+				for (const auto& Section : SM.GetStaticMesh()->GetSections())
+				{
+					pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
+					pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
+					pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+				}
+			}
+		);
+		pImmCtx->EndDebugEvent();
 	}
 
 	namespace
@@ -157,11 +226,7 @@ namespace ke
 			TLowLevelRenderer::m_SwapChainFrameCount);
 		TRef<RenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
-		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("MeshPassDepth",
-			m_CurrentViewport.Width,
-			m_CurrentViewport.Height,
-			EFormat::D24_UNORM_S8_UINT,
-			false);
+		auto pDepthTarget = TTargetRegistry::Get()->GetReadOnlyDepthTarget("PrePassDepth");
 
 		// Configure render target which will contain entity ids
 		auto pIdTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
@@ -172,18 +237,11 @@ namespace ke
 			1,
 			true);
 		auto pIdTarget = pIdTargetGroup->GetRenderTargetAtArrayLayer(0);
-		
-		// Bind static camera
-		StaticState.RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
-		pImmCtx->BindParamBuffers(StaticState.RS_CameraBuffer, RS_Camera);
 
 		// Start drawing other state
 		pImmCtx->StartDrawingToRenderTargets({ pCurTarget, pIdTarget }, pDepthTarget);
 		pImmCtx->ClearRenderTarget(pCurTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
 		pImmCtx->ClearRenderTarget(pIdTarget, float4(-1.0f));
-		pImmCtx->ClearDepthTarget(pDepthTarget, true);
-		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);
-		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
 
 		// For now just draw all the meshes with no pipeline sorting
 		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
@@ -245,5 +303,5 @@ namespace ke
 		pImmCtx->EndDebugEvent();
 	}
 
-	TWorldRenderer::TStaticState TWorldRenderer::StaticState;
+	TWorldRenderer::TStaticState* TWorldRenderer::StaticState = nullptr;
 }

@@ -28,7 +28,7 @@ namespace ke
 	class DepthStencilTarget2D : public TEnableRefFromThis<DepthStencilTarget2D>
 	{
 	protected:
-		DepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
+		DepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false);
 		
 	public:
 		TRef<TImage2D> GetImage() const { return m_Image; }
@@ -37,6 +37,7 @@ namespace ke
 		inline EFormat GetFormat() const { return m_Image->GetFormat(); }
 
 		static TRef<DepthStencilTarget2D> New(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
+		static TRef<DepthStencilTarget2D> NewReadOnly(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
 
 	protected:
 		TRef<TImage2D> m_Image{};

@@ -23,6 +23,7 @@ namespace ke
 		float3 GetForwardVector() const;
 		float3 GetRightVector() const;
 		float3 GetUpVector() const;
+
 	private:
 		TWorldTransform Transform;
 	};

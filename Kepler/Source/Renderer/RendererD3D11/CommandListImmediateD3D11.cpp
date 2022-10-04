@@ -149,19 +149,19 @@ namespace ke
 		// TODO: Make handling for HLSL Class Instances (or should we?)
 		if (MyShader)
 		{
-			if (MyShader->VertexShader && BoundVertexShader != MyShader->VertexShader)
+			if (BoundVertexShader != MyShader->VertexShader)
 			{
 				BoundVertexShader = MyShader->VertexShader;
 				Context->VSSetShader(BoundVertexShader, nullptr, 0);
 			}
 
-			if (MyShader->PixelShader && BoundPixelShader != MyShader->PixelShader)
+			if (BoundPixelShader != MyShader->PixelShader)
 			{
 				BoundPixelShader = MyShader->PixelShader;
 				Context->PSSetShader(BoundPixelShader, nullptr, 0);
 			}
 
-			if (MyShader->ComputeShader && BoundComputeShader != MyShader->ComputeShader)
+			if (BoundComputeShader != MyShader->ComputeShader)
 			{
 				BoundComputeShader = MyShader->ComputeShader;
 				Context->CSSetShader(BoundComputeShader, nullptr, 0);
@@ -271,26 +271,26 @@ namespace ke
 	void GraphicsCommandListImmediateD3D11::StartDrawingToRenderTargets(TRef<RenderTarget2D> RenderTarget, TRef<DepthStencilTarget2D> DepthStencil)
 	{
 		CHECK(IsRenderThread());
-		if (!RenderTarget)
+		ID3D11RenderTargetView* View = nullptr;
+		if (RenderTarget)
 		{
-			KEPLER_WARNING(LogImmediateContext, "Passed null to TCommandListImmediate::StartDrawingToRenderTargets");
-			return;
-		}
-
-		TRef<RenderTarget2D_D3D11> MyTarget = RefCast<RenderTarget2D_D3D11>(RenderTarget);
-		if (MyTarget)
-		{
-			ID3D11RenderTargetView* View = MyTarget->GetView();
-			ID3D11DepthStencilView* DepthStencilView = nullptr;
-			if (View)
+			TRef<RenderTarget2D_D3D11> MyTarget = RefCast<RenderTarget2D_D3D11>(RenderTarget);
+			if (MyTarget)
 			{
-				if (auto MyDepthStencil = RefCast<DepthStencilTarget2D_D3D11>(DepthStencil))
-				{
-					DepthStencilView = MyDepthStencil->GetView();
-				}
-				Context->OMSetRenderTargets(1, &View, DepthStencilView);
+				View = MyTarget->GetView();
 			}
 		}
+
+		ID3D11DepthStencilView* DepthStencilView = nullptr;
+		if (DepthStencil)
+		{
+			if (auto MyDepthStencil = RefCast<DepthStencilTarget2D_D3D11>(DepthStencil))
+			{
+				DepthStencilView = MyDepthStencil->GetView();
+			}
+		}
+
+		Context->OMSetRenderTargets(1, &View, DepthStencilView);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

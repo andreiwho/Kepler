@@ -50,8 +50,15 @@ namespace ke
 		// Name is required, Width, Height, Format are important only for the first time.
 		TRef<DepthStencilTarget2D> GetDepthTarget(const TString& name, u32 width = UINT32_MAX, u32 height = UINT32_MAX, EFormat format = EFormat::Unknown, bool bSampled = false);
 
+		// Returns a depth target with a specified name, size and format
+		// - If size is different from the actual size, the depth target is recreated and returned
+		// - If no depth target exists with this name, the new one gets created
+		// Name is required, Width, Height, Format are important only for the first time.
+		TRef<DepthStencilTarget2D> GetReadOnlyDepthTarget(const TString& name);
+
 	private:
 		Map<TString, TRef<TRenderTargetGroup>> m_RenderTargets;
 		Map<TString, TRef<DepthStencilTarget2D>> m_DepthTargets;
+		Map<TString, TRef<DepthStencilTarget2D>> m_ReadOnlyDepthTargets;
 	};
 }

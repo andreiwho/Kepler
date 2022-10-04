@@ -38,6 +38,7 @@ namespace ke
 			EPrimitiveFillMode FillMode = EPrimitiveFillMode::Solid;
 			EPrimitiveCullMode CullMode = EPrimitiveCullMode::Back;
 			bool bEnableScissor = false;
+			bool bRasterDisabled = false;
 		} Rasterizer;
 
 		struct
@@ -46,6 +47,7 @@ namespace ke
 			EDepthBufferAccess DepthAccess = EDepthBufferAccess::Write;
 			bool bStencilEnable = false;
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
+			EDepthComparissonMode DepthFunc = EDepthComparissonMode::Less;
 		} DepthStencil;
 		TRef<TPipelineParamMapping> ParamMapping;
 	};

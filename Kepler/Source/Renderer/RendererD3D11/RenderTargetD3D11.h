@@ -21,7 +21,7 @@ namespace ke
 	class DepthStencilTarget2D_D3D11 : public DepthStencilTarget2D
 	{
 	public:
-		DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
+		DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false);
 		~DepthStencilTarget2D_D3D11();
 
 		inline ID3D11DepthStencilView* GetView() const { return m_View; }

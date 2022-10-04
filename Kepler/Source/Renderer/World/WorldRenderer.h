@@ -26,6 +26,7 @@ namespace ke
 		~TWorldRenderer();
 		
 		void Render(TViewport2D ViewportSize);
+		void UpdateRendererMainThread(float deltaTime);
 
 		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
 
@@ -33,6 +34,7 @@ namespace ke
 	private:
 		void RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
+		void PrePass(TRef<GraphicsCommandListImmediate> pImmCtx);
 		void MeshPass(TRef<GraphicsCommandListImmediate> pImmCtx);
 		void FlushPass(TRef<GraphicsCommandListImmediate> pImmCtx);
 
@@ -48,6 +50,7 @@ namespace ke
 
 			bool bInitialized = false;
 			TRef<TParamBuffer> RS_CameraBuffer;
+			TRef<TGraphicsPipeline> PrePassPipeline;
 		};
 
 		struct RS_CameraBufferStruct
@@ -55,6 +58,6 @@ namespace ke
 			matrix4x4 ViewProjection;
 		};
 
-		static TStaticState StaticState;
+		static TStaticState* StaticState;
 	};
 }

@@ -111,9 +111,9 @@ namespace ke
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
-		for (i32 idx = 0; idx < 3600; ++idx)
+		for (i32 idx = 0; idx < 10; ++idx)
 		{
-			if (x > 60)
+			if (x > 3)
 			{
 				x = 0;
 				y++;
@@ -150,15 +150,19 @@ namespace ke
 #else
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
-					// Start rendering the frame
+					// Initialize the renderer
+					TRef<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
+					Renderer->UpdateRendererMainThread(mainTimer.Delta());
+					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					
+					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
-							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(m_CurrentWorld);
 							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
-
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
+
+
 
 #ifdef ENABLE_EDITOR
 					//Await(renderTask);

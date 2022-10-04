@@ -46,7 +46,7 @@ namespace ke
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(TWindow* Window) override;
 		virtual TRef<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
 		virtual TRef<RenderTarget2D> CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
-		virtual TRef<DepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
+		virtual TRef<DepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false) override;
 		virtual TRef<TTextureSampler2D> CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
