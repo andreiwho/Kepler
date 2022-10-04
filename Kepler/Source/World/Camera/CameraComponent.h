@@ -4,20 +4,20 @@
 
 namespace ke
 {
-	class TCameraComponent
+	class CameraComponent
 	{
 	public:
-		TCameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);
-		~TCameraComponent();
+		CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);
+		~CameraComponent();
 
-		inline TCamera& GetCamera() { return Camera; }
-		inline const TCamera& GetCamera() const { return Camera; }
+		inline MathCamera& GetCamera() { return m_Camera; }
+		inline const MathCamera& GetCamera() const { return m_Camera; }
 
-		inline void SetRenderTargetName(const TString& NewName) { RenderTargetName = NewName; }
-		inline const TString& GetRenderTargetName() const { return RenderTargetName; }
+		inline void SetRenderTargetName(const TString& NewName) { m_RenderTargetName = NewName; }
+		inline const TString& GetRenderTargetName() const { return m_RenderTargetName; }
 
 	private:
-		TCamera Camera;
-		TString RenderTargetName{ "MeshPassTarget" };
+		MathCamera m_Camera;
+		TString m_RenderTargetName{ "MeshPassTarget" };
 	};
 }

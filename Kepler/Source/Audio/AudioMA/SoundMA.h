@@ -18,7 +18,7 @@ namespace ke
 		virtual void Stop() override;
 
 	private:
-		TDynArray<ma_sound> m_SoundBuffer;
+		Array<ma_sound> m_SoundBuffer;
 		ma_fence* m_DoneFence{nullptr};
 		u32 m_CurrentSound = 0;
 	};

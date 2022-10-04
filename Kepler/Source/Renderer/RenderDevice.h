@@ -15,7 +15,7 @@
 
 namespace ke
 {
-	class TRenderDevice : public TRefCounted
+	class TRenderDevice : public IntrusiveRefCounted
 	{
 	public:
 		virtual ~TRenderDevice() = default;
@@ -23,18 +23,18 @@ namespace ke
 		static TRef<TRenderDevice> CreateRenderDevice(ERenderAPI overrideApi = ERenderAPI::Default);
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(class TWindow* pWindow) = 0;
 
-		inline TRef<TCommandListImmediate> GetImmediateCommandList() const { return m_ImmediateCommandList; }
-		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags access, TRef<TDataBlob> pData) = 0;
-		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags access, TRef<TDataBlob> pData) = 0;
+		inline TRef<GraphicsCommandListImmediate> GetImmediateCommandList() const { return m_ImmediateCommandList; }
+		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags access, TRef<AsyncDataBlob> pData) = 0;
+		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags access, TRef<AsyncDataBlob> pData) = 0;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> params) = 0;
-		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize size, TRef<TDataBlob> pInitialData) = 0;
+		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize size, TRef<AsyncDataBlob> pInitialData) = 0;
 		virtual TRef<TImage2D> CreateImage2D(u32 width, u32 height, EFormat format, EImageUsage usage, u32 mips = 1, u32 layers = 1) = 0;
-		virtual TRef<TRenderTarget2D> CreateRenderTarget2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
-		virtual TRef<TDepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
+		virtual TRef<RenderTarget2D> CreateRenderTarget2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
+		virtual TRef<DepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
 		virtual TRef<TTextureSampler2D> CreateTextureSampler2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
 		virtual bool RT_FlushPendingDeleteResources() = 0;
 
 	protected:
-		TRef<TCommandListImmediate> m_ImmediateCommandList{};
+		TRef<GraphicsCommandListImmediate> m_ImmediateCommandList{};
 	};
 }

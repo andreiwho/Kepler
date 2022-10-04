@@ -106,7 +106,7 @@ namespace ke
 		WaitForTasksToFinish();
 		DestroyThreads();
 		m_ThreadCount = CalculateThreadCount(numThreads);
-		m_Workers = TDynArray<std::thread>(m_ThreadCount);
+		m_Workers = Array<std::thread>(m_ThreadCount);
 		m_bPaused = bWasPaused;
 		CreateThreads();
 	}

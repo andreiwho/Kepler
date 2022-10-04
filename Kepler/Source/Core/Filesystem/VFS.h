@@ -20,7 +20,7 @@ namespace ke
 	private:
 		static constexpr const char* m_VFSToken = "://";
 		TPath m_Cwd = std::filesystem::current_path();
-		TChaoticMap<TString, TString> m_Aliases;
+		Map<TString, TString> m_Aliases;
 	};
 
 	// Register a path to use it with the VFS

@@ -1,6 +1,8 @@
 #pragma once
 #include "Renderer/Elements/ParamBuffer.h"
 #include "D3D11Common.h"
+#include "Renderer/LowLevelRenderer.h"
+#include <array>
 
 namespace ke
 {
@@ -10,10 +12,11 @@ namespace ke
 		TParamBufferD3D11(TRef<TPipelineParamMapping> Params);
 		~TParamBufferD3D11();
 
-		virtual void RT_UploadToGPU(TRef<class TCommandListImmediate> pImmContext) override;
+		virtual void RT_UploadToGPU(TRef<class GraphicsCommandListImmediate> pImmContext) override;
 
-		virtual void* GetNativeHandle() const override { return Buffer; }
+		virtual void* GetNativeHandle() const override { return Buffer[TLowLevelRenderer::Get()->GetFrameIndex()]; }
+		void* GetNextFrameHandle() const { return Buffer[TLowLevelRenderer::Get()->GetNextFrameIndex()]; }
 	private:
-		ID3D11Buffer* Buffer{ nullptr };
+		std::array<ID3D11Buffer*, TLowLevelRenderer::m_SwapChainFrameCount> Buffer{ nullptr };
 	};
 }

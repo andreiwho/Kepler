@@ -24,6 +24,6 @@ namespace ke
 		static TWorldRegistry* Get() { return Instance; }
 
 	private:
-		TDynArray<TRef<TWorld>> LoadedWorlds;
+		Array<TRef<TWorld>> LoadedWorlds;
 	};
 }

@@ -7,21 +7,21 @@
 namespace ke
 {
 	template<typename TKey, typename TValue>
-	class TChaoticMap
+	class Map
 	{
 		using TMapType = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, ke::TMallocator<std::pair<const TKey, TValue>>>;
 	public:
-		TChaoticMap() = default;
-		TChaoticMap(const TChaoticMap& other) noexcept 
+		Map() = default;
+		Map(const Map& other) noexcept 
 			: m_Container(other.m_Container) {}
-		TChaoticMap& operator=(const TChaoticMap& other) noexcept
+		Map& operator=(const Map& other) noexcept
 		{
 			m_Container = other.m_Container;
 			return *this;
 		}
 
-		TChaoticMap(TChaoticMap&& other) noexcept : m_Container(std::move(other.m_Container)) {}
-		TChaoticMap& operator=(TChaoticMap&& other) noexcept
+		Map(Map&& other) noexcept : m_Container(std::move(other.m_Container)) {}
+		Map& operator=(Map&& other) noexcept
 		{
 			m_Container = std::move(other.m_Container);
 			return *this;

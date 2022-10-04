@@ -12,7 +12,7 @@ namespace ke
 		ESoundCreateFlags actualFlags = flags;
 		ma_uint32 loadFlags = 0;
 		
-		TAudioEngineMA* pEngine = (TAudioEngineMA*)TAudioEngine::Get();
+		AudioEngineMA* pEngine = (AudioEngineMA*)AudioEngine::Get();
 		u32 numMaxBuffers = pEngine->m_MaxOverlappingClips;
 
 		if (actualFlags & ESoundCreateFlags::Streamed)
@@ -56,7 +56,7 @@ namespace ke
 	{
 		KEPLER_TRACE(LogSoundMA, "Unloading audio track {}", m_Path);
 
-		TAudioEngineMA* pEngine = (TAudioEngineMA*)TAudioEngine::Get();
+		AudioEngineMA* pEngine = (AudioEngineMA*)AudioEngine::Get();
 		for (auto& sound : m_SoundBuffer)
 		{
 			ma_sound_uninit(&sound);

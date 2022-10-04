@@ -27,11 +27,11 @@ namespace ke
 			});
 	}
 
-	std::future<TDynArray<u8>> TFileUtils::ReadBinaryFileAsync(const TString& path)
+	std::future<Array<u8>> TFileUtils::ReadBinaryFileAsync(const TString& path)
 	{
 		return Async([CopiedPath = VFSResolvePath(path)]
 			{
-				TDynArray<u8> outData;
+				Array<u8> outData;
 #ifdef WIN32
 				std::ifstream stream{ CopiedPath, std::ios::ate | std::ios::binary };
 #else

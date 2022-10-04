@@ -30,7 +30,7 @@
 
 namespace ke
 {
-	TCommandLineArguments::TCommandLineArguments(TDynArray<TString> const& cmdLine)
+	TCommandLineArguments::TCommandLineArguments(Array<TString> const& cmdLine)
 	{
 		// Parse command line args
 		// Game module name must always be the first arg
@@ -52,7 +52,7 @@ namespace ke
 		}
 	}
 
-	TApplication::TApplication(const TApplicationLaunchParams& launchParams)
+	Engine::Engine(const TApplicationLaunchParams& launchParams)
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(launchParams);
@@ -63,13 +63,13 @@ namespace ke
 
 		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
-		m_AudioEngine = TAudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
+		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
 		m_WorldRegistry = MakeShared<TWorldRegistry>();
 	}
 
-	void TApplication::InitVFSAliases(const TApplicationLaunchParams& launchParams)
+	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)
 	{
 		// Initialize VFS
 		VFSRegisterPathAlias("Engine", "Kepler/Assets");
@@ -77,7 +77,7 @@ namespace ke
 		VFSRegisterPathAlias("Game", fmt::format("{}/Assets", launchParams.CommandLine.GameModuleDirectory));
 	}
 
-	TApplication::~TApplication()
+	Engine::~Engine()
 	{
 		m_MeshLoader.ClearCache();
 		m_ImageLoader.ClearCache();
@@ -90,7 +90,7 @@ namespace ke
 		KEPLER_INFO(LogApp, "Finishing application termination");
 	}
 
-	void TApplication::Run()
+	void Engine::Run()
 	{
 		KEPLER_INFO(LogApp, "Application Run called...");
 
@@ -108,12 +108,12 @@ namespace ke
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
-		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", false);
+		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
-		for (i32 idx = 0; idx < 100; ++idx)
+		for (i32 idx = 0; idx < 3600; ++idx)
 		{
-			if (x > 10)
+			if (x > 60)
 			{
 				x = 0;
 				y++;
@@ -150,19 +150,18 @@ namespace ke
 #else
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
-					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
-
-					// Render the frame
-					// We are not waiting here, because we also want the editor GUI to be drawn as well. 
-					// This is a subject to consider though
+					// Start rendering the frame
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
 							TRef<TWorldRenderer> Renderer = TWorldRenderer::New(m_CurrentWorld);
 							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
+
+					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
+
 #ifdef ENABLE_EDITOR
-					Await(renderTask);
+					//Await(renderTask);
 
 					m_Editor->BeginGUIPass();
 					m_Editor->DrawEditor();
@@ -200,16 +199,16 @@ namespace ke
 #endif
 			}
 		}
-
+		TWorldRenderer::ClearStaticState();
 		TerminateModuleStack();
 	}
 
-	void TApplication::OnPlatformEvent(const TPlatformEventBase& event)
+	void Engine::OnPlatformEvent(const TPlatformEventBase& event)
 	{
 		TPlatformEventDispatcher dispatcher{ event };
-		dispatcher.Dispatch(this, &TApplication::OnWindowClosed);
-		dispatcher.Dispatch(this, &TApplication::OnWindowResized);
-		dispatcher.Dispatch(this, &TApplication::OnKeyDown);
+		dispatcher.Dispatch(this, &Engine::OnWindowClosed);
+		dispatcher.Dispatch(this, &Engine::OnWindowResized);
+		dispatcher.Dispatch(this, &Engine::OnKeyDown);
 
 		if (!event.Handled)
 		{
@@ -217,7 +216,7 @@ namespace ke
 		}
 	}
 
-	void TApplication::InitApplicationModules()
+	void Engine::InitApplicationModules()
 	{
 		// Initialize engine modules
 		// ...
@@ -225,7 +224,7 @@ namespace ke
 		ChildSetupModuleStack(m_ModuleStack);
 
 #ifdef ENABLE_EDITOR
-		m_Editor = MakeRef(New<TEditorModule>(m_MainWindow));
+		m_Editor = MakeRef(New<EditorModule>(m_MainWindow));
 		m_ModuleStack.PushModule(m_Editor, EModulePushStrategy::Overlay);
 		TEditorElements::SetMainWindow(m_MainWindow);
 #endif
@@ -233,7 +232,7 @@ namespace ke
 		m_ModuleStack.Init();
 	}
 
-	void TApplication::TerminateModuleStack()
+	void Engine::TerminateModuleStack()
 	{
 #ifdef ENABLE_EDITOR
 		m_Editor.Release();
@@ -242,7 +241,7 @@ namespace ke
 		m_ModuleStack.Clear();
 	}
 
-	bool TApplication::OnWindowClosed(const TWindowClosedEvent& event)
+	bool Engine::OnWindowClosed(const TWindowClosedEvent& event)
 	{
 		if (m_LowLevelRenderer)
 		{
@@ -252,7 +251,7 @@ namespace ke
 		return false;
 	}
 
-	bool TApplication::OnWindowResized(const TWindowSizeEvent& event)
+	bool Engine::OnWindowResized(const TWindowSizeEvent& event)
 	{
 		if (m_LowLevelRenderer)
 		{
@@ -262,7 +261,7 @@ namespace ke
 		return false;
 	}
 
-	bool TApplication::OnKeyDown(const TKeyDownEvent& event)
+	bool Engine::OnKeyDown(const TKeyDownEvent& event)
 	{
 		return false;
 	}

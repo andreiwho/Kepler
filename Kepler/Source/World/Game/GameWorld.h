@@ -77,7 +77,7 @@ namespace ke
 
 		entt::registry EntityRegistry;
 
-		TDynArray<entt::entity> PendingDestroyEntities;
+		Array<entt::entity> PendingDestroyEntities;
 
 		TGameEntityId MainCamera{};
 	};

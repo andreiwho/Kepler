@@ -20,9 +20,9 @@ namespace ke
 {
 	struct TCommonImageState
 	{
-		TDynArray<ID3D11RenderTargetView*> RenderTargetViews{};
-		TDynArray<ID3D11DepthStencilView*> DepthStencilViews{};
-		TDynArray<ID3D11ShaderResourceView*> ShaderResourceView{};
+		Array<ID3D11RenderTargetView*> RenderTargetViews{};
+		Array<ID3D11DepthStencilView*> DepthStencilViews{};
+		Array<ID3D11ShaderResourceView*> ShaderResourceView{};
 	};
 }
 

@@ -18,7 +18,7 @@ namespace ke
 	{
 	}
 
-	void TGraphicsPipeline::UploadParameters(TRef<TCommandListImmediate> pImmCmdList)
+	void TGraphicsPipeline::UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList)
 	{
 	}
 

@@ -35,7 +35,7 @@ namespace ke
 		virtual void CloseAllWindows() override;
 
 	private:
-		TDynArray<std::unique_ptr<TWindow>> m_Windows;
+		Array<std::unique_ptr<TWindow>> m_Windows;
 	};
 }
 #endif

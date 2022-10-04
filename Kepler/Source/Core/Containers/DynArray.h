@@ -6,41 +6,41 @@
 namespace ke
 {
 	template<typename T, typename TAllocator = TMallocator<T>>
-	class TDynArray
+	class Array
 	{
 	public:
-		TDynArray() = default;
+		Array() = default;
 
-		TDynArray(std::initializer_list<T> data)
+		Array(std::initializer_list<T> data)
 			:	m_Container(data.begin(), data.end())
 		{}
 
-		TDynArray(T* pBegin, T* pEnd)
+		Array(T* pBegin, T* pEnd)
 			:	m_Container(pBegin, pEnd)
 		{
 		}
 
-		TDynArray(usize size)
+		Array(usize size)
 			:	m_Container(size)
 		{}
 
-		TDynArray(const TDynArray& other)
+		Array(const Array& other)
 			:	m_Container(other.m_Container)
 		{
 		}
 
-		TDynArray& operator=(const TDynArray& other)
+		Array& operator=(const Array& other)
 		{
 			m_Container = other.m_Container;
 			return *this;
 		}
 
-		TDynArray(TDynArray&& other) noexcept
+		Array(Array&& other) noexcept
 			:	m_Container(std::move(other.m_Container))
 		{
 		}
 
-		TDynArray& operator=(TDynArray&& other) noexcept
+		Array& operator=(Array&& other) noexcept
 		{
 			m_Container = std::move(other.m_Container);
 			return *this;

@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	class TSound : public TRefCounted
+	class TSound : public IntrusiveRefCounted
 	{
 	protected:
 		TSound(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);

@@ -13,12 +13,12 @@ namespace ke
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices)
 		:	StaticMesh(TStaticMesh::New(Vertices, InIndices))
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(const TDynArray<TStaticMeshSection>& Sections)
+	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshSection>& Sections)
 		: StaticMesh(TStaticMesh::New(Sections))
 	{
 

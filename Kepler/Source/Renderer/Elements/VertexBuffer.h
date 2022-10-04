@@ -6,17 +6,17 @@
 
 namespace ke
 {
-	class TVertexBuffer : public TBuffer
+	class TVertexBuffer : public Buffer
 	{
 	protected:
 		TVertexBuffer() = default;
-		TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
+		TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data = nullptr);
 	
 	public:
 		inline usize GetSize() const { return Size; }
 		inline usize GetStride() const { return Stride; }
 
-		static TRef<TVertexBuffer> New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data = nullptr);
+		static TRef<TVertexBuffer> New(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data = nullptr);
 
 	protected:
 		EBufferAccessFlags AccessFlags{};

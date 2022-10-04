@@ -38,12 +38,12 @@ namespace ke
 				// Todo: move to using TMallocator for this
 				u8* Data = stbi_load(CopiedPath.c_str(), &Width, &Height, &Comp, (int)COMPONENT_COUNT);
 				CHECK(Data);
-				TDynArray<u8> DataArray{ Data, Data + Width * Height * 4 };
+				Array<u8> DataArray{ Data, Data + Width * Height * 4 };
 				stbi_image_free(Data);
 
 				return TImageData
 				{
-					TDataBlob::New(DataArray),
+					AsyncDataBlob::New(DataArray),
 					(u32)Width,
 					(u32)Height,
 					COMPONENT_COUNT

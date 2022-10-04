@@ -11,7 +11,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderCompiler);
 
-	class THLSLShaderCompiler : public TRefCounted
+	class THLSLShaderCompiler : public IntrusiveRefCounted
 	{
 	public:
 		static TRef<THLSLShaderCompiler> CreateShaderCompiler();

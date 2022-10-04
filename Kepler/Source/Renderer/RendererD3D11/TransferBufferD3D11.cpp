@@ -6,13 +6,13 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogStagingBuffer);
 
-	TTransferBufferD3D11::TTransferBufferD3D11(usize Size, TRef<TDataBlob> InitialData)
+	TTransferBufferD3D11::TTransferBufferD3D11(usize Size, TRef<AsyncDataBlob> InitialData)
 		: TTransferBuffer(Size, InitialData)
-		, TempDataBlob(InitialData)
+		, m_TempDataBlob(InitialData)
 	{
 		CHECK(IsRenderThread());
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
-		CHECKMSG(InitialData->GetStride(), "When creating a vertex buffer using TDataBlob the ElemSize of the blob must be specified");
+		CHECKMSG(InitialData->GetStride(), "When creating a vertex buffer using AsyncDataBlob the ElemSize of the blob must be specified");
 
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
@@ -27,35 +27,35 @@ namespace ke
 		BufferData.pSysMem = InitialData->GetData();
 
 		D3D11_SUBRESOURCE_DATA* pBufferData = !!InitialData ? &BufferData : nullptr;
-		HRCHECK(Device->CreateBuffer(&Desc, pBufferData, &Buffer));
+		HRCHECK(Device->CreateBuffer(&Desc, pBufferData, &m_Buffer));
 
 		// This is used to ensure that the data buffer will live long enough on the render thread to copy the buffer data into the buffer
-		TempDataBlob.Release();
+		m_TempDataBlob.Release();
 
 		KEPLER_TRACE(LogStagingBuffer, "Created Staging Buffer with size {}", Size);
 	}
 
 	TTransferBufferD3D11::~TTransferBufferD3D11()
 	{
-		if (Buffer)
+		if (m_Buffer)
 		{
 			if (auto pDevice = TRenderDeviceD3D11::Get())
 			{
-				pDevice->RegisterPendingDeleteResource(Buffer);
+				pDevice->RegisterPendingDeleteResource(m_Buffer);
 			}
 		}
 	}
 
-	void TTransferBufferD3D11::Write(TRef<class TCommandListImmediate> pImmCmd, TRef<TDataBlob> Data)
+	void TTransferBufferD3D11::Write(TRef<class GraphicsCommandListImmediate> pImmCmd, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		if (Size < Data->GetSize())
 		{
-			if (Buffer)
+			if (m_Buffer)
 			{
 				if (auto pDevice = TRenderDeviceD3D11::Get())
 				{
-					pDevice->RegisterPendingDeleteResource(Buffer);
+					pDevice->RegisterPendingDeleteResource(m_Buffer);
 				}
 			}
 
@@ -63,18 +63,18 @@ namespace ke
 		}
 		else
 		{
-			TempDataBlob = Data;
+			m_TempDataBlob = Data;
 			void* Mapped = pImmCmd->MapBuffer(RefFromThis());
-			memcpy(Mapped, TempDataBlob->GetData(), TempDataBlob->GetSize());
+			memcpy(Mapped, m_TempDataBlob->GetData(), m_TempDataBlob->GetSize());
 			pImmCmd->UnmapBuffer(RefFromThis());
-			TempDataBlob.Release();
+			m_TempDataBlob.Release();
 		}
 	}
 
-	void TTransferBufferD3D11::Transfer(TRef<TCommandListImmediate> pImmCmd, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	void TTransferBufferD3D11::Transfer(TRef<GraphicsCommandListImmediate> pImmCmd, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size)
 	{
 		CHECK(IsRenderThread());
-		CHECK(Buffer);
+		CHECK(m_Buffer);
 		pImmCmd->Transfer(RefCast<TTransferBufferD3D11>(RefFromThis()), To, DstOffset, SrcOffset, Size);
 	}
 

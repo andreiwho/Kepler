@@ -13,7 +13,7 @@ namespace ke
 		TMaterial() = default;
 		TMaterial(TRef<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
 
-		void RT_Update(TRef<class TCommandListImmediate> pImmCmd);
+		void RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd);
 
 		template<typename T>
 		void WriteParamData(const TString& param, const T* pData)
@@ -56,7 +56,7 @@ namespace ke
 
 		// Helper functions
 		void WriteTransform(TWorldTransform transform);
-		void WriteCamera(TCamera camera);
+		void WriteCamera(MathCamera camera);
 		void WriteId(i32 id);
 
 		inline const TString& GetParentAssetPath() const { return m_ParentAssetPath; }

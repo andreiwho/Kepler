@@ -4,15 +4,20 @@ namespace ke
 {
 
 	TMemoryPool::TMemoryPool(usize InitialSize)
-		:	m_ContiguousMemoryResource(InitialSize)
-		,	m_PoolManager(&m_ContiguousMemoryResource)
+		: m_ContiguousMemoryResource(InitialSize)
+		, m_PoolManager(&m_ContiguousMemoryResource)
 	{
 	}
 
 	void* TMemoryPool::Allocate(usize size)
 	{
 		const usize sizeWithHeader = size + sizeof(TMemoryPoolBlockHeader);
-		TMemoryPoolBlockHeader* pNewBlock = (TMemoryPoolBlockHeader*)m_PoolManager.allocate(sizeWithHeader);
+		TMemoryPoolBlockHeader* pNewBlock = std::invoke(
+			[&, this]
+			{
+				std::lock_guard lck{ m_Mutex };
+				return (TMemoryPoolBlockHeader*)m_PoolManager.allocate(sizeWithHeader);
+			});
 		if (pNewBlock)
 		{
 			pNewBlock->Pool = this;
@@ -33,6 +38,7 @@ namespace ke
 		TMemoryPoolBlockHeader* pHeader = GetAllocationHeader(pBlock);
 		if (pHeader)
 		{
+			std::lock_guard lck{ m_Mutex };
 			m_PoolManager.deallocate(pHeader, pHeader->Size + sizeof(TMemoryPoolBlockHeader));
 		}
 	}
@@ -44,7 +50,6 @@ namespace ke
 			return 0;
 		}
 
-		// Being naughty here :)
 		TMemoryPoolBlockHeader* pHeader = GetAllocationHeader(pBlock);
 		return pHeader->Size;
 	}

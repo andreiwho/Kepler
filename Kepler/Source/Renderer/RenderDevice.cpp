@@ -30,13 +30,13 @@ namespace ke
 		CRASHMSG("Failed to create render device. Unknown render API");
 	}
 
-	TRef<TDataBlob> TDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
+	TRef<AsyncDataBlob> AsyncDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
 	{
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
 		case ke::ERenderAPI::DirectX11:
-			return MakeRef(ke::New<TDataBlobD3D11>(pData, size, elemSize));
+			return MakeRef(ke::New<AsyncDataBlobD3D11>(pData, size, elemSize));
 #endif
 		default:
 			break;

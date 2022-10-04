@@ -15,10 +15,14 @@ struct TPixel
 	int Id : ENTITY_ID0;
 };
 
-//////////////////////////////////////////////////////////////////
-cbuffer TConstants : register(b0)
+cbuffer TCamera : register(RS_Camera)
 {
 	float4x4 ViewProjection;
+};
+
+//////////////////////////////////////////////////////////////////
+cbuffer TConstants : register(RS_User)
+{
 	float4x4 Transform;
 	int EntityId;
 };

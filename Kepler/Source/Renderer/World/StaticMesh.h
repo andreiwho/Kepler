@@ -16,8 +16,8 @@ namespace ke
 
 	struct TStaticMeshSection
 	{
-		TDynArray<TStaticMeshVertex> Vertices{};
-		TDynArray<u32> Indices{};
+		Array<TStaticMeshVertex> Vertices{};
+		Array<u32> Indices{};
 	};
 
 	class TStaticMesh : public TEnableRefFromThis<TStaticMesh>
@@ -25,8 +25,8 @@ namespace ke
 	public:
 		TStaticMesh() = default;
 		TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer);
-		TStaticMesh(const TDynArray<TStaticMeshVertex>& vertices, const TDynArray<u32>& indices);
-		TStaticMesh(const TDynArray<TStaticMeshSection>& sections);
+		TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices);
+		TStaticMesh(const Array<TStaticMeshSection>& sections);
 
 	public:
 		struct TInternalSection
@@ -35,7 +35,7 @@ namespace ke
 			TRef<TIndexBuffer> IndexBuffer{};
 		};
 
-		void SetSections(const TDynArray<TStaticMeshSection>& sections);
+		void SetSections(const Array<TStaticMeshSection>& sections);
 
 		static TRef<TStaticMesh> New()
 		{
@@ -47,20 +47,20 @@ namespace ke
 			return MakeRef(ke::New<TStaticMesh>(pVertexBuffer, pIndexBuffer));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshVertex>& pVertices, const TDynArray<u32>& pIndices)
+		static TRef<TStaticMesh> New(const Array<TStaticMeshVertex>& pVertices, const Array<u32>& pIndices)
 		{
 			return MakeRef(ke::New<TStaticMesh>(pVertices, pIndices));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& sections)
+		static TRef<TStaticMesh> New(const Array<TStaticMeshSection>& sections)
 		{
 			return MakeRef(ke::New<TStaticMesh>(sections));
 		}
 
-		const TDynArray<TInternalSection>& GetSections() const { return m_Sections; }
+		const Array<TInternalSection>& GetSections() const { return m_Sections; }
 
 	private:
-		TDynArray<TInternalSection> m_Sections;
+		Array<TInternalSection> m_Sections;
 	
 	};
 }

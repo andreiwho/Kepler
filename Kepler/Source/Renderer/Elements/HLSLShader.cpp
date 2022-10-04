@@ -2,7 +2,7 @@
 
 namespace ke
 {
-	THLSLShader::THLSLShader(const TString& Name, const TDynArray<TShaderModule>& Modules)
+	THLSLShader::THLSLShader(const TString& Name, const Array<TShaderModule>& Modules)
 		:	TShader(Name, Modules)
 	{
 	}

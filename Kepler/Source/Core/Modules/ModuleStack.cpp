@@ -2,7 +2,7 @@
 
 namespace ke
 {
-	void TModuleStack::PushModule(TRef<TApplicationModule> pModule, EModulePushStrategy strategy /*= EModulePushStrategy::Normal*/)
+	void TModuleStack::PushModule(TRef<EngineModule> pModule, EModulePushStrategy strategy /*= EModulePushStrategy::Normal*/)
 	{
 		if (!pModule)
 		{
@@ -18,10 +18,10 @@ namespace ke
 		break;
 		case ke::EModulePushStrategy::Overlay:
 		{
-			TDynArray<TRef<TApplicationModule>> newModules;
+			Array<TRef<EngineModule>> newModules;
 			newModules.Reserve(m_Modules.GetLength() + 1);
 			newModules.EmplaceBack(pModule);
-			for (TRef<TApplicationModule> pNewModule : m_Modules)
+			for (TRef<EngineModule> pNewModule : m_Modules)
 			{
 				newModules.EmplaceBack(pNewModule);
 			}
@@ -35,7 +35,7 @@ namespace ke
 		pModule->OnAttach();
 	}
 
-	void TModuleStack::RemoveModule(TRef<TApplicationModule> pModule)
+	void TModuleStack::RemoveModule(TRef<EngineModule> pModule)
 	{
 		if (!pModule)
 		{
@@ -44,7 +44,7 @@ namespace ke
 
 		pModule->OnDetach();
 		auto iter = m_Modules.FindIterator(
-			[pModule](const TRef<TApplicationModule>& lhs)
+			[pModule](const TRef<EngineModule>& lhs)
 			{
 				return pModule.Raw() == lhs.Raw();
 			});
@@ -67,7 +67,7 @@ namespace ke
 
 	void TModuleStack::HandlePlatformEvent(const TPlatformEventBase& event)
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnPlatformEvent(event);
 		}
@@ -75,7 +75,7 @@ namespace ke
 
 	void TModuleStack::OnUpdate(float deltaTime)
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnUpdate(deltaTime);
 		}
@@ -83,7 +83,7 @@ namespace ke
 
 	void TModuleStack::OnRender()
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnRender();
 		}
@@ -91,7 +91,7 @@ namespace ke
 
 	void TModuleStack::OnRenderGUI()
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnRenderGUI();
 		}
@@ -99,7 +99,7 @@ namespace ke
 
 	void TModuleStack::Init()
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnInit();
 		}
@@ -107,7 +107,7 @@ namespace ke
 
 	void TModuleStack::Terminate()
 	{
-		for (TRef<TApplicationModule> pModule : m_Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
 			pModule->OnTerminate();
 		}

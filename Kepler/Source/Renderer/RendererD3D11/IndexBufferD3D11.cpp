@@ -6,7 +6,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogIndexBuffer);
 
-	TIndexBufferD3D11::TIndexBufferD3D11(EBufferAccessFlags InAccess, TRef<TDataBlob> Data)
+	TIndexBufferD3D11::TIndexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data)
 		:	TIndexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		if (!Data)
@@ -15,7 +15,7 @@ namespace ke
 		}
 
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
-		CHECKMSG(Data->GetStride(), "When creating a index buffer using TDataBlob the ElemSize of the blob must be specified");
+		CHECKMSG(Data->GetStride(), "When creating a index buffer using AsyncDataBlob the ElemSize of the blob must be specified");
 
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));

@@ -25,7 +25,7 @@ namespace ke
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(TDynArray<TString> const& cmdLine);
+		TCommandLineArguments(Array<TString> const& cmdLine);
 
 		TString GameModuleDirectory = "";
 	};
@@ -39,11 +39,11 @@ namespace ke
 	// This is an important class.
 	// - All of the internal initialization and application logic will happen inside the IApplication::Run function
 	// --------------------------------------------
-	class TApplication : public IPlatformEventListener
+	class Engine : public IPlatformEventListener
 	{
 	public:
-		TApplication(const TApplicationLaunchParams& launchParams);
-		virtual ~TApplication();
+		Engine(const TApplicationLaunchParams& launchParams);
+		virtual ~Engine();
 
 		virtual void Run();
 
@@ -62,7 +62,7 @@ namespace ke
 	private:
 		TWindow* m_MainWindow{};
 		TSharedPtr<TLowLevelRenderer> m_LowLevelRenderer{};
-		TSharedPtr<TAudioEngine> m_AudioEngine{};
+		TSharedPtr<AudioEngine> m_AudioEngine{};
 		TSharedPtr<TWorldRegistry> m_WorldRegistry{};
 
 		TMaterialLoader m_MaterialLoader;
@@ -72,11 +72,11 @@ namespace ke
 		TRef<TGameWorld> m_CurrentWorld;
 		
 #ifdef ENABLE_EDITOR
-		TRef<class TEditorModule> m_Editor;
+		TRef<class EditorModule> m_Editor;
 #endif
 
 		TModuleStack m_ModuleStack{};
 	};
 
-	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
+	extern TSharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
 }

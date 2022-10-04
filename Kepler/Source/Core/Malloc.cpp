@@ -64,25 +64,25 @@ namespace ke
 
 	void DoRelease(void* pRefCounted)
 	{
-		((TRefCounted*)pRefCounted)->Release();
+		((IntrusiveRefCounted*)pRefCounted)->Release();
 	}
 
 	void DoAddRef(void* pRefCounted)
 	{
-		((TRefCounted*)pRefCounted)->AddRef();
+		((IntrusiveRefCounted*)pRefCounted)->AddRef();
 	}
 
 	usize DoGetRefCount(void* pRefCounted)
 	{
-		return ((TRefCounted*)pRefCounted)->GetRefCount();
+		return ((IntrusiveRefCounted*)pRefCounted)->GetRefCount();
 	}
 
-	void TRefCounted::AddRef() const
+	void IntrusiveRefCounted::AddRef() const
 	{
 		m_RefCount++;
 	}
 
-	void TRefCounted::Release() const
+	void IntrusiveRefCounted::Release() const
 	{
 		if (m_RefCount > 0)
 		{

@@ -37,10 +37,10 @@ namespace ke
 
 	template<typename T> using TSharedPtr = std::shared_ptr<T>;
 
-	class TRefCounted
+	class IntrusiveRefCounted
 	{
 	public:
-		virtual ~TRefCounted() = default;
+		virtual ~IntrusiveRefCounted() = default;
 
 		void AddRef() const;
 		void Release() const;
@@ -207,12 +207,18 @@ namespace ke
 	}
 
 	template<typename T>
-	struct TEnableRefFromThis : public TRefCounted
+	struct TEnableRefFromThis : public IntrusiveRefCounted
 	{
 		inline TRef<T> RefFromThis()
 		{
 			AddRef();
 			return MakeRef(static_cast<T*>(this));
+		}
+
+		template<typename U>
+		inline TRef<U> RefFromThis()
+		{
+			return RefCast<U>(RefFromThis());
 		}
 	};
 

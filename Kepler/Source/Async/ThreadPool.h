@@ -112,7 +112,7 @@ namespace ke
 
 		u32 m_ThreadCount = 0;
 
-		TDynArray<std::thread> m_Workers{ };
+		Array<std::thread> m_Workers{ };
 
 		std::atomic<bool> m_bWaiting = false;
 

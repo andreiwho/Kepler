@@ -33,7 +33,7 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TEditorModule::TEditorModule(TWindow* pWindow)
+	EditorModule::EditorModule(TWindow* pWindow)
 		: m_pMainWindow(pWindow)
 	{
 		for (auto& Size : m_ViewportSizes)
@@ -92,7 +92,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TEditorModule::~TEditorModule()
+	EditorModule::~EditorModule()
 	{
 		m_LogPanel.reset();
 		Await(TRenderThread::Submit([]
@@ -105,13 +105,13 @@ namespace ke
 		KEPLER_INFO(LogEditor, "Terminating editor module");
 	}
 
-	float2 TEditorModule::GetViewportSize(EViewportIndex idx)
+	float2 EditorModule::GetViewportSize(EViewportIndex idx)
 	{
 		return m_ViewportSizes[(u32)idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::BeginGUIPass()
+	void EditorModule::BeginGUIPass()
 	{
 		KEPLER_PROFILE_SCOPE();
 		auto task = TRenderThread::Submit(
@@ -141,7 +141,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawEditor()
+	void EditorModule::DrawEditor()
 	{
 		KEPLER_PROFILE_SCOPE();
 		DrawMenuBar();
@@ -154,14 +154,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::OnUpdate(float deltaTime)
+	void EditorModule::OnUpdate(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
 		ControlEditorCamera(deltaTime);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::EndGUIPass()
+	void EditorModule::EndGUIPass()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::Render();
@@ -194,14 +194,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SetEditedWorld(TRef<TGameWorld> pWorld)
+	void EditorModule::SetEditedWorld(TRef<TGameWorld> pWorld)
 	{
 		KEPLER_PROFILE_SCOPE();
 		m_pEditedWorld = pWorld;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SelectEntity(TGameEntityId id)
+	void EditorModule::SelectEntity(TGameEntityId id)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld || !m_pEditedWorld->IsValidEntity(id))
@@ -213,24 +213,24 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::UnselectEverything()
+	void EditorModule::UnselectEverything()
 	{
 		m_SelectedEntity = TGameEntityId{};
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::OnPlatformEvent(const TPlatformEventBase& event)
+	void EditorModule::OnPlatformEvent(const TPlatformEventBase& event)
 	{
 		KEPLER_PROFILE_SCOPE();
 		TPlatformEventDispatcher Dispatcher(event);
-		Dispatcher.Dispatch(this, &TEditorModule::OnKeyDown);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonDown);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonUp);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseMove);
+		Dispatcher.Dispatch(this, &EditorModule::OnKeyDown);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonDown);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonUp);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SetupStyle()
+	void EditorModule::SetupStyle()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		const TString font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
@@ -310,7 +310,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawMenuBar()
+	void EditorModule::DrawMenuBar()
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (ImGui::BeginMainMenuBar())
@@ -325,7 +325,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewports()
+	void EditorModule::DrawViewports()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
@@ -369,7 +369,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewportGizmoControls()
+	void EditorModule::DrawViewportGizmoControls()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -452,7 +452,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewportCameraControls()
+	void EditorModule::DrawViewportCameraControls()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -478,7 +478,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawDetailsPanel()
+	void EditorModule::DrawDetailsPanel()
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
@@ -491,7 +491,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawSceneGraph()
+	void EditorModule::DrawSceneGraph()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::Begin("Scene Graph");
@@ -529,7 +529,7 @@ namespace ke
 		ImGui::End();
 	}
 
-	void TEditorModule::DrawDebugTools()
+	void EditorModule::DrawDebugTools()
 	{
 		KEPLER_PROFILE_SCOPE();
 		// Draw console
@@ -540,7 +540,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawGizmo()
+	void EditorModule::DrawGizmo()
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
@@ -563,7 +563,7 @@ namespace ke
 
 			auto mainCameraId = m_pEditedWorld->GetMainCamera();
 			// auto& MainCameraEntity = EditedWorld->GetEntityFromId(SelectedEntity);
-			TCamera& camera = m_pEditedWorld->GetComponent<TCameraComponent>(mainCameraId).GetCamera();
+			MathCamera& camera = m_pEditedWorld->GetComponent<CameraComponent>(mainCameraId).GetCamera();
 
 			matrix4x4 viewMatrix = camera.GenerateViewMatrix();
 			matrix4x4 projMatrix = camera.GenerateProjectionMatrix();
@@ -594,7 +594,7 @@ namespace ke
 		}
 	}
 
-	void TEditorModule::ControlEditorCamera(float deltaTime)
+	void EditorModule::ControlEditorCamera(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
@@ -660,7 +660,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnKeyDown(const TKeyDownEvent& event)
+	bool EditorModule::OnKeyDown(const TKeyDownEvent& event)
 	{
 		if (m_bIsControllingCamera)
 		{
@@ -714,7 +714,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& event)
+	bool EditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& event)
 	{
 		// Read entity id under render target
 		if (event.Button & EMouseButton::Left)
@@ -728,7 +728,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseButtonUp(const TMouseButtonUpEvent& event)
+	bool EditorModule::OnMouseButtonUp(const TMouseButtonUpEvent& event)
 	{
 		if (m_bIsControllingCamera && event.Button & EMouseButton::Right)
 		{
@@ -739,7 +739,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseMove(const TMouseMoveEvent& event)
+	bool EditorModule::OnMouseMove(const TMouseMoveEvent& event)
 	{
 		// Start moving camera only if mouse button pressed and mouse is dragged, otherwise, use context menu (probably...)
 		if (TInput::GetMouseButon(EMouseButton::Right) && m_bIsCursorInViewport)
@@ -751,7 +751,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	float3 TEditorModule::CalculateSnapVec() const
+	float3 EditorModule::CalculateSnapVec() const
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (m_bSnapEnabled)
@@ -816,13 +816,13 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::TrySelectEntity()
+	void EditorModule::TrySelectEntity()
 	{
 		// Read render target
 		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
 			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
-			TRef<TRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			TRef<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
 			TRef<TImage2D> pTargetImage = pTarget->GetImage();
 			if (auto pImmCmd = TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
 			{

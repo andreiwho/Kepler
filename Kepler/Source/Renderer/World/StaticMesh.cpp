@@ -10,25 +10,25 @@ namespace ke
 	{
 	}
 
-	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshVertex>& vertices, const TDynArray<u32>& indices)
+	TStaticMesh::TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices)
 	{
 		CHECK(!IsRenderThread());
 
 		TInternalSection section;
 		Await(TRenderThread::Submit([&section, vertices, indices]
 			{
-				section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(vertices));
-				section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(indices));
+				section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(vertices));
+				section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
 			}));
 		m_Sections.EmplaceBack(std::move(section));
 	}
 
-	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshSection>& sections)
+	TStaticMesh::TStaticMesh(const Array<TStaticMeshSection>& sections)
 	{
 		SetSections(sections);
 	}
 
-	void TStaticMesh::SetSections(const TDynArray<TStaticMeshSection>& sections)
+	void TStaticMesh::SetSections(const Array<TStaticMeshSection>& sections)
 	{
 		m_Sections.Clear();
 		m_Sections.Reserve(sections.GetLength());
@@ -37,8 +37,8 @@ namespace ke
 			TInternalSection outSection;
 			Await(TRenderThread::Submit([&section, &outSection]
 				{
-					outSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(section.Vertices));
-					outSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(section.Indices));
+					outSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Vertices));
+					outSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Indices));
 				}));
 			m_Sections.EmplaceBack(std::move(outSection));
 		}

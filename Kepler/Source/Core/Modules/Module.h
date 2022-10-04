@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	class TApplicationModule : public TRefCounted
+	class EngineModule : public IntrusiveRefCounted
 	{
 	public:
 		virtual void OnAttach() {}

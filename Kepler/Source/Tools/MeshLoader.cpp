@@ -32,10 +32,10 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDynArray<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
+	Array<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
 	{
 		Assimp::Importer Importer{};
-		TDynArray<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
+		Array<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
 		CHECK(!Binary.IsEmpty());
 
 		const aiScene* pScene = Importer.ReadFileFromMemory(Binary.GetData(), Binary.GetLength(),
@@ -46,7 +46,7 @@ namespace ke
 			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);
 
-		TDynArray<TStaticMeshSection> MeshSections;
+		Array<TStaticMeshSection> MeshSections;
 		MeshSections.Reserve(pScene->mNumMeshes);
 
 		if (ProcessNode(pScene, pScene->mRootNode, MeshSections))
@@ -57,7 +57,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, TDynArray<TStaticMeshSection>& OutSections)
+	bool TMeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pNode)
 		{
@@ -87,7 +87,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, TDynArray<TStaticMeshSection>& OutSections)
+	bool TMeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pMesh || !pScene)
 		{

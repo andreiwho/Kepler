@@ -93,7 +93,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawCameraComponentInfo()
 	{
-		TCamera& camera = m_pWorld->GetComponent<TCameraComponent>(m_SelectedEntity).GetCamera();
+		MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
 		{
 			if (TEditorElements::BeginFieldTable("camera", 2))

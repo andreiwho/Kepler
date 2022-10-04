@@ -6,6 +6,7 @@
 #include "HLSLShaderD3D11.h"
 #include "Renderer/RenderThread.h"
 #include "HLSLIncludeResolver.h"
+#include "../World/WorldRenderer.h"
 
 namespace ke
 {
@@ -28,7 +29,7 @@ namespace ke
 		}
 
 		const auto Stages = TypeMask.Separate();
-		TDynArray<std::future<TShaderModule>> ModuleFutures;
+		Array<std::future<TShaderModule>> ModuleFutures;
 		for (const EShaderStageFlags::Type Stage : Stages)
 		{
 			ModuleFutures.EmplaceBack(Async(
@@ -39,7 +40,7 @@ namespace ke
 			);
 		}
 
-		TDynArray<TShaderModule> Modules;
+		Array<TShaderModule> Modules;
 		Modules.Reserve(ModuleFutures.GetLength());
 		for (auto& Future : ModuleFutures)
 		{
@@ -76,7 +77,7 @@ namespace ke
 		return OutShaderModule;
 	}
 
-	TRef<TDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
+	TRef<AsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
 		const TString& EntryPoint,
 		EShaderStageFlags::Type Type,
 		const TString& Code)
@@ -102,23 +103,20 @@ namespace ke
 
 		CComPtr<ID3DBlob> ErrorBlob{};
 		CComPtr<ID3DBlob> Blob;
-		D3D_SHADER_MACRO Macros[] = {
-			{
-				"ENABLE_EDITOR",
-#ifdef ENABLE_EDITOR
-				"1"
-#else
-				"0"
-#endif
-			},
-			{nullptr, nullptr}
-		};
+
+		Array<D3D_SHADER_MACRO> shaderMacros;
+		TString CameraSlot = MakeBufferSlotString(TWorldRenderer::RS_Camera);
+		TString UserSlot = MakeBufferSlotString(TWorldRenderer::RS_User);
+
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Camera", CameraSlot.c_str()});
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_User", UserSlot.c_str()});
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{nullptr, nullptr});
 
 		if (FAILED(D3DCompile(
 			Code.data(),
 			Code.size(),
 			SourceName.c_str(),
-			Macros, 
+			shaderMacros.GetData(), 
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			EntryPoint.c_str(),
 			ShaderType.c_str(),
@@ -135,9 +133,15 @@ namespace ke
 		}
 		else
 		{
-			return TDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
+			return AsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
 		}
 		return nullptr;
 	}
+
+	TString THLSLShaderCompilerD3D11::MakeBufferSlotString(i32 index)
+	{
+		return fmt::format("b{}", index);
+	}
+
 }
 

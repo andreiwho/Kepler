@@ -10,7 +10,7 @@
 
 namespace ke
 {
-	class TLowLevelRenderer : public TRefCounted
+	class TLowLevelRenderer : public IntrusiveRefCounted
 	{
 		static TLowLevelRenderer* Instance;
 
@@ -26,6 +26,11 @@ namespace ke
 		inline u8 GetFrameIndex() const
 		{
 			return m_SwapChainFrame.load(std::memory_order_relaxed);
+		}
+
+		inline u8 GetNextFrameIndex() const
+		{
+			return m_NextFrameIndex;
 		}
 
 		static TLowLevelRenderer* Get() { return Instance; }
@@ -65,9 +70,10 @@ namespace ke
 		TSharedPtr<TTargetRegistry> m_TargetRegistry{};
 
 		TRef<TRenderDevice> m_RenderDevice{};
-		TDynArray<TRef<TSwapChain>> m_SwapChains;
+		Array<TRef<TSwapChain>> m_SwapChains;
 		TAtomic<u64> m_FrameCounter = 0;
 		TAtomic<u8> m_SwapChainFrame = 0;
+		u8 m_NextFrameIndex = 1;
 		const u64 m_FlushPendingDeleteResourcesInterval = 16;
 	};
 }

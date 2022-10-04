@@ -3,12 +3,12 @@
 namespace ke
 {
 
-	TCameraComponent::TCameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip)
-		: Camera(InFOVDegrees, InWidth, InHeight, InNearClip, InFarClip)
+	CameraComponent::CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip)
+		: m_Camera(InFOVDegrees, InWidth, InHeight, InNearClip, InFarClip)
 	{
 	}
 
-	TCameraComponent::~TCameraComponent()
+	CameraComponent::~CameraComponent()
 	{
 	}
 

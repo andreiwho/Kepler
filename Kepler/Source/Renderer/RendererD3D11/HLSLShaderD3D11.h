@@ -27,17 +27,17 @@ namespace ke
 	class THLSLShaderD3D11 : public THLSLShader
 	{
 	public:
-		THLSLShaderD3D11(const TString& Name, const TDynArray<TShaderModule>& Modules);
+		THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules);
 
 	protected:
 		inline TRef<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(Handle); }
 
 	private:
 		void InitHandle();
-		void InitShaders(const TDynArray<TShaderModule>& Modules);
+		void InitShaders(const Array<TShaderModule>& Modules);
 
 		// Reflection interface
-		void InitReflection(const TDynArray<TShaderModule>& Modules);
+		void InitReflection(const Array<TShaderModule>& Modules);
 		TVertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule);
 		TRef<TPipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, TRef<TPipelineParamMapping> ToMerge);
 	};

@@ -15,6 +15,29 @@ namespace ke
 		: m_CurrentWorld(pWorld)
 		, m_LLR(TLowLevelRenderer::Get())
 	{
+		if (!StaticState.bInitialized)
+		{
+			StaticState.Init();
+		}
+	}
+
+	void TWorldRenderer::TStaticState::Init()
+	{
+		CHECK(IsRenderThread());
+		TRef<TPipelineParamMapping> RS_CameraParams = TPipelineParamMapping::New();
+		RS_CameraParams->AddParam("ViewProjection", offsetof(RS_CameraBufferStruct, ViewProjection), sizeof(RS_CameraBufferStruct::ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
+		bInitialized = true;
+	}
+
+	void TWorldRenderer::TStaticState::Clear()
+	{
+		if (!bInitialized)
+		{
+			return;
+		}
+
+		RS_CameraBuffer = nullptr;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -30,7 +53,7 @@ namespace ke
 		m_CurrentViewport = vpSize;
 
 		// Upload material data to the GPU
-		TRef<TCommandListImmediate> pImmCtx = m_LLR->GetRenderDevice()->GetImmediateCommandList();
+		TRef<GraphicsCommandListImmediate> pImmCtx = m_LLR->GetRenderDevice()->GetImmediateCommandList();
 
 		RT_UpdateMaterialComponents(pImmCtx);
 
@@ -58,8 +81,13 @@ namespace ke
 		return MakeRef(ke::New<TWorldRenderer>(pWorld));
 	}
 
+	void TWorldRenderer::ClearStaticState()
+	{
+
+	}
+
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::RT_UpdateMaterialComponents(TRef<TCommandListImmediate> pImmCtx)
+	void TWorldRenderer::RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
@@ -67,14 +95,18 @@ namespace ke
 
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
 		{
-			auto& cameraComp = m_CurrentWorld->GetComponent<TCameraComponent>(camera);
+			auto& cameraComp = m_CurrentWorld->GetComponent<CameraComponent>(camera);
 			if (TTargetRegistry::Get()->RenderTargetGroupExists(cameraComp.GetRenderTargetName()))
 			{
 				if (auto pTarget = TTargetRegistry::Get()->GetRenderTargetGroup(cameraComp.GetRenderTargetName()))
 				{
-					auto& mathCamera = m_CurrentWorld->GetComponent<TCameraComponent>(camera).GetCamera();
+					auto& mathCamera = m_CurrentWorld->GetComponent<CameraComponent>(camera).GetCamera();
 					mathCamera.SetFrustumWidth(pTarget->GetRenderTargetAtArrayLayer(0)->GetWidth());
 					mathCamera.SetFrustumHeight(pTarget->GetRenderTargetAtArrayLayer(0)->GetHeight());
+
+					// Write it here, though there may be a better place for it
+					const auto viewProj = glm::transpose(mathCamera.GenerateViewProjectionMatrix());
+					StaticState.RS_CameraBuffer->Write("ViewProjection", &viewProj);
 				}
 				else
 				{
@@ -109,7 +141,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::MeshPass(TRef<TCommandListImmediate> pImmCtx)
+	void TWorldRenderer::MeshPass(TRef<GraphicsCommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("MeshPass");
@@ -123,7 +155,7 @@ namespace ke
 			m_CurrentViewport.Height,
 			EFormat::R8G8B8A8_UNORM,
 			TLowLevelRenderer::m_SwapChainFrameCount);
-		TRef<TRenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
+		TRef<RenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
 		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("MeshPassDepth",
 			m_CurrentViewport.Width,
@@ -140,11 +172,16 @@ namespace ke
 			1,
 			true);
 		auto pIdTarget = pIdTargetGroup->GetRenderTargetAtArrayLayer(0);
+		
+		// Bind static camera
+		StaticState.RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(StaticState.RS_CameraBuffer, RS_Camera);
 
-		pImmCtx->StartDrawingToRenderTargets({ pCurTarget.Raw(), pIdTarget.Raw() }, pDepthTarget.Raw());
-		pImmCtx->ClearRenderTarget(pCurTarget.Raw(), float4(0.1f, 0.1f, 0.1f, 1.0f));
-		pImmCtx->ClearRenderTarget(pIdTarget.Raw(), float4(-1.0f));
-		pImmCtx->ClearDepthTarget(pDepthTarget.Raw(), true);
+		// Start drawing other state
+		pImmCtx->StartDrawingToRenderTargets({ pCurTarget, pIdTarget }, pDepthTarget);
+		pImmCtx->ClearRenderTarget(pCurTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
+		pImmCtx->ClearRenderTarget(pIdTarget, float4(-1.0f));
+		pImmCtx->ClearDepthTarget(pDepthTarget, true);
 		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);
 		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
 
@@ -152,13 +189,13 @@ namespace ke
 		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
 			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
 			{
-				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer().Raw(), 0);
-				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline().Raw());
-				pImmCtx->BindSamplers(MT.GetMaterial()->GetSamplers().Raw());
+				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline());
+				pImmCtx->BindSamplers(MT.GetMaterial()->GetSamplers());
 				for (const auto& Section : SM.GetStaticMesh()->GetSections())
 				{
-					pImmCtx->BindVertexBuffers(Section.VertexBuffer.Raw(), 0, 0);
-					pImmCtx->BindIndexBuffer(Section.IndexBuffer.Raw(), 0);
+					pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
+					pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
 					pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
 				}
 			}
@@ -167,7 +204,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::FlushPass(TRef<TCommandListImmediate> pImmCtx)
+	void TWorldRenderer::FlushPass(TRef<GraphicsCommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		// For now just flush the mesh pass image
@@ -182,9 +219,9 @@ namespace ke
 			TLowLevelRenderer::m_SwapChainFrameCount);
 
 		const u32 frameIndex = m_LLR->GetFrameIndex();
-		TRef<TRenderTarget2D> pCurRenderTarget = pTargetGroup->GetRenderTargetAtArrayLayer(frameIndex);
-		pImmCtx->StartDrawingToRenderTargets(pCurRenderTarget.Raw(), nullptr);
-		pImmCtx->ClearRenderTarget(pCurRenderTarget.Raw(), float4(0.1f, 0.1f, 0.1f, 1.0f));
+		TRef<RenderTarget2D> pCurRenderTarget = pTargetGroup->GetRenderTargetAtArrayLayer(frameIndex);
+		pImmCtx->StartDrawingToRenderTargets(pCurRenderTarget, nullptr);
+		pImmCtx->ClearRenderTarget(pCurRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
 		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);
 		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
 #else
@@ -192,9 +229,9 @@ namespace ke
 		pImmCtx->StartDrawingToSwapChainImage(SwapChain);
 		pImmCtx->ClearSwapChainImage(SwapChain, { 0.1f, 0.1f, 0.1f, 1.0f });
 #endif
-		pImmCtx->BindVertexBuffers(m_LLR->m_ScreenQuad.VertexBuffer.Raw(), 0, 0);
-		pImmCtx->BindIndexBuffer(m_LLR->m_ScreenQuad.IndexBuffer.Raw(), 0);
-		pImmCtx->BindPipeline(m_LLR->m_ScreenQuad.Pipeline.Raw());
+		pImmCtx->BindVertexBuffers(m_LLR->m_ScreenQuad.VertexBuffer, 0, 0);
+		pImmCtx->BindIndexBuffer(m_LLR->m_ScreenQuad.IndexBuffer, 0);
+		pImmCtx->BindPipeline(m_LLR->m_ScreenQuad.Pipeline);
 
 		//Write quad sampler
 		auto pTarget = TTargetRegistry::Get()->GetRenderTargetGroup("MeshPassTarget");
@@ -203,8 +240,10 @@ namespace ke
 
 		m_LLR->m_ScreenQuad.Samplers->Write("RenderTarget", pSampler);
 		// and
-		pImmCtx->BindSamplers(m_LLR->m_ScreenQuad.Samplers.Raw());
+		pImmCtx->BindSamplers(m_LLR->m_ScreenQuad.Samplers);
 		pImmCtx->DrawIndexed(m_LLR->m_ScreenQuad.IndexBuffer->GetCount(), 0, 0);
 		pImmCtx->EndDebugEvent();
 	}
+
+	TWorldRenderer::TStaticState TWorldRenderer::StaticState;
 }

@@ -1,5 +1,6 @@
 #include "ParamPack.h"
 #include <set>
+#include "../LowLevelRenderer.h"
 
 namespace ke
 {
@@ -12,7 +13,7 @@ namespace ke
 			TPipelineParam Param;
 		};
 
-		TDynArray<TLocalParam> SortedParams;
+		Array<TLocalParam> SortedParams;
 		SortedParams.Reserve(Mapping->GetParams().GetLength());
 
 		for (auto& [Name, Value] : Mapping->GetParams())
@@ -32,8 +33,14 @@ namespace ke
 
 		// Allocate space
 		const TPipelineParam& LastParam = SortedParams[SortedParams.GetLength() - 1].Param;
-		CPUData.Resize(LastParam.GetOffset() + LastParam.GetSize());
-		bIsCompiled = true;
+		static constexpr auto FrameCount = TLowLevelRenderer::m_SwapChainFrameCount;
+		CPUData.Resize((LastParam.GetOffset() + LastParam.GetSize()) * FrameCount);	// Enable multi-buffering
+		SinglePackStride = CPUData.GetLength() / FrameCount;
+	}
+
+	u8 TPipelineParamPack::GetBufferIndex() noexcept
+	{
+		return TLowLevelRenderer::Get()->GetNextFrameIndex();
 	}
 
 	void TPipelineParamMapping::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)

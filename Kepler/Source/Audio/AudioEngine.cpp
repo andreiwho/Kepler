@@ -11,20 +11,20 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////
-	ke::TAudioEngine* TAudioEngine::Instance;
+	ke::AudioEngine* AudioEngine::Instance;
 
-	TAudioEngine::TAudioEngine()
+	AudioEngine::AudioEngine()
 	{
 		Instance = this;
 	}
 
-	TSharedPtr<TAudioEngine> TAudioEngine::CreateAudioEngine(EAudioEngineAPI api)
+	TSharedPtr<AudioEngine> AudioEngine::CreateAudioEngine(EAudioEngineAPI api)
 	{
 		switch (api)
 		{
 		case ke::EAudioEngineAPI::MiniAudio:
 			GAudioEngineAPI = EAudioEngineAPI::MiniAudio;
-			return MakeShared<TAudioEngineMA>();
+			return MakeShared<AudioEngineMA>();
 			break;
 		default:
 			break;

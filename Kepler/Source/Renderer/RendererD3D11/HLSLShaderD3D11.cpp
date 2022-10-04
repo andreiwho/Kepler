@@ -5,13 +5,14 @@
 #include "D3D11Common.h"
 #include "Async/Async.h"
 #include "../Elements/ShaderReflection.h"
+#include "../World/WorldRenderer.h"
 
 namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection);
 
 	//////////////////////////////////////////////////////////////////////////
-	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const TDynArray<TShaderModule>& Modules)
+	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules)
 		: THLSLShader(Name, Modules)
 	{
 		InitHandle();
@@ -27,7 +28,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void THLSLShaderD3D11::InitShaders(const TDynArray<TShaderModule>& Modules)
+	void THLSLShaderD3D11::InitShaders(const Array<TShaderModule>& Modules)
 	{
 		// CHECK(IsRenderThread());
 		auto Device = TRenderDeviceD3D11::Get();
@@ -74,7 +75,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void THLSLShaderD3D11::InitReflection(const TDynArray<TShaderModule>& Modules)
+	void THLSLShaderD3D11::InitReflection(const Array<TShaderModule>& Modules)
 	{
 		ReflectionData = MakeRef(New<TShaderModuleReflection>());
 		for (const auto& Module : Modules)
@@ -244,6 +245,10 @@ namespace ke
 		TRef<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
 		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
+			if (idx < TWorldRenderer::RS_User)
+			{
+				continue;
+			}
 			// Reflect constant buffers
 			ID3D11ShaderReflectionConstantBuffer* pBuffer = pReflection->GetConstantBufferByIndex(idx);
 			CHECK(pBuffer);

@@ -6,11 +6,11 @@
 
 namespace ke
 {
-	class TAudioEngineMA : public TAudioEngine
+	class AudioEngineMA : public AudioEngine
 	{
 	public:
-		TAudioEngineMA();
-		~TAudioEngineMA();
+		AudioEngineMA();
+		~AudioEngineMA();
 
 		inline ma_engine* GetEngineHandle() { return &m_Engine; }
 		virtual void PlayInline(const TString& path) override;
@@ -21,6 +21,6 @@ namespace ke
 
 	private:
 		ma_engine m_Engine;
-		TChaoticMap<TString, TRef<TSoundMA>> m_Sounds;
+		Map<TString, TRef<TSoundMA>> m_Sounds;
 	};
 }

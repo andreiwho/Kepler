@@ -5,14 +5,14 @@
 namespace ke
 {
 
-	TVertexBuffer::TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TVertexBuffer::TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 		: AccessFlags(InAccessFlags)
 		, Size(Data ? Data->GetSize() : 0)
 		, Stride(Data ? Data->GetStride() : 0)
 	{
 	}
 
-	TRef<TVertexBuffer> TVertexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TRef<TVertexBuffer> TVertexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		return GetRenderDevice()->CreateVertexBuffer(InAccessFlags, Data);
 	}

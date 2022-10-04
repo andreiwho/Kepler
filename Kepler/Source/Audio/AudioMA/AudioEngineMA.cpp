@@ -6,35 +6,35 @@
 namespace ke
 {
 
-	TAudioEngineMA::TAudioEngineMA()
+	AudioEngineMA::AudioEngineMA()
 	{
 		MACHECK(ma_engine_init(nullptr, &m_Engine));
 		KEPLER_INFO(LogAudio, "MiniAudio Engine initialized");
 	}
 
-	TAudioEngineMA::~TAudioEngineMA()
+	AudioEngineMA::~AudioEngineMA()
 	{
 		m_Sounds.Clear();
 		ma_engine_uninit(&m_Engine);
 		KEPLER_INFO(LogAudio, "MiniAudio Engine terminated");
 	}
 
-	void TAudioEngineMA::PlayInline(const TString& path)
+	void AudioEngineMA::PlayInline(const TString& path)
 	{
 		ma_engine_play_sound(&m_Engine, VFSResolvePath(path).c_str(), nullptr);
 	}
 
-	void TAudioEngineMA::Play(const TString& path, ESoundCreateFlags flags)
+	void AudioEngineMA::Play(const TString& path, ESoundCreateFlags flags)
 	{
 		GetOrLoadSound(path, flags)->Play();
 	}
 
-	void TAudioEngineMA::PlayAt(const TString& path, float3 position, ESoundCreateFlags flags)
+	void AudioEngineMA::PlayAt(const TString& path, float3 position, ESoundCreateFlags flags)
 	{
 		GetOrLoadSound(path, flags)->Play(position);
 	}
 
-	void TAudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
+	void AudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
 	{
 		if (bAlsoForPlaying)
 		{
@@ -50,7 +50,7 @@ namespace ke
 		}
 	}
 
-	TRef<TSound> TAudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
+	TRef<TSound> AudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
 	{
 		if (!m_Sounds.Contains(path))
 		{

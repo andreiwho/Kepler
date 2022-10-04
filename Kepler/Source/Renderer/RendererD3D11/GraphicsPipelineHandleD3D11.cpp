@@ -138,7 +138,7 @@ namespace ke
 				CRASH();
 			});
 		
-		TDynArray<D3D11_INPUT_ELEMENT_DESC> Elements;
+		Array<D3D11_INPUT_ELEMENT_DESC> Elements;
 		Elements.Reserve(Config.VertexInput.VertexLayout.GetAttributes().GetLength());
 		
 		for (const TVertexAttribute& Element : Config.VertexInput.VertexLayout.GetAttributes())
@@ -192,7 +192,7 @@ namespace ke
 		}
 		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
 		CHECK(Device);
-		TRef<TDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
+		TRef<AsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
 		HRCHECK(Device->CreateInputLayout(Elements.GetData(), (UINT)Elements.GetLength(), VertexShaderBytecode->GetData(), VertexShaderBytecode->GetSize(), &InputLayout));
 	}
 

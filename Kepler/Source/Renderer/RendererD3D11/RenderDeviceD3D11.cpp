@@ -40,7 +40,7 @@ namespace ke
 #endif
 		CreateClassLinkage();
 
-		m_ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
+		m_ImmediateCommandList = MakeRef(New<GraphicsCommandListImmediateD3D11>(ImmediateContext));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -79,7 +79,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -114,10 +114,10 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDynArray<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	Array<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifdef ENABLE_DEBUG
-		TDynArray<TString> OutMessages;
+		Array<TString> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		for (u64 idx = InfoMsgStartIndex; idx < InfoMsgEndIndex; ++idx)
 		{
@@ -173,7 +173,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
+	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<AsyncDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -189,15 +189,15 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	TRef<RenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
-		return MakeRef(New<TRenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
+		return MakeRef(New<RenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TDepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	TRef<DepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
-		return MakeRef(New<TDepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
+		return MakeRef(New<DepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -289,7 +289,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
+	AsyncDataBlobD3D11::AsyncDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
 		: Stride(ElemSize)
 	{
 		if (Size > 0)
@@ -304,21 +304,21 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	const void* TDataBlobD3D11::GetData() const
+	const void* AsyncDataBlobD3D11::GetData() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferPointer();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	usize TDataBlobD3D11::GetSize() const
+	usize AsyncDataBlobD3D11::GetSize() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferSize();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TDataBlobD3D11::Write(const void* Data, usize Size)
+	void AsyncDataBlobD3D11::Write(const void* Data, usize Size)
 	{
 		CHECK(Blob);
 		CHECK(Size <= GetSize());

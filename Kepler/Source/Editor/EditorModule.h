@@ -37,11 +37,11 @@ namespace ke
 		_180Degrees,
 	};
 
-	class TEditorModule : public TApplicationModule
+	class EditorModule : public EngineModule
 	{
 	public:
-		TEditorModule(TWindow* pWindow);
-		~TEditorModule();
+		EditorModule(TWindow* pWindow);
+		~EditorModule();
 
 		float2 GetViewportSize(EViewportIndex idx);
 

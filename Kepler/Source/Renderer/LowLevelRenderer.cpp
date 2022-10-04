@@ -80,6 +80,7 @@ namespace ke
 
 
 		m_SwapChainFrame = (m_SwapChainFrame + 1) % m_SwapChainFrameCount;
+		m_NextFrameIndex = (m_NextFrameIndex + 1) % m_SwapChainFrameCount;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -126,7 +127,7 @@ namespace ke
 			float2 UV{};
 		};
 
-		TDynArray<TVertex> QuadVertices =
+		Array<TVertex> QuadVertices =
 		{
 			{{-1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 			{{ 1.0f, 1.0f, 0.0f }, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -134,7 +135,7 @@ namespace ke
 			{{-1.0f,-1.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
 		};
 
-		TDynArray<u32> indices = { 0,1,3,1,2,3 };
+		Array<u32> indices = { 0,1,3,1,2,3 };
 
 		auto task = TRenderThread::Submit(
 			[&, this]
@@ -149,8 +150,8 @@ namespace ke
 				config.ParamMapping = pShader->GetReflection()->ParamMapping;
 
 				m_ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(pShader, config));
-				m_ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(QuadVertices));
-				m_ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(indices));
+				m_ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(QuadVertices));
+				m_ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
 				m_ScreenQuad.Samplers = m_ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
 			});
 		Await(task);

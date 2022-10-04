@@ -8,7 +8,7 @@
 
 namespace ke
 {
-	class TCommandListImmediate;
+	class GraphicsCommandListImmediate;
 
 	// What pipeline needs
 	// - Input layout.
@@ -50,7 +50,7 @@ namespace ke
 		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
-	class TGraphicsPipelineHandle : public TRefCounted
+	class TGraphicsPipelineHandle : public IntrusiveRefCounted
 	{
 	public:
 		static TRef<TGraphicsPipelineHandle> CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
@@ -69,16 +69,16 @@ namespace ke
 		TRef<TGraphicsPipeline> GetPipeline(const TString& Name) const;
 
 	private:
-		TChaoticMap<TString, TRef<TGraphicsPipeline>> Pipelines;
+		Map<TString, TRef<TGraphicsPipeline>> Pipelines;
 	};
 
-	class TGraphicsPipeline : public TRefCounted
+	class TGraphicsPipeline : public IntrusiveRefCounted
 	{
 	public:
 		TGraphicsPipeline() = default;
 		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
-		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);
+		virtual void UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList);
 
 		TRef<TShader> GetShader() const { return Shader; }
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }

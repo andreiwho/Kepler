@@ -4,10 +4,10 @@
 
 namespace ke
 {
-	class TCamera
+	class MathCamera
 	{
 	public:
-		TCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());
+		MathCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());
 
 		matrix4x4 GenerateViewProjectionMatrix() const;
 		matrix4x4 GenerateViewMatrix() const;

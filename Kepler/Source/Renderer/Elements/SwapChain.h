@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	class TSwapChain : public TRefCounted
+	class TSwapChain : public IntrusiveRefCounted
 	{
 	public:
 		TSwapChain(class TWindow* Window);

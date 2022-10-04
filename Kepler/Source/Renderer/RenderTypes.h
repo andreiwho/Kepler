@@ -114,9 +114,9 @@ namespace ke
 			return *this;
 		}
 
-		inline TDynArray<EShaderStageFlags::Type> Separate() const
+		inline Array<EShaderStageFlags::Type> Separate() const
 		{
-			TDynArray<EShaderStageFlags::Type> OutFlags = 0;
+			Array<EShaderStageFlags::Type> OutFlags = 0;
 
 			auto EmplaceIf = [&](EShaderStageFlags::Type CheckMask)
 			{
@@ -157,13 +157,13 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	class TDataBlob : public TRefCounted
+	class AsyncDataBlob : public IntrusiveRefCounted
 	{
 	public:
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
+		static TRef<AsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
 
 		template<typename T>
-		static TRef<TDataBlob> New(const TDynArray<T>& data)
+		static TRef<AsyncDataBlob> New(const Array<T>& data)
 		{
 			return CreateGraphicsDataBlob(data.GetData(), data.GetLength() * sizeof(T), sizeof(T));
 		}

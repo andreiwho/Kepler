@@ -7,8 +7,8 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TRenderTarget2D_D3D11::TRenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-		:	TRenderTarget2D(InImage, MipLevel, ArrayLayer)
+	RenderTarget2D_D3D11::RenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+		:	RenderTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
@@ -25,7 +25,7 @@ namespace ke
 		}
 	}
 
-	TRenderTarget2D_D3D11::~TRenderTarget2D_D3D11()
+	RenderTarget2D_D3D11::~RenderTarget2D_D3D11()
 	{
 		if (!m_RenderTarget)
 		{
@@ -41,8 +41,8 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	TDepthStencilTarget2D_D3D11::TDepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer) 
-		:	TDepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer) 
+		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
@@ -55,13 +55,13 @@ namespace ke
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			HRCHECK(Device->GetDevice()->CreateDepthStencilView(Texture, &Desc, &View));
+			HRCHECK(Device->GetDevice()->CreateDepthStencilView(Texture, &Desc, &m_View));
 		}
 	}
 
-	TDepthStencilTarget2D_D3D11::~TDepthStencilTarget2D_D3D11()
+	DepthStencilTarget2D_D3D11::~DepthStencilTarget2D_D3D11()
 	{
-		if (!View)
+		if (!m_View)
 		{
 			return;
 		}
@@ -69,7 +69,7 @@ namespace ke
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			Device->RegisterPendingDeleteResource(View);
+			Device->RegisterPendingDeleteResource(m_View);
 		}
 	}
 

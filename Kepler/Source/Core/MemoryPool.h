@@ -13,6 +13,7 @@ namespace ke
 
 	class TMemoryPool
 	{
+		using PoolAllocator = std::pmr::unsynchronized_pool_resource;
 	public:
 		TMemoryPool(usize size);
 
@@ -32,6 +33,7 @@ namespace ke
 		usize m_Size{};
 
 		std::pmr::monotonic_buffer_resource m_ContiguousMemoryResource;
-		std::pmr::synchronized_pool_resource m_PoolManager;
+		PoolAllocator m_PoolManager;
+		std::mutex m_Mutex;
 	};
 }

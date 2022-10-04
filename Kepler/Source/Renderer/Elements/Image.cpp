@@ -23,7 +23,7 @@ namespace ke
 	{
 	}
 
-	void TImage2D::Write(TRef<TCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data)
+	void TImage2D::Write(TRef<GraphicsCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		if (pImmCmd)

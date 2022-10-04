@@ -8,7 +8,7 @@ namespace ke
 {
 	struct TImageData
 	{
-		TRef<TDataBlob> Data;
+		TRef<AsyncDataBlob> Data;
 		u32 Width, Height, Components;
 	};
 
@@ -30,6 +30,6 @@ namespace ke
 		TRef<TTextureSampler2D> LoadSamplerCached(const TString& Path);
 
 	private:
-		TChaoticMap<TString, TRef<TTextureSampler2D>> LoadedSamplers;
+		Map<TString, TRef<TTextureSampler2D>> LoadedSamplers;
 	};
 }

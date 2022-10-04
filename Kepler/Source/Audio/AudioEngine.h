@@ -5,18 +5,18 @@
 
 namespace ke
 {
-	class TAudioEngine
+	class AudioEngine
 	{
-		static TAudioEngine* Instance;
+		static AudioEngine* Instance;
 
 	protected:
-		TAudioEngine();
+		AudioEngine();
 
 	public:
-		virtual ~TAudioEngine() = default;
+		virtual ~AudioEngine() = default;
 
-		static TAudioEngine* Get() { return Instance; }
-		static TSharedPtr<TAudioEngine> CreateAudioEngine(EAudioEngineAPI api = EAudioEngineAPI::Default);
+		static AudioEngine* Get() { return Instance; }
+		static TSharedPtr<AudioEngine> CreateAudioEngine(EAudioEngineAPI api = EAudioEngineAPI::Default);
 		virtual void PlayInline(const TString& path) = 0;
 		virtual void Play(const TString& path, ESoundCreateFlags flags = 0) = 0;
 		virtual void PlayAt(const TString& path, float3 position, ESoundCreateFlags flags = 0) = 0;

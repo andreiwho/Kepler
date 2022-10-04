@@ -5,7 +5,7 @@
 namespace ke
 {
 	class TPipelineParamMapping;
-	struct TShaderModuleReflection : public TRefCounted
+	struct TShaderModuleReflection : public IntrusiveRefCounted
 	{
 		TVertexLayout VertexLayout{};
 		TRef<TPipelineParamMapping> ParamMapping;

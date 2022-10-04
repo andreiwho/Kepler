@@ -39,7 +39,7 @@ namespace ke
 		NameComp.Name = Name;
 		EntityRegistry.emplace<TIdComponent>(EntityId);
 		EntityRegistry.emplace<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<TCameraComponent>(EntityId, Fov, Width, Height, Near, Far);
+		EntityRegistry.emplace<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
 		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 
 		if (!IsValidEntity(MainCamera))
@@ -94,7 +94,7 @@ namespace ke
 		if (IsValidEntity(MainCamera))
 		{
 			auto& CameraEntity = GetEntityFromId(MainCamera);
-			auto& camera = GetComponent<TCameraComponent>(MainCamera).GetCamera();
+			auto& camera = GetComponent<CameraComponent>(MainCamera).GetCamera();
 			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
@@ -104,7 +104,7 @@ namespace ke
 			{
 				TRef<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());
-				Material->WriteCamera(GetComponent<TCameraComponent>(MainCamera).GetCamera());
+				// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
 				Material->WriteId((i32)Id);
 			});
 
@@ -130,7 +130,7 @@ namespace ke
 
 	bool TGameWorld::IsCamera(TGameEntityId Entity) const
 	{
-		return HasComponent<TCameraComponent>(Entity);
+		return HasComponent<CameraComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()

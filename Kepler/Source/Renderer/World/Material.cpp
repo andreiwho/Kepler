@@ -20,7 +20,7 @@ namespace ke
 			}));
 	}
 
-	void TMaterial::RT_Update(TRef<class TCommandListImmediate> pImmCmd)
+	void TMaterial::RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd)
 	{
 		CHECK(IsRenderThread());
 		m_ParamBuffer->RT_UploadToGPU(pImmCmd);
@@ -38,7 +38,7 @@ namespace ke
 	}
 
 	// BIG TODO: Use global renderer buffer in shaders to represent the camera state
-	void TMaterial::WriteCamera(TCamera camera)
+	void TMaterial::WriteCamera(MathCamera camera)
 	{
 		matrix4x4 viewProj = glm::transpose(camera.GenerateViewProjectionMatrix());
 		m_ParamBuffer->Write("ViewProjection", &viewProj);

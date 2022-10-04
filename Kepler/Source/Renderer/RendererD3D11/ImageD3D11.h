@@ -13,7 +13,7 @@ namespace ke
 
 		inline auto GetImage() const { return Image; }
 		inline auto GetReadbackImage() const { return ReadbackImage; }
-		void RequireReadbackCopy(TRef<class TCommandListImmediate> pImmCtx);
+		void RequireReadbackCopy(TRef<class GraphicsCommandListImmediate> pImmCtx);
 
 	private:
 		ID3D11Texture2D* Image{};

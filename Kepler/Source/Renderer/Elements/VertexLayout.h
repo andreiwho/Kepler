@@ -41,10 +41,10 @@ namespace ke
 			Attributes.EmplaceBack(Attribute);
 		}
 
-		const TDynArray<TVertexAttribute>& GetAttributes() const { return Attributes; }
+		const Array<TVertexAttribute>& GetAttributes() const { return Attributes; }
 
 	protected:
-		TDynArray<TVertexAttribute> Attributes;
+		Array<TVertexAttribute> Attributes;
 		usize Stride{};
 	};
 }

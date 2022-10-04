@@ -14,7 +14,7 @@ namespace ke
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 argc, char** ppArgv)
 	{
-		TDynArray<TString> cmdArgs;
+		Array<TString> cmdArgs;
 		for (i32 idx = 1; idx < argc; ++idx)
 		{
 			if (char const* const arg = ppArgv[idx])
@@ -38,7 +38,7 @@ namespace ke
 			// Platform must be initialized after the log and 
 			auto pPlatform = TPlatform::CreatePlatformInterface();
 
-			std::shared_ptr<TApplication> pApp;
+			std::shared_ptr<Engine> pApp;
 			{
 				TApplicationLaunchParams params{};
 				params.CommandLine = ReadCommandLineArgs(argc, ppArgv);
