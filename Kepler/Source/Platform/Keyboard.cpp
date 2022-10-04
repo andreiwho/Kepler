@@ -1,6 +1,6 @@
 #include "Keyboard.h"
 
-namespace Kepler
+namespace ke
 {
 
 	void TKeyboardState::OnKeyPressed(EKeyCode code)
@@ -9,7 +9,7 @@ namespace Kepler
 		{
 			return;
 		}
-		KeyStates[code] = true;
+		m_KeyStates[code] = true;
 	}
 
 	void TKeyboardState::OnKeyReleased(EKeyCode code)
@@ -19,7 +19,7 @@ namespace Kepler
 		{
 			return;
 		}
-		KeyStates[code] = false;
+		m_KeyStates[code] = false;
 	}
 
 }

@@ -11,7 +11,7 @@
 #  undef CreateWindow
 #endif
 
-namespace Kepler
+namespace ke
 {
 	class TPlatformGLFW : public TPlatform
 	{
@@ -19,13 +19,13 @@ namespace Kepler
 		TPlatformGLFW();
 		~TPlatformGLFW();
 
-		virtual TWindow* CreatePlatformWindow(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params = {}) override;
+		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) override;
 		virtual void Update() override;
 		virtual bool HasActiveMainWindow() const override;
-		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
-		static bool HandleCrashReported_Impl(const TString& Message);
-		inline virtual bool IsMainWindow(TWindow* Window) const override { return !Windows.IsEmpty() && (Windows[0].get() == Window); }
-		virtual void SetCursorMode(ECursorMode Mode) override;
+		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
+		static bool HandleCrashReported_Impl(const TString& msg);
+		inline virtual bool IsMainWindow(TWindow* pWindow) const override { return !m_Windows.IsEmpty() && (m_Windows[0].get() == pWindow); }
+		virtual void SetCursorMode(ECursorMode mode) override;
 
 	private:
 		void DestroyClosedWindows();
@@ -35,7 +35,7 @@ namespace Kepler
 		virtual void CloseAllWindows() override;
 
 	private:
-		TDynArray<std::unique_ptr<TWindow>> Windows;
+		Array<std::unique_ptr<TWindow>> m_Windows;
 	};
 }
 #endif

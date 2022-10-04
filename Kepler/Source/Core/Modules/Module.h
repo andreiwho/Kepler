@@ -2,18 +2,18 @@
 #include "Core/Core.h"
 #include "Platform/PlatformEvent.h"
 
-namespace Kepler
+namespace ke
 {
-	class TApplicationModule : public TRefCounted
+	class EngineModule : public IntrusiveRefCounted
 	{
 	public:
 		virtual void OnAttach() {}
 		virtual void OnInit() {}
 		virtual void OnTerminate() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate(float DeltaTime) {}
+		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnRenderGUI() {}
-		virtual void OnPlatformEvent(const TPlatformEventBase& Event) {}
+		virtual void OnPlatformEvent(const TPlatformEventBase& event) {}
 	};
 }

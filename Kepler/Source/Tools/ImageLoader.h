@@ -4,11 +4,11 @@
 #include "Async/Async.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TImageData
 	{
-		TRef<TDataBlob> Data;
+		TRef<AsyncDataBlob> Data;
 		u32 Width, Height, Components;
 	};
 
@@ -30,6 +30,6 @@ namespace Kepler
 		TRef<TTextureSampler2D> LoadSamplerCached(const TString& Path);
 
 	private:
-		TChaoticMap<TString, TRef<TTextureSampler2D>> LoadedSamplers;
+		Map<TString, TRef<TTextureSampler2D>> LoadedSamplers;
 	};
 }

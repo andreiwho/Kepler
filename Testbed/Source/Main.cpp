@@ -1,10 +1,10 @@
 #include "Kepler.h"
 
-using namespace Kepler;
+using namespace ke;
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogTestbed);
 
-class TTestbedModule : public TApplicationModule
+class TTestbedModule : public EngineModule
 {
 public:
 	virtual void OnAttach() override
@@ -13,9 +13,9 @@ public:
 	}
 };
 
-class TTestbed : public Kepler::TApplication
+class TTestbed : public ke::Engine
 {
-	using Base = TApplication;
+	using Base = Engine;
 
 public:
 	TTestbed(const TApplicationLaunchParams& LaunchParams)
@@ -30,9 +30,9 @@ protected:
 	}
 };
 
-TSharedPtr<TApplication> Kepler::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
+TSharedPtr<Engine> ke::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
-	TSharedPtr<TApplication> App = MakeShared<TTestbed>(LaunchParams);
+	TSharedPtr<Engine> App = MakeShared<TTestbed>(LaunchParams);
 	// ... Do some processing if needed
 	return App;
 }

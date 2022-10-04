@@ -1,6 +1,6 @@
 #include "EntityHelper.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TEntityHandle::TEntityHandle(TRef<TGameWorld> World, TGameEntityId EntityId)

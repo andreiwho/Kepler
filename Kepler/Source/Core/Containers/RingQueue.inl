@@ -1,101 +1,101 @@
 #pragma once
 
-namespace Kepler
+namespace ke
 {
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool TRingQueue<T, ThreadPolicy>::Enqueue(T&& Value)
+	bool TRingQueue<T, ThreadPolicy>::Enqueue(T&& value)
 	{
 		if constexpr (ThreadPolicy == ERingQueueThreadPolicy::Safe)
 		{
-			std::lock_guard lck{ Mutex };
-			return InternalEnqueue(std::move(Value));
+			std::lock_guard lck{ m_Mutex };
+			return InternalEnqueue(std::move(value));
 		}
 		else
 		{
-			return InternalEnqueue(std::move(Value));
+			return InternalEnqueue(std::move(value));
 		}
 	}
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool TRingQueue<T, ThreadPolicy>::Dequeue(T& OutValue)
+	bool TRingQueue<T, ThreadPolicy>::Dequeue(T& outValue)
 	{
 		if constexpr (ThreadPolicy == ERingQueueThreadPolicy::Safe)
 		{
-			std::lock_guard lck{ Mutex };
-			return InternalDequeue(OutValue);
+			std::lock_guard lck{ m_Mutex };
+			return InternalDequeue(outValue);
 		}
 		else
 		{
-			return InternalDequeue(OutValue);
+			return InternalDequeue(outValue);
 		}
 	}
 
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool TRingQueue<T, ThreadPolicy>::Peek(T& OutValue) const
+	bool TRingQueue<T, ThreadPolicy>::Peek(T& outValue) const
 	{
 		if constexpr (ThreadPolicy == ERingQueueThreadPolicy::Safe)
 		{
-			std::lock_guard lck{ Mutex };
-			return InternalPeek(OutValue);
+			std::lock_guard lck{ m_Mutex };
+			return InternalPeek(outValue);
 		}
 		else
 		{
-			return InternalPeek(OutValue);
+			return InternalPeek(outValue);
 		}
 	}
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool TRingQueue<T, ThreadPolicy>::InternalEnqueue(T&& Value)
+	bool TRingQueue<T, ThreadPolicy>::InternalEnqueue(T&& value)
 	{
-		if (!Memory)
+		if (!m_pMemory)
 		{
 			return false;
 		}
 
-		CHECK(Length != Capacity);
-		new(Memory + Tail) T(std::move(Value));
-		Tail = (Tail + 1) % Capacity;
-		Length++;
+		CHECK(m_Length != m_Capacity);
+		new(m_pMemory + m_Tail) T(std::move(value));
+		m_Tail = (m_Tail + 1) % m_Capacity;
+		m_Length++;
 		return true;
 	}
 
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool Kepler::TRingQueue<T, ThreadPolicy>::InternalDequeue(T& OutValue)
+	bool ke::TRingQueue<T, ThreadPolicy>::InternalDequeue(T& outValue)
 	{
-		if (!Memory)
+		if (!m_pMemory)
 		{
 			return false;
 		}
 
-		if (Length == 0)
+		if (m_Length == 0)
 		{
 			return false;
 		}
 
-		new(&OutValue) T(std::move(Memory[Head]));
-		Memory[Head].~T();
-		Head = (Head + 1) % Capacity;
-		Length--;
+		new(&outValue) T(std::move(m_pMemory[m_Head]));
+		m_pMemory[m_Head].~T();
+		m_Head = (m_Head + 1) % m_Capacity;
+		m_Length--;
 		return true;
 	}
 
 
 	template<typename T, ERingQueueThreadPolicy ThreadPolicy>
-	bool TRingQueue<T, ThreadPolicy>::InternalPeek(T& OutValue) const
+	bool TRingQueue<T, ThreadPolicy>::InternalPeek(T& outValue) const
 	{
-		if (!Memory)
+		if (!m_pMemory)
 		{
 			return false;
 		}
 
-		if (Length == 0)
+		if (m_Length == 0)
 		{
 			return false;
 		}
 
-		new(&OutValue) T(Memory[Head]);
+		new(&outValue) T(m_pMemory[m_Head]);
 		return true;
 	}
 }

@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TImage : public TEnableRefFromThis<TImage>
@@ -29,21 +29,6 @@ namespace Kepler
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TImage1D : public TImage
-	{
-	protected:
-		TImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
-
-	public:
-		inline u32 GetWidth() const { return Width; }
-
-		static TRef<TImage1D> New(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
-
-	protected:
-		u32 Width{};
-	};
-
-	//////////////////////////////////////////////////////////////////////////
 	class TImage2D : public TImage
 	{
 	protected:
@@ -54,32 +39,10 @@ namespace Kepler
 		inline u32 GetHeight() const { return Height; }
 		
 		static TRef<TImage2D> New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
-		void Write(TRef<class TCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data);
+		void Write(TRef<class GraphicsCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data);
 
 	protected:
 		u32 Width{};
 		u32 Height{};
 	};
-
-	//////////////////////////////////////////////////////////////////////////
-	class TImage3D : public TImage
-	{
-	protected:
-		TImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
-
-	public:
-		inline u32 GetWidth() const { return Width; }
-		inline u32 GetHeight() const { return Height; }
-		inline u32 GetDepth() const { return Depth; }
-
-		static TRef<TImage3D> New(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
-
-	protected:
-		u32 Width{};
-		u32 Height{};
-		u32 Depth{};
-	};
-
-	// TODO:
-	// Add class for cube textures
 }

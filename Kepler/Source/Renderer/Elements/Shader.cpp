@@ -1,6 +1,6 @@
 #include "Shader.h"
 
-namespace Kepler
+namespace ke
 {
 	TShaderCache* TShaderCache::Instance;
 
@@ -25,7 +25,7 @@ namespace Kepler
 		LoadedShaders.Clear();
 	}
 
-	TShader::TShader(const TString& InName, const TDynArray<TShaderModule>& ShaderModules)
+	TShader::TShader(const TString& InName, const Array<TShaderModule>& ShaderModules)
 		:	Name(InName)
 	{
 		// Combine the shader stage mask

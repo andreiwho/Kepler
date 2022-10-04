@@ -4,7 +4,7 @@
 #include "../RenderTypes.h"
 #include <type_traits>
 
-namespace Kepler
+namespace ke
 {
 
 	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
@@ -44,6 +44,10 @@ namespace Kepler
 		CD3D11_RASTERIZER_DESC Desc(D3D11_DEFAULT);
 		Desc.ScissorEnable = Config.Rasterizer.bEnableScissor;
 
+		if (Config.Rasterizer.bRasterDisabled)
+		{
+			return;
+		}
 		Desc.FillMode = std::invoke(
 			[&Config]
 			{
@@ -93,6 +97,32 @@ namespace Kepler
 					return D3D11_DEPTH_WRITE_MASK_ZERO;
 				}
 			});
+
+		Desc.DepthFunc = std::invoke(
+			[&Config]
+			{
+				switch (Config.DepthStencil.DepthFunc)
+				{
+				case EDepthComparissonMode::None:
+					return D3D11_COMPARISON_NEVER;
+				case EDepthComparissonMode::Less:
+					return D3D11_COMPARISON_LESS;
+				case EDepthComparissonMode::LEqual:
+					return D3D11_COMPARISON_LESS_EQUAL;
+				case EDepthComparissonMode::Greater:
+					return D3D11_COMPARISON_GREATER;
+				case EDepthComparissonMode::GEqual:
+					return D3D11_COMPARISON_GREATER_EQUAL;
+				case EDepthComparissonMode::Equal:
+					return D3D11_COMPARISON_EQUAL;
+				case EDepthComparissonMode::Always:
+					return D3D11_COMPARISON_ALWAYS;
+				default:
+					break;
+				}
+				return D3D11_COMPARISON_LESS;
+			});
+
 		Desc.StencilEnable = Config.DepthStencil.bStencilEnable;
 		Desc.FrontFace = std::invoke([&Config]
 			{
@@ -138,7 +168,7 @@ namespace Kepler
 				CRASH();
 			});
 		
-		TDynArray<D3D11_INPUT_ELEMENT_DESC> Elements;
+		Array<D3D11_INPUT_ELEMENT_DESC> Elements;
 		Elements.Reserve(Config.VertexInput.VertexLayout.GetAttributes().GetLength());
 		
 		for (const TVertexAttribute& Element : Config.VertexInput.VertexLayout.GetAttributes())
@@ -192,7 +222,7 @@ namespace Kepler
 		}
 		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
 		CHECK(Device);
-		TRef<TDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
+		TRef<AsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
 		HRCHECK(Device->CreateInputLayout(Elements.GetData(), (UINT)Elements.GetLength(), VertexShaderBytecode->GetData(), VertexShaderBytecode->GetSize(), &InputLayout));
 	}
 

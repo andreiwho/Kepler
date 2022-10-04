@@ -1,7 +1,7 @@
 #pragma once
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	struct THLSLIncludeResolverD3D11 : public ID3DInclude
 	{

@@ -1,6 +1,6 @@
 #include "MaterialComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	TMaterialComponent::TMaterialComponent(TRef<TMaterial> InMaterial)
 		: Material(InMaterial)

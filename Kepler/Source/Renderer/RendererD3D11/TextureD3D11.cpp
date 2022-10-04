@@ -3,7 +3,7 @@
 #include "ImageD3D11.h"
 #include "RenderDeviceD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	TTextureSampler2D_D3D11::TTextureSampler2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 		: TTextureSampler2D(InImage)

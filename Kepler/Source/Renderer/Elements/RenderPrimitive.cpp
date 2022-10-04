@@ -1,7 +1,7 @@
 #include "RenderPrimitive.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
 
 	void TRenderPrimitive::AddRef() const

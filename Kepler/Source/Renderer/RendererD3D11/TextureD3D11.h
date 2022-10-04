@@ -2,7 +2,7 @@
 #include "Renderer/Elements/Texture.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTextureSampler2D_D3D11 : public TTextureSampler2D
 	{

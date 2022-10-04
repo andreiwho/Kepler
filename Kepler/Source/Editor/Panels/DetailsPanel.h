@@ -2,12 +2,12 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 
-namespace Kepler
+namespace ke
 {
 	class TEditorDetailsPanel
 	{
 	public:
-		TEditorDetailsPanel(TRef<TGameWorld> InWorldContext, TGameEntityId InSelectedEntity);
+		TEditorDetailsPanel(TRef<TGameWorld> pWorld, TGameEntityId entity);
 		
 		void Draw();
 
@@ -18,7 +18,7 @@ namespace Kepler
 		void DrawEntityInfo();
 
 	private:
-		TRef<TGameWorld> WorldContext;
-		TGameEntityId SelectedEntity;
+		TRef<TGameWorld> m_pWorld;
+		TGameEntityId m_SelectedEntity;
 	};
 }

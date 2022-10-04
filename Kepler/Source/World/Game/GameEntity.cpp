@@ -2,7 +2,7 @@
 #include "GameWorld.h"
 #include "Components/TransformComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogEntity);
 

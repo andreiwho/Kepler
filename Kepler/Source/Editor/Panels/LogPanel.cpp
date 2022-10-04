@@ -2,7 +2,7 @@
 #include "../Misc/EditorLogSink.h"
 #include <iostream>
 
-namespace Kepler
+namespace ke
 {
 
 	TLogPanel::TLogPanel()
@@ -15,7 +15,7 @@ namespace Kepler
 		TEditorLogSink::UnregisterLogReceiver(this);
 	}
 
-	void TLogPanel::ReceiveLog(const spdlog::details::log_msg& Msg, const spdlog::memory_buf_t& Formatted)
+	void TLogPanel::ReceiveLog(const spdlog::details::log_msg& msg, const spdlog::memory_buf_t& formatted)
 	{
 	}
 

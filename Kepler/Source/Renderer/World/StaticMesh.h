@@ -3,8 +3,9 @@
 #include "Renderer/Elements/VertexBuffer.h"
 #include "Renderer/Elements/IndexBuffer.h"
 
-namespace Kepler
+namespace ke
 {
+	// TODO: Make standard vertex
 	struct TStaticMeshVertex
 	{
 		float3 Position;
@@ -15,17 +16,17 @@ namespace Kepler
 
 	struct TStaticMeshSection
 	{
-		TDynArray<TStaticMeshVertex> Vertices{};
-		TDynArray<u32> Indices{};
+		Array<TStaticMeshVertex> Vertices{};
+		Array<u32> Indices{};
 	};
 
 	class TStaticMesh : public TEnableRefFromThis<TStaticMesh>
 	{
 	public:
 		TStaticMesh() = default;
-		TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
-		TStaticMesh(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices);
-		TStaticMesh(const TDynArray<TStaticMeshSection>& InSections);
+		TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer);
+		TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices);
+		TStaticMesh(const Array<TStaticMeshSection>& sections);
 
 	public:
 		struct TInternalSection
@@ -34,32 +35,32 @@ namespace Kepler
 			TRef<TIndexBuffer> IndexBuffer{};
 		};
 
-		void SetSections(const TDynArray<TStaticMeshSection>& Sections);
+		void SetSections(const Array<TStaticMeshSection>& sections);
 
 		static TRef<TStaticMesh> New()
 		{
-			return MakeRef(Kepler::New<TStaticMesh>());
+			return MakeRef(ke::New<TStaticMesh>());
 		}
 
-		static TRef<TStaticMesh> New(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
+		static TRef<TStaticMesh> New(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(InVertexBuffer, InIndexBuffer));
+			return MakeRef(ke::New<TStaticMesh>(pVertexBuffer, pIndexBuffer));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+		static TRef<TStaticMesh> New(const Array<TStaticMeshVertex>& pVertices, const Array<u32>& pIndices)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(Vertices, InIndices));
+			return MakeRef(ke::New<TStaticMesh>(pVertices, pIndices));
 		}
 
-		static TRef<TStaticMesh> New(const TDynArray<TStaticMeshSection>& Sections)
+		static TRef<TStaticMesh> New(const Array<TStaticMeshSection>& sections)
 		{
-			return MakeRef(Kepler::New<TStaticMesh>(Sections));
+			return MakeRef(ke::New<TStaticMesh>(sections));
 		}
 
-		const TDynArray<TInternalSection>& GetSections() const { return Sections; }
+		const Array<TInternalSection>& GetSections() const { return m_Sections; }
 
 	private:
-		TDynArray<TInternalSection> Sections;
+		Array<TInternalSection> m_Sections;
 	
 	};
 }

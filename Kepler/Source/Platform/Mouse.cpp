@@ -1,6 +1,6 @@
 #include "Mouse.h"
 
-namespace Kepler
+namespace ke
 {
 
 	void TMouseState::OnButtonPressed(EMouseButton button)
@@ -9,7 +9,7 @@ namespace Kepler
 		{
 			return;
 		}
-		ButtonStateMask |= button;
+		m_ButtonStateMask |= button;
 	}
 
 	void TMouseState::OnButtonReleased(EMouseButton button)
@@ -18,14 +18,14 @@ namespace Kepler
 		{
 			return;
 		}
-		ButtonStateMask &= ~button;
+		m_ButtonStateMask &= ~button;
 	}
 
 	void TMouseState::OnMouseMove(TMouseVector2f newPosition)
 	{
-		const TMouseVector2f oldPos = Position;
-		Position = newPosition;
-		Offset = {Position.X - oldPos.X, Position.Y - oldPos.Y};
+		const TMouseVector2f oldPos = m_Position;
+		m_Position = newPosition;
+		m_Offset = {m_Position.X - oldPos.X, m_Position.Y - oldPos.Y};
 	}
 
 	bool TMouseState::GetButtonState(EMouseButton button) const
@@ -34,13 +34,13 @@ namespace Kepler
 		{
 			return false;
 		}
-		return ButtonStateMask & button;
+		return m_ButtonStateMask & button;
 	}
 
 	void TMouseState::OnUpdate()
 	{
-		OldOffset = Offset;
-		Offset = TMouseVector2f(0.0f, 0.0f);
+		m_OldOffset = m_Offset;
+		m_Offset = TMouseVector2f(0.0f, 0.0f);
 	}
 
 }

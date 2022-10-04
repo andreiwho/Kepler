@@ -30,13 +30,13 @@
 #include "Platform/Platform.h"
 #include "World/Game/Helpers/EntityHelper.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TEditorModule::TEditorModule(TWindow* pWindow)
-		: MainWindow(pWindow)
+	EditorModule::EditorModule(TWindow* pWindow)
+		: m_pMainWindow(pWindow)
 	{
-		for (auto& Size : ViewportSizes)
+		for (auto& Size : m_ViewportSizes)
 		{
 			Size = float2(pWindow->GetWidth(), pWindow->GetHeight());
 		}
@@ -72,17 +72,17 @@ namespace Kepler
 		switch (GRenderAPI)
 		{
 #ifdef WIN32
-		case Kepler::ERenderAPI::DirectX11:
+		case ke::ERenderAPI::DirectX11:
 		{
-			auto InitTask = TRenderThread::Submit([]
+			auto initTask = TRenderThread::Submit([]
 				{
-					auto Device = RefCast<TRenderDeviceD3D11>(TLowLevelRenderer::Get()->GetRenderDevice());
-					auto DeviceHandle = Device->GetDevice();
-					auto ContextHandle = Device->GetImmediateContext();
-					CHECK(ImGui_ImplDX11_Init(DeviceHandle, ContextHandle));
+					auto pDevice = RefCast<TRenderDeviceD3D11>(TLowLevelRenderer::Get()->GetRenderDevice());
+					auto pDeviceHandle = pDevice->GetDevice();
+					auto pContextHandle = pDevice->GetImmediateContext();
+					CHECK(ImGui_ImplDX11_Init(pDeviceHandle, pContextHandle));
 					KEPLER_INFO(LogEditor, "Editor layer D3D11 Backend initialized on render thread");
 				});
-			Await(InitTask);
+			Await(initTask);
 		}
 #endif
 		break;
@@ -92,9 +92,9 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TEditorModule::~TEditorModule()
+	EditorModule::~EditorModule()
 	{
-		LogPanel.reset();
+		m_LogPanel.reset();
 		Await(TRenderThread::Submit([]
 			{
 				ImGui_ImplDX11_Shutdown();
@@ -105,16 +105,16 @@ namespace Kepler
 		KEPLER_INFO(LogEditor, "Terminating editor module");
 	}
 
-	float2 TEditorModule::GetViewportSize(EViewportIndex Index)
+	float2 EditorModule::GetViewportSize(EViewportIndex idx)
 	{
-		return ViewportSizes[(u32)Index];
+		return m_ViewportSizes[(u32)idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::BeginGUIPass()
+	void EditorModule::BeginGUIPass()
 	{
 		KEPLER_PROFILE_SCOPE();
-		auto Task = TRenderThread::Submit(
+		auto task = TRenderThread::Submit(
 			[]
 			{
 				KEPLER_PROFILE_SCOPE();
@@ -126,7 +126,7 @@ namespace Kepler
 		}
 		{
 			KEPLER_PROFILE_SCOPE("GUI AWAIT RENDER");
-			Await(Task);
+			Await(task);
 		}
 
 		{
@@ -141,7 +141,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawEditor()
+	void EditorModule::DrawEditor()
 	{
 		KEPLER_PROFILE_SCOPE();
 		DrawMenuBar();
@@ -154,34 +154,34 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::OnUpdate(float DeltaTime)
+	void EditorModule::OnUpdate(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
-		ControlEditorCamera(DeltaTime);
+		ControlEditorCamera(deltaTime);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::EndGUIPass()
+	void EditorModule::EndGUIPass()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::Render();
 		Await(TRenderThread::Submit(
 			[]
 			{
-				auto LLR = TLowLevelRenderer::Get();
-				auto SwapChain = LLR->GetSwapChain(0);
-				auto pImmCtx = LLR->GetRenderDevice()->GetImmediateCommandList();
-				pImmCtx->StartDrawingToSwapChainImage(SwapChain);
-				pImmCtx->ClearSwapChainImage(SwapChain, { 0.1f, 0.1f, 0.1f, 1.0f });
+				auto pLLR = TLowLevelRenderer::Get();
+				auto pSwapChain = pLLR->GetSwapChain(0);
+				auto pImmCtx = pLLR->GetRenderDevice()->GetImmediateCommandList();
+				pImmCtx->StartDrawingToSwapChainImage(pSwapChain);
+				pImmCtx->ClearSwapChainImage(pSwapChain, { 0.1f, 0.1f, 0.1f, 1.0f });
 
-				const auto FrameIndex = LLR->GetFrameIndex();
+				const auto FrameIndex = pLLR->GetFrameIndex();
 				// TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
 				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 			}));
 
 		// This currently doesn't work. The only way to fix this is to handle window creation manually, 
-		ImGuiIO& IO = ImGui::GetIO();
-		if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
 			Await(TRenderThread::Submit(
@@ -194,130 +194,130 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SetEditedWorld(TRef<TGameWorld> InWorld)
+	void EditorModule::SetEditedWorld(TRef<TGameWorld> pWorld)
 	{
 		KEPLER_PROFILE_SCOPE();
-		EditedWorld = InWorld;
+		m_pEditedWorld = pWorld;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SelectEntity(TGameEntityId Id)
+	void EditorModule::SelectEntity(TGameEntityId id)
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (!EditedWorld || !EditedWorld->IsValidEntity(Id))
+		if (!m_pEditedWorld || !m_pEditedWorld->IsValidEntity(id))
 		{
 			return;
 		}
 
-		SelectedEntity = Id;
+		m_SelectedEntity = id;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::UnselectEverything()
+	void EditorModule::UnselectEverything()
 	{
-		SelectedEntity = TGameEntityId{};
+		m_SelectedEntity = TGameEntityId{};
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::OnPlatformEvent(const TPlatformEventBase& Event)
+	void EditorModule::OnPlatformEvent(const TPlatformEventBase& event)
 	{
 		KEPLER_PROFILE_SCOPE();
-		TPlatformEventDispatcher Dispatcher(Event);
-		Dispatcher.Dispatch(this, &TEditorModule::OnKeyDown);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonDown);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseButtonUp);
-		Dispatcher.Dispatch(this, &TEditorModule::OnMouseMove);
+		TPlatformEventDispatcher Dispatcher(event);
+		Dispatcher.Dispatch(this, &EditorModule::OnKeyDown);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonDown);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonUp);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::SetupStyle()
+	void EditorModule::SetupStyle()
 	{
-		ImGuiIO& IO = ImGui::GetIO();
-		const TString Font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
-		IO.Fonts->AddFontFromFileTTF(Font.c_str(), 15.0f);
+		ImGuiIO& io = ImGui::GetIO();
+		const TString font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
+		io.Fonts->AddFontFromFileTTF(font.c_str(), 15.0f);
 
-		auto& Style = ImGui::GetStyle();
-		ImVec4* Colors = Style.Colors;
+		auto& style = ImGui::GetStyle();
+		ImVec4* colors = style.Colors;
 
 		// TEXT
-		Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-		Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		
 		// WINDOWS
-		Colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.94f);
-		Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-		Colors[ImGuiCol_Border] = ImVec4(0.2f, 0.2f, 0.2f, 0.50f);
-		Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.94f);
+		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+		colors[ImGuiCol_Border] = ImVec4(0.2f, 0.2f, 0.2f, 0.50f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 		
 		// FRAMES
-		Colors[ImGuiCol_FrameBg] = ImVec4(0.24f, 0.24f, 0.24f, 0.54f);
-		Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.47f, 0.47f, 0.47f, 0.40f);
-		Colors[ImGuiCol_FrameBgActive] = ImVec4(0.7f, 0.7f, 0.7f, 0.67f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.24f, 0.24f, 0.24f, 0.54f);
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.47f, 0.47f, 0.47f, 0.40f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.7f, 0.7f, 0.7f, 0.67f);
 		
 		// TITLES
-		Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-		Colors[ImGuiCol_TitleBgActive] = ImVec4(0.05f, 0.05f, 0.05f, 1.00f);
-		Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.05f, 0.05f, 0.05f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
 
-		Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-		Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-		Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-		Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
-		Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-		Colors[ImGuiCol_CheckMark] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
-		Colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
-		Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-		Colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-		Colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-		Colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-		Colors[ImGuiCol_Header] = ImVec4(0.21f, 0.21f, 0.21f, 0.31f);
-		Colors[ImGuiCol_HeaderHovered] = ImVec4(0.31f, 0.31f, 0.31f, 0.80f);
-		Colors[ImGuiCol_HeaderActive] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
-		Colors[ImGuiCol_Separator] = Colors[ImGuiCol_Border];
-		Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
-		Colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
-		Colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
-		Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-		Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+		colors[ImGuiCol_CheckMark] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+		colors[ImGuiCol_Header] = ImVec4(0.21f, 0.21f, 0.21f, 0.31f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.31f, 0.31f, 0.31f, 0.80f);
+		colors[ImGuiCol_HeaderActive] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
+		colors[ImGuiCol_Separator] = colors[ImGuiCol_Border];
+		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
+		colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
+		colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+		colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
 
 		// Tabs
-		Colors[ImGuiCol_Tab] = ImLerp(Colors[ImGuiCol_Header], Colors[ImGuiCol_TitleBgActive], 0.80f);
-		Colors[ImGuiCol_TabHovered] = Colors[ImGuiCol_HeaderHovered];
-		Colors[ImGuiCol_TabActive] = ImLerp(Colors[ImGuiCol_HeaderActive], Colors[ImGuiCol_TitleBgActive], 0.60f);
-		Colors[ImGuiCol_TabUnfocused] = ImLerp(Colors[ImGuiCol_Tab], Colors[ImGuiCol_TitleBg], 0.80f);
-		Colors[ImGuiCol_TabUnfocusedActive] = ImLerp(Colors[ImGuiCol_TabActive], Colors[ImGuiCol_TitleBg], 0.40f);
-		Colors[ImGuiCol_DockingPreview] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
-		Colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+		colors[ImGuiCol_Tab] = ImLerp(colors[ImGuiCol_Header], colors[ImGuiCol_TitleBgActive], 0.80f);
+		colors[ImGuiCol_TabHovered] = colors[ImGuiCol_HeaderHovered];
+		colors[ImGuiCol_TabActive] = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
+		colors[ImGuiCol_TabUnfocused] = ImLerp(colors[ImGuiCol_Tab], colors[ImGuiCol_TitleBg], 0.80f);
+		colors[ImGuiCol_TabUnfocusedActive] = ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f);
+		colors[ImGuiCol_DockingPreview] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 		
 		// Other
-		Colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-		Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-		Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-		Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-		Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-		Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);   // Prefer using Alpha=1.0 here
-		Colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);   // Prefer using Alpha=1.0 here
-		Colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-		Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-		Colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-		Colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-		Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-		Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-		Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
+		colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);   // Prefer using Alpha=1.0 here
+		colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);   // Prefer using Alpha=1.0 here
+		colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+		colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+		colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+		colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+		colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+		colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 		//		ImGui::StyleColorsDark();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawMenuBar()
+	void EditorModule::DrawMenuBar()
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File", true))
 			{
-				ImGui::MenuItem("Noop", "No + Op");
+				ImGui::MenuItem("NoOp", "No + Op");
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -325,7 +325,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewports()
+	void EditorModule::DrawViewports()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
@@ -335,30 +335,30 @@ namespace Kepler
 		{
 			if (ImGui::IsWindowHovered())
 			{
-				HoveredViewport = EViewportIndex::Viewport1;
-				bIsCursorInViewport = true;
+				m_HoveredViewport = EViewportIndex::Viewport1;
+				m_bIsCursorInViewport = true;
 			}
 			else
 			{
-				bIsCursorInViewport = false;
+				m_bIsCursorInViewport = false;
 			}
 
-			ImVec2 Region = ImGui::GetContentRegionAvail();
+			ImVec2 region = ImGui::GetContentRegionAvail();
 
 			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 			vMin.x += ImGui::GetWindowPos().x;
 			vMin.y += ImGui::GetWindowPos().y;
 
-			ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(Region.x, Region.y);
-			ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
-			auto LLR = TLowLevelRenderer::Get();
+			m_ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(region.x, region.y);
+			m_ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
+			auto pLLR = TLowLevelRenderer::Get();
 
-			auto RenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
-			auto ViewportSampler = RenderTargetGroup->GetTextureSamplerAtArrayLayer(LLR->GetFrameIndex());
-			auto Image = ViewportSampler->GetImage();
+			auto pRenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
+			auto pViewportSampler = pRenderTargetGroup->GetTextureSamplerAtArrayLayer(pLLR->GetFrameIndex());
+			auto pImage = pViewportSampler->GetImage();
 			ImGui::Image(
-				(ImTextureID)ViewportSampler->GetNativeHandle(),
-				ImVec2(Image->GetWidth(), Image->GetHeight()));
+				(ImTextureID)pViewportSampler->GetNativeHandle(),
+				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
 			DrawGizmo();
 			DrawViewportGizmoControls();
@@ -369,7 +369,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewportGizmoControls()
+	void EditorModule::DrawViewportGizmoControls()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -380,68 +380,68 @@ namespace Kepler
 		vMax.x += ImGui::GetWindowPos().x;
 		vMax.y += ImGui::GetWindowPos().y;
 
-		ImGui::SetCursorScreenPos(ImVec2(vMin.x + ViewportToolbarOffset.x, vMin.y + ViewportToolbarOffset.y));
+		ImGui::SetCursorScreenPos(ImVec2(vMin.x + m_ViewportToolbarOffset.x, vMin.y + m_ViewportToolbarOffset.y));
 
 		ImGui::BeginGroup();
 		ImGui::Text("Operation");
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Translate", EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE))
+		if (ImGui::RadioButton("Translate", m_EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE))
 		{
-			EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
+			m_EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Rotate", EditOperationIndex == ImGuizmo::OPERATION::ROTATE))
+		if (ImGui::RadioButton("Rotate", m_EditOperationIndex == ImGuizmo::OPERATION::ROTATE))
 		{
-			EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
+			m_EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Scale", EditOperationIndex == ImGuizmo::OPERATION::SCALE))
+		if (ImGui::RadioButton("Scale", m_EditOperationIndex == ImGuizmo::OPERATION::SCALE))
 		{
-			EditOperationIndex = ImGuizmo::OPERATION::SCALE;
+			m_EditOperationIndex = ImGuizmo::OPERATION::SCALE;
 		}
 
-		if (EditOperationIndex != ImGuizmo::OPERATION::SCALE)
+		if (m_EditOperationIndex != ImGuizmo::OPERATION::SCALE)
 		{
 			ImGui::SameLine(0.0f, 32);
 			ImGui::Text("Mode");
 			ImGui::SameLine();
-			if (ImGui::RadioButton("World", EditSpaceIndex == ImGuizmo::MODE::WORLD))
+			if (ImGui::RadioButton("World", m_EditSpaceIndex == ImGuizmo::MODE::WORLD))
 			{
-				EditSpaceIndex = ImGuizmo::MODE::WORLD;
+				m_EditSpaceIndex = ImGuizmo::MODE::WORLD;
 			}
 			ImGui::SameLine();
-			if (ImGui::RadioButton("Local", EditSpaceIndex == ImGuizmo::MODE::LOCAL))
+			if (ImGui::RadioButton("Local", m_EditSpaceIndex == ImGuizmo::MODE::LOCAL))
 			{
-				EditSpaceIndex = ImGuizmo::MODE::LOCAL;
+				m_EditSpaceIndex = ImGuizmo::MODE::LOCAL;
 			}
 
 			// Snapping
 			ImGui::SameLine(0.0f, 32);
-			ImGui::Checkbox("Snap", &bSnapEnabled);
+			ImGui::Checkbox("Snap", &m_bSnapEnabled);
 
-			if (bSnapEnabled)
+			if (m_bSnapEnabled)
 			{
 				ImGui::SameLine();
-				if (EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
+				if (m_EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
 				{
 					const char* pEntries = " 1\0 2\0 5\0 10\0 25\0 50\0 100\0";
 
-					i32 CurrentValue = (i32)TranslationSnap;
+					i32 curValue = (i32)m_TranslationSnap;
 					ImGui::SetNextItemWidth(50.0f);
-					if (ImGui::Combo("##v", &CurrentValue, pEntries))
+					if (ImGui::Combo("##v", &curValue, pEntries))
 					{
-						TranslationSnap = (ETranslationSnap)CurrentValue;
+						m_TranslationSnap = (ETranslationSnap)curValue;
 					}
 				}
-				if (EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
+				if (m_EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
 				{
 					const char* pEntries = " 1\0 10\0 30\0 45\0 90\0 180\0 ";
 
-					i32 CurrentValue = (i32)RotationSnap;
+					i32 curVal = (i32)m_RotationSnap;
 					ImGui::SetNextItemWidth(50.0f);
-					if (ImGui::Combo("##v", &CurrentValue, pEntries))
+					if (ImGui::Combo("##v", &curVal, pEntries))
 					{
-						RotationSnap = (ERotationSnap)CurrentValue;
+						m_RotationSnap = (ERotationSnap)curVal;
 					}
 				}
 			}
@@ -452,7 +452,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawViewportCameraControls()
+	void EditorModule::DrawViewportCameraControls()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -463,57 +463,57 @@ namespace Kepler
 		vMax.x += ImGui::GetWindowPos().x;
 		vMax.y += ImGui::GetWindowPos().y;
 
-		ImGui::SetCursorScreenPos(ImVec2(vMin.x + ViewportToolbarOffset.x, vMax.y - ImGui::GetTextLineHeight() - ViewportToolbarOffset.y));
+		ImGui::SetCursorScreenPos(ImVec2(vMin.x + m_ViewportToolbarOffset.x, vMax.y - ImGui::GetTextLineHeight() - m_ViewportToolbarOffset.y));
 		ImGui::Text("Camera");
 		ImGui::SameLine(0.0f, 32.0f);
 		ImGui::Text("Sensitivity");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##Sensitivity", &EditorCameraSensitivity, 0.1f, 128.0f);
+		ImGui::DragFloat("##Sensitivity", &m_EditorCameraSensitivity, 0.1f, 128.0f);
 		ImGui::SameLine(0.0f, 32.0f);
 		ImGui::Text("Movement Speed");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##MovementSpeed", &EditorCameraSpeed, 0.1f, 128.0f);
+		ImGui::DragFloat("##MovementSpeed", &m_EditorCameraSpeed, 0.1f, 128.0f);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawDetailsPanel()
+	void EditorModule::DrawDetailsPanel()
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (!EditedWorld)
+		if (!m_pEditedWorld)
 		{
 			return;
 		}
 
-		TEditorDetailsPanel Widget(EditedWorld, SelectedEntity);
-		Widget.Draw();
+		TEditorDetailsPanel widget(m_pEditedWorld, m_SelectedEntity);
+		widget.Draw();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawSceneGraph()
+	void EditorModule::DrawSceneGraph()
 	{
 		KEPLER_PROFILE_SCOPE();
 		ImGui::Begin("Scene Graph");
-		i32 Index = 0;
-		if (ImGui::TreeNodeEx((void*)(intptr_t)Index, ImGuiTreeNodeFlags_DefaultOpen, EditedWorld->GetName().c_str()))
+		i32 idx = 0;
+		if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
 		{
-			EditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
-				[&, this](auto EntityId, TNameComponent& NC, TGameEntity& GE)
+			m_pEditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
+				[&, this](auto id, TNameComponent& NC, TGameEntity& GE)
 				{
-					ImGuiTreeNodeFlags NodeFlags = ImGuiTreeNodeFlags_None;
+					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 					if (!GE.ShouldHideInSceneGraph())
 					{
 						bool bNodeOpen = false;
-						if (SelectedEntity == TGameEntityId{ EntityId })
+						if (m_SelectedEntity == TGameEntityId{ id })
 						{
-							NodeFlags |= ImGuiTreeNodeFlags_Selected;
+							flags |= ImGuiTreeNodeFlags_Selected;
 						}
 
-						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)Index, NodeFlags, NC.Name.c_str());
+						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
 						if (ImGui::IsItemClicked())
 						{
-							SelectedEntity = TGameEntityId{ EntityId };
+							m_SelectedEntity = TGameEntityId{ id };
 						}
 
 						if (bNodeOpen)
@@ -521,7 +521,7 @@ namespace Kepler
 							ImGui::TreePop();
 						}
 
-						Index++;
+						idx++;
 					}
 				});
 			ImGui::TreePop();
@@ -529,31 +529,31 @@ namespace Kepler
 		ImGui::End();
 	}
 
-	void TEditorModule::DrawDebugTools()
+	void EditorModule::DrawDebugTools()
 	{
 		KEPLER_PROFILE_SCOPE();
 		// Draw console
-		if (!LogPanel)
+		if (!m_LogPanel)
 		{
-			LogPanel = MakeShared<TLogPanel>();
+			m_LogPanel = MakeShared<TLogPanel>();
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::DrawGizmo()
+	void EditorModule::DrawGizmo()
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (!EditedWorld)
+		if (!m_pEditedWorld)
 		{
 			return;
 		}
 
-		if (HoveredViewport == EViewportIndex::Max)
+		if (m_HoveredViewport == EViewportIndex::Max)
 		{
 			return;
 		}
 
-		if (EditedWorld->IsValidEntity(SelectedEntity))
+		if (m_pEditedWorld->IsValidEntity(m_SelectedEntity))
 		{
 			ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 			ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -561,68 +561,68 @@ namespace Kepler
 			vMin.x += ImGui::GetWindowPos().x;
 			vMin.y += ImGui::GetWindowPos().y;
 
-			auto MainCameraId = EditedWorld->GetMainCamera();
+			auto mainCameraId = m_pEditedWorld->GetMainCamera();
 			// auto& MainCameraEntity = EditedWorld->GetEntityFromId(SelectedEntity);
-			TCamera& Camera = EditedWorld->GetComponent<TCameraComponent>(MainCameraId).GetCamera();
+			MathCamera& camera = m_pEditedWorld->GetComponent<CameraComponent>(mainCameraId).GetCamera();
 
-			matrix4x4 ViewMatrix = Camera.GenerateViewMatrix();
-			matrix4x4 ProjectionMatrix = Camera.GenerateProjectionMatrix();
+			matrix4x4 viewMatrix = camera.GenerateViewMatrix();
+			matrix4x4 projMatrix = camera.GenerateProjectionMatrix();
 
-			TTransformComponent& TransformComponent = EditedWorld->GetComponent<TTransformComponent>(SelectedEntity);
-			matrix4x4 Transform = TransformComponent.GetTransform().GenerateWorldMatrix();
+			TTransformComponent& transformComp = m_pEditedWorld->GetComponent<TTransformComponent>(m_SelectedEntity);
+			matrix4x4 transform = transformComp.GetTransform().GenerateWorldMatrix();
 
 			ImGuizmo::SetDrawlist();
 			// Snapping
-			float3 SnapVec = CalculateSnapVec();
+			float3 snapVec = CalculateSnapVec();
 
-			bIsGizmoHovered = ImGuizmo::IsOver();
-			bIsGizmoUsed = ImGuizmo::IsUsing();
+			m_bIsGizmoHovered = ImGuizmo::IsOver();
+			m_bIsGizmoUsed = ImGuizmo::IsUsing();
 
 			ImGuiIO& io = ImGui::GetIO();
 			ImGuizmo::SetRect(vMin.x, vMin.y, vMax.x, vMax.y);
-			if (ImGuizmo::Manipulate(glm::value_ptr(ViewMatrix), glm::value_ptr(ProjectionMatrix),
-				static_cast<ImGuizmo::OPERATION>(EditOperationIndex),
-				static_cast<ImGuizmo::MODE>(EditSpaceIndex),
-				glm::value_ptr(Transform),
+			if (ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(projMatrix),
+				static_cast<ImGuizmo::OPERATION>(m_EditOperationIndex),
+				static_cast<ImGuizmo::MODE>(m_EditSpaceIndex),
+				glm::value_ptr(transform),
 				nullptr,
-				bSnapEnabled ? &SnapVec.x : nullptr))
+				m_bSnapEnabled ? &snapVec.x : nullptr))
 			{
 				float3 Location, Rotation, Scale;
-				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(Transform), &Location.x, &Rotation.x, &Scale.x);
-				TransformComponent.SetTransform(TWorldTransform{ Location, Rotation, Scale });
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &Location.x, &Rotation.x, &Scale.x);
+				transformComp.SetTransform(TWorldTransform{ Location, Rotation, Scale });
 			}
 		}
 	}
 
-	void TEditorModule::ControlEditorCamera(float DeltaTime)
+	void EditorModule::ControlEditorCamera(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (!EditedWorld)
+		if (!m_pEditedWorld)
 		{
 			return;
 		}
 
-		if (!EditedWorld->IsValidEntity(EditorCameraEntity))
+		if (!m_pEditedWorld->IsValidEntity(m_EditorCameraEntity))
 		{
-			EditorCameraEntity = EditedWorld->CreateCamera("_EditorCamera");
-			TEntityHandle Camera{ EditedWorld, EditorCameraEntity };
+			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
+			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			
-			Camera->SetLocation(float3(0.0f, -3.0f, 0.0f));
-			Camera->SetHideInSceneGraph(true);
+			camera->SetLocation(float3(0.0f, -3.0f, 0.0f));
+			camera->SetHideInSceneGraph(true);
 		}
-		EditedWorld->SetMainCamera(EditorCameraEntity);
+		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
 
-		if (bIsControllingCamera)
+		if (m_bIsControllingCamera)
 		{
-			TEntityHandle Camera{ EditedWorld, EditorCameraEntity };
+			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			ImGuiIO& IO = ImGui::GetIO();
-			auto MouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
-			float3 Rotation = Camera->GetRotation();
-			Rotation.z -= MouseDelta.X * DeltaTime * EditorCameraSensitivity;
-			Rotation.x -= MouseDelta.Y * DeltaTime * EditorCameraSensitivity;
-			Camera->SetRotation(Rotation);
+			auto mouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
+			float3 rotation = camera->GetRotation();
+			rotation.z -= mouseDelta.X * deltaTime * m_EditorCameraSensitivity;
+			rotation.x -= mouseDelta.Y * deltaTime * m_EditorCameraSensitivity;
+			camera->SetRotation(rotation);
 
-			auto Location = Camera->GetLocation();
+			auto location = camera->GetLocation();
 			if (TInput::GetKey(EKeyCode::LeftAlt))
 			{
 				// Orbiting camera
@@ -632,78 +632,78 @@ namespace Kepler
 				// First person camera
 				if (TInput::GetKey(EKeyCode::W))
 				{
-					Location += Camera->GetForwardVector() * DeltaTime * EditorCameraSpeed;
+					location += camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::S))
 				{
-					Location -= Camera->GetForwardVector() * DeltaTime * EditorCameraSpeed;
+					location -= camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::A))
 				{
-					Location -= Camera->GetRightVector() * DeltaTime * EditorCameraSpeed;
+					location -= camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::D))
 				{
-					Location += Camera->GetRightVector() * DeltaTime * EditorCameraSpeed;
+					location += camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::E))
 				{
-					Location += Camera->GetUpVector() * DeltaTime * EditorCameraSpeed;
+					location += camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::Q))
 				{
-					Location -= Camera->GetUpVector() * DeltaTime * EditorCameraSpeed;
+					location -= camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
 				}
 			}
-			Camera->SetLocation(Location);
+			camera->SetLocation(location);
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnKeyDown(const TKeyDownEvent& InEvent)
+	bool EditorModule::OnKeyDown(const TKeyDownEvent& event)
 	{
-		if (bIsControllingCamera)
+		if (m_bIsControllingCamera)
 		{
 
 		}
 		else
 		{
-			switch (InEvent.Key)
+			switch (event.Key)
 			{
 				// Switch gizmos
 			case EKeyCode::W:
 			{
-				EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
+				m_EditOperationIndex = ImGuizmo::OPERATION::TRANSLATE;
 			} break;
 			case EKeyCode::E:
 			{
-				EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
+				m_EditOperationIndex = ImGuizmo::OPERATION::ROTATE;
 			} break;
 			case EKeyCode::R:
 			{
-				EditOperationIndex = ImGuizmo::OPERATION::SCALE;
-				if (bSnapEnabled)
+				m_EditOperationIndex = ImGuizmo::OPERATION::SCALE;
+				if (m_bSnapEnabled)
 				{
-					static std::once_flag Once;
-					std::call_once(Once, [] { KEPLER_WARNING(LogEditor, "Gizmo scaling currently doesn't support snapping"); });
+					static std::once_flag once;
+					std::call_once(once, [] { KEPLER_WARNING(LogEditor, "Gizmo scaling currently doesn't support snapping"); });
 				}
 			} break;
 			// Switch spaces
 			case EKeyCode::T:
 			{
-				const ImGuizmo::MODE Mode = static_cast<ImGuizmo::MODE>(EditSpaceIndex);
-				if (Mode == ImGuizmo::MODE::LOCAL)
+				const ImGuizmo::MODE mode = static_cast<ImGuizmo::MODE>(m_EditSpaceIndex);
+				if (mode == ImGuizmo::MODE::LOCAL)
 				{
-					EditSpaceIndex = ImGuizmo::MODE::WORLD;
+					m_EditSpaceIndex = ImGuizmo::MODE::WORLD;
 				}
 				else
 				{
-					EditSpaceIndex = ImGuizmo::MODE::LOCAL;
+					m_EditSpaceIndex = ImGuizmo::MODE::LOCAL;
 				}
 			} break;
 			case EKeyCode::Q:
 			{
-				bSnapEnabled = !bSnapEnabled;
+				m_bSnapEnabled = !m_bSnapEnabled;
 			}
 			break;
 			default:
@@ -714,12 +714,12 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& InEvent)
+	bool EditorModule::OnMouseButtonDown(const TMouseButtonDownEvent& event)
 	{
 		// Read entity id under render target
-		if (InEvent.Button & EMouseButton::Left)
+		if (event.Button & EMouseButton::Left)
 		{
-			if (bIsCursorInViewport && !bIsControllingCamera && !bIsGizmoHovered && !bIsGizmoUsed)
+			if (m_bIsCursorInViewport && !m_bIsControllingCamera && !m_bIsGizmoHovered && !m_bIsGizmoUsed)
 			{
 				TrySelectEntity();
 			}
@@ -728,83 +728,83 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseButtonUp(const TMouseButtonUpEvent& InEvent)
+	bool EditorModule::OnMouseButtonUp(const TMouseButtonUpEvent& event)
 	{
-		if (bIsControllingCamera && InEvent.Button & EMouseButton::Right)
+		if (m_bIsControllingCamera && event.Button & EMouseButton::Right)
 		{
 			TPlatform::Get()->SetCursorMode(ECursorMode::Visible);
-			bIsControllingCamera = false;
+			m_bIsControllingCamera = false;
 		}
 		return false;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorModule::OnMouseMove(const TMouseMoveEvent& InEvent)
+	bool EditorModule::OnMouseMove(const TMouseMoveEvent& event)
 	{
 		// Start moving camera only if mouse button pressed and mouse is dragged, otherwise, use context menu (probably...)
-		if (TInput::GetMouseButon(EMouseButton::Right) && bIsCursorInViewport)
+		if (TInput::GetMouseButon(EMouseButton::Right) && m_bIsCursorInViewport)
 		{
 			TPlatform::Get()->SetCursorMode(ECursorMode::HiddenLocked);
-			bIsControllingCamera = true;
+			m_bIsControllingCamera = true;
 		}
 		return false;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	float3 TEditorModule::CalculateSnapVec() const
+	float3 EditorModule::CalculateSnapVec() const
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (bSnapEnabled)
+		if (m_bSnapEnabled)
 		{
-			if (EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
+			if (m_EditOperationIndex == ImGuizmo::OPERATION::TRANSLATE)
 			{
-				switch (TranslationSnap)
+				switch (m_TranslationSnap)
 				{
-				case Kepler::ETranslationSnap::_1Unit:
+				case ke::ETranslationSnap::_1Unit:
 					return float3(0.01f);
 					break;
-				case Kepler::ETranslationSnap::_2Units:
+				case ke::ETranslationSnap::_2Units:
 					return float3(0.02f);
 					break;
-				case Kepler::ETranslationSnap::_5Units:
+				case ke::ETranslationSnap::_5Units:
 					return float3(0.05f);
 					break;
-				case Kepler::ETranslationSnap::_10Units:
+				case ke::ETranslationSnap::_10Units:
 					return float3(0.1f);
 					break;
-				case Kepler::ETranslationSnap::_25Units:
+				case ke::ETranslationSnap::_25Units:
 					return float3(0.25f);
 					break;
-				case Kepler::ETranslationSnap::_50Units:
+				case ke::ETranslationSnap::_50Units:
 					return float3(0.5f);
 					break;
-				case Kepler::ETranslationSnap::_100Units:
+				case ke::ETranslationSnap::_100Units:
 					return float3(1.0f);
 					break;
 				default:
 					break;
 				}
 			}
-			if (EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
+			if (m_EditOperationIndex == ImGuizmo::OPERATION::ROTATE)
 			{
-				switch (RotationSnap)
+				switch (m_RotationSnap)
 				{
-				case Kepler::ERotationSnap::_1Degree:
+				case ke::ERotationSnap::_1Degree:
 					return float3(1.0f);
 					break;
-				case Kepler::ERotationSnap::_10Degrees:
+				case ke::ERotationSnap::_10Degrees:
 					return float3(10.0f);
 					break;
-				case Kepler::ERotationSnap::_30Degrees:
+				case ke::ERotationSnap::_30Degrees:
 					return float3(30.0f);
 					break;
-				case Kepler::ERotationSnap::_45Degrees:
+				case ke::ERotationSnap::_45Degrees:
 					return float3(45.0f);
 					break;
-				case Kepler::ERotationSnap::_90Degrees:
+				case ke::ERotationSnap::_90Degrees:
 					return float3(90.0f);
 					break;
-				case Kepler::ERotationSnap::_180Degrees:
+				case ke::ERotationSnap::_180Degrees:
 					return float3(180.0f);
 					break;
 				default:
@@ -816,37 +816,37 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorModule::TrySelectEntity()
+	void EditorModule::TrySelectEntity()
 	{
 		// Read render target
 		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
 			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
-			TRef<TRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			TRef<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
 			TRef<TImage2D> pTargetImage = pTarget->GetImage();
 			if (auto pImmCmd = TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
 			{
-				i32 IdColor = Await(TRenderThread::Submit([&, this]
+				i32 idColor = Await(TRenderThread::Submit([&, this]
 					{
-						usize Align;
-						i32* pData = (i32*)pImmCmd->MapImage2D(pTargetImage, Align);
+						usize align;
+						i32* pData = (i32*)pImmCmd->MapImage2D(pTargetImage, align);
 
-						float X, Y;
-						TInput::GetMousePosition(X, Y);
-						const auto ViewportPos = ViewportPositions[(u32)EViewportIndex::Viewport1];
-						X -= ViewportPos.x;
-						Y -= ViewportPos.y;
+						float x, y;
+						TInput::GetMousePosition(x, y);
+						const auto ViewportPos = m_ViewportPositions[(u32)EViewportIndex::Viewport1];
+						x -= ViewportPos.x;
+						y -= ViewportPos.y;
 
-						const auto Width = Align / sizeof(i32);
-						const auto OutIndex = (u32)Width * (u32)Y + (u32)X;
-						const i32 RetVal = pData[OutIndex];
+						const auto width = align / sizeof(i32);
+						const auto outIndex = (u32)width * (u32)y + (u32)x;
+						const i32 retVal = pData[outIndex];
 						pImmCmd->UnmapImage2D(pTargetImage);
-						return RetVal;
+						return retVal;
 					}));
 
-				if (IdColor != -1)
+				if (idColor != -1)
 				{
-					SelectedEntity = TGameEntityId{ (entt::entity)IdColor };
+					m_SelectedEntity = TGameEntityId{ (entt::entity)idColor };
 				}
 			}
 		}

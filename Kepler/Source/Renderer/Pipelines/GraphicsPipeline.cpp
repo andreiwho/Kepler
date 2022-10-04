@@ -8,7 +8,7 @@
 #endif
 #include "../HLSLShaderCompiler.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TGraphicsPipeline::TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Config)
@@ -18,7 +18,7 @@ namespace Kepler
 	{
 	}
 
-	void TGraphicsPipeline::UploadParameters(TRef<TCommandListImmediate> pImmCmdList)
+	void TGraphicsPipeline::UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList)
 	{
 	}
 
@@ -55,14 +55,14 @@ namespace Kepler
 }
 
 // Some internals
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
 		switch (GRenderAPI)
 		{
-		case Kepler::ERenderAPI::DirectX11:
+		case ke::ERenderAPI::DirectX11:
 			return MakeRef(New<TGraphicsPipelineHandleD3D11>(Shader, Config));
 			break;
 		default:

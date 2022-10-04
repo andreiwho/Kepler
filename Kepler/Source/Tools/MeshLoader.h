@@ -8,7 +8,7 @@ class aiMesh;
 class aiNode;
 class aiScene;
 
-namespace Kepler
+namespace ke
 {
 	class TMeshLoader
 	{
@@ -21,10 +21,10 @@ namespace Kepler
 
 		void ClearCache();
 
-		TDynArray<TStaticMeshSection> LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection = false);
+		Array<TStaticMeshSection> LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection = false);
 
 	private:
-		bool ProcessNode(const aiScene* pScene, const aiNode* pNode, TDynArray<TStaticMeshSection>& OutSections);
-		bool ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, TDynArray<TStaticMeshSection>& OutSections);
+		bool ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections);
+		bool ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections);
 	};
 }

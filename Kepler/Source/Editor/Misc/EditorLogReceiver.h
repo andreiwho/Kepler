@@ -1,11 +1,11 @@
 #pragma once
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 	class TEditorLogReceiver
 	{
 	public:
-		virtual void ReceiveLog(const spdlog::details::log_msg& Msg, const spdlog::memory_buf_t& Formatted) {}
+		virtual void ReceiveLog(const spdlog::details::log_msg& msg, const spdlog::memory_buf_t& formatteed) {}
 	};
 }

@@ -1,20 +1,20 @@
 #include "Sound.h"
 #include "Audio/AudioMA/SoundMA.h"
 
-namespace Kepler
+namespace ke
 {
 
-	TSound::TSound(const TString& InPath, ESoundCreateFlags InCreateFlags)
-		:	Path(InPath)
+	TSound::TSound(const TString& path, ESoundCreateFlags flags)
+		:	m_Path(path)
 	{
 	}
 
-	TRef<TSound> TSound::New(const TString& InPath, ESoundCreateFlags CreateFlags)
+	TRef<TSound> TSound::New(const TString& path, ESoundCreateFlags flags)
 	{
 		switch (GAudioEngineAPI)
 		{
-		case Kepler::EAudioEngineAPI::MiniAudio:
-			return MakeRef(Kepler::New<TSoundMA>(InPath, CreateFlags));
+		case ke::EAudioEngineAPI::MiniAudio:
+			return MakeRef(ke::New<TSoundMA>(path, flags));
 		}
 		return nullptr;
 	}

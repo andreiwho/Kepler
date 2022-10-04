@@ -1,7 +1,7 @@
 #include "TransformComponent.h"
 #include "Renderer/World/Camera.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TTransformComponent::TTransformComponent(float3 Location, float3 Rotation, float3 Scale)
@@ -31,7 +31,7 @@ namespace Kepler
 
 	float3 TTransformComponent::GetForwardVector() const
 	{
-		return TCamera::ToEuler(Transform.GetRotation());
+		return MathCamera::ToEuler(Transform.GetRotation());
 	}
 
 	float3 TTransformComponent::GetRightVector() const

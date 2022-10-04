@@ -10,59 +10,58 @@
 # include <crtdbg.h>
 #endif
 
-namespace Kepler
+namespace ke
 {
-	TCommandLineArguments ReadCommandLineArgs(i32 Argc, char** ppArgv)
+	TCommandLineArguments ReadCommandLineArgs(i32 argc, char** ppArgv)
 	{
-		TDynArray<TString> CommandLineArguments;
-		for (i32 Index = 1; Index < Argc; ++Index)
+		Array<TString> cmdArgs;
+		for (i32 idx = 1; idx < argc; ++idx)
 		{
-			if (char const* const arg = ppArgv[Index])
+			if (char const* const arg = ppArgv[idx])
 			{
-				CommandLineArguments.EmplaceBack(ppArgv[Index]);
+				cmdArgs.EmplaceBack(ppArgv[idx]);
 			}
 		}
-		return TCommandLineArguments(CommandLineArguments);
+		return TCommandLineArguments(cmdArgs);
 	}
 
-	int Main(i32 Argc, char** ppArgv)
+	int Main(i32 argc, char** ppArgv)
 	{
 		// Log must be the first one always (after malloc)
-		TGlobalExceptionContainer Exceptions{};
-		TMalloc Malloc{};
-		TLog GlobalLog;
-		TVirtualFileSystem FileSystem;
+		TMalloc poolAlloc{};
+		TLog globalLog;
+		TVirtualFileSystem VFS;
 		GLargeThreadPool = new TThreadPool(std::thread::hardware_concurrency() - 1); // We already have render thread
 
 		try
 		{
 			// Platform must be initialized after the log and 
-			auto platform = TPlatform::CreatePlatformInterface();
+			auto pPlatform = TPlatform::CreatePlatformInterface();
 
-			std::shared_ptr<TApplication> AppInstance;
+			std::shared_ptr<Engine> pApp;
 			{
-				TApplicationLaunchParams Params{};
-				Params.CommandLine = ReadCommandLineArgs(Argc, ppArgv);
+				TApplicationLaunchParams params{};
+				params.CommandLine = ReadCommandLineArgs(argc, ppArgv);
 				// ...
-				AppInstance = MakeRuntimeApplication(Params);
+				pApp = MakeRuntimeApplication(params);
 
 				KEPLER_INFO(LogInit, "Resolved game path: {}", VFSResolvePath("Game://"));
 			}
 
-			if (AppInstance)
+			if (pApp)
 			{
-				AppInstance->Run();
+				pApp->Run();
 			}
 		}
-		catch (const Kepler::TException& Exception)
+		catch (const ke::TException& exc)
 		{
-			KEPLER_CRITICAL(LogInit, "{}", Exception.GetErrorMessage());
-			TPlatform::HandleCrashReported(Exception.GetErrorMessage());
+			KEPLER_CRITICAL(LogInit, "{}", exc.GetErrorMessage());
+			TPlatform::HandleCrashReported(exc.GetErrorMessage());
 			return EXIT_FAILURE;
 		}
-		catch (const std::exception& Exception)
+		catch (const std::exception& exc)
 		{
-			KEPLER_CRITICAL(LogInit, "Exception caught: {}", Exception.what());
+			KEPLER_CRITICAL(LogInit, "Exception caught: {}", exc.what());
 			return EXIT_FAILURE;
 		}
 
@@ -76,5 +75,5 @@ extern int main(int argc, char** argv)
 #if defined(ENABLE_DEBUG) && defined(WIN32)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	return Kepler::Main(argc, argv);
+	return ke::Main(argc, argv);
 }

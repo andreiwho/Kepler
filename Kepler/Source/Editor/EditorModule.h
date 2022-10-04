@@ -3,7 +3,7 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor);
 
@@ -37,24 +37,24 @@ namespace Kepler
 		_180Degrees,
 	};
 
-	class TEditorModule : public TApplicationModule
+	class EditorModule : public EngineModule
 	{
 	public:
-		TEditorModule(TWindow* pWindow);
-		~TEditorModule();
+		EditorModule(TWindow* pWindow);
+		~EditorModule();
 
-		float2 GetViewportSize(EViewportIndex Index);
+		float2 GetViewportSize(EViewportIndex idx);
 
 		void BeginGUIPass();
 		void DrawEditor();
-		virtual void OnUpdate(float DeltaTime) override;
+		virtual void OnUpdate(float deltaTime) override;
 		void EndGUIPass();
-		void SetEditedWorld(TRef<TGameWorld> InWorld);
-		void SelectEntity(TGameEntityId Id);
+		void SetEditedWorld(TRef<TGameWorld> pWorld);
+		void SelectEntity(TGameEntityId id);
 		void UnselectEverything();
-		EViewportIndex GetHoveredViewport() const { return HoveredViewport; }
+		EViewportIndex GetHoveredViewport() const { return m_HoveredViewport; }
 
-		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
+		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
 
 	private:
 		void SetupStyle();
@@ -66,42 +66,42 @@ namespace Kepler
 		void DrawSceneGraph();
 		void DrawDebugTools();
 		void DrawGizmo();
-		void ControlEditorCamera(float DeltaTime);
+		void ControlEditorCamera(float deltaTime);
 
-		bool OnKeyDown(const TKeyDownEvent& InEvent);
-		bool OnMouseButtonDown(const TMouseButtonDownEvent& InEvent);
-		bool OnMouseButtonUp(const TMouseButtonUpEvent& InEvent);
-		bool OnMouseMove(const TMouseMoveEvent& InEvent);
+		bool OnKeyDown(const TKeyDownEvent& event);
+		bool OnMouseButtonDown(const TMouseButtonDownEvent& event);
+		bool OnMouseButtonUp(const TMouseButtonUpEvent& event);
+		bool OnMouseMove(const TMouseMoveEvent& event);
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
 
 	private:
-		TWindow* MainWindow{};
-		float2 ViewportSizes[(u32)EViewportIndex::Max]{};
-		float2 ViewportPositions[(u32)EViewportIndex::Max]{};
+		TWindow* m_pMainWindow{};
+		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
+		float2 m_ViewportPositions[(u32)EViewportIndex::Max]{};
 
-		TRef<TGameWorld> EditedWorld{};
-		TGameEntityId SelectedEntity{};
-		EViewportIndex HoveredViewport = EViewportIndex::Max;
-		TGameEntityId EditorCameraEntity{};
-		bool bIsControllingCamera = false;
-		bool bIsCursorInViewport = false;
-		bool bIsGizmoHovered = false;
-		bool bIsGizmoUsed = false;
+		TRef<TGameWorld> m_pEditedWorld{};
+		TGameEntityId m_SelectedEntity{};
+		EViewportIndex m_HoveredViewport = EViewportIndex::Max;
+		TGameEntityId m_EditorCameraEntity{};
+		bool m_bIsControllingCamera = false;
+		bool m_bIsCursorInViewport = false;
+		bool m_bIsGizmoHovered = false;
+		bool m_bIsGizmoUsed = false;
 
-		float EditorCameraSensitivity = 32;
-		float EditorCameraSpeed = 2.0f;
+		float m_EditorCameraSensitivity = 32;
+		float m_EditorCameraSpeed = 2.0f;
 
-		TSharedPtr<TLogPanel> LogPanel;
+		TSharedPtr<TLogPanel> m_LogPanel;
 
 	private:
-		i32 EditOperationIndex = 0x7;	// Translate by default
-		i32 EditSpaceIndex = 0x1;		// World by default
-		float2 ViewportToolbarOffset = float2(8, 8);
+		i32 m_EditOperationIndex = 0x7;	// Translate by default
+		i32 m_EditSpaceIndex = 0x1;		// World by default
+		float2 m_ViewportToolbarOffset = float2(8, 8);
 
-		bool bSnapEnabled = false;
-		ETranslationSnap TranslationSnap = ETranslationSnap::_1Unit;
-		ERotationSnap RotationSnap = ERotationSnap::_1Degree;
+		bool m_bSnapEnabled = false;
+		ETranslationSnap m_TranslationSnap = ETranslationSnap::_1Unit;
+		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
 	};
 }

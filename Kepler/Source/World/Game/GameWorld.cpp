@@ -4,7 +4,7 @@
 #include "Components/MaterialComponent.h"
 #include "../Camera/CameraComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld);
 
@@ -39,7 +39,7 @@ namespace Kepler
 		NameComp.Name = Name;
 		EntityRegistry.emplace<TIdComponent>(EntityId);
 		EntityRegistry.emplace<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<TCameraComponent>(EntityId, Fov, Width, Height, Near, Far);
+		EntityRegistry.emplace<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
 		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 
 		if (!IsValidEntity(MainCamera))
@@ -94,8 +94,8 @@ namespace Kepler
 		if (IsValidEntity(MainCamera))
 		{
 			auto& CameraEntity = GetEntityFromId(MainCamera);
-			auto& Camera = GetComponent<TCameraComponent>(MainCamera).GetCamera();
-			Camera.SetTransform(CameraEntity.GetTransform());
+			auto& camera = GetComponent<CameraComponent>(MainCamera).GetCamera();
+			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
 		// Update components for entities
@@ -104,7 +104,7 @@ namespace Kepler
 			{
 				TRef<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());
-				Material->WriteCamera(GetComponent<TCameraComponent>(MainCamera).GetCamera());
+				// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
 				Material->WriteId((i32)Id);
 			});
 
@@ -130,7 +130,7 @@ namespace Kepler
 
 	bool TGameWorld::IsCamera(TGameEntityId Entity) const
 	{
-		return HasComponent<TCameraComponent>(Entity);
+		return HasComponent<CameraComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()

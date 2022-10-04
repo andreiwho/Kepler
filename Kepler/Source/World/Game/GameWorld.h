@@ -4,7 +4,7 @@
 
 #include <entt/entt.hpp>
 
-namespace Kepler
+namespace ke
 {
 	class TGameEntity;
 
@@ -77,7 +77,7 @@ namespace Kepler
 
 		entt::registry EntityRegistry;
 
-		TDynArray<entt::entity> PendingDestroyEntities;
+		Array<entt::entity> PendingDestroyEntities;
 
 		TGameEntityId MainCamera{};
 	};

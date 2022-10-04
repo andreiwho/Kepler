@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer/World/Material.h"
 
-namespace Kepler
+namespace ke
 {
 	class TMaterialComponent
 	{

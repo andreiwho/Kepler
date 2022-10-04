@@ -1,54 +1,58 @@
 #include "ThreadPool.h"
 #include "Platform/Platform.h"
 
-namespace Kepler
+namespace ke
 {
 	void TThreadPool::WorkerMain()
 	{
 		KEPLER_PROFILE_INIT_THREAD("Worker");
-		while (bIsRunning)
+		while (m_bIsRunning)
 		{
-			std::function<void()> Task;
-			std::unique_lock<std::mutex> Lck(TasksMutex);
-			TasksAvailableFence.wait(Lck, [this] { return Tasks.GetLength() > 0 || !bIsRunning; });
-			if (bIsRunning && !bPaused)
+			std::function<void()> task;
+			std::unique_lock<std::mutex> lck(m_TaskMutex);
+			m_TasksAvailableFence.wait(lck, 
+				[this] 
+				{ 
+					return m_Tasks.GetLength() > 0 || !m_bIsRunning; 
+				});
+			if (m_bIsRunning && !m_bPaused)
 			{
 				bool bTaskValid = false;
-				if (bTaskValid = Tasks.Dequeue(Task))
+				if (bTaskValid = m_Tasks.Dequeue(task))
 				{
-					Lck.unlock();
+					lck.unlock();
 					// TODO: Fix cross-thread exception handling
 					try
 					{
-						Task();
+						task();
 					}
-					catch (const TException& Exception)
+					catch (const TException& exc)
 					{
-						if (TPlatform::HandleCrashReported(Exception.GetErrorMessage()))
+						if (TPlatform::HandleCrashReported(exc.GetErrorMessage()))
 						{
 							return;
 						}
 					}
-					catch (const std::exception& Exception)
+					catch (const std::exception& exc)
 					{
-						if (TPlatform::HandleCrashReported(Exception.what()))
+						if (TPlatform::HandleCrashReported(exc.what()))
 						{
 							return;
 						}
 					}
-					Lck.lock();
-					--TotalTaskNum;
+					lck.lock();
+					--m_TotalTaskNum;
 				}
-				if (bWaiting)
-					TaskDoneFence.notify_one();
+				if (m_bWaiting)
+					m_TaskDoneFence.notify_one();
 			}
 		}
 	}
 
-	u32 TThreadPool::CalculateThreadCount(const u32 InThreadCount)
+	u32 TThreadPool::CalculateThreadCount(const u32 numThreads)
 	{
-		if (InThreadCount > 0)
-			return InThreadCount;
+		if (numThreads > 0)
+			return numThreads;
 		else
 		{
 			const u32 HWConcurrency = std::thread::hardware_concurrency();
@@ -61,78 +65,82 @@ namespace Kepler
 
 	void TThreadPool::DestroyThreads()
 	{
-		bIsRunning = false;
-		TasksAvailableFence.notify_all();
-		for (u32 Index = 0; Index < ThreadCount; ++Index)
+		m_bIsRunning = false;
+		m_TasksAvailableFence.notify_all();
+		for (u32 idx = 0; idx < m_ThreadCount; ++idx)
 		{
-			Workers[Index].join();
+			m_Workers[idx].join();
 		}
 	}
 
 	void TThreadPool::CreateThreads()
 	{
-		bIsRunning = true;
-		for (u32 Index = 0; Index < ThreadCount; ++Index)
+		m_bIsRunning = true;
+		for (u32 idx = 0; idx < m_ThreadCount; ++idx)
 		{
-			Workers[Index] = std::thread(&TThreadPool::WorkerMain, this);
+			m_Workers[idx] = std::thread(&TThreadPool::WorkerMain, this);
 		}
 	}
 
 	void TThreadPool::WaitForTasksToFinish()
 	{
-		bWaiting = true;
-		std::unique_lock Lck(TasksMutex);
-		TaskDoneFence.wait(Lck, [this] { return (TotalTaskNum == (bPaused ? Tasks.GetLength() : 0)); });
-		bWaiting = false;
+		m_bWaiting = true;
+		std::unique_lock lck(m_TaskMutex);
+		m_TaskDoneFence.wait(lck, 
+			[this] 
+			{ 
+				return (m_TotalTaskNum == (m_bPaused ? m_Tasks.GetLength() : 0)); 
+			});
+		m_bWaiting = false;
 	}
 
 	void TThreadPool::Unpause()
 	{
-		bPaused = false;
+		m_bPaused = false;
 	}
 
-	void TThreadPool::Reset(const u32 NumThreads)
+	void TThreadPool::Reset(const u32 numThreads)
 	{
-		const bool bWasPaused = bPaused;
-		bPaused = true;
+		const bool bWasPaused = m_bPaused;
+		m_bPaused = true;
 		WaitForTasksToFinish();
 		DestroyThreads();
-		ThreadCount = CalculateThreadCount(NumThreads);
-		Workers = TDynArray<std::thread>(ThreadCount);
-		bPaused = bWasPaused;
+		m_ThreadCount = CalculateThreadCount(numThreads);
+		m_Workers = Array<std::thread>(m_ThreadCount);
+		m_bPaused = bWasPaused;
 		CreateThreads();
 	}
 
 	void TThreadPool::Pause()
 	{
-		bPaused = true;
+		m_bPaused = true;
 	}
 
 	bool TThreadPool::IsPaused() const
 	{
-		return bPaused;
+		return m_bPaused;
 	}
 
 	u32 TThreadPool::GetNumThreads() const
 	{
-		return ThreadCount;
+		return m_ThreadCount;
 	}
 
 	usize TThreadPool::GetTotalNumTasks() const
 	{
-		return TotalTaskNum;
+		return m_TotalTaskNum;
 	}
 
 	usize TThreadPool::GetNumExecutingTasks() const
 	{
-		const std::scoped_lock Lck(TasksMutex);
-		return TotalTaskNum - Tasks.GetLength();
+		const std::scoped_lock lck(m_TaskMutex);
+		return m_TotalTaskNum - m_Tasks.GetLength();
 	}
 
 	usize TThreadPool::GetNumTasks() const
 	{
-		const std::scoped_lock Lck(TasksMutex);
-		return Tasks.GetLength();
+		const std::scoped_lock lck(m_TaskMutex);
+		return m_Tasks.GetLength();
 	}
 
 	TThreadPool::~TThreadPool()
@@ -141,8 +149,8 @@ namespace Kepler
 		DestroyThreads();
 	}
 
-	TThreadPool::TThreadPool(const u32 InNumThreads) : ThreadCount(CalculateThreadCount(InNumThreads))
-		, Workers(CalculateThreadCount(ThreadCount))
+	TThreadPool::TThreadPool(const u32 numThreads) : m_ThreadCount(CalculateThreadCount(numThreads))
+		, m_Workers(CalculateThreadCount(m_ThreadCount))
 	{
 		CreateThreads();
 	}
@@ -153,7 +161,7 @@ namespace Kepler
 
 	bool TThreadPool::HasAnyExceptions() const
 	{
-		return Exceptions.GetLength() > 0;
+		return m_Exceptions.GetLength() > 0;
 	}
 
 }

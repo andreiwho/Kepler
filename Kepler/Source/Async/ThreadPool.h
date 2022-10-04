@@ -20,12 +20,12 @@
 #include <utility>           
 #include <vector>            
 
-namespace Kepler
+namespace ke
 {
 	class TThreadPool
 	{
 	public:
-		TThreadPool(const u32 InNumThreads = 0);
+		TThreadPool(const u32 numThreads = 0);
 
 		~TThreadPool();
 
@@ -45,11 +45,11 @@ namespace Kepler
 		void EnqueueTask(TFUNC&& Task)
 		{
 			{
-				const std::scoped_lock Lck(TasksMutex);
-				Tasks.Enqueue(std::move(Task));
+				const std::scoped_lock lck(m_TaskMutex);
+				m_Tasks.Enqueue(std::move(Task));
 			}
-			++TotalTaskNum;
-			TasksAvailableFence.notify_one();
+			++m_TotalTaskNum;
+			m_TasksAvailableFence.notify_one();
 		}
 
 		void Reset(const u32 NumThreads = 0);
@@ -57,23 +57,23 @@ namespace Kepler
 		template <typename TFUNC, typename RETVAL = std::invoke_result_t<std::decay_t<TFUNC>>>
 		std::future<RETVAL> SubmitTask(TFUNC&& Task)
 		{
-			TSharedPtr<std::promise<RETVAL>> Promise = MakeShared<std::promise<RETVAL>>();
+			TSharedPtr<std::promise<RETVAL>> promise = MakeShared<std::promise<RETVAL>>();
 			EnqueueTask(
-				[Func = std::move(Task), Promise, this]
+				[Func = std::move(Task), promise, this]
 				{
 					if constexpr (std::is_void_v<RETVAL>)
 					{
 						std::invoke(Func);
-						Promise->set_value();
+						promise->set_value();
 					}
 					else
 					{
 						auto Value = std::invoke(Func);
-						Promise->set_value(Value);
+						promise->set_value(Value);
 					}
 
 				});
-			return Promise->get_future();
+			return promise->get_future();
 		}
 
 		void Unpause();
@@ -90,31 +90,32 @@ namespace Kepler
 
 		void DestroyThreads();
 
-		u32 CalculateThreadCount(const u32 InThreadCount);
+		u32 CalculateThreadCount(const u32 numThreads);
 
 		void WorkerMain();
 
-		std::atomic<bool> bPaused = false;
+	private:
+		std::atomic<bool> m_bPaused = false;
 
-		std::atomic<bool> bIsRunning = false;
+		std::atomic<bool> m_bIsRunning = false;
 
-		std::condition_variable TasksAvailableFence = {};
+		std::condition_variable m_TasksAvailableFence = {};
 
-		std::condition_variable TaskDoneFence = {};
+		std::condition_variable m_TaskDoneFence = {};
 
 		static constexpr usize MAX_TASK_COUNT = 10000;
-		TThreadRelaxedRingQueue<std::function<void()>> Tasks{ MAX_TASK_COUNT };
+		TThreadRelaxedRingQueue<std::function<void()>> m_Tasks{ MAX_TASK_COUNT };
 
-		std::atomic<usize> TotalTaskNum = 0;
+		std::atomic<usize> m_TotalTaskNum = 0;
 
-		mutable std::mutex TasksMutex = {};
+		mutable std::mutex m_TaskMutex = {};
 
-		u32 ThreadCount = 0;
+		u32 m_ThreadCount = 0;
 
-		TDynArray<std::thread> Workers{ };
+		Array<std::thread> m_Workers{ };
 
-		std::atomic<bool> bWaiting = false;
+		std::atomic<bool> m_bWaiting = false;
 
-		TThreadSafeRingQueue<std::exception_ptr> Exceptions{ 32 };
+		TThreadSafeRingQueue<std::exception_ptr> m_Exceptions{ 32 };
 	};
 }

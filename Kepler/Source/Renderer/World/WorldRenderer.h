@@ -5,7 +5,7 @@
 #include "World/Game/GameWorld.h"
 #include "../LowLevelRenderer.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TViewport2D
 	{
@@ -13,25 +13,51 @@ namespace Kepler
 		u32 Width = 0, Height = 0;
 	};
 
-	class TWorldRenderer : public TRefCounted
+	class TWorldRenderer : public IntrusiveRefCounted
 	{
 	public:
-		TWorldRenderer(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR);
+		enum EReservedSlots
+		{
+			RS_Camera = 0,
+			RS_User,
+		};
+
+		TWorldRenderer(TRef<TGameWorld> pWorld);
 		~TWorldRenderer();
 		
 		void Render(TViewport2D ViewportSize);
+		void UpdateRendererMainThread(float deltaTime);
 
-		static TRef<TWorldRenderer> New(TRef<TGameWorld> WorldToRender, TSharedPtr<TLowLevelRenderer> InLLR);
+		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
 
+		static void ClearStaticState();
 	private:
-		void RT_UpdateMaterialComponents(TRef<TCommandListImmediate> pImmCtx);
+		void RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
-		void MeshPass(TRef<TCommandListImmediate> pImmCtx);
-		void FlushPass(TRef<TCommandListImmediate> pImmCtx);
+		void PrePass(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void MeshPass(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void FlushPass(TRef<GraphicsCommandListImmediate> pImmCtx);
 
 	private:
-		TViewport2D CurrentViewport{};
-		TRef<TGameWorld> CurrentWorld;
-		TSharedPtr<TLowLevelRenderer> LLR;
+		TViewport2D m_CurrentViewport{};
+		TRef<TGameWorld> m_CurrentWorld;
+		TLowLevelRenderer* m_LLR;
+
+		struct TStaticState
+		{
+			void Init();
+			void Clear();
+
+			bool bInitialized = false;
+			TRef<TParamBuffer> RS_CameraBuffer;
+			TRef<TGraphicsPipeline> PrePassPipeline;
+		};
+
+		struct RS_CameraBufferStruct
+		{
+			matrix4x4 ViewProjection;
+		};
+
+		static TStaticState* StaticState;
 	};
 }

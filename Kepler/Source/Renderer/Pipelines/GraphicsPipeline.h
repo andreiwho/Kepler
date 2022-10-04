@@ -6,9 +6,9 @@
 #include "Core/Malloc.h"
 #include "ParamPack.h"
 
-namespace Kepler
+namespace ke
 {
-	class TCommandListImmediate;
+	class GraphicsCommandListImmediate;
 
 	// What pipeline needs
 	// - Input layout.
@@ -38,6 +38,7 @@ namespace Kepler
 			EPrimitiveFillMode FillMode = EPrimitiveFillMode::Solid;
 			EPrimitiveCullMode CullMode = EPrimitiveCullMode::Back;
 			bool bEnableScissor = false;
+			bool bRasterDisabled = false;
 		} Rasterizer;
 
 		struct
@@ -46,11 +47,12 @@ namespace Kepler
 			EDepthBufferAccess DepthAccess = EDepthBufferAccess::Write;
 			bool bStencilEnable = false;
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
+			EDepthComparissonMode DepthFunc = EDepthComparissonMode::Less;
 		} DepthStencil;
 		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
-	class TGraphicsPipelineHandle : public TRefCounted
+	class TGraphicsPipelineHandle : public IntrusiveRefCounted
 	{
 	public:
 		static TRef<TGraphicsPipelineHandle> CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
@@ -69,16 +71,16 @@ namespace Kepler
 		TRef<TGraphicsPipeline> GetPipeline(const TString& Name) const;
 
 	private:
-		TChaoticMap<TString, TRef<TGraphicsPipeline>> Pipelines;
+		Map<TString, TRef<TGraphicsPipeline>> Pipelines;
 	};
 
-	class TGraphicsPipeline : public TRefCounted
+	class TGraphicsPipeline : public IntrusiveRefCounted
 	{
 	public:
 		TGraphicsPipeline() = default;
 		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
-		virtual void UploadParameters(TRef<TCommandListImmediate> pImmCmdList);
+		virtual void UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList);
 
 		TRef<TShader> GetShader() const { return Shader; }
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }

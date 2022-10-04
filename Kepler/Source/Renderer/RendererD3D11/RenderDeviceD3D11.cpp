@@ -21,7 +21,7 @@
 #include "RenderTargetD3D11.h"
 #include "TextureD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	TRenderDeviceD3D11* TRenderDeviceD3D11::Instance = nullptr;
 
@@ -40,7 +40,7 @@ namespace Kepler
 #endif
 		CreateClassLinkage();
 
-		ImmediateCommandList = MakeRef(New<TCommandListImmediateD3D11>(ImmediateContext));
+		m_ImmediateCommandList = MakeRef(New<GraphicsCommandListImmediateD3D11>(ImmediateContext));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -71,18 +71,18 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TRef<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TVertexBufferD3D11>(InAccessFlags, Data));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<TDataBlob> Data)
+	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
 	}
 
@@ -90,7 +90,7 @@ namespace Kepler
 	TRef<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(TRef<TPipelineParamMapping> Params)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TParamBufferD3D11>(Params));
 	}
 
@@ -98,7 +98,7 @@ namespace Kepler
 	TRef<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TSwapChainD3D11>(Window));
 	}
 
@@ -114,17 +114,17 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDynArray<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	Array<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifdef ENABLE_DEBUG
-		TDynArray<TString> OutMessages;
+		Array<TString> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
-		for (u64 Index = InfoMsgStartIndex; Index < InfoMsgEndIndex; ++Index)
+		for (u64 idx = InfoMsgStartIndex; idx < InfoMsgEndIndex; ++idx)
 		{
 			SIZE_T MessageLength{};
-			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, nullptr, &MessageLength));
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, idx, nullptr, &MessageLength));
 			DXGI_INFO_QUEUE_MESSAGE* pMessage = (DXGI_INFO_QUEUE_MESSAGE*)TMalloc::Get()->Allocate(MessageLength);
-			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, Index, pMessage, &MessageLength));
+			HRCHECK(InfoQueue->GetMessageA(DXGI_DEBUG_ALL, idx, pMessage, &MessageLength));
 			OutMessages.EmplaceBack(pMessage->pDescription);
 			TMalloc::Get()->Free(pMessage);
 		}
@@ -146,7 +146,7 @@ namespace Kepler
 #ifdef ENABLE_DEBUG
 			u32 NumDeletedResources{ (u32)PendingDeleteResources.GetLength() };
 #endif
-			std::lock_guard Lck{ ResourceMutex };
+			std::lock_guard lck{ ResourceMutex };
 			while (PendingDeleteResources.Dequeue(pResource))
 			{
 				pResource->Release();
@@ -173,48 +173,31 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<TDataBlob> InitialData)
+	TRef<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, TRef<AsyncDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TTransferBufferD3D11>(Size, InitialData));
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	TRef<TImage1D> TRenderDeviceD3D11::CreateImage1D(u32 InWidth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
-	{
-		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
-		return MakeRef(New<TImage1D_D3D11>(InWidth, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	TRef<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
+		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TImage2D_D3D11>(InWidth, InHeight, InFormat, InUsage, MipLevels, InArraySize));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TImage3D> TRenderDeviceD3D11::CreateImage3D(u32 InWidth, u32 InHeight, u32 InDepth, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
+	TRef<RenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
-		CHECK(IsRenderThread());
-		std::lock_guard Lck{ ResourceMutex };
-		return MakeRef(New<TImage3D_D3D11>(InWidth, InHeight, InDepth, InFormat, InUsage, MipLevels, InArraySize));
-
+		return MakeRef(New<RenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	TRef<DepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly)
 	{
-		return MakeRef(New<TRenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	TRef<TDepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-	{
-		return MakeRef(New<TDepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
+		return MakeRef(New<DepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer, bReadOnly));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -306,7 +289,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDataBlobD3D11::TDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
+	AsyncDataBlobD3D11::AsyncDataBlobD3D11(const void* Data, usize Size, usize ElemSize)
 		: Stride(ElemSize)
 	{
 		if (Size > 0)
@@ -321,21 +304,21 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	const void* TDataBlobD3D11::GetData() const
+	const void* AsyncDataBlobD3D11::GetData() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferPointer();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	usize TDataBlobD3D11::GetSize() const
+	usize AsyncDataBlobD3D11::GetSize() const
 	{
 		CHECK(Blob);
 		return Blob->GetBufferSize();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TDataBlobD3D11::Write(const void* Data, usize Size)
+	void AsyncDataBlobD3D11::Write(const void* Data, usize Size)
 	{
 		CHECK(Blob);
 		CHECK(Size <= GetSize());

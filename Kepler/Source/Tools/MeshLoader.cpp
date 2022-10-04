@@ -7,7 +7,7 @@
 #include <assimp/Importer.hpp>
 #include "assimp/matrix4x4.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader);
 
@@ -32,10 +32,10 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TDynArray<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
+	Array<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
 	{
 		Assimp::Importer Importer{};
-		TDynArray<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
+		Array<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
 		CHECK(!Binary.IsEmpty());
 
 		const aiScene* pScene = Importer.ReadFileFromMemory(Binary.GetData(), Binary.GetLength(),
@@ -46,7 +46,7 @@ namespace Kepler
 			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);
 
-		TDynArray<TStaticMeshSection> MeshSections;
+		Array<TStaticMeshSection> MeshSections;
 		MeshSections.Reserve(pScene->mNumMeshes);
 
 		if (ProcessNode(pScene, pScene->mRootNode, MeshSections))
@@ -57,16 +57,16 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, TDynArray<TStaticMeshSection>& OutSections)
+	bool TMeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pNode)
 		{
 			return false;
 		}
 
-		for (u32 Index = 0; Index < pNode->mNumMeshes; ++Index)
+		for (u32 idx = 0; idx < pNode->mNumMeshes; ++idx)
 		{
-			const aiMesh* pMesh = pScene->mMeshes[pNode->mMeshes[Index]];
+			const aiMesh* pMesh = pScene->mMeshes[pNode->mMeshes[idx]];
 			if (!ProcessMesh(pScene, pMesh, pNode->mTransformation, OutSections))
 			{
 				KEPLER_ERROR(LogMeshLoader, "An error occured while trying to load mesh. Returning empty array...");
@@ -74,9 +74,9 @@ namespace Kepler
 			}
 		}
 
-		for (u32 Index = 0; Index < pNode->mNumChildren; ++Index)
+		for (u32 idx = 0; idx < pNode->mNumChildren; ++idx)
 		{
-			if (!ProcessNode(pScene, pNode->mChildren[Index], OutSections))
+			if (!ProcessNode(pScene, pNode->mChildren[idx], OutSections))
 			{
 				KEPLER_ERROR(LogMeshLoader, "An error occured while trying to load mesh. Returning empty array...");
 				return false;
@@ -87,7 +87,7 @@ namespace Kepler
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, TDynArray<TStaticMeshSection>& OutSections)
+	bool TMeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pMesh || !pScene)
 		{
@@ -101,18 +101,18 @@ namespace Kepler
 		}
 
 		Section.Vertices.Reserve(pMesh->mNumVertices);
-		for (u32 Index = 0; Index < pMesh->mNumVertices; ++Index)
+		for (u32 idx = 0; idx < pMesh->mNumVertices; ++idx)
 		{
 			TStaticMeshVertex Vertex{};
 
-			aiVector3D Position = pMesh->mVertices[Index];
+			aiVector3D Position = pMesh->mVertices[idx];
 			Position *= ParentTransform;
 			Vertex.Position = float3(Position.x, Position.y, Position.z);
 
-			const aiVector3D& TexCoord = pMesh->mTextureCoords[0][Index];
+			const aiVector3D& TexCoord = pMesh->mTextureCoords[0][idx];
 			Vertex.UV0 = float2(TexCoord.x, TexCoord.y);
 
-			const aiVector3D& Normal = pMesh->mNormals[Index];
+			const aiVector3D& Normal = pMesh->mNormals[idx];
 			Vertex.Normal = float3(Normal.x, Normal.y, Normal.z);
 
 			Section.Vertices.EmplaceBack(Vertex);
@@ -121,9 +121,9 @@ namespace Kepler
 		Section.Indices.Reserve(std::invoke([pMesh]
 			{
 				u32 OutVertices = 0;
-				for (u32 Index = 0; Index < pMesh->mNumFaces; ++Index)
+				for (u32 idx = 0; idx < pMesh->mNumFaces; ++idx)
 				{
-					const aiFace& pFace = pMesh->mFaces[Index];
+					const aiFace& pFace = pMesh->mFaces[idx];
 					OutVertices += pFace.mNumIndices;
 				}
 				return OutVertices;
@@ -131,9 +131,9 @@ namespace Kepler
 		));
 
 		// Calculate index count
-		for (u32 Index = 0; Index < pMesh->mNumFaces; ++Index)
+		for (u32 idx = 0; idx < pMesh->mNumFaces; ++idx)
 		{
-			const aiFace& pFace = pMesh->mFaces[Index];
+			const aiFace& pFace = pMesh->mFaces[idx];
 			for (u32 ElemIndex = 0; ElemIndex < pFace.mNumIndices; ++ElemIndex)
 			{
 				Section.Indices.EmplaceBack(pFace.mIndices[ElemIndex]);

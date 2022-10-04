@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
 
-namespace Kepler
+namespace ke
 {
 	class TStaticMeshComponent
 	{
@@ -10,8 +10,8 @@ namespace Kepler
 		TStaticMeshComponent() = default;
 		TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh);
 		TStaticMeshComponent(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
-		TStaticMeshComponent(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices);
-		TStaticMeshComponent(const TDynArray<TStaticMeshSection>& Sections);
+		TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices);
+		TStaticMeshComponent(const Array<TStaticMeshSection>& Sections);
 
 		inline TRef<TStaticMesh> GetStaticMesh() const
 		{

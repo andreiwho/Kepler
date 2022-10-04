@@ -8,7 +8,7 @@
 #include <future>
 #include <condition_variable>
 
-namespace Kepler
+namespace ke
 {
 	extern bool IsRenderThread();
 
@@ -22,7 +22,7 @@ namespace Kepler
 		static TRenderThread* Get() { return CHECKED(Instance); }
 
 		template<typename FUNC>
-		static decltype(auto) Submit(FUNC&& Func)
+		static decltype(auto) Submit(FUNC&& func)
 		{
 #ifdef USE_ASSERT
 			if (GetWorkingPool().HasAnyExceptions())
@@ -30,16 +30,16 @@ namespace Kepler
 				GetWorkingPool().RethrowExceptions_MainThread();
 			}
 #endif
-			return GetWorkingPool().SubmitTask(std::move(Func));
+			return GetWorkingPool().SubmitTask(std::move(func));
 		}
 
 		static void Wait();
 
 	private:
-		bool bRunning = true;
-		static TThreadPool& GetWorkingPool() { return Get()->WorkerPool; }
+		bool m_bRunning = true;
+		static TThreadPool& GetWorkingPool() { return Get()->m_InternalPool; }
 
 	private:
-		TThreadPool WorkerPool{ 1 };
+		TThreadPool m_InternalPool{ 1 };
 	};
 }

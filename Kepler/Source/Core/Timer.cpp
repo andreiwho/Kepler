@@ -2,7 +2,7 @@
 #ifdef PLATFORM_DESKTOP
 # include <GLFW/glfw3.h>
 #endif
-namespace Kepler
+namespace ke
 {
 	TTimer* GGlobalTimer = nullptr;
 	
@@ -14,24 +14,24 @@ namespace Kepler
 	void TTimer::Begin()
 	{
 #ifdef PLATFORM_DESKTOP
-		StartTime = glfwGetTime();
+		m_StartTime = glfwGetTime();
 #else
 #endif
 	}
 
 	void TTimer::End()
 	{
-		double EndTime = 0.0;
+		double endTime = 0.0;
 #ifdef PLATFORM_DESKTOP
-		EndTime = glfwGetTime();
+		endTime = glfwGetTime();
 #else
 #endif
-		DeltaTime = (float)EndTime - (float)StartTime;
+		m_DeltaTime = (float)endTime - (float)m_StartTime;
 	}
 
 	float TTimer::Delta() const
 	{
-		return DeltaTime;
+		return m_DeltaTime;
 	}
 
 }

@@ -12,7 +12,7 @@
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
 
-namespace Kepler
+namespace ke
 {
 	enum class ECursorMode
 	{
@@ -33,17 +33,17 @@ namespace Kepler
 		static bool HandleCrashReported(const TString& Message);
 
 		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) = 0;
-		virtual void Update() { MouseState.OnUpdate(); };
+		virtual void Update() { m_MouseState.OnUpdate(); };
 		virtual bool HasActiveMainWindow() const = 0;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event);
 		void RegisterPlatformEventListener(IPlatformEventListener* listener);
 
-		inline const TKeyboardState& GetKeyboardState() const { return KeyboardState; }
-		inline const TMouseState& GetMouseState() const { return MouseState; }
-		virtual bool IsMainWindow(TWindow* Window) const { return true; }
+		inline const TKeyboardState& GetKeyboardState() const { return m_KeyboardState; }
+		inline const TMouseState& GetMouseState() const { return m_MouseState; }
+		virtual bool IsMainWindow(TWindow* pWindow) const { return true; }
 
-		inline ECursorMode GetCurrentCursorMode() const { return CurrentCursorMode; }
-		virtual void SetCursorMode(ECursorMode Mode);
+		inline ECursorMode GetCurrentCursorMode() const { return m_CurrentCursorMode; }
+		virtual void SetCursorMode(ECursorMode mode);
 
 	private:
 		bool Internal_MouseMoved(const TMouseMoveEvent& e);
@@ -51,32 +51,32 @@ namespace Kepler
 		bool Internal_MouseButtonReleased(const TMouseButtonUpEvent& e);
 		bool Internal_KeyPressed(const TKeyDownEvent& e);
 		bool Internal_KeyReleased(const TKeyUpEvent& e);
-		bool Internal_WindowClosed(const TWindowClosedEvent& Event);
-		bool Internal_WindowMinimized(const TWindowMinimizeEvent& Event);
-		bool Internal_WindowRestored(const TWindowRestoreEvent& Event);
-		bool Internal_WindowFocused(const TWindowFocusedEvent& Event);
-		bool Internal_WindowUnfocused(const TWindowUnfocusedEvent& Event);
+		bool Internal_WindowClosed(const TWindowClosedEvent& e);
+		bool Internal_WindowMinimized(const TWindowMinimizeEvent& e);
+		bool Internal_WindowRestored(const TWindowRestoreEvent& e);
+		bool Internal_WindowFocused(const TWindowFocusedEvent& e);
+		bool Internal_WindowUnfocused(const TWindowUnfocusedEvent& e);
 
 	protected:
-		bool bInitialized = false;
+		bool m_bInitialized = false;
 		virtual void CloseAllWindows() = 0;
-		ECursorMode CurrentCursorMode{ECursorMode::Visible};
-		ECursorMode OldCursorMode{ECursorMode::Visible};
+		ECursorMode m_CurrentCursorMode{ECursorMode::Visible};
+		ECursorMode m_OldCursorMode{ECursorMode::Visible};
 
 	private:
 		static TPlatform* Instance;
 
-		IPlatformEventListener* EventListener{ nullptr };
-		TMouseState MouseState{};
-		TKeyboardState KeyboardState{};
+		IPlatformEventListener* m_EventListener{ nullptr };
+		TMouseState m_MouseState{};
+		TKeyboardState m_KeyboardState{};
 
 	public:
-		bool bMinimized = false;
-		bool bUnfocused = false;
+		bool m_bMinimized = false;
+		bool m_bUnfocused = false;
 		bool IsMainWindowMinimized() const;
 		inline bool IsMainWindowUnfocused() const
 		{
-			return bUnfocused;
+			return m_bUnfocused;
 		}
 	};
 }
