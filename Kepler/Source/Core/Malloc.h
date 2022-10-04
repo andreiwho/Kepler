@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace Kepler
+namespace ke
 {
 	extern std::unique_ptr<TMemoryPool> GGlobalMemoryPool;
 
@@ -22,15 +22,9 @@ namespace Kepler
 
 		static TMalloc* Get() { return CHECKED(Instance); }
 
-		void* Allocate(usize Size, TMemoryPool* MemoryPool = nullptr);
+		void* Allocate(usize size, TMemoryPool* pPool = nullptr);
 		void Free(const void* block);
 		usize GetSize(const void* block) const;
-
-	private:
-		struct TAllocationHeader
-		{
-			usize AllocationSize{};
-		};
 	};
 
 	template<typename T, typename ... Args>
@@ -43,170 +37,188 @@ namespace Kepler
 
 	template<typename T> using TSharedPtr = std::shared_ptr<T>;
 
-	class TRefCounted
+	class IntrusiveRefCounted
 	{
 	public:
-		virtual ~TRefCounted() = default;
+		virtual ~IntrusiveRefCounted() = default;
 
 		void AddRef() const;
 		void Release() const;
-		inline u64 GetRefCount() const { return RefCount.load(); }
+		inline u64 GetRefCount() const { return m_RefCount.load(); }
 
 	private:
-		mutable TAtomic<u64> RefCount{ 1 };
+		mutable TAtomic<u64> m_RefCount{ 1 };
 	};
 
-	void DoRelease(void* RefCounted);
-	void DoAddRef(void* RefCounted);
-	usize DoGetRefCount(void* RefCounted);
+	void DoRelease(void* pRefCnt);
+	void DoAddRef(void* pRefCounted);
+	usize DoGetRefCount(void* pRefCounted);
 
 	template<typename T>
 	class TRef
 	{
 	public:
-		TRef() : Memory(nullptr) {}
-		TRef(T* NewMemory)
-			: Memory(NewMemory)
+		TRef() : m_pMemory(nullptr) {}
+		TRef(T* pNewMem)
+			: m_pMemory(pNewMem)
 		{
-			if (Memory && !DoGetRefCount(Memory))
+			if (m_pMemory && !DoGetRefCount(m_pMemory))
 			{
-				DoAddRef(Memory);
+				DoAddRef(m_pMemory);
 			}
 		}
 
 		~TRef() { Release(); }
 
-		TRef(const TRef& Other) noexcept
+		TRef(const TRef& other) noexcept
 		{
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = const_cast<T*>(Other.Raw());
-			DoAddRef(Memory);
+			m_pMemory = const_cast<T*>(other.Raw());
+			if (m_pMemory)
+			{
+				DoAddRef(m_pMemory);
+			}
 		}
 
 		template<typename U>
-		TRef<T>(const TRef<U>& Other) noexcept
+		TRef<T>(const TRef<U>& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = (T*)const_cast<U*>(Other.Raw());
-			DoAddRef(Memory);
+			m_pMemory = (T*)const_cast<U*>(other.Raw());
+			if (m_pMemory)
+			{
+				DoAddRef(m_pMemory);
+			}
 		}
 
-		TRef& operator=(const TRef& Other) noexcept
+		TRef& operator=(const TRef& other) noexcept
 		{
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = const_cast<T*>(Other.Raw());
-			DoAddRef(Memory);
+			m_pMemory = const_cast<T*>(other.Raw());
+			if (m_pMemory)
+			{
+				DoAddRef(m_pMemory);
+			}
 			return *this;
 		}
 
 		template<typename U>
-		TRef<T>& operator=(const TRef<U>& Other) noexcept
+		TRef<T>& operator=(const TRef<U>& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = (T*)const_cast<U*>(Other.Raw());
-			DoAddRef(Memory);
+			m_pMemory = (T*)const_cast<U*>(other.Raw());
+			if (m_pMemory)
+			{
+				DoAddRef(m_pMemory);
+			}
 			return *this;
 		}
 
-		TRef(TRef&& Other) noexcept
+		TRef(TRef&& other) noexcept
 		{
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = Other.Raw();
-			Other.ResetMemoryUnsafe();
+			m_pMemory = other.Raw();
+			other.ResetMemoryUnsafe();
 		}
 
 		template<typename U>
-		TRef<T>(TRef<U>&& Other) noexcept
+		TRef<T>(TRef<U>&& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = Other.Raw();
-			Other.ResetMemoryUnsafe();
+			m_pMemory = other.Raw();
+			other.ResetMemoryUnsafe();
 		}
 
-		TRef& operator=(TRef&& Other) noexcept
+		TRef& operator=(TRef&& other) noexcept
 		{
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = Other.Raw();
-			Other.ResetMemoryUnsafe();
+			m_pMemory = other.Raw();
+			other.ResetMemoryUnsafe();
 			return *this;
 		}
 
 		template<typename U>
-		TRef<T>& operator=(TRef<U>&& Other) noexcept
+		TRef<T>& operator=(TRef<U>&& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
+				DoRelease(m_pMemory);
 			}
-			Memory = Other.Raw();
-			Other.ResetMemoryUnsafe();
+			m_pMemory = other.Raw();
+			other.ResetMemoryUnsafe();
 			return *this;
 		}
 
-		T* operator->() { return Memory; }
-		T* operator->() const { return Memory; }
+		T* operator->() { return m_pMemory; }
+		T* operator->() const { return m_pMemory; }
 
-		T& operator*() { return *Memory; }
-		const T& operator*() const { return *Memory; }
+		T& operator*() { return *m_pMemory; }
+		const T& operator*() const { return *m_pMemory; }
 		inline operator bool() const { return !!Raw(); }
 
-		T* Raw() { return Memory; }
-		const T* Raw() const { return Memory; }
+		T* Raw() { return m_pMemory; }
+		const T* Raw() const { return m_pMemory; }
 
-		void AddRef() const { if (Memory) Memory->AddRef(); }
+		void AddRef() const { if (m_pMemory) m_pMemory->AddRef(); }
 		void Release() const
 		{
-			if (Memory)
+			if (m_pMemory)
 			{
-				DoRelease(Memory);
-				Memory = nullptr;
+				DoRelease(m_pMemory);
+				m_pMemory = nullptr;
 			}
 		}
-		void ResetMemoryUnsafe() { Memory = nullptr; }
+		void ResetMemoryUnsafe() { m_pMemory = nullptr; }
 	private:
 		//static_assert(std::is_base_of_v<TRefCounted, T>);
-		mutable T* Memory{};
+		mutable T* m_pMemory{};
 	};
 
 	template<typename T>
-	TRef<T> MakeRef(T* Memory)
+	TRef<T> MakeRef(T* pMem)
 	{
 		//static_assert(std::is_base_of_v<TRefCounted, T>);
-		return TRef<T>(Memory);
+		return TRef<T>(pMem);
 	}
 
 	template<typename T>
-	struct TEnableRefFromThis : public TRefCounted
+	struct TEnableRefFromThis : public IntrusiveRefCounted
 	{
 		inline TRef<T> RefFromThis()
 		{
 			AddRef();
 			return MakeRef(static_cast<T*>(this));
+		}
+
+		template<typename U>
+		inline TRef<U> RefFromThis()
+		{
+			return RefCast<U>(RefFromThis());
 		}
 	};
 
@@ -247,14 +259,14 @@ namespace Kepler
 	};
 
 	template<typename T, typename U>
-	TRef<T> RefCast(TRef<U> Ref)
+	TRef<T> RefCast(TRef<U> ref)
 	{
 		if constexpr (std::is_base_of_v<T, U> || std::is_base_of_v<U, T>)
 		{
-			if (Ref)
+			if (ref)
 			{
-				Ref.AddRef();
-				return TRef<T>(static_cast<T*>(Ref.Raw()));
+				ref.AddRef();
+				return TRef<T>(static_cast<T*>(ref.Raw()));
 			}
 		}
 		return nullptr;
@@ -267,7 +279,7 @@ namespace Kepler
 	}
 
 	template<typename T>
-	struct TDefaultDeleter { void operator()(T* mem) { Kepler::Delete<T>(mem); } };
+	struct TDefaultDeleter { void operator()(T* mem) { ke::Delete<T>(mem); } };
 
 	template<typename T> using TScope = std::unique_ptr<T, TDefaultDeleter<T>>;
 	template<typename T, typename... Args>

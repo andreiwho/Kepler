@@ -1,0 +1,24 @@
+{
+    "Material": {
+        "Pipeline": {
+            "Shader": "EngineShaders://DefaultUnlit.hlsl",
+            "PrimitiveTopology": "Triangles",
+            "Rasterizer": {
+                "bDisabled": false,
+                "FillMode": "Solid",
+                "CullMode": "Back",
+                "bEnableScissor": false
+            },
+            "DepthStencil": {
+                "bDepthEnable": true,
+                "DepthAccess": "Read",
+                "DepthFunc": "LEqual",
+                "bStencilEnable": false,
+                "StencilAccess": "None"
+            }
+        },
+        "Samplers": {
+            "Albedo": "Game://Tex_Gun_Diffuse.png"
+        }
+    }
+}

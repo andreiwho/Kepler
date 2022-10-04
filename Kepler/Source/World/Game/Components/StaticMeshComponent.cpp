@@ -1,6 +1,6 @@
 #include "StaticMeshComponent.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TStaticMeshComponent::TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh)
@@ -13,23 +13,19 @@ namespace Kepler
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices)
 		:	StaticMesh(TStaticMesh::New(Vertices, InIndices))
 	{
+	}
+
+	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshSection>& Sections)
+		: StaticMesh(TStaticMesh::New(Sections))
+	{
+
 	}
 
 	void TStaticMeshComponent::SetStaticMesh(TRef<TStaticMesh> NewMesh)
 	{
 		StaticMesh = NewMesh;
 	}
-
-	usize TStaticMeshComponent::GetIndexCount() const
-	{
-		if (StaticMesh)
-		{
-			return StaticMesh->GetIndexCount();
-		}
-		return 0;
-	}
-
 }

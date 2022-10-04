@@ -2,6 +2,6 @@
 #include "Renderer/RenderThread.h"
 #include "Renderer/RenderGlobals.h"
 
-namespace Kepler
+namespace ke
 {
 }

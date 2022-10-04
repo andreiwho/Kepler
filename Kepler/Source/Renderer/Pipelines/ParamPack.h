@@ -2,17 +2,17 @@
 #include "Core/Core.h"
 #include "Renderer/RenderTypes.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	class TPipelineParam
 	{
 	public:
 		TPipelineParam() = default;
-		TPipelineParam(usize InOffset, usize InSize, EShaderInputType InType = EShaderInputType::Custom) 
-			:	Offset(InOffset)
-			,	Size(InSize)
-			,	Type(InType)
+		TPipelineParam(usize InOffset, usize InSize, EShaderInputType InType = EShaderInputType::Custom)
+			: Offset(InOffset)
+			, Size(InSize)
+			, Type(InType)
 		{}
 
 		inline usize GetOffset() const { return Offset; }
@@ -22,7 +22,7 @@ namespace Kepler
 	private:
 		usize Offset{};
 		usize Size{};
-		EShaderInputType Type{EShaderInputType::Custom};
+		EShaderInputType Type{ EShaderInputType::Custom };
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -43,64 +43,66 @@ namespace Kepler
 
 		static TRef<TPipelineParamMapping> New()
 		{
-			return MakeRef(Kepler::New<TPipelineParamMapping>());
+			return MakeRef(ke::New<TPipelineParamMapping>());
 		}
 
 	private:
-		TChaoticMap<TString, TPipelineParam> Params;
-		EShaderStageFlags ParamShaderStages{0};
-		
-		TChaoticMap<TString, u32> Samplers;
+		Map<TString, TPipelineParam> Params;
+		EShaderStageFlags ParamShaderStages{ 0 };
+
+		Map<TString, u32> Samplers;
 		EShaderStageFlags SamplerShaderStages{ 0 };
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TPipelineParamPack : public TRefCounted
+	class TPipelineParamPack : public IntrusiveRefCounted
 	{
 	public:
 		TPipelineParamPack(TRef<TPipelineParamMapping> Mapping);
-
-		[[deprecated]] inline bool IsCompiled() const { return bIsCompiled; }
 
 		template<typename T>
 		void Write(const TString& Param, const T* Data)
 		{
 			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param) && IsCompiled());
+			CHECK(Params->GetParams().Contains(Param));
 
 			const auto& ParamRef = Params->GetParams()[Param];
-			memcpy(CPUData.GetData() + ParamRef.GetOffset(), Data, ParamRef.GetSize());
+			memcpy(CPUData.GetData() + ParamRef.GetOffset() + (GetBufferIndex() * SinglePackStride), Data, ParamRef.GetSize());
 		}
-		
+
 		template<typename T>
 		T& GetParam(const TString& Param)
 		{
 			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param) && IsCompiled());
-			return *reinterpret_cast<T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset());
+			CHECK(Params->GetParams().Contains(Param));
+			return *reinterpret_cast<T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset() + (GetBufferIndex() * SinglePackStride));
 		}
 
 		template<typename T>
 		const T& GetParam(const TString& Param) const
 		{
 			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param) && IsCompiled());
-			return *reinterpret_cast<const T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset());
+			CHECK(Params->GetParams().Contains(Param));
+			return *reinterpret_cast<const T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset() + (GetBufferIndex() * SinglePackStride));
 		}
 
-		const ubyte* GetDataPointer() const { return CPUData.GetData(); }
-		usize GetDataSize() const { return CPUData.GetLength(); }
+		const ubyte* GetDataPointer() const { return CPUData.GetData() + (GetBufferIndex() * SinglePackStride); }
+		usize GetDataSize() const { return SinglePackStride; }
 		inline EShaderStageFlags GetShaderStages() const { return Params->GetParamShaderStages(); }
 
 	private:
+		static u8 GetBufferIndex() noexcept;
+
+	private:
 		TRef<TPipelineParamMapping> Params;
-		TDynArray<ubyte> CPUData;
+		Array<ubyte> CPUData;
 		bool bIsCompiled = false;
+		usize SinglePackStride = 0;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 	class TTextureSampler2D;
-	class TPipelineSamplerPack : public TRefCounted
+	class TPipelineSamplerPack : public IntrusiveRefCounted
 	{
 	public:
 		TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping);
@@ -109,10 +111,12 @@ namespace Kepler
 
 		TRef<TTextureSampler2D> GetSampler(const TString& Name);
 
-		const TDynArray<TRef<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
-		
+		TRef<TPipelineParamMapping> GetParamMappings() const { return Params; }
+
+		const Array<TRef<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
+
 	private:
 		TRef<TPipelineParamMapping> Params;
-		TDynArray<TRef<TTextureSampler2D>> Samplers;
+		Array<TRef<TTextureSampler2D>> Samplers;
 	};
 }

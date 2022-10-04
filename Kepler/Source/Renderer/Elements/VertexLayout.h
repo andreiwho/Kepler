@@ -4,7 +4,7 @@
 #include "Core/Containers/DynArray.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TVertexAttribute
 	{
@@ -41,10 +41,10 @@ namespace Kepler
 			Attributes.EmplaceBack(Attribute);
 		}
 
-		const TDynArray<TVertexAttribute>& GetAttributes() const { return Attributes; }
+		const Array<TVertexAttribute>& GetAttributes() const { return Attributes; }
 
 	protected:
-		TDynArray<TVertexAttribute> Attributes;
+		Array<TVertexAttribute> Attributes;
 		usize Stride{};
 	};
 }

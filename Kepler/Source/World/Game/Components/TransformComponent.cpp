@@ -1,6 +1,7 @@
 #include "TransformComponent.h"
+#include "Renderer/World/Camera.h"
 
-namespace Kepler
+namespace ke
 {
 
 	TTransformComponent::TTransformComponent(float3 Location, float3 Rotation, float3 Scale)
@@ -27,4 +28,21 @@ namespace Kepler
 	{
 		Transform.SetScale(NewScale);
 	}
+
+	float3 TTransformComponent::GetForwardVector() const
+	{
+		return MathCamera::ToEuler(Transform.GetRotation());
+	}
+
+	float3 TTransformComponent::GetRightVector() const
+	{
+		float3 WorldUp = float3(0.0f, 0.0f, 1.0f);
+		return glm::normalize(glm::cross(GetForwardVector(), WorldUp));
+	}
+
+	float3 TTransformComponent::GetUpVector() const
+	{
+		return glm::normalize(glm::cross(GetRightVector(), GetForwardVector()));
+	}
+
 }

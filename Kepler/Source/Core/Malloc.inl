@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 
-namespace Kepler
+namespace ke
 {
 	template<typename T, typename ... Args>
 	T* New(Args&&... args)
@@ -13,13 +13,13 @@ namespace Kepler
 	}
 
 	template<typename T>
-	void Delete(const T* object)
+	void Delete(const T* pObj)
 	{
-		if (object)
+		if (pObj)
 		{
-			object->~T();
-			TMalloc* allocator = TMalloc::Get();
-			allocator->Free(object);
+			pObj->~T();
+			TMalloc* pAlloc = TMalloc::Get();
+			pAlloc->Free(pObj);
 		}
 	}
 }

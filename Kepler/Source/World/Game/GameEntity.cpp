@@ -2,7 +2,7 @@
 #include "GameWorld.h"
 #include "Components/TransformComponent.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogEntity);
 
@@ -10,12 +10,18 @@ namespace Kepler
 		: World(InWorld)
 		, Entity(Id)
 	{
-		KEPLER_TRACE(LogEntity, "Created entity '{}' with Id: {}", GetName(), GetGUID().Value);
+		KEPLER_TRACE(LogEntity, "Created entity '{}' with Id: 0x{:x}", GetName(), GetGUID().Value);
+		bIsCamera = InWorld->IsCamera(Entity);
 	}
 
 	TString TGameEntity::GetName() const
 	{
 		return World->GetEntityName(Entity);
+	}
+
+	void TGameEntity::SetName(const TString& Name)
+	{
+		World->GetComponent<TNameComponent>(Entity).Name = Name;
 	}
 
 	id64 TGameEntity::GetGUID() const
@@ -90,6 +96,21 @@ namespace Kepler
 	void TGameEntity::SetTransform(TWorldTransform NewTransform)
 	{
 		World->GetComponent<TTransformComponent>(Entity).SetTransform(NewTransform);
+	}
+
+	float3 TGameEntity::GetForwardVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetForwardVector();
+	}
+
+	float3 TGameEntity::GetRightVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetRightVector();
+	}
+
+	float3 TGameEntity::GetUpVector() const
+	{
+		return World->GetComponent<TTransformComponent>(Entity).GetUpVector();
 	}
 
 }

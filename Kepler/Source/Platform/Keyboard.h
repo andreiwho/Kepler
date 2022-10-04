@@ -135,7 +135,7 @@ struct EKeyCode
 };
 
 #include <bitset>
-namespace Kepler
+namespace ke
 {
 	class TKeyboardState
 	{
@@ -143,8 +143,8 @@ namespace Kepler
 		void OnKeyPressed(EKeyCode code);
 		void OnKeyReleased(EKeyCode code);
 
-		inline bool GetKeyState(EKeyCode code) const { assert(KeyStates.size() > code); return KeyStates[code]; }
+		inline bool GetKeyState(EKeyCode code) const { assert(m_KeyStates.size() > code); return m_KeyStates[code]; }
 	private:
-		std::bitset<EKeyCode::Last + 1> KeyStates;
+		std::bitset<EKeyCode::Last + 1> m_KeyStates;
 	};
 }

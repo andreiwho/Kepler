@@ -3,7 +3,7 @@
 
 #include <atomic>
 
-namespace Kepler
+namespace ke
 {
 	class TRenderPrimitive
 	{

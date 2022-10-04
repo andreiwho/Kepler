@@ -2,7 +2,7 @@
 #include "Core/Malloc.h"
 #include "Core/Containers/DynArray.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	enum class ERenderAPI
@@ -96,6 +96,18 @@ namespace Kepler
 	};
 
 	//////////////////////////////////////////////////////////////////////////
+	enum class EDepthComparissonMode
+	{
+		None,
+		Less,
+		Equal,
+		LEqual,
+		Greater,
+		GEqual,
+		Always,
+	};
+
+	//////////////////////////////////////////////////////////////////////////
 	struct EShaderStageFlags
 	{
 		enum Type {
@@ -114,9 +126,9 @@ namespace Kepler
 			return *this;
 		}
 
-		inline TDynArray<EShaderStageFlags::Type> Separate() const
+		inline Array<EShaderStageFlags::Type> Separate() const
 		{
-			TDynArray<EShaderStageFlags::Type> OutFlags = 0;
+			Array<EShaderStageFlags::Type> OutFlags = 0;
 
 			auto EmplaceIf = [&](EShaderStageFlags::Type CheckMask)
 			{
@@ -139,11 +151,11 @@ namespace Kepler
 				{
 					switch (Value)
 					{
-					case Kepler::EShaderStageFlags::Vertex:
+					case ke::EShaderStageFlags::Vertex:
 						return "Vertex";
-					case Kepler::EShaderStageFlags::Pixel:
+					case ke::EShaderStageFlags::Pixel:
 						return "Pixel";
-					case Kepler::EShaderStageFlags::Compute:
+					case ke::EShaderStageFlags::Compute:
 						return "Compute";
 					default:
 						break;
@@ -157,21 +169,21 @@ namespace Kepler
 
 
 	//////////////////////////////////////////////////////////////////////////
-	class TDataBlob : public TRefCounted
+	class AsyncDataBlob : public IntrusiveRefCounted
 	{
 	public:
-		static TRef<TDataBlob> CreateGraphicsDataBlob(const void* Data = nullptr, usize Size = 0, usize Stride = 0);
+		static TRef<AsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
 
 		template<typename T>
-		static TRef<TDataBlob> New(const TDynArray<T>& Data)
+		static TRef<AsyncDataBlob> New(const Array<T>& data)
 		{
-			return CreateGraphicsDataBlob(Data.GetData(), Data.GetLength() * sizeof(T), sizeof(T));
+			return CreateGraphicsDataBlob(data.GetData(), data.GetLength() * sizeof(T), sizeof(T));
 		}
 
 		virtual const void* GetData() const = 0;
 		virtual usize GetSize() const = 0;
 		virtual usize GetStride() const = 0;
-		virtual void Write(const void* Data, usize Size) = 0;
+		virtual void Write(const void* pData, usize size) = 0;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -327,6 +339,8 @@ namespace Kepler
 			ShaderResource = BIT(0),
 			RenderTarget = BIT(1),
 			DepthTarget = BIT(2),
+			AllowCPURead = BIT(3),
+			AllowCPUWrite = BIT(4)
 		};
 
 		u32 Mask{Undefined};

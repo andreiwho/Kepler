@@ -4,11 +4,11 @@
 #include "ImageD3D11.h"
 #include "RenderDeviceD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TRenderTarget2D_D3D11::TRenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-		:	TRenderTarget2D(InImage, MipLevel, ArrayLayer)
+	RenderTarget2D_D3D11::RenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+		:	RenderTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
@@ -21,13 +21,13 @@ namespace Kepler
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			HRCHECK(Device->GetDevice()->CreateRenderTargetView(Texture, &Desc, &RenderTarget));
+			HRCHECK(Device->GetDevice()->CreateRenderTargetView(Texture, &Desc, &m_RenderTarget));
 		}
 	}
 
-	TRenderTarget2D_D3D11::~TRenderTarget2D_D3D11()
+	RenderTarget2D_D3D11::~RenderTarget2D_D3D11()
 	{
-		if (!RenderTarget)
+		if (!m_RenderTarget)
 		{
 			return;
 		}
@@ -35,14 +35,14 @@ namespace Kepler
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			Device->RegisterPendingDeleteResource(RenderTarget);
+			Device->RegisterPendingDeleteResource(m_RenderTarget);
 		}
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////
-	TDepthStencilTarget2D_D3D11::TDepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer) 
-		:	TDepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
+		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
@@ -52,16 +52,21 @@ namespace Kepler
 		CHECK(Texture);
 
 		CD3D11_DEPTH_STENCIL_VIEW_DESC Desc(Texture, D3D11_DSV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, ArrayLayer, 1);
+		if (bReadOnly)
+		{
+			Desc.Flags = D3D11_DSV_FLAG::D3D11_DSV_READ_ONLY_DEPTH;
+		}
+
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			HRCHECK(Device->GetDevice()->CreateDepthStencilView(Texture, &Desc, &View));
+			HRCHECK(Device->GetDevice()->CreateDepthStencilView(Texture, &Desc, &m_View));
 		}
 	}
 
-	TDepthStencilTarget2D_D3D11::~TDepthStencilTarget2D_D3D11()
+	DepthStencilTarget2D_D3D11::~DepthStencilTarget2D_D3D11()
 	{
-		if (!View)
+		if (!m_View)
 		{
 			return;
 		}
@@ -69,7 +74,7 @@ namespace Kepler
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
-			Device->RegisterPendingDeleteResource(View);
+			Device->RegisterPendingDeleteResource(m_View);
 		}
 	}
 

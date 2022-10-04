@@ -3,7 +3,7 @@
 #include "Renderer/RenderTypes.h"
 #include "Image.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTextureSampler2D : public TEnableRefFromThis<TTextureSampler2D>
 	{
@@ -15,6 +15,7 @@ namespace Kepler
 
 		inline TRef<TImage2D> GetImage() const { return Image; }
 
+		virtual void* GetNativeHandle() const = 0;
 	protected:
 		TRef<TImage2D> Image;
 	};

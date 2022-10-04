@@ -4,7 +4,7 @@
 #include "Async/Async.h"
 #include "../Elements/VertexLayout.h"
 
-namespace Kepler
+namespace ke
 {
 	class THLSLShaderCompilerD3D11 : public THLSLShaderCompiler
 	{
@@ -14,6 +14,7 @@ namespace Kepler
 
 	private:
 		static TShaderModule CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flags, const TString& Source);
-		static TRef<TDataBlob> CompileHLSLCode(const TString& SourceName, const TString& EntryPoint, EShaderStageFlags::Type Type, const TString& Code);
+		static TRef<AsyncDataBlob> CompileHLSLCode(const TString& SourceName, const TString& EntryPoint, EShaderStageFlags::Type Type, const TString& Code);
+		static TString MakeBufferSlotString(i32 index);
 	};
 }

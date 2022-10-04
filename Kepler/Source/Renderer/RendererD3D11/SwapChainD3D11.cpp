@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogSwapchain);
 
@@ -76,13 +76,14 @@ namespace Kepler
 
 	void TSwapChainD3D11::Present()
 	{
+		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
 		CHECK(SwapChain);
 		
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
 		Device->Internal_InitInfoMessageStartIndex_Debug();
-		const HRESULT Result = SwapChain->Present(0, 0);
+		const HRESULT Result = SwapChain->Present(1, 0);
 		if (FAILED(Result))
 		{
 			auto Messages = Device->GetInfoQueueMessages();

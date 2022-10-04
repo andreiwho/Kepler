@@ -2,8 +2,9 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <cassert>
+#include "Editor/Misc/EditorLogSink.h"
 
-namespace Kepler
+namespace ke
 {
 	TLog* TLog::Instance = nullptr;
 
@@ -13,32 +14,41 @@ namespace Kepler
 		Instance = this;
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& Name)
+	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& name)
 	{
-		std::lock_guard Lck{ LoggerCreationFence };
-		if (Loggers.contains(Name))
+		std::lock_guard lck{ m_LoggerCreationFence };
+		if (m_Loggers.contains(name))
 		{
-			return Loggers.at(Name);
+			return m_Loggers.at(name);
 		}
-		return CreateLogger(Name);
+		return CreateLogger(name);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& Name)
+	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& name)
 	{
-		std::shared_ptr<spdlog::logger> Logger = spdlog::stdout_color_mt(Name);
-		if (!Logger)
+#ifdef ENABLE_EDITOR
+		if (!m_EditorSink)
+		{
+			m_EditorSink = std::make_shared<TEditorLogSink>();
+		}
+#endif
+		std::shared_ptr<spdlog::logger> pLogger = spdlog::stdout_color_mt(name);
+		if (!pLogger)
 		{
 			return nullptr;
 		}
-		Loggers[Name] = Logger;
- 		return ApplyDefaultLoggerConfig(Logger);
+		m_Loggers[name] = pLogger;
+#ifdef ENABLE_EDITOR
+		pLogger->sinks().push_back(m_EditorSink);
+#endif
+ 		return ApplyDefaultLoggerConfig(pLogger);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> Logger)
+	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> pLogger)
 	{
-		Logger->set_level(spdlog::level::trace);
-		Logger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
-		return Logger;
+		pLogger->set_level(spdlog::level::trace);
+		pLogger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
+		return pLogger;
 	}
 
 }

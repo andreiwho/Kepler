@@ -2,10 +2,12 @@
 #include "VertexLayout.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
-	struct TShaderModuleReflection : public TRefCounted
+	class TPipelineParamMapping;
+	struct TShaderModuleReflection : public IntrusiveRefCounted
 	{
 		TVertexLayout VertexLayout{};
+		TRef<TPipelineParamMapping> ParamMapping;
 	};
 }

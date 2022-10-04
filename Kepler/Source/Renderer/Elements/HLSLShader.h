@@ -2,11 +2,11 @@
 #include "Core/Core.h"
 #include "Shader.h"
 
-namespace Kepler
+namespace ke
 {
 	class THLSLShader : public TShader 
 	{
 	public:
-		THLSLShader(const TString& Name, const TDynArray<TShaderModule>& Modules);
+		THLSLShader(const TString& Name, const Array<TShaderModule>& Modules);
 	};
 }

@@ -1,6 +1,6 @@
 #include "World.h"
 
-namespace Kepler
+namespace ke
 {
 	
 	TWorld::TWorld(const TString& InName)

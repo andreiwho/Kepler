@@ -4,27 +4,27 @@
 
 #include "Audio/AudioMA/AudioEngineMA.h"
 
-namespace Kepler
+namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////
-	Kepler::TAudioEngine* TAudioEngine::Instance;
+	ke::AudioEngine* AudioEngine::Instance;
 
-	TAudioEngine::TAudioEngine()
+	AudioEngine::AudioEngine()
 	{
 		Instance = this;
 	}
 
-	TSharedPtr<TAudioEngine> TAudioEngine::CreateAudioEngine(EAudioEngineAPI Api)
+	TSharedPtr<AudioEngine> AudioEngine::CreateAudioEngine(EAudioEngineAPI api)
 	{
-		switch (Api)
+		switch (api)
 		{
-		case Kepler::EAudioEngineAPI::MiniAudio:
+		case ke::EAudioEngineAPI::MiniAudio:
 			GAudioEngineAPI = EAudioEngineAPI::MiniAudio;
-			return MakeShared<TAudioEngineMA>();
+			return MakeShared<AudioEngineMA>();
 			break;
 		default:
 			break;

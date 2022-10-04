@@ -2,10 +2,10 @@
 #include "../RenderGlobals.h"
 #include "Async/Async.h"
 
-namespace Kepler
+namespace ke
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> InPipeline)
-		: Pipeline(InPipeline)
+	TMaterial::TMaterial(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+		: m_Pipeline(pPipeline), m_ParentAssetPath(parentAssetPath)
 	{
 		CHECK(!IsRenderThread());
 		Await(TRenderThread::Submit(
@@ -14,33 +14,38 @@ namespace Kepler
 				auto ParamMapping = This->GetPipeline()->GetParamMapping();
 				if (ParamMapping)
 				{
-					This->ParamBuffer = TParamBuffer::New(ParamMapping);
-					This->Samplers = ParamMapping->CreateSamplerPack();
+					This->m_ParamBuffer = TParamBuffer::New(ParamMapping);
+					This->m_Samplers = ParamMapping->CreateSamplerPack();
 				}
 			}));
 	}
 
-	void TMaterial::RT_Update(TRef<class TCommandListImmediate> pImmCmd)
+	void TMaterial::RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd)
 	{
 		CHECK(IsRenderThread());
-		ParamBuffer->RT_UploadToGPU(pImmCmd);
+		m_ParamBuffer->RT_UploadToGPU(pImmCmd);
 	}
 
-	void TMaterial::WriteSampler(const TString& Name, TRef<TTextureSampler2D> Data)
+	void TMaterial::WriteSampler(const TString& name, TRef<TTextureSampler2D> data)
 	{
-		Samplers->Write(Name, Data);
+		m_Samplers->Write(name, data);
 	}
 
-	void TMaterial::WriteTransform(TWorldTransform Transform)
+	void TMaterial::WriteTransform(TWorldTransform transform)
 	{
-		matrix4x4 Matrix = glm::transpose(Transform.GenerateWorldMatrix());
-		ParamBuffer->Write("Transform", &Matrix);
+		matrix4x4 matrix = glm::transpose(transform.GenerateWorldMatrix());
+		m_ParamBuffer->Write("Transform", &matrix);
 	}
 
-	void TMaterial::WriteCamera(TCamera Camera)
+	// BIG TODO: Use global renderer buffer in shaders to represent the camera state
+	void TMaterial::WriteCamera(MathCamera camera)
 	{
-		matrix4x4 ViewProjection = glm::transpose(Camera.GenerateViewProjectionMatrix());
-		ParamBuffer->Write("ViewProjection", &ViewProjection);
+		matrix4x4 viewProj = glm::transpose(camera.GenerateViewProjectionMatrix());
+		m_ParamBuffer->Write("ViewProjection", &viewProj);
 	}
 
+	void TMaterial::WriteId(i32 id)
+	{
+		m_ParamBuffer->Write("EntityId", &id);
+	}
 }

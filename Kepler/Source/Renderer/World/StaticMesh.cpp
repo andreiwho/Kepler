@@ -2,44 +2,46 @@
 #include "Renderer/RenderGlobals.h"
 #include "Async/Async.h"
 
-namespace Kepler
+namespace ke
 {
 
-	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
-		:	VertexBuffer(InVertexBuffer)
-		,	IndexBuffer(InIndexBuffer)
+	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
+		:	m_Sections({TInternalSection{pVertexBuffer, pIndexBuffer}})
 	{
 	}
 
-	TStaticMesh::TStaticMesh(const TDynArray<TStaticMeshVertex>& Vertices, const TDynArray<u32>& InIndices)
+	TStaticMesh::TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices)
 	{
 		CHECK(!IsRenderThread());
 
-		SetVertices(Vertices);
-		SetIndices(InIndices);
-	}
-
-	void TStaticMesh::SetVertices(const TDynArray<TStaticMeshVertex>& Vertices)
-	{
-		CHECK(!IsRenderThread());
-
-		if (!VertexBuffer)
-		{
-			Await(TRenderThread::Submit(
-				[&Vertices, This = RefFromThis()]
-				{
-					This->VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Vertices));
-				}));
-		}
-	}
-
-	void TStaticMesh::SetIndices(const TDynArray<u32>& Indices)
-	{
-		Await(TRenderThread::Submit(
-			[&Indices, This = RefFromThis()]
+		TInternalSection section;
+		Await(TRenderThread::Submit([&section, vertices, indices]
 			{
-				This->IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, TDataBlob::New(Indices));
+				section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(vertices));
+				section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
 			}));
+		m_Sections.EmplaceBack(std::move(section));
+	}
+
+	TStaticMesh::TStaticMesh(const Array<TStaticMeshSection>& sections)
+	{
+		SetSections(sections);
+	}
+
+	void TStaticMesh::SetSections(const Array<TStaticMeshSection>& sections)
+	{
+		m_Sections.Clear();
+		m_Sections.Reserve(sections.GetLength());
+		for (const auto& section : sections)
+		{
+			TInternalSection outSection;
+			Await(TRenderThread::Submit([&section, &outSection]
+				{
+					outSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Vertices));
+					outSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Indices));
+				}));
+			m_Sections.EmplaceBack(std::move(outSection));
+		}
 	}
 
 }

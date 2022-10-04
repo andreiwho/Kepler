@@ -11,18 +11,18 @@
 #include "Image.h"
 #include "Renderer/Pipelines/ParamPack.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSwapChain;
-	class TRenderTarget2D;
-	class TDepthStencilTarget2D;
+	class RenderTarget2D;
+	class DepthStencilTarget2D;
 
-	class TCommandList : public TRefCounted
+	class GraphicsCommandList : public TEnableRefFromThis<GraphicsCommandList>
 	{
 	public:
-		virtual ~TCommandList() = default;
+		virtual ~GraphicsCommandList() = default;
 
-		virtual void StartDrawingToSwapChainImage(TRef<TSwapChain> SwapChain, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+		virtual void StartDrawingToSwapChainImage(TRef<TSwapChain> pSwapChain, TRef<DepthStencilTarget2D> pDepthStencil = nullptr) = 0;
 
 		virtual void ClearSwapChainImage(TRef<TSwapChain> SwapChain, float4 ClearColor) = 0;
 		
@@ -30,7 +30,7 @@ namespace Kepler
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) = 0;
 
 		// A version for multiple buffers (called like this for optimization reasons)
-		virtual void BindVertexBuffers(const TDynArray<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const TDynArray<u32>& Offsets) = 0;
+		virtual void BindVertexBuffers(const Array<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets) = 0;
 
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) = 0;
 
@@ -50,37 +50,41 @@ namespace Kepler
 		
 		virtual void SetScissor(float X, float Y, float Width, float Height) = 0;
 
-		inline bool HasPipelineStateSetup() const { return bHasAttachedPipeline; }
+		inline bool HasPipelineStateSetup() const { return m_bHasAttachedPipeline; }
 
 		virtual void BindParamBuffers(TRef<TParamBuffer> ParamBufer, u32 Slot) = 0;
 		
-		virtual void BindParamBuffers(TDynArray<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
+		virtual void BindParamBuffers(Array<TRef<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
 
-		virtual void StartDrawingToRenderTargets(TRef<TRenderTarget2D> RenderTarget, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+		virtual void StartDrawingToRenderTargets(TRef<RenderTarget2D> RenderTarget, TRef<DepthStencilTarget2D> DepthStencil = nullptr) = 0;
 
-		virtual void StartDrawingToRenderTargets(const TDynArray<TRef<TRenderTarget2D>>& RenderTargets, TRef<TDepthStencilTarget2D> DepthStencil = nullptr) = 0;
+		virtual void StartDrawingToRenderTargets(const Array<TRef<RenderTarget2D>>& RenderTargets, TRef<DepthStencilTarget2D> DepthStencil = nullptr) = 0;
 
-		virtual void ClearRenderTarget(TRef<TRenderTarget2D> Target, float4 Color) = 0;
+		virtual void ClearRenderTarget(TRef<RenderTarget2D> Target, float4 Color) = 0;
 
-		virtual void ClearDepthTarget(TRef<TDepthStencilTarget2D> Target, bool bCleanStencil = false) = 0;
+		virtual void ClearDepthTarget(TRef<DepthStencilTarget2D> Target, bool bCleanStencil = false) = 0;
 
 		virtual void BeginDebugEvent(const char* Name) = 0;
 
 		virtual void EndDebugEvent() = 0;
 		
 	protected:
-		bool bHasAttachedPipeline = false;
+		bool m_bHasAttachedPipeline = false;
 	};
 
-	class TCommandListImmediate : public TCommandList
+	class GraphicsCommandListImmediate : public GraphicsCommandList
 	{
 	public:
-		virtual void* MapBuffer(TRef<TBuffer> Buffer) = 0;
+		virtual void* MapBuffer(TRef<Buffer> Buffer) = 0;
 
-		virtual void UnmapBuffer(TRef<TBuffer> Buffer) = 0;
+		virtual void* MapImage2D(TRef<TImage2D> Image, usize& OutAlignment) = 0;
 
-		virtual void Transfer(TRef<TTransferBuffer> From, TRef<TBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+		virtual void UnmapImage2D(TRef<TImage2D> Image) = 0;
 
-		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<TDataBlob> Data) = 0;
+		virtual void UnmapBuffer(TRef<Buffer> Buffer) = 0;
+
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+
+		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data) = 0;
 	};
 }

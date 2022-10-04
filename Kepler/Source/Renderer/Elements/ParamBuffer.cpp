@@ -2,7 +2,7 @@
 #include "../RenderDevice.h"
 #include "../RenderGlobals.h"
 
-namespace Kepler
+namespace ke
 {
 	TParamBuffer::TParamBuffer(TRef<TPipelineParamMapping> Mapping)
 		:	Params(Mapping->CreateParamPack())

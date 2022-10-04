@@ -1,34 +1,26 @@
 #pragma once
 #include "ThreadPool.h"
 
-namespace Kepler
+namespace ke
 {
 	extern TThreadPool* GLargeThreadPool;
 
 	template<typename FUNC>
-	inline decltype(auto) Async(FUNC&& Func)
+	inline decltype(auto) Async(FUNC&& func)
 	{
 		CHECK(GLargeThreadPool);
-		return GLargeThreadPool->SubmitTask(std::move(Func));
+		return GLargeThreadPool->SubmitTask(std::move(func));
 	}
 
 	template<typename Type>
-	inline decltype(auto) Await(std::future<Type>&& Future)
+	inline decltype(auto) Await(std::future<Type>&& future)
 	{
-		try
-		{
-			return Future.get();
-		}
-		catch (const TException& Exception)
-		{
-			TGlobalExceptionContainer::Get()->Push(std::make_shared<TException>(Exception));
-			throw;
-		}
+		return future.get();
 	}
 
 	template<typename Type>
-	inline decltype(auto) Await(std::future<Type>& FutureLV)
+	inline decltype(auto) Await(std::future<Type>& future)
 	{
-		return Await(std::move(FutureLV));
+		return Await(std::move(future));
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <chrono>
-namespace Kepler
+namespace ke
 {
 	class TTimer
 	{
@@ -12,8 +12,8 @@ namespace Kepler
 		float Delta() const;
 		
 	private:
-		double StartTime{};
-		float DeltaTime{};
+		double m_StartTime{};
+		float m_DeltaTime{};
 	};
 
 	extern TTimer* GGlobalTimer;

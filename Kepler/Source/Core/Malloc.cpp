@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace Kepler
+namespace ke
 {
 	std::unique_ptr<TMemoryPool> GGlobalMemoryPool = nullptr;
 	TMalloc* TMalloc::Instance = nullptr;
@@ -27,64 +27,69 @@ namespace Kepler
 		}
 	}
 
-	void* TMalloc::Allocate(usize Size, TMemoryPool* MemoryPool)
+	void* TMalloc::Allocate(usize size, TMemoryPool* pPool)
 	{
-		TMemoryPool* AllocationPool = MemoryPool;
-		if (!MemoryPool)
+		TMemoryPool* pAllocPool = pPool;
+		if (!pPool)
 		{
-			AllocationPool = GGlobalMemoryPool.get();
+			pAllocPool = GGlobalMemoryPool.get();
 		}
 
-		void* NewData = AllocationPool->Allocate(Size);
-		assert(NewData && "TMalloc::Allocate - failed");
-		return NewData;
+		void* pNewData = pAllocPool->Allocate(size);
+		assert(pNewData && "TMalloc::Allocate - failed");
+		return pNewData;
 	}
 
-	void TMalloc::Free(const void* Block)
+	void TMalloc::Free(const void* pBlock)
 	{
-		TMemoryPool* Pool = TMemoryPool::GetAllocationPool(Block);
-		CHECK(Pool != nullptr);
-		Pool->Deallocate(Block);
-	}
-
-	usize TMalloc::GetSize(const void* Block) const
-	{
-		return TMemoryPool::GetAllocationSize(Block);
-	}
-
-	usize MemorySize(void* Data)
-	{
-		return CHECKED(TMalloc::Get())->GetSize(Data);
-	}
-
-	void DoRelease(void* RefCounted)
-	{
-		((TRefCounted*)RefCounted)->Release();
-	}
-
-	void DoAddRef(void* RefCounted)
-	{
-		((TRefCounted*)RefCounted)->AddRef();
-	}
-
-	usize DoGetRefCount(void* RefCounted)
-	{
-		return ((TRefCounted*)RefCounted)->GetRefCount();
-	}
-
-	void TRefCounted::AddRef() const
-	{
-		RefCount++;
-	}
-
-	void TRefCounted::Release() const
-	{
-		if (RefCount > 0)
+		if (!pBlock)
 		{
-			RefCount--;
+			return;
 		}
 
-		if (RefCount == 0)
+		TMemoryPool* pPool = TMemoryPool::GetAllocationPool(pBlock);
+		CHECK(pPool != nullptr);
+		pPool->Deallocate(pBlock);
+	}
+
+	usize TMalloc::GetSize(const void* pBlock) const
+	{
+		return TMemoryPool::GetAllocationSize(pBlock);
+	}
+
+	usize MemorySize(void* pData)
+	{
+		return CHECKED(TMalloc::Get())->GetSize(pData);
+	}
+
+	void DoRelease(void* pRefCounted)
+	{
+		((IntrusiveRefCounted*)pRefCounted)->Release();
+	}
+
+	void DoAddRef(void* pRefCounted)
+	{
+		((IntrusiveRefCounted*)pRefCounted)->AddRef();
+	}
+
+	usize DoGetRefCount(void* pRefCounted)
+	{
+		return ((IntrusiveRefCounted*)pRefCounted)->GetRefCount();
+	}
+
+	void IntrusiveRefCounted::AddRef() const
+	{
+		m_RefCount++;
+	}
+
+	void IntrusiveRefCounted::Release() const
+	{
+		if (m_RefCount > 0)
+		{
+			m_RefCount--;
+		}
+
+		if (m_RefCount == 0)
 		{
 			Delete(this);
 		}

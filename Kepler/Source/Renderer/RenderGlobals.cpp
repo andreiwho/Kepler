@@ -1,7 +1,7 @@
 #include "RenderGlobals.h"
 #include "LowLevelRenderer.h"
 
-namespace Kepler
+namespace ke
 {
 	ERenderAPI GRenderAPI = ERenderAPI::Default;
 	std::thread::id GRenderThreadID{};

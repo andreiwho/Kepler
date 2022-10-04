@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Core/Macros.h"
 
-namespace Kepler
+namespace ke
 {
 	enum class EAudioEngineAPI
 	{
@@ -24,7 +24,7 @@ namespace Kepler
 		};
 
 		u32 Mask = 0;
-		constexpr ESoundCreateFlags(u32 InMask) : Mask(InMask) {}
+		constexpr ESoundCreateFlags(u32 mask) : Mask(mask) {}
 		inline constexpr operator u32() const { return Mask; }
 	};
 

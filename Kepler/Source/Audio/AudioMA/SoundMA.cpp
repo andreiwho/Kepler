@@ -1,86 +1,86 @@
 #include "SoundMA.h"
 #include "AudioEngineMA.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogSoundMA);
 
-	TSoundMA::TSoundMA(const TString& InPath, const ESoundCreateFlags CreateFlags)
-		:	TSound(InPath, CreateFlags)
+	TSoundMA::TSoundMA(const TString& path, const ESoundCreateFlags flags)
+		:	TSound(path, flags)
 	{
 		// We need to avoid the thread lock if the sound is streamed
-		ESoundCreateFlags ActualFlags = CreateFlags;
-		ma_uint32 LoadFlags = 0;
+		ESoundCreateFlags actualFlags = flags;
+		ma_uint32 loadFlags = 0;
 		
-		TAudioEngineMA* Engine = (TAudioEngineMA*)TAudioEngine::Get();
-		u32 MaxBufferCount = Engine->MaxOverlappingClips;
+		AudioEngineMA* pEngine = (AudioEngineMA*)AudioEngine::Get();
+		u32 numMaxBuffers = pEngine->m_MaxOverlappingClips;
 
-		if (ActualFlags & ESoundCreateFlags::Streamed)
+		if (actualFlags & ESoundCreateFlags::Streamed)
 		{
-			ActualFlags.Mask &= ~ESoundCreateFlags::Async;
-			LoadFlags |= MA_SOUND_FLAG_STREAM;
+			actualFlags.Mask &= ~ESoundCreateFlags::Async;
+			loadFlags |= MA_SOUND_FLAG_STREAM;
 
-			MaxBufferCount = 1;
+			numMaxBuffers = 1;
 		}
 
 		// If we are still async, create the fence
-		if (ActualFlags & ESoundCreateFlags::Async)
+		if (actualFlags & ESoundCreateFlags::Async)
 		{
-			DoneFence = (ma_fence*)TMalloc::Get()->Allocate(sizeof(ma_fence));
-			MACHECK(ma_fence_init(DoneFence));
-			LoadFlags |= MA_SOUND_FLAG_ASYNC;
+			m_DoneFence = (ma_fence*)TMalloc::Get()->Allocate(sizeof(ma_fence));
+			MACHECK(ma_fence_init(m_DoneFence));
+			loadFlags |= MA_SOUND_FLAG_ASYNC;
 		}
 
-		if (ActualFlags & ESoundCreateFlags::Decode)
+		if (actualFlags & ESoundCreateFlags::Decode)
 		{
-			LoadFlags |= MA_SOUND_FLAG_DECODE;
+			loadFlags |= MA_SOUND_FLAG_DECODE;
 		}
-		CHECK(MaxBufferCount > 0);
-		SoundBuffer.Resize(MaxBufferCount);
-		for (u32 Index = 0; Index < MaxBufferCount; ++Index)
+		CHECK(numMaxBuffers > 0);
+		m_SoundBuffer.Resize(numMaxBuffers);
+		for (u32 idx = 0; idx < numMaxBuffers; ++idx)
 		{
-			MACHECK(ma_sound_init_from_file(Engine->GetEngineHandle(), InPath.c_str(), LoadFlags, nullptr, DoneFence, &SoundBuffer[Index]));
+			MACHECK(ma_sound_init_from_file(pEngine->GetEngineHandle(), path.c_str(), loadFlags, nullptr, m_DoneFence, &m_SoundBuffer[idx]));
 		}
 
-		if (CreateFlags & ESoundCreateFlags::Looping)
+		if (flags & ESoundCreateFlags::Looping)
 		{
 			SetLooping(true);
 		}
 
 		// TODO: Deal with looping
-		KEPLER_TRACE(LogSoundMA, "Audio track {} loaded", InPath);
-		CurrentSound = MaxBufferCount - 1;
+		KEPLER_TRACE(LogSoundMA, "Audio track {} loaded", path);
+		m_CurrentSound = numMaxBuffers - 1;
 	}
 
 	TSoundMA::~TSoundMA()
 	{
-		KEPLER_TRACE(LogSoundMA, "Unloading audio track {}", Path);
+		KEPLER_TRACE(LogSoundMA, "Unloading audio track {}", m_Path);
 
-		TAudioEngineMA* Engine = (TAudioEngineMA*)TAudioEngine::Get();
-		for (auto& Sound : SoundBuffer)
+		AudioEngineMA* pEngine = (AudioEngineMA*)AudioEngine::Get();
+		for (auto& sound : m_SoundBuffer)
 		{
-			ma_sound_uninit(&Sound);
+			ma_sound_uninit(&sound);
 		}
 	}
 
 	bool TSoundMA::IsPlaying() const
 	{
-		return ma_sound_is_playing(&SoundBuffer[CurrentSound]);
+		return ma_sound_is_playing(&m_SoundBuffer[m_CurrentSound]);
 	}
 
 	bool TSoundMA::IsFinished() const
 	{
-		return ma_sound_at_end(&SoundBuffer[CurrentSound]);
+		return ma_sound_at_end(&m_SoundBuffer[m_CurrentSound]);
 	}
 
 	void TSoundMA::Rewind()
 	{
-		ma_sound_seek_to_pcm_frame(&SoundBuffer[CurrentSound], 0);
+		ma_sound_seek_to_pcm_frame(&m_SoundBuffer[m_CurrentSound], 0);
 	}
 
-	void TSoundMA::Play(float3 Position)
+	void TSoundMA::Play(float3 position)
 	{
-		CurrentSound = (CurrentSound + 1) % (u32)SoundBuffer.GetLength();
+		m_CurrentSound = (m_CurrentSound + 1) % (u32)m_SoundBuffer.GetLength();
 		WaitForLoad();
 
 		if (IsPlaying())
@@ -89,28 +89,28 @@ namespace Kepler
 			Rewind();
 		}
 
-		if (bIsLooping)
+		if (m_bIsLooping)
 		{
-			ma_sound_set_looping(&SoundBuffer[CurrentSound], true);
+			ma_sound_set_looping(&m_SoundBuffer[m_CurrentSound], true);
 		}
 
-		ma_sound_set_position(&SoundBuffer[CurrentSound], Position.x, Position.y, Position.z);
-		ma_sound_start(&SoundBuffer[CurrentSound]);
+		ma_sound_set_position(&m_SoundBuffer[m_CurrentSound], position.x, position.y, position.z);
+		ma_sound_start(&m_SoundBuffer[m_CurrentSound]);
 	}
 
 	void TSoundMA::WaitForLoad()
 	{
-		if (DoneFence)
+		if (m_DoneFence)
 		{
-			ma_fence_wait(DoneFence);
-			ma_fence_uninit(DoneFence);
-			TMalloc::Get()->Free(DoneFence);
-			DoneFence = nullptr;
+			ma_fence_wait(m_DoneFence);
+			ma_fence_uninit(m_DoneFence);
+			TMalloc::Get()->Free(m_DoneFence);
+			m_DoneFence = nullptr;
 		}
 	}
 
 	void TSoundMA::Stop()
 	{
-		ma_sound_stop(&SoundBuffer[CurrentSound]);
+		ma_sound_stop(&m_SoundBuffer[m_CurrentSound]);
 	}
 }

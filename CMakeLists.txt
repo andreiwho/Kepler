@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project("Kepler Engine")
+project("KE1")
 include(Build.cmake)
 
 add_subdirectory(Kepler)

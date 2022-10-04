@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Core.h"
 
-namespace Kepler
+namespace ke
 {
 	enum class EWorldUpdateKind
 	{
@@ -23,6 +23,8 @@ namespace Kepler
 		~TWorld();
 
 		void Internal_Update(float DeltaTime);
+
+		const TString& GetName() const { return Name; }
 
 	protected:
 		// The constructor

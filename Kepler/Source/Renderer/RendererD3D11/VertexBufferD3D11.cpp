@@ -2,17 +2,17 @@
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer);
 
-	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<TDataBlob> Data)
+	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data)
 		:	TVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		CHECK(Data);
 
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
-		CHECKMSG(Data->GetStride(), "When creating a vertex buffer using TDataBlob the ElemSize of the blob must be specified");
+		CHECKMSG(Data->GetStride(), "When creating a vertex buffer using AsyncDataBlob the ElemSize of the blob must be specified");
 
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));

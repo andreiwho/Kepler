@@ -1,91 +1,115 @@
 #include "ModuleStack.h"
 
-namespace Kepler
+namespace ke
 {
-	void TModuleStack::PushModule(TRef<TApplicationModule> Module, EModulePushStrategy Strategy /*= EModulePushStrategy::Normal*/)
+	void TModuleStack::PushModule(TRef<EngineModule> pModule, EModulePushStrategy strategy /*= EModulePushStrategy::Normal*/)
 	{
-		if (!Module)
+		if (!pModule)
 		{
 			return;
 		}
 
-		switch (Strategy)
+		switch (strategy)
 		{
-		case Kepler::EModulePushStrategy::Normal:
+		case ke::EModulePushStrategy::Normal:
 		{
-			Modules.EmplaceBack(Module);
+			m_Modules.EmplaceBack(pModule);
 		}
 		break;
-		case Kepler::EModulePushStrategy::Overlay:
+		case ke::EModulePushStrategy::Overlay:
 		{
-			TDynArray<TRef<TApplicationModule>> NewModules;
-			NewModules.Reserve(Modules.GetLength() + 1);
-			NewModules.EmplaceBack(Module);
-			for (TRef<TApplicationModule> Module : Modules)
+			Array<TRef<EngineModule>> newModules;
+			newModules.Reserve(m_Modules.GetLength() + 1);
+			newModules.EmplaceBack(pModule);
+			for (TRef<EngineModule> pNewModule : m_Modules)
 			{
-				NewModules.EmplaceBack(Module);
+				newModules.EmplaceBack(pNewModule);
 			}
-			Modules = NewModules;
+			m_Modules = newModules;
 		}
 		break;
 		default:
 			CRASH();
 			break;
 		}
-		Module->OnAttach();
+		pModule->OnAttach();
 	}
 
-	void TModuleStack::RemoveModule(TRef<TApplicationModule> Module)
+	void TModuleStack::RemoveModule(TRef<EngineModule> pModule)
 	{
-		if (!Module)
+		if (!pModule)
 		{
 			return;
 		}
 
-		Module->OnDetach();
-		auto Iterator = Modules.FindIterator(
-			[Module](const TRef<TApplicationModule>& Lhs)
+		pModule->OnDetach();
+		auto iter = m_Modules.FindIterator(
+			[pModule](const TRef<EngineModule>& lhs)
 			{
-				return Module.Raw() == Lhs.Raw();
+				return pModule.Raw() == lhs.Raw();
 			});
-		if (Modules.IsValidIterator(Iterator))
+		if (m_Modules.IsValidIterator(iter))
 		{
-			Modules.Remove(Iterator);
+			m_Modules.Remove(iter);
 		}
-		Modules.Shrink();
+		m_Modules.Shrink();
 	}
 
 	void TModuleStack::Clear()
 	{
-		for (auto Module : Modules)
+		for (auto pModule : m_Modules)
 		{
-			Module->OnDetach();
+			pModule->OnDetach();
 		}
 
-		Modules.Clear();
+		m_Modules.Clear();
 	}
 
-	void TModuleStack::HandlePlatformEvent(const TPlatformEventBase& Event)
+	void TModuleStack::HandlePlatformEvent(const TPlatformEventBase& event)
 	{
-		for (TRef<TApplicationModule> Module : Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
-			Module->OnPlatformEvent(Event);
+			pModule->OnPlatformEvent(event);
+		}
+	}
+
+	void TModuleStack::OnUpdate(float deltaTime)
+	{
+		for (TRef<EngineModule> pModule : m_Modules)
+		{
+			pModule->OnUpdate(deltaTime);
+		}
+	}
+
+	void TModuleStack::OnRender()
+	{
+		for (TRef<EngineModule> pModule : m_Modules)
+		{
+			pModule->OnRender();
+		}
+	}
+
+	void TModuleStack::OnRenderGUI()
+	{
+		for (TRef<EngineModule> pModule : m_Modules)
+		{
+			pModule->OnRenderGUI();
 		}
 	}
 
 	void TModuleStack::Init()
 	{
-		for (TRef<TApplicationModule> Module : Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
-			Module->OnInit();
+			pModule->OnInit();
 		}
 	}
 
 	void TModuleStack::Terminate()
 	{
-		for (TRef<TApplicationModule> Module : Modules)
+		for (TRef<EngineModule> pModule : m_Modules)
 		{
-			Module->OnTerminate();
+			pModule->OnTerminate();
 		}
 	}
 

@@ -2,7 +2,7 @@
 #include "Core/Log.h"
 #include "Renderer/RenderGlobals.h"
 
-namespace Kepler
+namespace ke
 {
 	TRenderThread* TRenderThread::Instance = nullptr;
 
@@ -10,7 +10,7 @@ namespace Kepler
 	{
 		CHECK(!Instance);
 		Instance = this;
-		WorkerPool.SubmitTask([] { GRenderThreadID = std::this_thread::get_id(); });
+		m_InternalPool.SubmitTask([] { GRenderThreadID = std::this_thread::get_id(); });
 	}
 
 	TRenderThread::~TRenderThread()
@@ -20,6 +20,7 @@ namespace Kepler
 
 	void TRenderThread::Wait()
 	{
-		Get()->WorkerPool.WaitForTasksToFinish();
+		KEPLER_PROFILE_SCOPE();
+		Get()->m_InternalPool.WaitForTasksToFinish();
 	}
 }

@@ -18,13 +18,13 @@
 #  undef CreateWindow
 #endif
 
-namespace Kepler
+namespace ke
 {
 	TPlatformGLFW::TPlatformGLFW()
 	{
-		bInitialized = !!glfwInit();
+		m_bInitialized = !!glfwInit();
 		KEPLER_INFO(LogPlatform, "GLFW platform initialized");
-		if (!bInitialized)
+		if (!m_bInitialized)
 		{
 			// Throw some kind of an error
 		}
@@ -35,21 +35,23 @@ namespace Kepler
 
 	TPlatformGLFW::~TPlatformGLFW()
 	{
-		if (bInitialized)
+		if (m_bInitialized)
 		{
 			glfwTerminate();
 			KEPLER_INFO(LogPlatform, "GLFW platform terminated");
 		}
 	}
 
-	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
+	TWindow* TPlatformGLFW::CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params)
 	{
-		KEPLER_INFO(LogPlatform, "Creating GLFW platform window '{}'", Title);
-		return Windows.EmplaceBack(std::make_unique<TWindowGLFW>(Width, Height, Title, Params)).get();
+		KEPLER_INFO(LogPlatform, "Creating GLFW platform window '{}'", title);
+		return m_Windows.EmplaceBack(std::make_unique<TWindowGLFW>(width, height, title, params)).get();
 	}
 
 	void TPlatformGLFW::Update()
 	{
+		TPlatform::Update();
+
 		glfwPollEvents();
 		DestroyClosedWindows();
 
@@ -62,7 +64,7 @@ namespace Kepler
 
 	bool TPlatformGLFW::HasActiveMainWindow() const
 	{
-		return !Windows.IsEmpty() && !!Windows[0];
+		return !m_Windows.IsEmpty() && !!m_Windows[0];
 	}
 
 	void TPlatformGLFW::OnPlatformEvent(const TPlatformEventBase& event)
@@ -73,18 +75,54 @@ namespace Kepler
 		TPlatform::OnPlatformEvent(event);
 	}
 
-	bool TPlatformGLFW::HandleCrashReported_Impl(const TString& Message)
+	bool TPlatformGLFW::HandleCrashReported_Impl(const TString& msg)
 	{
-		if (::MessageBoxA(nullptr, Message.c_str(), "Crash Reported", MB_OK | MB_ICONERROR) == IDOK)
+		if (::MessageBoxA(nullptr, msg.c_str(), "Crash Reported", MB_OK | MB_ICONERROR) == IDOK)
 		{
 			return true;
 		}
 		return false;
 	}
 
+	void TPlatformGLFW::SetCursorMode(ECursorMode mode)
+	{
+		TPlatform::SetCursorMode(mode);
+		if (m_OldCursorMode == m_CurrentCursorMode)
+		{
+			return;
+		}
+
+		if (!HasActiveMainWindow())
+		{
+			return;
+		}
+
+		TWindowGLFW* pWindow = (TWindowGLFW*)m_Windows[0].get();
+		if (!pWindow)
+		{
+			return;
+		}
+
+		switch (mode)
+		{
+		case ECursorMode::Visible:
+			glfwSetInputMode(pWindow->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		case ECursorMode::HiddenFree:
+			glfwSetInputMode(pWindow->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			break;
+		case ECursorMode::HiddenLocked:
+			glfwSetInputMode(pWindow->GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(pWindow->GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			break;
+		default:
+			break;
+		}
+	}
+
 	void TPlatformGLFW::DestroyClosedWindows()
 	{
-		for (auto& window : Windows)
+		for (auto& window : m_Windows)
 		{
 			if (window && window->IsCloseRequested())
 			{
@@ -95,7 +133,7 @@ namespace Kepler
 
 	void TPlatformGLFW::Terminate()
 	{
-		for (auto& window : Windows)
+		for (auto& window : m_Windows)
 		{
 			window.reset();
 		}
@@ -103,7 +141,7 @@ namespace Kepler
 
 	void TPlatformGLFW::CloseAllWindows()
 	{
-		Windows.Clear();
+		m_Windows.Clear();
 	}
 
 	TSharedPtr<TPlatform> TPlatform::CreatePlatformInterface()

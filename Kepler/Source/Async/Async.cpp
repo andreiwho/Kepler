@@ -1,6 +1,6 @@
 #include "Async.h"
 
-namespace Kepler
+namespace ke
 {
 	TThreadPool* GLargeThreadPool = nullptr;
 }

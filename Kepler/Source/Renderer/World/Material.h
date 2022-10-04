@@ -5,62 +5,66 @@
 #include "WorldTransform.h"
 #include "Camera.h"
 
-namespace Kepler
+namespace ke
 {
 	class TMaterial : public TEnableRefFromThis<TMaterial>
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(TRef<TGraphicsPipeline> InPipeline);
+		TMaterial(TRef<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
 
-		void RT_Update(TRef<class TCommandListImmediate> pImmCmd);
+		void RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd);
 
 		template<typename T>
-		void WriteParamData(const TString& Param, const T* Data)
+		void WriteParamData(const TString& param, const T* pData)
 		{
-			ParamBuffer->Write<T>(Param, Data);
+			m_ParamBuffer->Write<T>(param, pData);
 		}
 
 		// Note that calling this function marks render state as dirty which invalidates GPU buffer contents.
 		// So calling this function may cause unexpected performance loss.
 		// If you have intended to only read the value, then use ReadParamValue function, which does not invalidate the buffer contents
 		template<typename T>
-		T& GetParamReferenceForWriting(const TString& Param)
+		T& GetParamReferenceForWriting(const TString& param)
 		{
-			return ParamBuffer->GetParamForWriting<T>(Param);
+			return m_ParamBuffer->GetParamForWriting<T>(param);
 		}
 
 		template<typename T>
-		const T& ReadParamValue(const TString& Param) const
+		const T& ReadParamValue(const TString& param) const
 		{
-			return ParamBuffer->ReadParamValue<T>(Param);
+			return m_ParamBuffer->ReadParamValue<T>(param);
 		}
 
-		inline TRef<TParamBuffer> GetParamBuffer() const { return ParamBuffer; }
+		inline TRef<TParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
 
-		inline TRef<TPipelineSamplerPack> GetSamplers() const { return Samplers; }
+		inline TRef<TPipelineSamplerPack> GetSamplers() const { return m_Samplers; }
 
-		inline TRef<TGraphicsPipeline> GetPipeline() const { return Pipeline; }
+		inline TRef<TGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
 
 		void WriteSampler(const TString& Name, TRef<TTextureSampler2D> Data);
 
 		static TRef<TMaterial> New()
 		{
-			return MakeRef(Kepler::New<TMaterial>());
+			return MakeRef(ke::New<TMaterial>());
 		}
 
-		static TRef<TMaterial> New(TRef<TGraphicsPipeline> InPipeline)
+		static TRef<TMaterial> New(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
 		{
-			return MakeRef(Kepler::New<TMaterial>(InPipeline));
+			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
 
 		// Helper functions
-		void WriteTransform(TWorldTransform Transform);
-		void WriteCamera(TCamera Camera);
+		void WriteTransform(TWorldTransform transform);
+		void WriteCamera(MathCamera camera);
+		void WriteId(i32 id);
+
+		inline const TString& GetParentAssetPath() const { return m_ParentAssetPath; }
 
 	private:
-		TRef<TGraphicsPipeline> Pipeline;
-		TRef<TParamBuffer> ParamBuffer;
-		TRef<TPipelineSamplerPack> Samplers;
+		TRef<TGraphicsPipeline> m_Pipeline;
+		TRef<TParamBuffer> m_ParamBuffer;
+		TRef<TPipelineSamplerPack> m_Samplers;
+		TString m_ParentAssetPath{};
 	};
 }

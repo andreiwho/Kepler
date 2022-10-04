@@ -3,7 +3,7 @@
 #include "D3D11Common.h"
 #include "Renderer/Elements/SwapChain.h"
 
-namespace Kepler
+namespace ke
 {
 	class TSwapChainD3D11 : public TSwapChain
 	{

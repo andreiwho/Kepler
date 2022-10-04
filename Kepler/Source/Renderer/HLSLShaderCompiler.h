@@ -7,15 +7,15 @@
 #include <future>
 
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderCompiler);
 
-	class THLSLShaderCompiler : public TRefCounted
+	class THLSLShaderCompiler : public IntrusiveRefCounted
 	{
 	public:
 		static TRef<THLSLShaderCompiler> CreateShaderCompiler();
 
-		virtual TRef<TShader> CompileShader(const TString& Path, EShaderStageFlags TypeMask) = 0;
+		virtual TRef<TShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
 	};
 }

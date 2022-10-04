@@ -2,7 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/WorldTransform.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTransformComponent
 	{
@@ -19,6 +19,10 @@ namespace Kepler
 		inline float3 GetLocation() const { return Transform.GetLocation(); }
 		inline float3 GetRotation() const { return Transform.GetRotation(); }
 		inline float3 GetScale() const { return Transform.GetScale(); }
+
+		float3 GetForwardVector() const;
+		float3 GetRightVector() const;
+		float3 GetUpVector() const;
 
 	private:
 		TWorldTransform Transform;

@@ -2,7 +2,7 @@
 #include "Renderer/Elements/Texture.h"
 #include "D3D11Common.h"
 
-namespace Kepler
+namespace ke
 {
 	class TTextureSampler2D_D3D11 : public TTextureSampler2D
 	{
@@ -12,6 +12,7 @@ namespace Kepler
 
 		inline ID3D11ShaderResourceView* GetView() const { return View; }
 		inline ID3D11SamplerState* GetSampler() const { return Sampler; }
+		virtual void* GetNativeHandle() const { return GetView(); };
 
 	private:
 		ID3D11ShaderResourceView* View{};

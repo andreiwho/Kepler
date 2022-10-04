@@ -3,14 +3,14 @@
 #include "Renderer/RenderGlobals.h"
 #include "Renderer/RenderDevice.h"
 
-namespace Kepler
+namespace ke
 {
-	TTransferBuffer::TTransferBuffer(usize InSize, TRef<TDataBlob> InitialData)
+	TTransferBuffer::TTransferBuffer(usize InSize, TRef<AsyncDataBlob> InitialData)
 		:	Size(InSize)
 	{
 	}
 
-	TRef<TTransferBuffer> TTransferBuffer::New(usize Size, TRef<TDataBlob> InitialData)
+	TRef<TTransferBuffer> TTransferBuffer::New(usize Size, TRef<AsyncDataBlob> InitialData)
 	{
 		return GetRenderDevice()->CreateTransferBuffer(Size, InitialData);
 	}

@@ -4,7 +4,7 @@
 #include "../Elements/CommandList.h"
 #include "CommandListImmediateD3D11.h"
 
-namespace Kepler
+namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer);
 
@@ -12,7 +12,6 @@ namespace Kepler
 		:	TParamBuffer(Mapping)
 	{
 		CHECK(Params);
-		CHECK(Params->IsCompiled());
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
@@ -40,34 +39,40 @@ namespace Kepler
 		ZeroMemory(&BufferData, sizeof(BufferData));
 		BufferData.pSysMem = Params->GetDataPointer();
 
-		HRCHECK(Device->CreateBuffer(&Desc, &BufferData, &Buffer));
+		for (u8 idx = 0; idx < Buffer.size(); ++idx)
+		{
+			HRCHECK(Device->CreateBuffer(&Desc, &BufferData, &Buffer[idx]));
+		}
 
 		KEPLER_TRACE(LogParamBuffer, "Created Param Buffer with size {}", Params->GetDataSize());
 	}
 
 	TParamBufferD3D11::~TParamBufferD3D11()
 	{
-		if (Buffer)
+		for (auto pBuffer : Buffer)
 		{
-			auto Device = CHECKED(TRenderDeviceD3D11::Get());
-			Device->RegisterPendingDeleteResource(Buffer);
+			if (pBuffer)
+			{
+				auto Device = CHECKED(TRenderDeviceD3D11::Get());
+				Device->RegisterPendingDeleteResource(pBuffer);
+			}
 		}
 	}
 
-	void TParamBufferD3D11::RT_UploadToGPU(TRef<TCommandListImmediate> pImmContext)
+	void TParamBufferD3D11::RT_UploadToGPU(TRef<GraphicsCommandListImmediate> pImmContext)
 	{
 		CHECK(IsRenderThread());
 
 		if (IsRenderStateDirty())
 		{
-			auto MyCmd = RefCast<TCommandListImmediateD3D11>(pImmContext);
+			auto MyCmd = RefCast<GraphicsCommandListImmediateD3D11>(pImmContext);
 			if (MyCmd)
 			{
-				void* Memory = MyCmd->MapBuffer(RefFromThis());
+				void* Memory = MyCmd->MapParamBuffer_NextFrame(RefFromThis<TParamBufferD3D11>());
 				if (Memory)
 				{
 					memcpy(Memory, Params->GetDataPointer(), Params->GetDataSize());
-					MyCmd->UnmapBuffer(RefFromThis());
+					MyCmd->UnmapParamBuffer_NextFrame(RefFromThis<TParamBufferD3D11>());
 				}
 			}
 			ResetRenderState();

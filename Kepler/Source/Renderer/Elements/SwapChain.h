@@ -2,9 +2,9 @@
 #include "Core/Types.h"
 #include "Core/Malloc.h"
 
-namespace Kepler
+namespace ke
 {
-	class TSwapChain : public TRefCounted
+	class TSwapChain : public IntrusiveRefCounted
 	{
 	public:
 		TSwapChain(class TWindow* Window);

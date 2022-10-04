@@ -12,48 +12,56 @@
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
 
-namespace Kepler
+namespace ke
 {
-	TWindowGLFW::TWindowGLFW(i32 Width, i32 Height, const TString& Title, const TWindowParams& Params)
-		: TWindow(Width, Height, Title, Params)
+	TWindowGLFW::TWindowGLFW(i32 width, i32 height, const TString& title, const TWindowParams& params)
+		: TWindow(width, height, title, params)
 	{
-		glfwWindowHint(GLFW_DECORATED, Params.bDecorated);
-		glfwWindowHint(GLFW_MAXIMIZED, Params.bMaximized);
-		Window = glfwCreateWindow(Width, Height, Title.c_str(), Params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-		assert(Window && "Failed to create GLFW window");
+		glfwWindowHint(GLFW_DECORATED, params.bDecorated);
+		glfwWindowHint(GLFW_MAXIMIZED, params.bMaximized);
+
+		m_Window = glfwCreateWindow(m_Width, m_Height, title.c_str(), params.bFullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+		assert(m_Window && "Failed to create GLFW window");
+
+		glfwGetFramebufferSize(m_Window, &m_Width, &m_Height);
 
 		SetupCallbacks();
 	}
 
 	TWindowGLFW::~TWindowGLFW()
 	{
-		if (Window)
+		if (m_Window)
 		{
-			glfwDestroyWindow(Window);
+			glfwDestroyWindow(m_Window);
 		}
 	}
 
 	void* TWindowGLFW::GetNativeHandle() const
 	{
-		return GET_NATIVE_WINDOW(Window);
+		return GET_NATIVE_WINDOW(m_Window);
 	}
 
 	void TWindowGLFW::RequestClose()
 	{
-		bCloseRequested = true;
+		m_bCloseRequested = true;
 	}
 
-	void TWindowGLFW::Internal_UpdateSize(i32 InWidth, i32 InHeight)
+	void TWindowGLFW::Internal_UpdateSize(i32 width, i32 heigth)
 	{
-		Width = InWidth;
-		Height = InHeight;
+		m_Width = width;
+		m_Height = heigth;
+	}
+
+	void TWindowGLFW::SetCursorPosition(float2 newPos)
+	{
+		glfwSetCursorPos(m_Window, (float)newPos.x, (float)newPos.y);
 	}
 
 	void TWindowGLFW::SetupCallbacks()
 	{
-		glfwSetWindowUserPointer(Window, this);
+		glfwSetWindowUserPointer(m_Window, this);
 
-		glfwSetWindowCloseCallback(Window, [](GLFWwindow* window)
+		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				win->RequestClose();
@@ -63,32 +71,47 @@ namespace Kepler
 		/************************************************************************/
 		/* MOUSE EVENTS                                                         */
 		/************************************************************************/
-		glfwSetCursorPosCallback(Window, [](GLFWwindow* window, double x, double y)
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				TPlatform::Get()->OnPlatformEvent(TMouseMoveEvent(win, (float)x, (float)y));
 			});
 
-		glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int button, int action, int mods)
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+
+				const EMouseButton::EValue ActualButton = std::invoke([button]
+					{
+						switch (button)
+						{
+						case GLFW_MOUSE_BUTTON_LEFT:
+							return EMouseButton::Left;
+						case GLFW_MOUSE_BUTTON_RIGHT:
+							return EMouseButton::Right;
+						case GLFW_MOUSE_BUTTON_MIDDLE:
+							return EMouseButton::Middle;
+						}
+						return EMouseButton::Unknown;
+					});
+
 				if (action == GLFW_PRESS)
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonDownEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 				else
 				{
-					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(button)));
+					TPlatform::Get()->OnPlatformEvent(TMouseButtonUpEvent(win, static_cast<EMouseButton::EValue>(ActualButton)));
 				}
 			});
 
-		glfwSetScrollCallback(Window, [](GLFWwindow* window, double, double vertical)
+		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double, double vertical)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				TPlatform::Get()->OnPlatformEvent(TMouseScrollWheelEvent(win, (float)vertical));
 			});
 
-		glfwSetCursorEnterCallback(Window, [](GLFWwindow* window, int entered)
+		glfwSetCursorEnterCallback(m_Window, [](GLFWwindow* window, int entered)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				if (entered)
@@ -104,7 +127,7 @@ namespace Kepler
 		/************************************************************************/
 		/* KEYBOARD EVENTS                                                      */
 		/************************************************************************/
-		glfwSetKeyCallback(Window, [](GLFWwindow* window, int key, int, int action, int)
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int, int action, int)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				switch (action)
@@ -121,7 +144,7 @@ namespace Kepler
 				}
 			});
 
-		glfwSetCharCallback(Window, [](GLFWwindow* window, unsigned int character)
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int character)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				TPlatform::Get()->OnPlatformEvent(TCharEvent(win, static_cast<char>(character)));
@@ -130,20 +153,20 @@ namespace Kepler
 		/************************************************************************/
 		/* WINDOW EVENTS                                                        */
 		/************************************************************************/
-		glfwSetWindowPosCallback(Window, [](GLFWwindow* window, i32 x, i32 y)
+		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, i32 x, i32 y)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				TPlatform::Get()->OnPlatformEvent(TWindowMoveEvent(win, x, y));
 			});
 
-		glfwSetFramebufferSizeCallback(Window, [](GLFWwindow* window, i32 width, i32 height)
+		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, i32 width, i32 height)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				win->Internal_UpdateSize(width, height);
 				TPlatform::Get()->OnPlatformEvent(TWindowSizeEvent(win, width, height));
 			});
 
-		glfwSetWindowIconifyCallback(Window, [](GLFWwindow* window, int iconified)
+		glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				if (iconified)
@@ -156,7 +179,21 @@ namespace Kepler
 				}
 			});
 
-		glfwSetWindowMaximizeCallback(Window, [](GLFWwindow* window, int maximized)
+		glfwSetWindowFocusCallback(m_Window, 
+			[](GLFWwindow* window, int focused)
+			{
+				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
+				if (focused)
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowFocusedEvent(win));
+				}
+				else
+				{
+					TPlatform::Get()->OnPlatformEvent(TWindowUnfocusedEvent(win));
+				}
+			});
+
+		glfwSetWindowMaximizeCallback(m_Window, [](GLFWwindow* window, int maximized)
 			{
 				TWindowGLFW* win = (TWindowGLFW*)glfwGetWindowUserPointer(window);
 				if (maximized)
@@ -170,30 +207,29 @@ namespace Kepler
 			});
 	}
 
-	void TWindowGLFW::SetTitle_Impl(const TString& NewTitle)
+	void TWindowGLFW::SetTitle_Impl(const TString& newTitle)
 	{
-		glfwSetWindowTitle(Window, NewTitle.c_str());
+		glfwSetWindowTitle(m_Window, newTitle.c_str());
 	}
 
 	void TWindowGLFW::SetMaximized_Impl(bool bNewMaximized)
 	{
 		if (bNewMaximized)
 		{
-			glfwMaximizeWindow(Window);
+			glfwMaximizeWindow(m_Window);
 		}
-		glfwRestoreWindow(Window);
+		glfwRestoreWindow(m_Window);
 	}
 
 	void TWindowGLFW::SetDecorated_Impl(bool bNewDecorated)
 	{
-		glfwSetWindowAttrib(Window, GLFW_DECORATED, bNewDecorated ? GLFW_TRUE : GLFW_FALSE);
+		glfwSetWindowAttrib(m_Window, GLFW_DECORATED, bNewDecorated ? GLFW_TRUE : GLFW_FALSE);
 	}
 
 	void TWindowGLFW::SetFullscreen_Impl(bool bNewFullscreen)
 	{
 		// TODO: This may work bad. Consider setting size, refresh rate and position
-		glfwSetWindowMonitor(Window, bNewFullscreen ? glfwGetPrimaryMonitor() : nullptr, 32, 32, Width, Height, GLFW_DONT_CARE);
+		glfwSetWindowMonitor(m_Window, bNewFullscreen ? glfwGetPrimaryMonitor() : nullptr, 32, 32, m_Width, m_Height, GLFW_DONT_CARE);
 	}
-
 }
 #endif

@@ -5,6 +5,7 @@
 #include "Core/Malloc.h"
 #include "Renderer/RenderThread.h"
 #include "Renderer/LowLevelRenderer.h"
+#include "Tools/MaterialLoader.h"
 
 #include "Audio/AudioEngine.h"
 
@@ -16,13 +17,15 @@
 #include "Modules/ModuleStack.h"
 #include "World/WorldRegistry.h"
 #include "World/Game/GameWorld.h"
+#include "Tools/ImageLoader.h"
+#include "Tools/MeshLoader.h"
 
-namespace Kepler
+namespace ke
 {
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(TDynArray<TString> const& CommandLine);
+		TCommandLineArguments(Array<TString> const& cmdLine);
 
 		TString GameModuleDirectory = "";
 	};
@@ -36,36 +39,44 @@ namespace Kepler
 	// This is an important class.
 	// - All of the internal initialization and application logic will happen inside the IApplication::Run function
 	// --------------------------------------------
-	class TApplication : public IPlatformEventListener
+	class Engine : public IPlatformEventListener
 	{
 	public:
-		TApplication(const TApplicationLaunchParams& LaunchParams);
-		virtual ~TApplication();
+		Engine(const TApplicationLaunchParams& launchParams);
+		virtual ~Engine();
 
 		virtual void Run();
 
 	protected:
-		virtual void ChildSetupModuleStack(TModuleStack& ModuleStack) {}
-		virtual void OnPlatformEvent(const TPlatformEventBase& Event) override;
+		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
+		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
 
 	private:
 		void InitApplicationModules();
 		void TerminateModuleStack();
-		void InitVFSAliases(const TApplicationLaunchParams& LaunchParams);
+		void InitVFSAliases(const TApplicationLaunchParams& launchParams);
 
-		bool OnWindowClosed(const TWindowClosedEvent& Event);
-		bool OnWindowResized(const TWindowSizeEvent& Event);
-		bool OnKeyDown(const TKeyDownEvent& Event);
+		bool OnWindowClosed(const TWindowClosedEvent& event);
+		bool OnWindowResized(const TWindowSizeEvent& event);
+		bool OnKeyDown(const TKeyDownEvent& evemt);
 	private:
-		TWindow* MainWindow{};
-		TSharedPtr<TLowLevelRenderer> LowLevelRenderer{};
-		TSharedPtr<TAudioEngine> AudioEngine{};
-		TSharedPtr<TWorldRegistry> WorldRegistry{};
+		TWindow* m_MainWindow{};
+		TSharedPtr<TLowLevelRenderer> m_LowLevelRenderer{};
+		TSharedPtr<AudioEngine> m_AudioEngine{};
+		TSharedPtr<TWorldRegistry> m_WorldRegistry{};
 
-		TRef<TGameWorld> CurrentWorld;
+		TMaterialLoader m_MaterialLoader;
+		TImageLoader m_ImageLoader;
+		TMeshLoader m_MeshLoader;
 
-		TModuleStack ModuleStack{};
+		TRef<TGameWorld> m_CurrentWorld;
+		
+#ifdef ENABLE_EDITOR
+		TRef<class EditorModule> m_Editor;
+#endif
+
+		TModuleStack m_ModuleStack{};
 	};
 
-	extern TSharedPtr<TApplication> MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams);
+	extern TSharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
 }

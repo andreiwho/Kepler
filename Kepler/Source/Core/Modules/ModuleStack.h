@@ -2,7 +2,7 @@
 #include "Core/Core.h"
 #include "Module.h"
 
-namespace Kepler
+namespace ke
 {
 	enum class EModulePushStrategy
 	{
@@ -13,15 +13,19 @@ namespace Kepler
 	class TModuleStack
 	{
 	public:
-		void PushModule(TRef<TApplicationModule> Module, EModulePushStrategy Strategy = EModulePushStrategy::Normal);
-		void RemoveModule(TRef<TApplicationModule> Module);
+		void PushModule(TRef<EngineModule> pModule, EModulePushStrategy strategy = EModulePushStrategy::Normal);
+		void RemoveModule(TRef<EngineModule> pModule);
 		void Clear();
-		void HandlePlatformEvent(const TPlatformEventBase& Event);
+		void HandlePlatformEvent(const TPlatformEventBase& event);
+
+		void OnUpdate(float deltaTime);
+		void OnRender();
+		void OnRenderGUI();
 
 		void Init();
 		void Terminate();
 
 	private:
-		TDynArray<TRef<TApplicationModule>> Modules{};
+		Array<TRef<EngineModule>> m_Modules{};
 	};
 }

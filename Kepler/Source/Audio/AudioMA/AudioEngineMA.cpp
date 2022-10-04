@@ -3,62 +3,60 @@
 
 #include "AudioEngineMA.h"
 
-namespace Kepler
+namespace ke
 {
 
-	TAudioEngineMA::TAudioEngineMA()
+	AudioEngineMA::AudioEngineMA()
 	{
-		MACHECK(ma_engine_init(nullptr, &Engine));
+		MACHECK(ma_engine_init(nullptr, &m_Engine));
 		KEPLER_INFO(LogAudio, "MiniAudio Engine initialized");
 	}
 
-	TAudioEngineMA::~TAudioEngineMA()
+	AudioEngineMA::~AudioEngineMA()
 	{
-		Sounds.Clear();
-		ma_engine_uninit(&Engine);
+		m_Sounds.Clear();
+		ma_engine_uninit(&m_Engine);
 		KEPLER_INFO(LogAudio, "MiniAudio Engine terminated");
 	}
 
-	void TAudioEngineMA::PlayInline(const TString& Path)
+	void AudioEngineMA::PlayInline(const TString& path)
 	{
-		auto ResolvedPath = VFSResolvePath(Path);
-		ma_engine_play_sound(&Engine, ResolvedPath.c_str(), nullptr);
+		ma_engine_play_sound(&m_Engine, VFSResolvePath(path).c_str(), nullptr);
 	}
 
-	void TAudioEngineMA::Play(const TString& Path, ESoundCreateFlags LoadFlags)
+	void AudioEngineMA::Play(const TString& path, ESoundCreateFlags flags)
 	{
-		GetOrLoadSound(Path, LoadFlags)->Play();
+		GetOrLoadSound(path, flags)->Play();
 	}
 
-	void TAudioEngineMA::PlayAt(const TString& Path, float3 Position, ESoundCreateFlags LoadFlags)
+	void AudioEngineMA::PlayAt(const TString& path, float3 position, ESoundCreateFlags flags)
 	{
-		GetOrLoadSound(Path, LoadFlags)->Play(Position);
+		GetOrLoadSound(path, flags)->Play(position);
 	}
 
-	void TAudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
+	void AudioEngineMA::UnloadPlaybackCache(bool bAlsoForPlaying)
 	{
 		if (bAlsoForPlaying)
 		{
-			Sounds.Clear();
+			m_Sounds.Clear();
 		}
 		else
 		{
-			std::erase_if(Sounds.GetUnderlyingContainer(),
-				[](const auto& Sound) 
+			std::erase_if(m_Sounds.GetUnderlyingContainer(),
+				[](const auto& snd)
 				{
-					return !Sound.second->IsPlaying();
+					return !snd.second->IsPlaying();
 				});
 		}
 	}
 
-	TRef<TSound> TAudioEngineMA::GetOrLoadSound(const TString& InPath, ESoundCreateFlags LoadFlags)
+	TRef<TSound> AudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
 	{
-		if (!Sounds.Contains(InPath))
+		if (!m_Sounds.Contains(path))
 		{
-			TString ResolvedPath = VFSResolvePath(InPath);
-			Sounds[InPath] = RefCast<TSoundMA>(TSound::New(ResolvedPath, ESoundCreateFlags::Decode | ESoundCreateFlags::Async | LoadFlags.Mask));
+			m_Sounds[path] = RefCast<TSoundMA>(TSound::New(VFSResolvePath(path), ESoundCreateFlags::Decode | ESoundCreateFlags::Async | flags.Mask));
 		}
-		return Sounds[InPath];
+		return m_Sounds[path];
 	}
 
 }
