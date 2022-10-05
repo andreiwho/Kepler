@@ -10,7 +10,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	TWorldRenderer::TWorldRenderer(TRef<TGameWorld> pWorld)

@@ -3,7 +3,7 @@
 #include "RenderTypes.h"
 #include "RenderThread.h"
 
-DEFINE_UNIQUE_LOG_CHANNEL(LogRender);
+DEFINE_UNIQUE_LOG_CHANNEL(LogRender, All);
 
 #include <thread>
 

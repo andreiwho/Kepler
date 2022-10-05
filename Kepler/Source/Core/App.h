@@ -19,6 +19,7 @@
 #include "World/Game/GameWorld.h"
 #include "Tools/ImageLoader.h"
 #include "Tools/MeshLoader.h"
+#include "Filesystem/AssetSystem/AssetManager.h"
 
 namespace ke
 {
@@ -64,6 +65,7 @@ namespace ke
 		TSharedPtr<TLowLevelRenderer> m_LowLevelRenderer{};
 		TSharedPtr<AudioEngine> m_AudioEngine{};
 		TSharedPtr<TWorldRegistry> m_WorldRegistry{};
+		TSharedPtr<AssetManager> m_AssetManager{};
 
 		TMaterialLoader m_MaterialLoader;
 		TImageLoader m_ImageLoader;

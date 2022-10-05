@@ -5,7 +5,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor, All);
 
 	class TWindow;
 	class TLogPanel;

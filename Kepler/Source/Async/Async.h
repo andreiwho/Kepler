@@ -5,6 +5,9 @@ namespace ke
 {
 	extern TThreadPool* GLargeThreadPool;
 
+	template<typename T>
+	using TFuture = std::future<T>;
+
 	template<typename FUNC>
 	inline decltype(auto) Async(FUNC&& func)
 	{

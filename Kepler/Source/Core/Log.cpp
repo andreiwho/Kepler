@@ -14,17 +14,17 @@ namespace ke
 		Instance = this;
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& name)
+	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& name, ELogLevel level)
 	{
 		std::lock_guard lck{ m_LoggerCreationFence };
 		if (m_Loggers.contains(name))
 		{
 			return m_Loggers.at(name);
 		}
-		return CreateLogger(name);
+		return CreateLogger(name, level);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& name)
+	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& name, ELogLevel level)
 	{
 #ifdef ENABLE_EDITOR
 		if (!m_EditorSink)
@@ -41,12 +41,31 @@ namespace ke
 #ifdef ENABLE_EDITOR
 		pLogger->sinks().push_back(m_EditorSink);
 #endif
- 		return ApplyDefaultLoggerConfig(pLogger);
+ 		return ApplyDefaultLoggerConfig(pLogger, level);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> pLogger)
+	std::shared_ptr<spdlog::logger> TLog::ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> pLogger, ELogLevel level)
 	{
-		pLogger->set_level(spdlog::level::trace);
+		switch (level)
+		{
+		case ke::ELogLevel::All:
+			pLogger->set_level(spdlog::level::trace);
+			break;
+		case ke::ELogLevel::Info:
+			pLogger->set_level(spdlog::level::info);
+			break;
+		case ke::ELogLevel::Warning:
+			pLogger->set_level(spdlog::level::warn);
+			break;
+		case ke::ELogLevel::Error:
+			pLogger->set_level(spdlog::level::err);
+			break;
+		case ke::ELogLevel::Critical:
+			pLogger->set_level(spdlog::level::critical);
+			break;
+		default:
+			break;
+		}
 		pLogger->set_pattern("%^|%H:%M:%S|(%n) [%l] -> %v%$");
 		return pLogger;
 	}

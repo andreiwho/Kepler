@@ -6,7 +6,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld, Info);
 
 	TGameWorld::TGameWorld(const TString& InName)
 		: TWorld(InName)

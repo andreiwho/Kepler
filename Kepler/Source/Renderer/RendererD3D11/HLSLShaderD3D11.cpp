@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules)

@@ -15,7 +15,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogMaterialLoader);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogMaterialLoader, All);
 
 	namespace
 	{

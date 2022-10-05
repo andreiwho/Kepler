@@ -9,13 +9,22 @@
 
 namespace ke
 {
-	// C++ 20 supports compile time std::string
+	enum class ELogLevel
+	{
+		All,
+		Info,
+		Warning,
+		Error,
+		Critical,
+	};
+
 #define PRODUCE_INTERNAL_LOG_NAME(Name) T ## Name ## LogChannel
 #define PRODUCE_INTERNAL_LOG_NAME_STRING(Name) #Name
-#define DEFINE_UNIQUE_LOG_CHANNEL(Name)\
+#define DEFINE_UNIQUE_LOG_CHANNEL(Name, LogLevel)\
 	struct PRODUCE_INTERNAL_LOG_NAME(Name)															\
 	{																								\
 		static constexpr const char* Internal_GetStringId__() {return PRODUCE_INTERNAL_LOG_NAME_STRING(Name);}	\
+		static constexpr ke::ELogLevel Internal_GetLogLevel__() { return ke::ELogLevel::LogLevel; }\
 	}
 
 	class TLog
@@ -30,37 +39,47 @@ namespace ke
 		template<typename TChannel, typename ... ARGS>
 		static void Trace(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->trace(format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(
+				TChannel::Internal_GetStringId__(),
+				TChannel::Internal_GetLogLevel__()))->trace(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
 		static void Info(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->info(format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(
+				TChannel::Internal_GetStringId__(),
+				TChannel::Internal_GetLogLevel__()))->info(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
 		static void Warn(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->warn(format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(
+				TChannel::Internal_GetStringId__(),
+				TChannel::Internal_GetLogLevel__()))->warn(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
 		static void Error(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->error(format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(
+				TChannel::Internal_GetStringId__(),
+				TChannel::Internal_GetLogLevel__()))->error(format, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename TChannel, typename ... ARGS>
 		static void Critical(fmt::format_string<ARGS...> format, ARGS&&... Args)
 		{
-			CHECKED(Get()->FindOrCreateLogger(TChannel::Internal_GetStringId__()))->critical(format, std::forward<ARGS>(Args)...);
+			CHECKED(Get()->FindOrCreateLogger(
+				TChannel::Internal_GetStringId__(),
+				TChannel::Internal_GetLogLevel__()))->critical(format, std::forward<ARGS>(Args)...);
 		}
 
 	private:
-		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& name);
-		std::shared_ptr<spdlog::logger> CreateLogger(const TString& name);
-		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> logger);
+		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& name, ELogLevel level);
+		std::shared_ptr<spdlog::logger> CreateLogger(const TString& name, ELogLevel level);
+		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> logger, ELogLevel level);
 
 		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> m_Loggers;
 		std::mutex m_LoggerCreationFence;
@@ -89,7 +108,7 @@ namespace ke
 
 // It has to be here... though will be moved to other file
 #ifdef ENABLE_VALIDATION_BREAK
-DEFINE_UNIQUE_LOG_CHANNEL(VALIDATE);
+DEFINE_UNIQUE_LOG_CHANNEL(VALIDATE, Error);
 # define VALIDATED(x) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP(VALIDATE, "Validation failed: {} on line {} in file {}", #x, __LINE__, __FILE__); bFired = true; } return arg; }(x)
 # define VALIDATEDMSG(x, msg) [&](auto&& arg) { static bool bFired = false; if(!(x) && !bFired) { KEPLER_ERROR_STOP(VALIDATE, "Validation failed: {} on line {} in file {}", msg, __LINE__, __FILE__); bFired = true;} return arg; }(x)
 #else
@@ -98,5 +117,5 @@ DEFINE_UNIQUE_LOG_CHANNEL(VALIDATE);
 #endif
 
 // MAIN LOGGING CATEGORIES
-DEFINE_UNIQUE_LOG_CHANNEL(LogInit);
-DEFINE_UNIQUE_LOG_CHANNEL(LogApp);
+DEFINE_UNIQUE_LOG_CHANNEL(LogInit, All);
+DEFINE_UNIQUE_LOG_CHANNEL(LogApp, All);

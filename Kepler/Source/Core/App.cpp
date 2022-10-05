@@ -56,6 +56,7 @@ namespace ke
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(launchParams);
+		m_AssetManager = MakeShared<AssetManager>();
 
 		TWindowParams windowParams{};
 		windowParams.bMaximized = false;
@@ -87,6 +88,7 @@ namespace ke
 		m_WorldRegistry.reset();
 		m_AudioEngine.reset();
 		m_LowLevelRenderer.reset();
+		m_AssetManager.reset();
 		KEPLER_INFO(LogApp, "Finishing application termination");
 	}
 
@@ -107,6 +109,15 @@ namespace ke
 		auto mainCamera = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
+
+		//////////////////////////////////////////////////////////////////////////
+		// TEST FOR ASSET MANAGER
+		//////////////////////////////////////////////////////////////////////////
+		for (usize index = 0; index < 100; ++index)
+		{
+			auto asset = Await(AssetManager::Get()->FindAssetNode("Engine://Materials/Mat_DefaultUnlit.kmat"));
+		}
+		//////////////////////////////////////////////////////////////////////////
 
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;

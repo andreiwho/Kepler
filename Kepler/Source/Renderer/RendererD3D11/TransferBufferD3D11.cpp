@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogStagingBuffer);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogStagingBuffer, Info);
 
 	TTransferBufferD3D11::TTransferBufferD3D11(usize Size, TRef<AsyncDataBlob> InitialData)
 		: TTransferBuffer(Size, InitialData)

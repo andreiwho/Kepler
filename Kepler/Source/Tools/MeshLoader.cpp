@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	TMeshLoader* TMeshLoader::Instance = nullptr;

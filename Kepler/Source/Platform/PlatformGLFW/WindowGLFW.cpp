@@ -10,7 +10,7 @@
 #include <GLFW/glfw3native.h>
 #include <cassert>
 
-DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
+DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow, All);
 
 namespace ke
 {

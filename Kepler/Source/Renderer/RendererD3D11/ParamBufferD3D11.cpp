@@ -6,7 +6,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer, Info);
 
 	TParamBufferD3D11::TParamBufferD3D11(TRef<TPipelineParamMapping> Mapping)
 		:	TParamBuffer(Mapping)
