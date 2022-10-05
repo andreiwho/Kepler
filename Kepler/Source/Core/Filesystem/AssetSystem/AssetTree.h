@@ -66,6 +66,10 @@ namespace ke
 		inline bool IsAssetMetadata() const { return m_Type == EAssetNodeType::AssetMetadata; }
 		inline bool IsPlainAsset() const { return m_Type == EAssetNodeType::PlainAsset; }
 		inline id64 GetUUID() const { return m_UUID; }
+		inline const Array<TRef<AssetTreeNode>>& GetChildren() const
+		{
+			return m_Children;
+		}
 
 		static TRef<AssetTreeNode> MakeRoot(const TString& unresolvedPath)
 		{

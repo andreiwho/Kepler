@@ -2,6 +2,7 @@
 #include "Core/Modules/Module.h"
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
+#include "Panels/AssetBrowserPanel.h"
 
 namespace ke
 {
@@ -94,6 +95,7 @@ namespace ke
 		float m_EditorCameraSpeed = 2.0f;
 
 		TSharedPtr<TLogPanel> m_LogPanel;
+		TSharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
 
 	private:
 		i32 m_EditOperationIndex = 0x7;	// Translate by default

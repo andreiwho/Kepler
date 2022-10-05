@@ -89,6 +89,9 @@ namespace ke
 		default:
 			break;
 		}
+
+		// Asset browser
+		m_AssetBrowserPanel = MakeShared<TAssetBrowserPanel>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -149,6 +152,7 @@ namespace ke
 		DrawViewports();
 		DrawDetailsPanel();
 		DrawSceneGraph();
+		m_AssetBrowserPanel->Draw();
 		DrawDebugTools();
 		ImGui::ShowDemoWindow();
 	}
