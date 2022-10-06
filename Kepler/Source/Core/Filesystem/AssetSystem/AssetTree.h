@@ -71,10 +71,7 @@ namespace ke
 			return m_Children;
 		}
 
-		static TRef<AssetTreeNode> MakeRoot(const TString& unresolvedPath)
-		{
-			return MakeRef(ke::New<AssetTreeNode>(EAssetNodeType::Root, nullptr, unresolvedPath));
-		}
+		inline AssetTreeNode* GetParent() const { return m_Parent; }
 
 	protected:
 		template<typename T>

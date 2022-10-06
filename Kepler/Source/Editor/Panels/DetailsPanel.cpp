@@ -42,7 +42,7 @@ namespace ke
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("ENTITY"))
 		{
-			if (TEditorElements::BeginFieldTable("entity", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Name");
 				char nameBuffer[TEditorElements::GMaxTextEditSymbols];
@@ -63,7 +63,7 @@ namespace ke
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("TRANSFORM"))
 		{
-			if (TEditorElements::BeginFieldTable("transform", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Location");
 				auto location = entity.GetLocation();
@@ -96,7 +96,7 @@ namespace ke
 		MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
 		{
-			if (TEditorElements::BeginFieldTable("camera", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Field of View");
 				auto fov = camera.GetFOV();
@@ -130,7 +130,7 @@ namespace ke
 		{
 			if (TEditorElements::Container("MATERIAL"))
 			{
-				if (TEditorElements::BeginFieldTable("material", 2))
+				if (TEditorElements::BeginFieldTable("details", 2))
 				{
 					TEditorElements::NextFieldRow("Path");
 					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
