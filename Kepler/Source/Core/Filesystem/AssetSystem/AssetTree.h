@@ -43,6 +43,41 @@ namespace ke
 			}
 			CRASH();
 		}
+
+		static Array<EAssetNodeType> GetEntries() { return { Root, Directory, AssetMetadata, PlainAsset }; }
+	};
+
+	struct EAssetSortFilter
+	{
+		enum EValue : u8
+		{
+			None,
+			DirectoriesFirst,
+			AssetsFirst,
+		} Value{};
+
+		constexpr EAssetSortFilter() = default;
+		constexpr EAssetSortFilter(EValue value) : Value(value) {}
+		inline constexpr operator EValue() const { return Value; }
+
+		inline TString ToString() const
+		{
+			switch (Value)
+			{
+			case ke::EAssetSortFilter::None:
+				return "None";
+				break;
+			case ke::EAssetSortFilter::DirectoriesFirst:
+				return "Directories First";
+				break;
+			case ke::EAssetSortFilter::AssetsFirst:
+				return "Assets First";
+				break;
+			}
+			CRASH();
+		}
+
+		static Array<EAssetSortFilter> GetEntries() { return { None, DirectoriesFirst, AssetsFirst }; }
 	};
 
 	class AssetTreeNode : public IntrusiveRefCounted
@@ -70,8 +105,10 @@ namespace ke
 		{
 			return m_Children;
 		}
+		inline const TString& GetName() const { return m_Name; }
 
 		inline AssetTreeNode* GetParent() const { return m_Parent; }
+		void SortChildren(EAssetSortFilter filter = EAssetSortFilter::None);
 
 	protected:
 		template<typename T>
@@ -90,6 +127,7 @@ namespace ke
 
 		id64 m_UUID{};
 		EAssetNodeType m_Type{};
+		TString m_Name{};
 	};
 
 	class AssetTreeNode_Directory : public AssetTreeNode

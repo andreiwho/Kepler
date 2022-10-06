@@ -1,4 +1,5 @@
 #include "AssetTree.h"
+#include <filesystem>
 
 namespace ke
 {
@@ -10,6 +11,7 @@ namespace ke
 		, m_UnresolvedPath(path)
 		, m_UUID(path)
 		, m_Type(type)
+		, m_Name(std::filesystem::path(path).stem().string())
 
 	{
 	}
@@ -28,6 +30,7 @@ namespace ke
 	void AssetTreeNode::AssignParent(AssetTreeNode* pParent)
 	{
 		CHECKMSG(!IsRoot(), "Root directory cannot have parent");
+		m_Parent = pParent;
 	}
 
 	TRef<AssetTreeNode> AssetTreeNode::FindChild(const TString& path)
@@ -53,6 +56,66 @@ namespace ke
 			}
 		}
 		return nullptr;
+	}
+
+	namespace 
+	{
+		template<EAssetNodeType::EValue CheckedType>
+		static bool SortComparator(const TRef<AssetTreeNode>& lhs, const TRef<AssetTreeNode>& rhs)
+		{
+			if (!lhs || !rhs)
+			{
+				return false;
+			}
+
+			const bool bNamesCorrect = lhs->GetName().length() && rhs->GetName().length();
+			const bool bIsOfType = lhs->GetNodeType() == CheckedType;
+			if (bNamesCorrect && bIsOfType)
+			{
+				if (rhs->GetNodeType() != CheckedType)
+				{
+					return true;
+				}
+
+				const TString& lName = lhs->GetName();
+				const TString& rName = rhs->GetName();
+				const i32 commonLen = (i32)std::min(lName.length(), rName.length());
+				CHECK(commonLen > 0);
+
+				for (i32 index = 0; index < commonLen - 1; ++index)
+				{
+					const char lc = std::tolower(lName[index]);
+					const char rc = std::tolower(rName[index]);
+					if (lc == rc)
+					{
+						continue;
+					}
+					return lc < rc;
+				}
+			}
+			return false;
+		}
+	}
+
+	void AssetTreeNode::SortChildren(EAssetSortFilter filter)
+	{
+		switch (filter.Value)
+		{
+		case EAssetSortFilter::None:
+			return;
+		case EAssetSortFilter::DirectoriesFirst:
+		{
+			m_Children.Sort(&SortComparator<EAssetNodeType::Directory>);
+		}
+		break;
+		case EAssetSortFilter::AssetsFirst:
+		{
+			m_Children.Sort(&SortComparator<EAssetNodeType::PlainAsset>);
+		}
+		return;
+		default:
+			break;
+		}
 	}
 
 }

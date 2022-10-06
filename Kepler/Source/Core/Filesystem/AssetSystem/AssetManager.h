@@ -30,5 +30,11 @@ namespace ke
     private:
         TRef<AssetTreeNode_Directory> m_GameAssetTree{};
         TRef<AssetTreeNode_Directory> m_EngineAssetTree{};
+
+#ifdef ENABLE_EDITOR
+        static constexpr EAssetSortFilter m_DefaultSortingFilter = EAssetSortFilter::DirectoriesFirst;
+#else
+        static constexpr EAssetSortFilter m_DefaultSortingFilter = EAssetSortFilter::AssetsFirst;
+#endif
     };
 }

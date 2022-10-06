@@ -89,6 +89,21 @@ namespace ke
 			return idx;
 		}
 
+		void PopBack()
+		{
+			m_Container.pop_back();
+		}
+
+		T& GetBack()
+		{
+			return m_Container.back();
+		}
+
+		const T& GetBack() const 
+		{
+			return m_Container.back();
+		}
+
 		template<typename ... ARGS>
 		inline decltype(auto) EmplaceBack(ARGS&&... Args)
 		{

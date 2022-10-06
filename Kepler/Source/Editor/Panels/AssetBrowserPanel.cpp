@@ -18,8 +18,10 @@ namespace ke
 		// Assets
 		m_FolderIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Folder.png");
 		m_FileIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_File.png");
+		m_UnknownIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Unknown.png");
 
 		// Navigation
+		m_NavUpIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavUp.png");
 		m_NavBackIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavBack.png");
 		m_NavFwdIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavForward.png");
 	}
@@ -31,30 +33,16 @@ namespace ke
 			return;
 		}
 
+		/************************************************************************/
+		/* NAV BUTTONS                                                          */
+		/************************************************************************/
 		// We cannot go back if current directory is root
-		bool bDisabled = m_CurrentDirectory->IsRoot();
-		if (bDisabled)
-		{
-			ImGui::BeginDisabled(bDisabled);
-		}
-
-		if (ImGui::ImageButton("##navback", (ImTextureID)m_NavBackIcon->GetNativeHandle(), ImVec2(50, 50)))
-		{
-			if (m_CurrentDirectory->IsRoot())
-			{
-				return;
-			}
-			
-			m_CurrentDirectory = (AssetTreeNode_Directory*)m_CurrentDirectory->GetParent();
-		}
-
-		if (bDisabled)
-		{
-			ImGui::EndDisabled();
-		}
-
-		// TODO: Add forward button
-
+		// UP
+		DrawNavButton(m_NavUpIcon, "##navup", m_CurrentDirectory->IsRoot(), &TAssetBrowserPanel::OnTreeNavigateUp);
+		ImGui::SameLine();
+		DrawNavButton(m_NavBackIcon, "##navback", m_BackStack.IsEmpty(), &TAssetBrowserPanel::OnTreeNavigateBack);
+		ImGui::SameLine();
+		DrawNavButton(m_NavFwdIcon, "##navfwd", m_ForwardStack.IsEmpty(), &TAssetBrowserPanel::OnTreeNavigateForward);
 		ImGui::SameLine();
 
 		ImGui::SetNextItemWidth(-FLT_MIN);
@@ -74,6 +62,7 @@ namespace ke
 		ImGui::BeginGroup();
 		TString visibleLabel = fmt::format("##{}", label.data());
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, m_ItemRounding * 3);
 		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize, m_IconSize)))
 		{
 			ZeroSelectionCache();
@@ -84,18 +73,21 @@ namespace ke
 				OnDoubleClick(itemIndex);
 			}
 		}
+		ImGui::PopStyleVar();
 
 		ImGui::SetCursorPos(cursorPos);
 		ImGui::Image((ImTextureID)icon->GetNativeHandle(), ImVec2(m_IconSize, m_IconSize));
 
+		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + m_IconSize);
+		
 		const i32 textSize = (i32)ImGui::CalcTextSize(label.data()).x;
 		i32 itemSize = m_IconSize;
-		auto offset = ImGui::GetCursorPosX() + (itemSize - textSize) * 0.5f;
-		if (offset < 0)
-		{
-			offset = 0;
-		}
-		ImGui::SetCursorPosX(offset);
+		// auto offset = ImGui::GetCursorPosX() + (itemSize - textSize) * 0.5f;
+		// if (offset < 0)
+		// {
+		// 	offset = 0;
+		// }
+		// ImGui::SetCursorPosX(offset);
 		ImGui::TextWrapped(label.data());
 		ImGui::EndGroup();
 	}
@@ -105,18 +97,88 @@ namespace ke
 		TRef<AssetTreeNode> item = m_CurrentDirectory->GetChildren()[itemIndex];
 		if (item->IsDirectory())
 		{
+			m_BackStack.AppendBack(m_CurrentDirectory);
 			m_CurrentDirectory = RefCast<AssetTreeNode_Directory>(item).Raw();
+			m_ForwardStack.Clear();
+		}
+	}
+
+	void TAssetBrowserPanel::OnTreeNavigateUp()
+	{
+		if (m_CurrentDirectory->IsRoot())
+		{
+			return;
+		}
+
+		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
+		m_BackStack.AppendBack(pLastDir);
+		m_ForwardStack.Clear();
+		m_CurrentDirectory = (AssetTreeNode_Directory*)m_CurrentDirectory->GetParent();
+	}
+
+	void TAssetBrowserPanel::OnTreeNavigateBack()
+	{
+		if (m_BackStack.IsEmpty())
+		{
+			return;
+		}
+
+		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
+		AssetTreeNode_Directory* pNextDir = m_BackStack.GetBack();
+		m_CurrentDirectory = pNextDir;
+		m_ForwardStack.AppendBack(pLastDir);
+		m_BackStack.PopBack();
+	}
+
+	void TAssetBrowserPanel::OnTreeNavigateForward()
+	{
+		if (m_ForwardStack.IsEmpty())
+		{
+			return;
+		}
+
+		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
+		AssetTreeNode_Directory* pNextDir = m_ForwardStack.GetBack();
+		m_CurrentDirectory = pNextDir;
+		m_BackStack.AppendBack(pLastDir);
+		m_ForwardStack.PopBack();
+	}
+
+	void TAssetBrowserPanel::DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
+	{
+		if (bDisabled)
+		{
+			ImGui::BeginDisabled(bDisabled);
+		}
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, m_ItemRounding);
+		if (ImGui::ImageButton(pId, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(m_NavIconSize, m_NavIconSize)))
+		{
+			(this->*pCallback)();
+		}
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+
+		if (bDisabled)
+		{
+			ImGui::EndDisabled();
 		}
 	}
 
 	void TAssetBrowserPanel::Draw()
 	{
-		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(-1.0f, -1.0f));
 		ImGui::Begin("Asset Browser");
 		DrawAddressBar();
 
 		auto regionAvail = ImGui::GetContentRegionAvail();
 		i32 widgetsPerRow = (i32)regionAvail.x / ((i32)m_IconSize + (i32)m_IconPadding);
+		if (widgetsPerRow < 1)
+		{
+			widgetsPerRow = 1;
+		}
 
 		if (m_CurrentDirectory)
 		{
@@ -126,18 +188,17 @@ namespace ke
 				m_SelectionIndexCache.Resize(m_CurrentDirectory->GetChildren().GetLength());
 			}
 
-			if (ImGui::BeginTable("assetbrowser", widgetsPerRow))
+			if (ImGui::BeginTable("assetbrowser", widgetsPerRow, 
+				ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX))
 			{
 				i32 colIndex = 0;
 				i32 itemIndex = 0;
 				ImGui::TableNextRow();
 				for (const auto& entry : m_CurrentDirectory->GetChildren())
 				{
-					const auto& path = entry->GetPath_Resolved();
-					usize slashIndex = path.find_last_of("/");
-					std::string_view view(path.c_str() + slashIndex + 1);
-
+					std::string_view view(entry->GetName());
 					ImGui::TableSetColumnIndex(colIndex);
+					ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(ImVec4(0.05f, 0.05f, 0.05f, 1.0f)));
 					switch (entry->GetNodeType())
 					{
 					case EAssetNodeType::Directory:
@@ -148,6 +209,11 @@ namespace ke
 					case EAssetNodeType::PlainAsset:
 					{
 						DrawAsset(view, itemIndex, m_FileIcon);
+					}
+					break;
+					default:
+					{
+						DrawAsset(view, itemIndex, m_UnknownIcon);
 					}
 					break;
 					}

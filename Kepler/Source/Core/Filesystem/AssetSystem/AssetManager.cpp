@@ -40,9 +40,11 @@ namespace ke
 
 		m_GameAssetTree = ReadDirectory("Game://", AssetTreeNode_Directory::New(nullptr, "Game://"));
 		m_GameAssetTree->SetRoot();
+		m_GameAssetTree->SortChildren(m_DefaultSortingFilter);
 
 		m_EngineAssetTree = ReadDirectory("Engine://", AssetTreeNode_Directory::New(nullptr, "Engine://"));
 		m_EngineAssetTree->SetRoot();
+		m_GameAssetTree->SortChildren(m_DefaultSortingFilter);
 
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
@@ -63,6 +65,7 @@ namespace ke
 				TRef<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
 				ReadDirectory(root, pNewDirectory);
 				pDirectory->AddChild(pNewDirectory);
+				pNewDirectory->SortChildren(m_DefaultSortingFilter);
 			}
 
 			if (fs::is_regular_file(entryPath))
