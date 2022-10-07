@@ -57,6 +57,9 @@ namespace ke
 
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
 
+	protected:
+		virtual void PostWorldInit() override;
+
 	private:
 		void SetupStyle();
 		void DrawMenuBar();
@@ -76,6 +79,8 @@ namespace ke
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
+
+		void CreateEditorGrid();
 
 	private:
 		TWindow* m_pMainWindow{};
@@ -105,5 +110,8 @@ namespace ke
 		bool m_bSnapEnabled = false;
 		ETranslationSnap m_TranslationSnap = ETranslationSnap::_1Unit;
 		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
+
+		TGameEntityId m_EditorGridEntity{};
+		const i32 m_GridSize = 100;
 	};
 }

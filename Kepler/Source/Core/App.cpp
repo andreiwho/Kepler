@@ -110,15 +110,6 @@ namespace ke
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
-		//////////////////////////////////////////////////////////////////////////
-		// TEST FOR ASSET MANAGER
-		//////////////////////////////////////////////////////////////////////////
-		for (usize index = 0; index < 100; ++index)
-		{
-			auto asset = Await(AssetManager::Get()->FindAssetNode("Engine://Materials/Mat_DefaultUnlit.kmat"));
-		}
-		//////////////////////////////////////////////////////////////////////////
-
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
@@ -147,6 +138,8 @@ namespace ke
 #ifdef ENABLE_EDITOR
 			m_Editor->SetEditedWorld(m_CurrentWorld);
 #endif
+
+			m_ModuleStack.OnPostWorldInit();
 
 			while (pPlatform->HasActiveMainWindow())
 			{

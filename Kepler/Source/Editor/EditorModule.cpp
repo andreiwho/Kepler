@@ -29,6 +29,9 @@
 #include "Platform/Input.h"
 #include "Platform/Platform.h"
 #include "World/Game/Helpers/EntityHelper.h"
+#include "Tools/MaterialLoader.h"
+#include "World/Game/Components/MaterialComponent.h"
+#include "World/Game/Components/StaticMeshComponent.h"
 
 namespace ke
 {
@@ -231,6 +234,11 @@ namespace ke
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonDown);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonUp);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
+	}
+
+	void EditorModule::PostWorldInit()
+	{
+		CreateEditorGrid();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -611,7 +619,7 @@ namespace ke
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			
-			camera->SetLocation(float3(0.0f, -3.0f, 0.0f));
+			camera->SetLocation(float3(0.0f, -3.0f, 1.0f));
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
@@ -863,6 +871,33 @@ namespace ke
 		{
 			KEPLER_WARNING(LogEditor, "Tried to access IdTarget render target, which doesn't exist");
 		}
+	}
+
+	void EditorModule::CreateEditorGrid()
+	{
+		Array<TStaticMeshVertex> vertices;
+		Array<u32> indices;
+
+		for (i32 x = 0; x < m_GridSize; ++x)
+		{
+			float realX = (float)x - ((float)m_GridSize * 0.5f);
+			float realY = (float)m_GridSize * 0.5f;
+
+			vertices.AppendBack(TStaticMeshVertex{ {realX, -realY, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {realX, realY, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {-realY, realX, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {realY,  realX, 0.0f} });
+			indices.AppendBack(x * 4 + 0);
+			indices.AppendBack(x * 4 + 1);
+			indices.AppendBack(x * 4 + 2);
+			indices.AppendBack(x * 4 + 3);
+		}
+
+		m_EditorGridEntity = m_pEditedWorld->CreateEntity("_editorgrid");
+		auto gridEntity = TEntityHandle{ m_pEditedWorld, m_EditorGridEntity };
+		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
+		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
+		gridEntity->SetHideInSceneGraph(true);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

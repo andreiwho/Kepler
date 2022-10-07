@@ -188,8 +188,8 @@ namespace ke
 			// Vertex Input stage
 			PipelineConfig.VertexInput.VertexLayout = ShaderRef->GetReflection()->VertexLayout;
 			PipelineConfig.VertexInput.Topology =
-				Pipeline.HasMember("Primitive")
-				? ParsePrimitiveTopology(Pipeline["Primitive"])
+				Pipeline.HasMember("PrimitiveTopology")
+				? ParsePrimitiveTopology(Pipeline["PrimitiveTopology"])
 				: EPrimitiveTopology::TriangleList;
 			// Rasterizer stage
 			if (Pipeline.HasMember("Rasterizer"))
@@ -241,13 +241,21 @@ namespace ke
 					PipelineConfig.DepthStencil.DepthFunc = ParseDepthMode(DepthStencil["DepthFunc"]);
 				}
 			}
+
+			if (Pipeline.HasMember("bUsePrepass"))
+			{
+				const auto& bUsePrepass = Pipeline["bUsePrepass"];
+				CHECK(bUsePrepass.IsBool());
+				PipelineConfig.bUsePrepass = bUsePrepass.GetBool();
+			}
+
 			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;
 			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
 		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, TRef<TMaterial> Material)
 		{
-			if (!MaterialInfo.IsObject() && !MaterialInfo.HasMember("Samplers"))
+			if (!MaterialInfo.IsObject() || !MaterialInfo.HasMember("Samplers"))
 			{
 				return false;
 			}

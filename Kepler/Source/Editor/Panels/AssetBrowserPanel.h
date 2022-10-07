@@ -13,8 +13,7 @@ namespace ke
 		
 		void Draw();
 
-
-		inline bool IsHovered() const { return m_bIsHovered; }
+		inline bool IsHovered() const { return m_bIsHovered || m_bIsAssetTreeHovered || m_bIsAssetGridHovered; }
 		void OnMouseButton(EMouseButton button);
 
 	private:
@@ -68,5 +67,7 @@ namespace ke
 		Array<AssetTreeNode_Directory*> m_ForwardStack;
 
 		bool m_bIsHovered = false;
+		bool m_bIsAssetTreeHovered = false;
+		bool m_bIsAssetGridHovered = false;
 	};
 }

@@ -60,6 +60,7 @@ namespace ke
 		void WriteId(i32 id);
 
 		inline const TString& GetParentAssetPath() const { return m_ParentAssetPath; }
+		inline bool UsesPrepass() const { return m_Pipeline->UsesPrepass(); }
 
 	private:
 		TRef<TGraphicsPipeline> m_Pipeline;

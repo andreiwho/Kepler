@@ -158,6 +158,48 @@ namespace ke
 		}
 	};
 
+	/************************************************************************/
+	/* Assets                                                               */
+	/************************************************************************/
+	struct EPlainAssetType
+	{
+		enum EValue
+		{
+			Unknown,
+			StaticMesh,
+			Image,
+			Font,
+			Sound,
+			Material,
+		} Value{};
+
+		EPlainAssetType() = default;
+		EPlainAssetType(EValue value) : Value(value) {}
+		inline operator EValue() const { return Value; }
+
+		inline TString ToString() const
+		{
+			switch (Value)
+			{
+			case EPlainAssetType::Unknown:
+				return "Unknown";
+			case EPlainAssetType::StaticMesh:
+				return "Static Mesh";
+			case EPlainAssetType::Image:
+				return "Image";
+			case EPlainAssetType::Font:
+				return "Font";
+			case EPlainAssetType::Sound:
+				return "Sound";
+			case EPlainAssetType::Material:
+				return "Material";
+			}
+			CRASH();
+		}
+
+		static Array<EPlainAssetType> GetEntries() { return { Unknown, StaticMesh, Image, Font, Sound, Material}; }
+	};
+
 	class AssetTreeNode_PlainAsset: public AssetTreeNode
 	{
 	public:

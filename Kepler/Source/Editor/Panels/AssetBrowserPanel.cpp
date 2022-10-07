@@ -260,6 +260,7 @@ namespace ke
 			const float desiredSize = ImGui::GetContentRegionAvail().x * 0.2f;
 			const float maxSize = 200.0f;
 			ImGui::BeginChild("##assettree", ImVec2(std::min(desiredSize, maxSize), 0));
+			m_bIsAssetTreeHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 			DrawAssetTreeNode("Game", m_GameRootNode);
 			if (m_bShowEngineContent)
 			{
@@ -276,7 +277,12 @@ namespace ke
 			return;
 		}
 
-		u32 flags = m_CurrentDirectory == pDirectory ? ImGuiTreeNodeFlags_Selected : 0;
+		u32 flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+		if (m_CurrentDirectory == pDirectory)
+		{
+			flags |= ImGuiTreeNodeFlags_Selected;
+		}
+		
 		if (pDirectory->IsRoot())
 		{
 			flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -288,11 +294,20 @@ namespace ke
 		}
 		else
 		{
-			flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+			flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		}
-		
+
 		const TString name = pCustomName ? pCustomName : pDirectory->GetName();
 		bool bOpened = ImGui::TreeNodeEx((name + "##" + pDirectory->GetPath_Resolved()).c_str(), flags);
+		bool bClicked = ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen();
+
+		if (bClicked)
+		{
+			m_BackStack.AppendBack(m_CurrentDirectory);
+			m_ForwardStack.Clear();
+			m_CurrentDirectory = pDirectory;
+		}
+
 		if (bOpened)
 		{
 			for (auto& pChild : pDirectory->GetChildren())
@@ -304,18 +319,10 @@ namespace ke
 			}
 		}
 
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
-		{
-			m_BackStack.AppendBack(m_CurrentDirectory);
-			m_ForwardStack.Clear();
-			m_CurrentDirectory = pDirectory;
-		}
-
 		if (bOpened)
 		{
 			ImGui::TreePop();
 		}
-
 	}
 
 	void TAssetBrowserPanel::Draw()
@@ -323,7 +330,7 @@ namespace ke
 		ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(-1.0f, -1.0f));
 		ImGui::Begin("Asset Browser");
 
-		m_bIsHovered = ImGui::IsWindowHovered();
+		m_bIsHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		DrawAddressBar();
 		DrawAssetTree();
@@ -344,6 +351,7 @@ namespace ke
 				m_SelectionIndexCache.Resize(m_CurrentDirectory->GetChildren().GetLength());
 			}
 			ImGui::BeginChild("##assetbrowserchild", ImVec2(0.0f, 0));
+			m_bIsAssetGridHovered = ImGui::IsWindowHovered();
 			if (ImGui::BeginTable("assetbrowser", widgetsPerRow,
 				ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY
 				| ImGuiTableFlags_PadOuterX))

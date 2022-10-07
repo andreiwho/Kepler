@@ -21,6 +21,7 @@ namespace ke
 		void OnUpdate(float deltaTime);
 		void OnRender();
 		void OnRenderGUI();
+		void OnPostWorldInit();
 
 		void Init();
 		void Terminate();

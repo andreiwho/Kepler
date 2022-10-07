@@ -22,10 +22,10 @@ namespace ke
 			StaticState = ke::New<TStaticState>();
 		}
 
-		if (!StaticState->bInitialized) [[unlikely]]
-		{
-			StaticState->Init();
-		}
+			if (!StaticState->bInitialized) [[unlikely]]
+			{
+				StaticState->Init();
+			}
 	}
 
 	void TWorldRenderer::TStaticState::Init()
@@ -186,12 +186,15 @@ namespace ke
 		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
 			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
 			{
-				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
-				for (const auto& Section : SM.GetStaticMesh()->GetSections())
+				if (MT.UsesPrepass())
 				{
-					pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
-					pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
-					pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+					pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+					for (const auto& Section : SM.GetStaticMesh()->GetSections())
+					{
+						pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
+						pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
+						pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+					}
 				}
 			}
 		);
@@ -226,7 +229,7 @@ namespace ke
 			TLowLevelRenderer::m_SwapChainFrameCount);
 		TRef<RenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
-		auto pDepthTarget = TTargetRegistry::Get()->GetReadOnlyDepthTarget("PrePassDepth");
+		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth");
 
 		// Configure render target which will contain entity ids
 		auto pIdTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(

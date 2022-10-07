@@ -17,6 +17,8 @@ namespace ke
 			return Material->GetParentAssetPath();
 		}
 
+		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
+
 	private:
 		TRef<TMaterial> Material;
 	};

@@ -49,6 +49,8 @@ namespace ke
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
 			EDepthComparissonMode DepthFunc = EDepthComparissonMode::Less;
 		} DepthStencil;
+		bool bUsePrepass = true;
+
 		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
@@ -86,6 +88,7 @@ namespace ke
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
 
 		TRef<TPipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
+		inline bool UsesPrepass() const { return Configuration.bUsePrepass; }
 
 	protected:
 		static TRef<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
