@@ -11,9 +11,25 @@ namespace ke
 		, m_UnresolvedPath(path)
 		, m_UUID(path)
 		, m_Type(type)
-		, m_Name(std::filesystem::path(path).stem().string())
-
 	{
+		if (m_ResolvedPath.ends_with('/'))
+		{
+			m_ResolvedPath = m_ResolvedPath.substr(0, m_ResolvedPath.length() - 1);
+		}
+
+		auto fsPath = std::filesystem::path(m_ResolvedPath);
+		if (std::filesystem::is_directory(fsPath))
+		{
+			const auto lastSlash = m_ResolvedPath.find_last_of('/');
+			m_Name = m_ResolvedPath.substr(lastSlash + 1);
+		}
+		else
+		{
+			if (fsPath.has_stem())
+			{
+				m_Name = fsPath.stem().string();
+			}
+		}
 	}
 
 	void AssetTreeNode::AddChild(TRef<AssetTreeNode> newChild)
@@ -58,7 +74,7 @@ namespace ke
 		return nullptr;
 	}
 
-	namespace 
+	namespace
 	{
 		template<EAssetNodeType::EValue CheckedType>
 		static bool SortComparator(const TRef<AssetTreeNode>& lhs, const TRef<AssetTreeNode>& rhs)

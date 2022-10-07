@@ -23,6 +23,8 @@ namespace ke
 		void OnTreeNavigateForward();
 
 		void DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
+		void DrawAssetTree();
+		void DrawAssetTreeNode(AssetTreeNode_Directory* pDirectory);
 
 	private:
 		// Icons
@@ -36,8 +38,9 @@ namespace ke
 		TRef<TTextureSampler2D> m_NavFwdIcon;
 
 		AssetTreeNode_Directory* m_CurrentDirectory{nullptr};
-		
-		float m_IconSize = 64;
+		AssetTreeNode_Directory* m_RootNode{ nullptr };
+
+		float m_IconSize = 80;
 		float m_IconPadding = 16;
 
 		float m_NavIconSize = 32.0f;

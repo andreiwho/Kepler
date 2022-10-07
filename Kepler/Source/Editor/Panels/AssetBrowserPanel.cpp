@@ -63,7 +63,7 @@ namespace ke
 		TString visibleLabel = fmt::format("##{}", label.data());
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, m_ItemRounding * 3);
-		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize, m_IconSize)))
+		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize + m_IconPadding * 2, m_IconSize)))
 		{
 			ZeroSelectionCache();
 			m_SelectionIndexCache[itemIndex] = true;
@@ -75,19 +75,18 @@ namespace ke
 		}
 		ImGui::PopStyleVar();
 
-		ImGui::SetCursorPos(cursorPos);
+		ImGui::SetCursorPos(ImVec2(cursorPos.x + m_IconPadding * 0.5f, cursorPos.y));
 		ImGui::Image((ImTextureID)icon->GetNativeHandle(), ImVec2(m_IconSize, m_IconSize));
 
-		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + m_IconSize);
-		
+
 		const i32 textSize = (i32)ImGui::CalcTextSize(label.data()).x;
-		i32 itemSize = m_IconSize;
-		// auto offset = ImGui::GetCursorPosX() + (itemSize - textSize) * 0.5f;
-		// if (offset < 0)
-		// {
-		// 	offset = 0;
-		// }
-		// ImGui::SetCursorPosX(offset);
+		i32 itemSize = m_IconSize + m_IconPadding;
+		ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + (m_IconSize + m_IconPadding * 0.5f));
+		auto offset = (itemSize - textSize) * 0.5f;
+		if (offset > 0)
+		{
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+		}
 		ImGui::TextWrapped(label.data());
 		ImGui::EndGroup();
 	}
@@ -167,11 +166,67 @@ namespace ke
 		}
 	}
 
+	void TAssetBrowserPanel::DrawAssetTree()
+	{
+		if (!m_RootNode)
+		{
+			if (auto node = AssetManager::Get()->GetRootNode("Game://"))
+			{
+				m_RootNode = node.Raw();
+			}
+
+		}
+
+		if (VALIDATED(m_RootNode))
+		{
+			const float desiredSize = ImGui::GetContentRegionAvail().x * 0.2f;
+			const float maxSize = 200.0f;
+			ImGui::BeginChild("##assettree", ImVec2(std::min(desiredSize, maxSize), 0));
+			DrawAssetTreeNode(m_RootNode);
+			ImGui::EndChild();
+		}
+
+	}
+
+	void TAssetBrowserPanel::DrawAssetTreeNode(AssetTreeNode_Directory* pDirectory)
+	{
+		if (!pDirectory)
+		{
+			return;
+		}
+
+		u32 flags = m_CurrentDirectory == pDirectory ? ImGuiTreeNodeFlags_Selected : 0;
+		if (pDirectory->IsRoot())
+		{
+			flags |= ImGuiTreeNodeFlags_DefaultOpen;
+		}
+		
+		if (ImGui::TreeNodeEx(pDirectory->GetName().c_str(), flags))
+		{
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			{
+				m_CurrentDirectory = pDirectory;
+			}
+
+			for (auto& pChild : pDirectory->GetChildren())
+			{
+				if (pChild && pChild->IsDirectory())
+				{
+					DrawAssetTreeNode(RefCast<AssetTreeNode_Directory>(pChild).Raw());
+				}
+			}
+			ImGui::TreePop();
+		}
+
+	}
+
 	void TAssetBrowserPanel::Draw()
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(-1.0f, -1.0f));
 		ImGui::Begin("Asset Browser");
 		DrawAddressBar();
+		DrawAssetTree();
+		ImGui::SameLine();
 
 		auto regionAvail = ImGui::GetContentRegionAvail();
 		i32 widgetsPerRow = (i32)regionAvail.x / ((i32)m_IconSize + (i32)m_IconPadding);
@@ -187,9 +242,10 @@ namespace ke
 				m_SelectionIndexCache.Clear();
 				m_SelectionIndexCache.Resize(m_CurrentDirectory->GetChildren().GetLength());
 			}
-
-			if (ImGui::BeginTable("assetbrowser", widgetsPerRow, 
-				ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_PadOuterX))
+			ImGui::BeginChild("##assetbrowserchild", ImVec2(0.0f, 0));
+			if (ImGui::BeginTable("assetbrowser", widgetsPerRow,
+				ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY
+				| ImGuiTableFlags_PadOuterX))
 			{
 				i32 colIndex = 0;
 				i32 itemIndex = 0;
@@ -198,7 +254,6 @@ namespace ke
 				{
 					std::string_view view(entry->GetName());
 					ImGui::TableSetColumnIndex(colIndex);
-					ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, ImGui::GetColorU32(ImVec4(0.05f, 0.05f, 0.05f, 1.0f)));
 					switch (entry->GetNodeType())
 					{
 					case EAssetNodeType::Directory:
@@ -227,6 +282,7 @@ namespace ke
 					itemIndex++;
 				}
 				ImGui::EndTable();
+				ImGui::EndChild();
 			}
 		}
 		ImGui::End();
