@@ -27,6 +27,19 @@ namespace ke
 			});
 	}
 
+	TFuture<void> TFileUtils::WriteTextFileAsync(const TString& path, const TString& text)
+	{
+		return Async([CopiedPath = VFSResolvePath(path), CopiedText = text]
+			{
+				std::ofstream stream{ CopiedPath, std::ios::ate | std::ios::binary };
+				if (!stream.is_open())
+				{
+					CRASHMSG(fmt::format("Failed to read text file: {}", CopiedPath));
+				}
+				stream.write(CopiedText.c_str(), CopiedText.size());
+			});
+	}
+
 	std::future<Array<u8>> TFileUtils::ReadBinaryFileAsync(const TString& path)
 	{
 		return Async([CopiedPath = VFSResolvePath(path)]

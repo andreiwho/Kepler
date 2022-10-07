@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include <string_view>
 #include "Tools/ImageLoader.h"
+#include "Core/Filesystem/FileUtils.h"
 
 namespace ke
 {
@@ -21,6 +22,7 @@ namespace ke
 		m_UnknownIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Unknown.png");
 
 		// Navigation
+		m_NavSettingsIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Settings.png");
 		m_NavUpIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavUp.png");
 		m_NavBackIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavBack.png");
 		m_NavFwdIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavForward.png");
@@ -38,6 +40,8 @@ namespace ke
 		/************************************************************************/
 		// We cannot go back if current directory is root
 		// UP
+		DrawNavButton(m_NavSettingsIcon, "##navsettings", false, &TAssetBrowserPanel::OnNavOpenSettings);
+		ImGui::SameLine();
 		DrawNavButton(m_NavUpIcon, "##navup", m_CurrentDirectory->IsRoot(), &TAssetBrowserPanel::OnTreeNavigateUp);
 		ImGui::SameLine();
 		DrawNavButton(m_NavBackIcon, "##navback", m_BackStack.IsEmpty(), &TAssetBrowserPanel::OnTreeNavigateBack);
@@ -45,8 +49,57 @@ namespace ke
 		DrawNavButton(m_NavFwdIcon, "##navfwd", m_ForwardStack.IsEmpty(), &TAssetBrowserPanel::OnTreeNavigateForward);
 		ImGui::SameLine();
 
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::Text(m_CurrentDirectory->GetPath_Resolved().c_str());
+		DrawAddressBarAddressNode(m_CurrentDirectory);
+		DrawSettingsPopup();
+	}
+
+	void TAssetBrowserPanel::DrawAddressBarAddressNode(AssetTreeNode_Directory* pDirectory)
+	{
+		if (!pDirectory->IsRoot())
+		{
+			if (auto pParent = pDirectory->GetParent())
+			{
+				DrawAddressBarAddressNode((AssetTreeNode_Directory*)pParent);
+			}
+		}
+
+		bool bDisabled = pDirectory == m_CurrentDirectory;
+		if (bDisabled)
+		{
+			ImGui::BeginDisabled(bDisabled);
+		}
+
+		if (ImGui::Button(pDirectory->GetName().c_str(), ImVec2(0.0f, m_NavIconSize)))
+		{
+			m_BackStack.AppendBack(m_CurrentDirectory);
+			m_ForwardStack.Clear();
+			m_CurrentDirectory = pDirectory;
+
+		}
+
+		if (bDisabled)
+		{
+			ImGui::EndDisabled();
+		}
+
+		ImGui::SameLine();
+		ImGui::Text("/");
+
+		if (pDirectory != m_CurrentDirectory)
+		{
+			ImGui::SameLine();
+		}
+	}
+
+
+	void TAssetBrowserPanel::SerializeConfig()
+	{
+		// TODO
+	}
+
+	void TAssetBrowserPanel::DeserializeConfig()
+	{
+		// TODO
 	}
 
 	void TAssetBrowserPanel::ZeroSelectionCache()
@@ -62,7 +115,7 @@ namespace ke
 		ImGui::BeginGroup();
 		TString visibleLabel = fmt::format("##{}", label.data());
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
-		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, m_ItemRounding * 3);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, m_ItemRounding * 3);
 		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize + m_IconPadding * 2, m_IconSize)))
 		{
 			ZeroSelectionCache();
@@ -143,6 +196,20 @@ namespace ke
 		m_ForwardStack.PopBack();
 	}
 
+	void TAssetBrowserPanel::OnNavOpenSettings()
+	{
+		ImGui::OpenPopup("assetbrowsersettings");
+	}
+
+	void TAssetBrowserPanel::DrawSettingsPopup()
+	{
+		if (ImGui::BeginPopup("assetbrowsersettings"))
+		{
+			ImGui::SliderFloat("Icon Size", &m_IconSize, 32.0f, 256.0f);
+			ImGui::EndPopup();
+		}
+	}
+
 	void TAssetBrowserPanel::DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
 	{
 		if (bDisabled)
@@ -168,27 +235,41 @@ namespace ke
 
 	void TAssetBrowserPanel::DrawAssetTree()
 	{
-		if (!m_RootNode)
+		if (!m_GameRootNode)
 		{
 			if (auto node = AssetManager::Get()->GetRootNode("Game://"))
 			{
-				m_RootNode = node.Raw();
+				m_GameRootNode = node.Raw();
 			}
 
 		}
 
-		if (VALIDATED(m_RootNode))
+		if (m_bShowEngineContent)
+		{
+			if (!m_EngineRootNode)
+			{
+				if (auto node = AssetManager::Get()->GetRootNode("Engine://"))
+				{
+					m_EngineRootNode = node.Raw();
+				}
+			}
+		}
+
+		if (VALIDATED(m_GameRootNode))
 		{
 			const float desiredSize = ImGui::GetContentRegionAvail().x * 0.2f;
 			const float maxSize = 200.0f;
 			ImGui::BeginChild("##assettree", ImVec2(std::min(desiredSize, maxSize), 0));
-			DrawAssetTreeNode(m_RootNode);
+			DrawAssetTreeNode("Game", m_GameRootNode);
+			if (m_bShowEngineContent)
+			{
+				DrawAssetTreeNode("Engine", m_EngineRootNode);
+			}
 			ImGui::EndChild();
 		}
-
 	}
 
-	void TAssetBrowserPanel::DrawAssetTreeNode(AssetTreeNode_Directory* pDirectory)
+	void TAssetBrowserPanel::DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory)
 	{
 		if (!pDirectory)
 		{
@@ -200,21 +281,38 @@ namespace ke
 		{
 			flags |= ImGuiTreeNodeFlags_DefaultOpen;
 		}
-		
-		if (ImGui::TreeNodeEx(pDirectory->GetName().c_str(), flags))
-		{
-			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-			{
-				m_CurrentDirectory = pDirectory;
-			}
 
+		if (!pDirectory->HasDirectories())
+		{
+			flags |= ImGuiTreeNodeFlags_Leaf;
+		}
+		else
+		{
+			flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+		}
+		
+		const TString name = pCustomName ? pCustomName : pDirectory->GetName();
+		bool bOpened = ImGui::TreeNodeEx((name + "##" + pDirectory->GetPath_Resolved()).c_str(), flags);
+		if (bOpened)
+		{
 			for (auto& pChild : pDirectory->GetChildren())
 			{
 				if (pChild && pChild->IsDirectory())
 				{
-					DrawAssetTreeNode(RefCast<AssetTreeNode_Directory>(pChild).Raw());
+					DrawAssetTreeNode(nullptr, RefCast<AssetTreeNode_Directory>(pChild).Raw());
 				}
 			}
+		}
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
+		{
+			m_BackStack.AppendBack(m_CurrentDirectory);
+			m_ForwardStack.Clear();
+			m_CurrentDirectory = pDirectory;
+		}
+
+		if (bOpened)
+		{
 			ImGui::TreePop();
 		}
 
@@ -224,6 +322,9 @@ namespace ke
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(-1.0f, -1.0f));
 		ImGui::Begin("Asset Browser");
+
+		m_bIsHovered = ImGui::IsWindowHovered();
+
 		DrawAddressBar();
 		DrawAssetTree();
 		ImGui::SameLine();
@@ -286,6 +387,21 @@ namespace ke
 			}
 		}
 		ImGui::End();
+	}
+
+	void TAssetBrowserPanel::OnMouseButton(EMouseButton button)
+	{
+		switch (button)
+		{
+		case EMouseButton::Back:
+			OnTreeNavigateBack();
+			return;
+		case EMouseButton::Forward:
+			OnTreeNavigateForward();
+			return;
+		default:
+			break;
+		}
 	}
 
 }

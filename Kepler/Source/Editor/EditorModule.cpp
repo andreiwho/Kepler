@@ -728,6 +728,11 @@ namespace ke
 				TrySelectEntity();
 			}
 		}
+
+		if (m_AssetBrowserPanel->IsHovered())
+		{
+			m_AssetBrowserPanel->OnMouseButton(event.Button);
+		}
 		return false;
 	}
 

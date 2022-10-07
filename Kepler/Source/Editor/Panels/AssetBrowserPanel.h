@@ -2,6 +2,7 @@
 #include "Core/Core.h"
 #include "Core/Filesystem/AssetSystem/AssetTree.h"
 #include "Renderer/Elements/Texture.h"
+#include "Platform/Mouse.h"
 
 namespace ke
 {
@@ -12,6 +13,10 @@ namespace ke
 		
 		void Draw();
 
+
+		inline bool IsHovered() const { return m_bIsHovered; }
+		void OnMouseButton(EMouseButton button);
+
 	private:
 		void DrawAddressBar();
 		void ZeroSelectionCache();
@@ -21,10 +26,18 @@ namespace ke
 		void OnTreeNavigateUp();
 		void OnTreeNavigateBack();
 		void OnTreeNavigateForward();
+		void OnNavOpenSettings();
+		void DrawSettingsPopup();
 
 		void DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
 		void DrawAssetTree();
-		void DrawAssetTreeNode(AssetTreeNode_Directory* pDirectory);
+		void DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory);
+		void DrawAddressBarAddressNode(AssetTreeNode_Directory* pDirectory);
+
+	private:
+		// Serialization functions
+		void SerializeConfig();
+		void DeserializeConfig();
 
 	private:
 		// Icons
@@ -33,12 +46,15 @@ namespace ke
 		TRef<TTextureSampler2D> m_UnknownIcon;
 
 		// Nav
+		TRef<TTextureSampler2D> m_NavSettingsIcon;
 		TRef<TTextureSampler2D> m_NavUpIcon;
 		TRef<TTextureSampler2D> m_NavBackIcon;
 		TRef<TTextureSampler2D> m_NavFwdIcon;
 
 		AssetTreeNode_Directory* m_CurrentDirectory{nullptr};
-		AssetTreeNode_Directory* m_RootNode{ nullptr };
+		AssetTreeNode_Directory* m_GameRootNode{ nullptr };
+		AssetTreeNode_Directory* m_EngineRootNode{ nullptr };
+		bool m_bShowEngineContent = true;
 
 		float m_IconSize = 80;
 		float m_IconPadding = 16;
@@ -50,5 +66,7 @@ namespace ke
 
 		Array<AssetTreeNode_Directory*> m_BackStack;
 		Array<AssetTreeNode_Directory*> m_ForwardStack;
+
+		bool m_bIsHovered = false;
 	};
 }

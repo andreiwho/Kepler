@@ -106,7 +106,7 @@ namespace ke
 			return m_Children;
 		}
 		inline const TString& GetName() const { return m_Name; }
-
+		inline bool HasDirectories() const { return m_bHasDirectories; }
 		inline AssetTreeNode* GetParent() const { return m_Parent; }
 		void SortChildren(EAssetSortFilter filter = EAssetSortFilter::None);
 
@@ -128,6 +128,8 @@ namespace ke
 		id64 m_UUID{};
 		EAssetNodeType m_Type{};
 		TString m_Name{};
+
+		bool m_bHasDirectories = false;
 	};
 
 	class AssetTreeNode_Directory : public AssetTreeNode

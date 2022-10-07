@@ -9,6 +9,8 @@ struct EMouseButton
 		Left = BIT(0),
 		Right = BIT(1),
 		Middle = BIT(2),
+		Forward = BIT(3),
+		Back = BIT(4),
 	} const Value{Unknown};
 
 	EMouseButton(EValue value) : Value(value) {}

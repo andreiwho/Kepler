@@ -35,6 +35,11 @@ namespace ke
 	void AssetTreeNode::AddChild(TRef<AssetTreeNode> newChild)
 	{
 		m_Children.AppendBack(newChild);
+		if (newChild->IsDirectory())
+		{
+			m_bHasDirectories = true;
+		}
+
 		KEPLER_INFO(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
 	}
 
