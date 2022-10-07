@@ -3,18 +3,9 @@
         "Pipeline": {
             "Shader": "EngineShaders://Editor/EditorGrid.hlsl",
             "PrimitiveTopology": "Lines",
-            "Rasterizer": {
-                "bDisabled": false,
-                "FillMode": "Solid",
-                "CullMode": "Back",
-                "bEnableScissor": false
-            },
             "DepthStencil": {
                 "bDepthEnable": true,
-                "DepthAccess": "Read",
-                "DepthFunc": "LEqual",
-                "bStencilEnable": false,
-                "StencilAccess": "None"
+                "DepthAccess": "ReadWrite"
             },
             "bUsePrepass": false
         }

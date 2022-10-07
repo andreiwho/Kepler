@@ -718,6 +718,11 @@ namespace ke
 				m_bSnapEnabled = !m_bSnapEnabled;
 			}
 			break;
+			case EKeyCode::F:
+			{
+				EditorCamera_FocusSelectedObject();
+			}
+			break;
 			default:
 				break;
 			}
@@ -876,7 +881,9 @@ namespace ke
 	void EditorModule::CreateEditorGrid()
 	{
 		Array<TStaticMeshVertex> vertices;
+		vertices.Reserve((usize)m_GridSize * 4);
 		Array<u32> indices;
+		indices.Reserve((usize)m_GridSize * 4);
 
 		for (i32 x = 0; x < m_GridSize; ++x)
 		{
@@ -898,6 +905,14 @@ namespace ke
 		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
 		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
 		gridEntity->SetHideInSceneGraph(true);
+	}
+
+	void EditorModule::EditorCamera_FocusSelectedObject()
+	{
+		if (m_pEditedWorld->IsValidEntity(m_SelectedEntity))
+		{
+			// TODO
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

@@ -82,6 +82,7 @@ namespace ke
 
 		void CreateEditorGrid();
 
+		void EditorCamera_FocusSelectedObject();
 	private:
 		TWindow* m_pMainWindow{};
 		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
@@ -112,6 +113,6 @@ namespace ke
 		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
 
 		TGameEntityId m_EditorGridEntity{};
-		const i32 m_GridSize = 100;
+		const i32 m_GridSize = 1000;
 	};
 }
