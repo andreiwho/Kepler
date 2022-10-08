@@ -45,6 +45,7 @@ namespace ke
 				continue;
 				idx++;
 			}
+
 			// Do someting 
 			// ...
 			// Increment the index
@@ -60,7 +61,7 @@ namespace ke
 
 		TWindowParams windowParams{};
 		windowParams.bMaximized = false;
-		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", windowParams));
+		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1920, 1080, "Kepler", windowParams));
 
 		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);

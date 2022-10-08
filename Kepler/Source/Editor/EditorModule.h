@@ -79,10 +79,11 @@ namespace ke
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
-
 		void CreateEditorGrid();
-
 		void EditorCamera_FocusSelectedObject();
+
+		void DrawViewportEntityIcons();
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
 	private:
 		TWindow* m_pMainWindow{};
 		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
@@ -114,5 +115,9 @@ namespace ke
 
 		TGameEntityId m_EditorGridEntity{};
 		const i32 m_GridSize = 1000;
+		float m_InViewportIconSize = 50.0;
+
+		// Entity icons
+		TRef<TTextureSampler2D> m_CameraIcon;
 	};
 }

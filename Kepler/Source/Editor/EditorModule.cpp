@@ -32,6 +32,7 @@
 #include "Tools/MaterialLoader.h"
 #include "World/Game/Components/MaterialComponent.h"
 #include "World/Game/Components/StaticMeshComponent.h"
+#include "Tools/ImageLoader.h"
 
 namespace ke
 {
@@ -239,6 +240,8 @@ namespace ke
 	void EditorModule::PostWorldInit()
 	{
 		CreateEditorGrid();
+
+		m_CameraIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Camera.png");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -373,6 +376,7 @@ namespace ke
 				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
 			DrawGizmo();
+			DrawViewportEntityIcons();
 			DrawViewportGizmoControls();
 			DrawViewportCameraControls();
 		}
@@ -619,7 +623,7 @@ namespace ke
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			
-			camera->SetLocation(float3(0.0f, -3.0f, 1.0f));
+			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
@@ -913,6 +917,74 @@ namespace ke
 		{
 			// TODO
 		}
+	}
+
+	void EditorModule::DrawViewportEntityIcons()
+	{
+		KEPLER_PROFILE_SCOPE();
+		TEntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
+		auto view = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateViewMatrix();
+		auto proj = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateProjectionMatrix();
+
+		m_pEditedWorld->GetComponentView<CameraComponent>().each(
+			[&proj, &view, &editorCameraEntity, this](entt::entity e, auto&)
+			{
+				if (e == m_EditorCameraEntity.Entity)
+				{
+					return;
+				}
+
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
+			});
+	}
+
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
+	{
+		KEPLER_PROFILE_SCOPE();
+		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
+
+		auto transform = handle->GetTransform();
+		auto world = transform.GenerateWorldMatrix();
+		auto mvp = projection * view * world;
+
+		float4 v = mvp * float4(0, 0, 0, 1);
+
+		if (glm::epsilonEqual(v.w, 0.0f, FLT_EPSILON))
+		{
+			v.w = 0.01f;
+		}
+		float3 screenSpace = v / -v.w;
+
+		if (screenSpace.x < -0.95f || screenSpace.x > 0.95f || screenSpace.y < -0.95f || screenSpace.y > 0.95f || v.w < 0)
+		{
+			return;
+		}
+
+		ImVec2 posNormalized = ImVec2(1.0f - (screenSpace.x + 1.0f) * 0.5f, (screenSpace.y + 1.0f) * 0.5f);
+		auto vpSize = m_ViewportSizes[(usize)viewport];
+
+		const auto iconSize = m_InViewportIconSize - v.w;
+
+		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f};
+		ImGui::SetCursorPos(iconPos);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+
+		bool bDisabled = m_bIsGizmoHovered || m_bIsGizmoUsed;
+		if (bDisabled)
+		{
+			
+			ImGui::Image((ImTextureID)m_CameraIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
+		}
+		else if (ImGui::ImageButton(id, (ImTextureID)m_CameraIcon->GetNativeHandle(), ImVec2(iconSize, iconSize)))
+		{
+			m_SelectedEntity = entity;
+		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(3);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
