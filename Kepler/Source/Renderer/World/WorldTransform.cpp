@@ -35,4 +35,24 @@ namespace ke
 		worldMat = glm::scale(worldMat, m_Scale);
 		return worldMat;
 	}
+
+	matrix3x3 TWorldTransform::GenerateNormalMatrix() const
+	{
+		const auto worldMat = GenerateWorldMatrix();
+		return glm::transpose(glm::inverse(worldMat));
+	}
+
+	float3 TWorldTransform::RotationToEuler() const
+	{
+		const float yaw = m_Rotation.z + 90.0f;
+		const float pitch = m_Rotation.x;
+		// const float Roll = Vector.y;
+
+		float3 direction{};
+		direction.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		direction.z = glm::sin(glm::radians(pitch));
+		direction.y = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		return glm::normalize(direction);
+	}
+
 }

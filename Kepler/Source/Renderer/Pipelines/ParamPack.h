@@ -46,6 +46,8 @@ namespace ke
 			return MakeRef(ke::New<TPipelineParamMapping>());
 		}
 
+		inline bool HasParam(const TString& name) const { return Params.Contains(name); }
+
 	private:
 		Map<TString, TPipelineParam> Params;
 		EShaderStageFlags ParamShaderStages{ 0 };
@@ -89,6 +91,8 @@ namespace ke
 		const ubyte* GetDataPointer() const { return CPUData.GetData() + (GetBufferIndex() * SinglePackStride); }
 		usize GetDataSize() const { return SinglePackStride; }
 		inline EShaderStageFlags GetShaderStages() const { return Params->GetParamShaderStages(); }
+
+		inline bool HasParam(const TString& name) const { return Params->HasParam(name); }
 
 	private:
 		static u8 GetBufferIndex() noexcept;

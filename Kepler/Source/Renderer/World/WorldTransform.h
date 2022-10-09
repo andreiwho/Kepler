@@ -18,6 +18,8 @@ namespace ke
 		void SetScale(float3 scale);
 
 		matrix4x4 GenerateWorldMatrix() const;
+		matrix3x3 GenerateNormalMatrix() const;
+		float3 RotationToEuler() const;
 
 	private:
 		float3 m_Location = float3();

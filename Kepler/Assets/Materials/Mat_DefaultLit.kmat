@@ -1,6 +1,7 @@
 {
     "Material": {
         "Pipeline": {
+            "Domain": "Lit",
             "Shader": "EngineShaders://DefaultLit.hlsl",
             "PrimitiveTopology": "Triangles",
             "Rasterizer": {
@@ -18,7 +19,8 @@
             }
         },
         "Samplers": {
-            "Albedo": "Game://Tex_Gun_Diffuse.png"
+            "Albedo": "Game://CubeBaseColor.png",
+            "Normal": "Game://CubeNormal.png"
         }
     }
 }

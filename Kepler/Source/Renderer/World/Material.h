@@ -54,6 +54,8 @@ namespace ke
 			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
 
+		inline bool HasParam(const TString& name) const { return m_ParamBuffer->HasParam(name); }
+
 		// Helper functions
 		void WriteTransform(TWorldTransform transform);
 		void WriteCamera(MathCamera camera);

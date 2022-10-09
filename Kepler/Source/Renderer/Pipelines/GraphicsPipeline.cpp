@@ -22,6 +22,31 @@ namespace ke
 	{
 	}
 
+	void TGraphicsPipeline::Validate() const
+	{
+#ifdef ENABLE_DEBUG
+		auto mappings = GetParamMapping();
+		switch (GetDomain().Value)
+		{
+		case EPipelineDomain::Unlit:
+		{
+			CHECK(mappings->HasParam("Transform"));
+			CHECK(mappings->HasParam("EntityId"));
+		}
+		break;
+		case EPipelineDomain::Lit:
+		{
+			CHECK(mappings->HasParam("Transform"));
+			CHECK(mappings->HasParam("NormalMatrix"));
+			CHECK(mappings->HasParam("EntityId"));
+		}
+		break;
+		default:
+			CRASH();
+		}
+#endif
+	}
+
 	TRef<TShader> TGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
 	{
 		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();

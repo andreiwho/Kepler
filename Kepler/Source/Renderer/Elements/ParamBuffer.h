@@ -36,6 +36,11 @@ namespace ke
 			return Params->GetParam<T>(Param);
 		}
 
+		inline bool HasParam(const TString& param) const
+		{
+			return Params->HasParam(param);
+		}
+
 		virtual void RT_UploadToGPU(TRef<class GraphicsCommandListImmediate> pImmContext) = 0;
 
 		inline EShaderStageFlags GetShaderStages() const { return Params->GetShaderStages(); }

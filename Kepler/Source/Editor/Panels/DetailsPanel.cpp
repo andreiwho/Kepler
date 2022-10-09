@@ -8,6 +8,7 @@
 #include "Tools/MaterialLoader.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -190,6 +191,34 @@ namespace ke
 					{
 						pAmbientLight->SetColor(color);
 					}
+
+					TEditorElements::EndFieldTable();
+				}
+			}
+		}
+
+		if (auto pDirLight = entity.GetComponent<DirectionalLightComponent>())
+		{
+			if (TEditorElements::Container("DIRECTIONAL LIGHT"))
+			{
+				if (TEditorElements::BeginFieldTable("details", 2))
+				{
+					TEditorElements::NextFieldRow("Color");
+					float3 color = pDirLight->GetColor();
+					if (TEditorElements::DragFloat3("Color", color, 0.01f, 0.0f, 100.0f))
+					{
+						pDirLight->SetColor(color);
+					}
+
+
+					TEditorElements::NextFieldRow("Intensity");
+					float intensity = pDirLight->GetIntensity();
+					if (TEditorElements::DragFloat1("Intensity", intensity, 0.01f, 0.0f, 100.0f))
+					{
+						pDirLight->SetIntensity(intensity);
+					}
+
+
 
 					TEditorElements::EndFieldTable();
 				}

@@ -34,6 +34,7 @@
 #include "World/Game/Components/StaticMeshComponent.h"
 #include "Tools/ImageLoader.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -249,6 +250,7 @@ namespace ke
 	{
 		m_CameraIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Camera.png");
 		m_AmbientLightIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_AmbientLight.png");
+		m_DirectionalLightIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_DirectionLight.png");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -881,6 +883,10 @@ namespace ke
 				{
 					m_SelectedEntity = TGameEntityId{ (entt::entity)idColor };
 				}
+				else
+				{
+					m_SelectedEntity = TGameEntityId{ (entt::entity)entt::null };
+				}
 			}
 		}
 		else
@@ -948,8 +954,20 @@ namespace ke
 			[&proj, &view, this](auto e, auto&)
 			{
 				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
-			}
-		);
+			});
+
+
+		m_pEditedWorld->GetComponentView<DirectionalLightComponent>().each(
+			[&proj, &view, this](auto e, auto&)
+			{
+				TGameEntityId entity{ e };
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, entity, m_DirectionalLightIcon, EViewportIndex::Viewport1);
+
+				if (m_SelectedEntity == entity)
+				{
+					// DrawDirections(entity);
+				}
+			});
 	}
 
 	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
@@ -990,7 +1008,6 @@ namespace ke
 		bool bDisabled = m_bIsGizmoHovered || m_bIsGizmoUsed;
 		if (bDisabled)
 		{
-			
 			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
 		}
 		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))

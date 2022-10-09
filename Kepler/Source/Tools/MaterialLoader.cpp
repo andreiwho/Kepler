@@ -30,29 +30,6 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		EPipelineCategory ParsePipelineCategory(const rapidjson::Value& Object)
-		{
-			CHECK(Object.IsObject());
-			CHECK(Object.HasMember("Pipeline"));
-
-			const auto& PipelineName = Object["Pipeline"];
-			if (PipelineName.IsString())
-			{
-				auto PipelineString = PipelineName.GetString();
-				if (TString("DefaultUnlit") == PipelineString)
-				{
-					return EPipelineCategory::DefaultUnlit;
-				}
-				if (TString("PostProcess") == PipelineString)
-				{
-					return EPipelineCategory::PostProcess;
-				}
-			}
-			KEPLER_WARNING(LogMaterialLoader, "Unknown material pipeline.");
-			return EPipelineCategory::Unknown;
-		}
-
-		//////////////////////////////////////////////////////////////////////////
 		EPrimitiveTopology ParsePrimitiveTopology(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
@@ -144,6 +121,23 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
+		EPipelineDomain ParsePipelineDomain(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("Unlit") == String)
+			{
+				return EPipelineDomain::Unlit;
+			}
+			if (TString("Lit") == String)
+			{
+				return EPipelineDomain::Lit;
+			}
+			// Crash on undefined or other value
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
 		template<typename Enum>
 		Enum ParseAccessFlags(const rapidjson::Value& Object)
 		{
@@ -185,6 +179,12 @@ namespace ke
 
 			// Conigure the pipeline
 			TGraphicsPipelineConfiguration PipelineConfig{};
+			// Read shader domain
+			if (Pipeline.HasMember("Domain"))
+			{
+				PipelineConfig.Domain = ParsePipelineDomain(Pipeline["Domain"]);
+			}
+
 			// Vertex Input stage
 			PipelineConfig.VertexInput.VertexLayout = ShaderRef->GetReflection()->VertexLayout;
 			PipelineConfig.VertexInput.Topology =
@@ -332,6 +332,8 @@ namespace ke
 		}
 
 		LoadMaterialSamplers(Document["Material"], Material);
+
+		Material->GetPipeline()->Validate();
 		return Material;
 	}
 

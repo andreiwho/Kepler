@@ -63,7 +63,10 @@ namespace ke
 
 		struct RS_LightBufferStruct
 		{
-			float3 Ambient;
+			float4 Ambient;
+			float4 DirectionalLightDirection;
+			float4 DirectionalLightColor;
+			float DirectionalLightIntensity;
 		};
 
 		static TStaticState* StaticState;

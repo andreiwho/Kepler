@@ -8,6 +8,7 @@
 #include "../HLSLShaderCompiler.h"
 #include "../Pipelines/GraphicsPipeline.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -37,7 +38,10 @@ namespace ke
 		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
 
 		TRef<TPipelineParamMapping> RS_LightParams = TPipelineParamMapping::New();
-		RS_LightParams->AddParam("Ambient", offsetof(RS_LightBufferStruct, Ambient), sizeof(RS_LightBufferStruct::Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float3);
+		RS_LightParams->AddParam("Ambient", offsetof(RS_LightBufferStruct, Ambient), sizeof(RS_LightBufferStruct::Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightDirection", offsetof(RS_LightBufferStruct, DirectionalLightDirection), sizeof(RS_LightBufferStruct::DirectionalLightDirection), EShaderStageFlags::Vertex | EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightColor", offsetof(RS_LightBufferStruct, DirectionalLightColor), sizeof(RS_LightBufferStruct::DirectionalLightColor), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightIntensity", offsetof(RS_LightBufferStruct, DirectionalLightIntensity), sizeof(RS_LightBufferStruct::DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
 		RS_LightBuffer = TParamBuffer::New(RS_LightParams);
 
 		// Setup pipeline
@@ -149,6 +153,17 @@ namespace ke
 			});
 
 		StaticState->RS_LightBuffer->Write("Ambient", &Ambient);
+
+		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TTransformComponent>().each(
+			[&, this](auto, DirectionalLightComponent& DLC, TTransformComponent& TC)
+			{
+				auto dir = TC.GetTransform().RotationToEuler();
+				auto color = DLC.GetColor();
+				auto intensity = DLC.GetIntensity();
+				StaticState->RS_LightBuffer->Write("DirectionalLightDirection", &dir);
+				StaticState->RS_LightBuffer->Write("DirectionalLightColor", &color);
+				StaticState->RS_LightBuffer->Write("DirectionalLightIntensity", &intensity);
+			});
 	}
 
 	//////////////////////////////////////////////////////////////////////////

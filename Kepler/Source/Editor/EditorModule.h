@@ -85,6 +85,8 @@ namespace ke
 
 		void DrawViewportEntityIcons();
 		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
+		// void DrawDirections(TGameEntityId id);
+
 	private:
 		TWindow* m_pMainWindow{};
 		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
@@ -121,5 +123,6 @@ namespace ke
 		// Entity icons
 		TRef<TTextureSampler2D> m_CameraIcon;
 		TRef<TTextureSampler2D> m_AmbientLightIcon;
+		TRef<TTextureSampler2D> m_DirectionalLightIcon;
 	};
 }

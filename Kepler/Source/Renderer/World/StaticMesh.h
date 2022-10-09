@@ -12,6 +12,8 @@ namespace ke
 		float3 Color;
 		float2 UV0;
 		float3 Normal;
+		float3 Tangent;
+		float3 Bitangent;
 	};
 
 	struct TStaticMeshSection

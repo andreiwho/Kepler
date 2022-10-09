@@ -4,6 +4,8 @@
 #include "Components/MaterialComponent.h"
 #include "../Camera/CameraComponent.h"
 #include "Components/Light/AmbientLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "glm/gtc/type_ptr.inl"
 
 namespace ke
 {
@@ -136,7 +138,7 @@ namespace ke
 
 	bool TGameWorld::IsLight(TGameEntityId Entity) const
 	{
-		return HasComponent<AmbientLightComponent>(Entity);
+		return HasComponent<AmbientLightComponent>(Entity) || HasComponent<DirectionalLightComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()
