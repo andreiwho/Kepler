@@ -19,6 +19,7 @@ namespace ke
 		enum EReservedSlots
 		{
 			RS_Camera = 0,
+			RS_Light = 1,
 			RS_User,
 		};
 
@@ -27,6 +28,7 @@ namespace ke
 		
 		void Render(TViewport2D ViewportSize);
 		void UpdateRendererMainThread(float deltaTime);
+		void UpdateLightingData_MainThread();
 
 		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
 
@@ -50,12 +52,18 @@ namespace ke
 
 			bool bInitialized = false;
 			TRef<TParamBuffer> RS_CameraBuffer;
+			TRef<TParamBuffer> RS_LightBuffer;
 			TRef<TGraphicsPipeline> PrePassPipeline;
 		};
 
 		struct RS_CameraBufferStruct
 		{
 			matrix4x4 ViewProjection;
+		};
+
+		struct RS_LightBufferStruct
+		{
+			float3 Ambient;
 		};
 
 		static TStaticState* StaticState;

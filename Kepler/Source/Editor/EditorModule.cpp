@@ -33,6 +33,7 @@
 #include "World/Game/Components/MaterialComponent.h"
 #include "World/Game/Components/StaticMeshComponent.h"
 #include "Tools/ImageLoader.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
 
 namespace ke
 {
@@ -241,7 +242,13 @@ namespace ke
 	{
 		CreateEditorGrid();
 
+		LoadEditorViewportIcons();
+	}
+
+	void EditorModule::LoadEditorViewportIcons()
+	{
 		m_CameraIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Camera.png");
+		m_AmbientLightIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_AmbientLight.png");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -936,6 +943,13 @@ namespace ke
 
 				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
 			});
+
+		m_pEditedWorld->GetComponentView<AmbientLightComponent>().each(
+			[&proj, &view, this](auto e, auto&)
+			{
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
+			}
+		);
 	}
 
 	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
@@ -977,9 +991,9 @@ namespace ke
 		if (bDisabled)
 		{
 			
-			ImGui::Image((ImTextureID)m_CameraIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
+			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
 		}
-		else if (ImGui::ImageButton(id, (ImTextureID)m_CameraIcon->GetNativeHandle(), ImVec2(iconSize, iconSize)))
+		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
 		{
 			m_SelectedEntity = entity;
 		}

@@ -27,6 +27,7 @@
 #include "Editor/Widgets/Elements.h"
 #include "World/Game/Components/TransformComponent.h"
 #include "World/Game/Helpers/EntityHelper.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
 
 namespace ke
 {
@@ -111,6 +112,11 @@ namespace ke
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
+		auto ambientLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
+		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
+		pALC->SetColor(float3(0.1f, 0.1f, 0.1f));
+		
+
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
@@ -124,7 +130,7 @@ namespace ke
 
 			auto entity = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<TStaticMeshComponent>(mesh);
-			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
+			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
 			entity->SetScale(float3(3.0f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
 			entity->SetLocation(float3(x, y, 0.0f));

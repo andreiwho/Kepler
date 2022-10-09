@@ -61,6 +61,7 @@ namespace ke
 		virtual void PostWorldInit() override;
 
 	private:
+		void LoadEditorViewportIcons();
 		void SetupStyle();
 		void DrawMenuBar();
 		void DrawViewports();
@@ -119,5 +120,6 @@ namespace ke
 
 		// Entity icons
 		TRef<TTextureSampler2D> m_CameraIcon;
+		TRef<TTextureSampler2D> m_AmbientLightIcon;
 	};
 }

@@ -7,6 +7,7 @@
 #include "World/Game/Components/TransformComponent.h"
 #include "../HLSLShaderCompiler.h"
 #include "../Pipelines/GraphicsPipeline.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
 
 namespace ke
 {
@@ -34,6 +35,10 @@ namespace ke
 		TRef<TPipelineParamMapping> RS_CameraParams = TPipelineParamMapping::New();
 		RS_CameraParams->AddParam("ViewProjection", offsetof(RS_CameraBufferStruct, ViewProjection), sizeof(RS_CameraBufferStruct::ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
+
+		TRef<TPipelineParamMapping> RS_LightParams = TPipelineParamMapping::New();
+		RS_LightParams->AddParam("Ambient", offsetof(RS_LightBufferStruct, Ambient), sizeof(RS_LightBufferStruct::Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float3);
+		RS_LightBuffer = TParamBuffer::New(RS_LightParams);
 
 		// Setup pipeline
 		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
@@ -90,6 +95,9 @@ namespace ke
 		StaticState->RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
 		pImmCtx->BindParamBuffers(StaticState->RS_CameraBuffer, RS_Camera);
 
+		StaticState->RS_LightBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(StaticState->RS_LightBuffer, RS_Light);
+
 		// Collect renderable objects
 		// ...
 		PrePass(pImmCtx);
@@ -104,6 +112,8 @@ namespace ke
 	void TWorldRenderer::UpdateRendererMainThread(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
+		UpdateLightingData_MainThread();
+
 		auto camera = m_CurrentWorld->GetMainCamera();
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
 		{
@@ -126,6 +136,19 @@ namespace ke
 				}
 			}
 		}
+	}
+
+	void TWorldRenderer::UpdateLightingData_MainThread()
+	{
+		KEPLER_PROFILE_SCOPE();
+		float3 Ambient{ 0.0f, 0.0f, 0.0f };
+		m_CurrentWorld->GetComponentView<AmbientLightComponent>().each(
+			[&](auto, AmbientLightComponent& AL)
+			{
+				Ambient += AL.GetColor();
+			});
+
+		StaticState->RS_LightBuffer->Write("Ambient", &Ambient);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

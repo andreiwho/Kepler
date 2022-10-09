@@ -6,6 +6,8 @@
 #include "World/Game/Helpers/EntityHelper.h"
 #include "World/Game/Components/MaterialComponent.h"
 #include "Tools/MaterialLoader.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "glm/gtc/type_ptr.inl"
 
 namespace ke
 {
@@ -30,6 +32,11 @@ namespace ke
 				if (m_pWorld->IsCamera(m_SelectedEntity))
 				{
 					DrawCameraComponentInfo();
+				}
+
+				if (m_pWorld->IsLight(m_SelectedEntity))
+				{
+					DrawLightInfo();
 				}
 			}
 		}
@@ -141,7 +148,7 @@ namespace ke
 					{
 						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
 
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
@@ -154,6 +161,34 @@ namespace ke
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
+					}
+
+					TEditorElements::EndFieldTable();
+				}
+			}
+		}
+	}
+
+	void TEditorDetailsPanel::DrawLightInfo()
+	{
+		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		if (!entity)
+		{
+			return;
+		}
+
+		if (auto pAmbientLight = entity.GetComponent<AmbientLightComponent>())
+		{
+			if (TEditorElements::Container("AMBIENT LIGHT"))
+			{
+				if (TEditorElements::BeginFieldTable("details", 2))
+				{
+					TEditorElements::NextFieldRow("Color");
+
+					float3 color = pAmbientLight->GetColor();
+					if (TEditorElements::DragFloat3("Ambient Color", color, 0.01f, 0.0f, 100.0f))
+					{
+						pAmbientLight->SetColor(color);
 					}
 
 					TEditorElements::EndFieldTable();

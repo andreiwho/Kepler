@@ -71,6 +71,7 @@ namespace ke
 
 		// Check functons
 		bool IsCamera(TGameEntityId Entity) const;
+		bool IsLight(TGameEntityId Entity) const;
 
 	private:
 		void FlushPendingDestroys();

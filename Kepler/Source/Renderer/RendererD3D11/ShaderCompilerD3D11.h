@@ -9,8 +9,7 @@ namespace ke
 	class THLSLShaderCompilerD3D11 : public THLSLShaderCompiler
 	{
 	public:
-		virtual TRef<TShader> CompileShader(const TString& Path, 
-			EShaderStageFlags TypeMask) override;
+		virtual TRef<TShader> CompileShader(const TString& Path, EShaderStageFlags TypeMask) override;
 
 	private:
 		static TShaderModule CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flags, const TString& Source);

@@ -3,6 +3,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/MaterialComponent.h"
 #include "../Camera/CameraComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 
 namespace ke
 {
@@ -131,6 +132,11 @@ namespace ke
 	bool TGameWorld::IsCamera(TGameEntityId Entity) const
 	{
 		return HasComponent<CameraComponent>(Entity);
+	}
+
+	bool TGameWorld::IsLight(TGameEntityId Entity) const
+	{
+		return HasComponent<AmbientLightComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()

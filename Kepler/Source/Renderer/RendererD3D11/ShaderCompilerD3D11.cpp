@@ -106,9 +106,11 @@ namespace ke
 
 		Array<D3D_SHADER_MACRO> shaderMacros;
 		TString CameraSlot = MakeBufferSlotString(TWorldRenderer::RS_Camera);
+		TString LightSlot = MakeBufferSlotString(TWorldRenderer::RS_Light);
 		TString UserSlot = MakeBufferSlotString(TWorldRenderer::RS_User);
 
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Camera", CameraSlot.c_str()});
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Light", LightSlot.c_str()});
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_User", UserSlot.c_str()});
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{nullptr, nullptr});
 
@@ -133,6 +135,11 @@ namespace ke
 		}
 		else
 		{
+			if (ErrorBlob)
+			{
+				TString Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
+				KEPLER_WARNING(LogShaderCompiler, "While compiling {} shader: {}", EShaderStageFlags::ToString(Type), Message);
+			}
 			return AsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
 		}
 		return nullptr;
