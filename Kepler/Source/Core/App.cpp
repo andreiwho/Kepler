@@ -37,8 +37,11 @@ namespace ke
 		// Parse command line args
 		// Game module name must always be the first arg
 		CHECKMSG(cmdLine.GetLength() > 0, "The first param of the command line must be the application directory");
+#ifdef ENABLE_EDITOR
 		GameModuleDirectory = cmdLine[0];
-
+#else
+		GameModuleDirectory = RELEASE_APPLICATION_NAME;
+#endif
 		usize idx = 0;
 		for (const auto& arg : cmdLine)
 		{
