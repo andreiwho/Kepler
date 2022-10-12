@@ -10,7 +10,7 @@
 #include <GLFW/glfw3native.h>
 #include <cassert>
 
-DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow);
+DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow, All);
 
 namespace ke
 {
@@ -91,6 +91,10 @@ namespace ke
 							return EMouseButton::Right;
 						case GLFW_MOUSE_BUTTON_MIDDLE:
 							return EMouseButton::Middle;
+						case GLFW_MOUSE_BUTTON_4:
+							return EMouseButton::Back;
+						case GLFW_MOUSE_BUTTON_5:
+							return EMouseButton::Forward;
 						}
 						return EMouseButton::Unknown;
 					});

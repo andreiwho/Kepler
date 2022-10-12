@@ -10,6 +10,7 @@ namespace ke
 		virtual void OnAttach() {}
 		virtual void OnInit() {}
 		virtual void OnTerminate() {}
+		virtual void PostWorldInit() {}
 		virtual void OnDetach() {}
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}

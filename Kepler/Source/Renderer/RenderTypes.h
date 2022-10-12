@@ -208,7 +208,8 @@ namespace ke
 	{
 		enum
 		{
-			Geometry = BIT(0),
+			PrePass = BIT(0),
+			Geometry = BIT(1),
 		};
 
 		u32 Mask{};

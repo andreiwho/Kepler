@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules)
@@ -245,10 +245,6 @@ namespace ke
 		TRef<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
 		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
-			if (idx < TWorldRenderer::RS_User)
-			{
-				continue;
-			}
 			// Reflect constant buffers
 			ID3D11ShaderReflectionConstantBuffer* pBuffer = pReflection->GetConstantBufferByIndex(idx);
 			CHECK(pBuffer);
@@ -256,6 +252,13 @@ namespace ke
 			HRCHECK(pBuffer->GetDesc(&BufferDesc));
 			if (BufferDesc.Type == D3D_CBUFFER_TYPE::D3D_CT_CBUFFER)
 			{
+				D3D11_SHADER_INPUT_BIND_DESC bindDesc;
+				HRCHECK(pReflection->GetResourceBindingDescByName(BufferDesc.Name, &bindDesc));
+				if (bindDesc.BindPoint < TWorldRenderer::RS_User)
+				{
+					continue;
+				}
+
 				for (UINT VarIndex = 0; VarIndex < BufferDesc.Variables; ++VarIndex)
 				{
 					ID3D11ShaderReflectionVariable* pVar = pBuffer->GetVariableByIndex(VarIndex);

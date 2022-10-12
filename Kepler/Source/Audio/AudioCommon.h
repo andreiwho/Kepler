@@ -28,5 +28,5 @@ namespace ke
 		inline constexpr operator u32() const { return Mask; }
 	};
 
-	DEFINE_UNIQUE_LOG_CHANNEL(LogAudio);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogAudio, All);
 }

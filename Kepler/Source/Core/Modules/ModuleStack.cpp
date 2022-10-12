@@ -97,6 +97,14 @@ namespace ke
 		}
 	}
 
+	void TModuleStack::OnPostWorldInit()
+	{
+		for (TRef<EngineModule> pModule : m_Modules)
+		{
+			pModule->PostWorldInit();
+		}
+	}
+
 	void TModuleStack::Init()
 	{
 		for (TRef<EngineModule> pModule : m_Modules)

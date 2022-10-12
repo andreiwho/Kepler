@@ -13,7 +13,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogImmediateContext);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogImmediateContext, All);
 
 	GraphicsCommandListImmediateD3D11* GraphicsCommandListImmediateD3D11::Instance = nullptr;
 

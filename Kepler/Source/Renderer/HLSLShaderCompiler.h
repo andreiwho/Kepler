@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderCompiler);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderCompiler, All);
 
 	class THLSLShaderCompiler : public IntrusiveRefCounted
 	{

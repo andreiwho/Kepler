@@ -29,6 +29,12 @@
 #include "Platform/Input.h"
 #include "Platform/Platform.h"
 #include "World/Game/Helpers/EntityHelper.h"
+#include "Tools/MaterialLoader.h"
+#include "World/Game/Components/MaterialComponent.h"
+#include "World/Game/Components/StaticMeshComponent.h"
+#include "Tools/ImageLoader.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -89,6 +95,9 @@ namespace ke
 		default:
 			break;
 		}
+
+		// Asset browser
+		m_AssetBrowserPanel = MakeShared<TAssetBrowserPanel>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -149,6 +158,7 @@ namespace ke
 		DrawViewports();
 		DrawDetailsPanel();
 		DrawSceneGraph();
+		m_AssetBrowserPanel->Draw();
 		DrawDebugTools();
 		ImGui::ShowDemoWindow();
 	}
@@ -229,6 +239,20 @@ namespace ke
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
 	}
 
+	void EditorModule::PostWorldInit()
+	{
+		CreateEditorGrid();
+
+		LoadEditorViewportIcons();
+	}
+
+	void EditorModule::LoadEditorViewportIcons()
+	{
+		m_CameraIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Camera.png");
+		m_AmbientLightIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_AmbientLight.png");
+		m_DirectionalLightIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_DirectionLight.png");
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::SetupStyle()
 	{
@@ -268,9 +292,9 @@ namespace ke
 		colors[ImGuiCol_CheckMark] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
 		colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
 		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-		colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-		colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-		colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+		colors[ImGuiCol_Button] = ImVec4(0.26f, 0.26f, 0.26f, 1.0f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
 		colors[ImGuiCol_Header] = ImVec4(0.21f, 0.21f, 0.21f, 0.31f);
 		colors[ImGuiCol_HeaderHovered] = ImVec4(0.31f, 0.31f, 0.31f, 0.80f);
 		colors[ImGuiCol_HeaderActive] = ImVec4(0.81f, 0.41f, 0.1f, 1.00f);
@@ -361,6 +385,7 @@ namespace ke
 				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
 			DrawGizmo();
+			DrawViewportEntityIcons();
 			DrawViewportGizmoControls();
 			DrawViewportCameraControls();
 		}
@@ -607,7 +632,7 @@ namespace ke
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			
-			camera->SetLocation(float3(0.0f, -3.0f, 0.0f));
+			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
@@ -706,6 +731,11 @@ namespace ke
 				m_bSnapEnabled = !m_bSnapEnabled;
 			}
 			break;
+			case EKeyCode::F:
+			{
+				EditorCamera_FocusSelectedObject();
+			}
+			break;
 			default:
 				break;
 			}
@@ -723,6 +753,11 @@ namespace ke
 			{
 				TrySelectEntity();
 			}
+		}
+
+		if (m_AssetBrowserPanel->IsHovered())
+		{
+			m_AssetBrowserPanel->OnMouseButton(event.Button);
 		}
 		return false;
 	}
@@ -848,12 +883,140 @@ namespace ke
 				{
 					m_SelectedEntity = TGameEntityId{ (entt::entity)idColor };
 				}
+				else
+				{
+					m_SelectedEntity = TGameEntityId{ (entt::entity)entt::null };
+				}
 			}
 		}
 		else
 		{
 			KEPLER_WARNING(LogEditor, "Tried to access IdTarget render target, which doesn't exist");
 		}
+	}
+
+	void EditorModule::CreateEditorGrid()
+	{
+		Array<TStaticMeshVertex> vertices;
+		vertices.Reserve((usize)m_GridSize * 4);
+		Array<u32> indices;
+		indices.Reserve((usize)m_GridSize * 4);
+
+		for (i32 x = 0; x < m_GridSize; ++x)
+		{
+			float realX = (float)x - ((float)m_GridSize * 0.5f);
+			float realY = (float)m_GridSize * 0.5f;
+
+			vertices.AppendBack(TStaticMeshVertex{ {realX, -realY, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {realX, realY, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {-realY, realX, 0.0f} });
+			vertices.AppendBack(TStaticMeshVertex{ {realY,  realX, 0.0f} });
+			indices.AppendBack(x * 4 + 0);
+			indices.AppendBack(x * 4 + 1);
+			indices.AppendBack(x * 4 + 2);
+			indices.AppendBack(x * 4 + 3);
+		}
+
+		m_EditorGridEntity = m_pEditedWorld->CreateEntity("_editorgrid");
+		auto gridEntity = TEntityHandle{ m_pEditedWorld, m_EditorGridEntity };
+		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
+		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
+		gridEntity->SetHideInSceneGraph(true);
+	}
+
+	void EditorModule::EditorCamera_FocusSelectedObject()
+	{
+		if (m_pEditedWorld->IsValidEntity(m_SelectedEntity))
+		{
+			// TODO
+		}
+	}
+
+	void EditorModule::DrawViewportEntityIcons()
+	{
+		KEPLER_PROFILE_SCOPE();
+		TEntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
+		auto view = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateViewMatrix();
+		auto proj = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateProjectionMatrix();
+
+		m_pEditedWorld->GetComponentView<CameraComponent>().each(
+			[&proj, &view, &editorCameraEntity, this](entt::entity e, auto&)
+			{
+				if (e == m_EditorCameraEntity.Entity)
+				{
+					return;
+				}
+
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
+			});
+
+		m_pEditedWorld->GetComponentView<AmbientLightComponent>().each(
+			[&proj, &view, this](auto e, auto&)
+			{
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
+			});
+
+
+		m_pEditedWorld->GetComponentView<DirectionalLightComponent>().each(
+			[&proj, &view, this](auto e, auto&)
+			{
+				TGameEntityId entity{ e };
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, entity, m_DirectionalLightIcon, EViewportIndex::Viewport1);
+
+				if (m_SelectedEntity == entity)
+				{
+					// DrawDirections(entity);
+				}
+			});
+	}
+
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
+	{
+		KEPLER_PROFILE_SCOPE();
+		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
+
+		auto transform = handle->GetTransform();
+		auto world = transform.GenerateWorldMatrix();
+		auto mvp = projection * view * world;
+
+		float4 v = mvp * float4(0, 0, 0, 1);
+
+		if (glm::epsilonEqual(v.w, 0.0f, FLT_EPSILON))
+		{
+			v.w = 0.01f;
+		}
+		float3 screenSpace = v / -v.w;
+
+		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord 
+			|| screenSpace.y < -m_MaxViewportIconScreenCoord|| screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
+		{
+			return;
+		}
+
+		ImVec2 posNormalized = ImVec2(1.0f - (screenSpace.x + 1.0f) * 0.5f, (screenSpace.y + 1.0f) * 0.5f);
+		auto vpSize = m_ViewportSizes[(usize)viewport];
+
+		const auto iconSize = m_InViewportIconSize - v.w;
+
+		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f};
+		ImGui::SetCursorPos(iconPos);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+
+		bool bDisabled = m_bIsGizmoHovered || m_bIsGizmoUsed;
+		if (bDisabled)
+		{
+			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
+		}
+		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
+		{
+			m_SelectedEntity = entity;
+		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(3);
 	}
 
 	//////////////////////////////////////////////////////////////////////////

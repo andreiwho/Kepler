@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogSwapchain);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogSwapchain, All);
 
 	TSwapChainD3D11::TSwapChainD3D11(class TWindow* Window)
 		: TSwapChain(Window)

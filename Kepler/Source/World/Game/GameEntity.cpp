@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogEntity);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogEntity, Info);
 
 	TGameEntity::TGameEntity(TGameWorld* InWorld, entt::entity Id)
 		: World(InWorld)

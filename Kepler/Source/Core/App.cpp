@@ -27,6 +27,8 @@
 #include "Editor/Widgets/Elements.h"
 #include "World/Game/Components/TransformComponent.h"
 #include "World/Game/Helpers/EntityHelper.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -35,8 +37,11 @@ namespace ke
 		// Parse command line args
 		// Game module name must always be the first arg
 		CHECKMSG(cmdLine.GetLength() > 0, "The first param of the command line must be the application directory");
+#ifdef ENABLE_EDITOR
 		GameModuleDirectory = cmdLine[0];
-
+#else
+		GameModuleDirectory = RELEASE_APPLICATION_NAME;
+#endif
 		usize idx = 0;
 		for (const auto& arg : cmdLine)
 		{
@@ -45,6 +50,7 @@ namespace ke
 				continue;
 				idx++;
 			}
+
 			// Do someting 
 			// ...
 			// Increment the index
@@ -56,10 +62,11 @@ namespace ke
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(launchParams);
+		m_AssetManager = MakeShared<AssetManager>();
 
 		TWindowParams windowParams{};
 		windowParams.bMaximized = false;
-		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1280, 720, "Kepler", windowParams));
+		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1920, 1080, "Kepler", windowParams));
 
 		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
@@ -87,6 +94,7 @@ namespace ke
 		m_WorldRegistry.reset();
 		m_AudioEngine.reset();
 		m_LowLevelRenderer.reset();
+		m_AssetManager.reset();
 		KEPLER_INFO(LogApp, "Finishing application termination");
 	}
 
@@ -108,6 +116,18 @@ namespace ke
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
+		auto ambientLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
+		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
+		pALC->SetColor(float3(0.3f, 0.3f, 0.3f));
+		ambientLight->SetLocation(float3(-2.0f, 0.0f, 0.0f));
+		
+		auto dirLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("Directional Light") };
+		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
+		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
+		pDLC->SetIntensity(1.0f);
+		dirLight->SetRotation(float3(-45, 0, 90.0f));
+		dirLight->SetLocation(float3(-3, 0.0f, 0.0f));
+
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
@@ -121,8 +141,8 @@ namespace ke
 
 			auto entity = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<TStaticMeshComponent>(mesh);
-			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultUnlit.kmat"));
-			entity->SetScale(float3(3.0f));
+			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
+			entity->SetScale(float3(0.3f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
 			entity->SetLocation(float3(x, y, 0.0f));
 
@@ -136,6 +156,8 @@ namespace ke
 #ifdef ENABLE_EDITOR
 			m_Editor->SetEditedWorld(m_CurrentWorld);
 #endif
+
+			m_ModuleStack.OnPostWorldInit();
 
 			while (pPlatform->HasActiveMainWindow())
 			{

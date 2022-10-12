@@ -1,0 +1,13 @@
+{
+    "Material": {
+        "Pipeline": {
+            "Shader": "EngineShaders://Editor/EditorGrid.hlsl",
+            "PrimitiveTopology": "Lines",
+            "DepthStencil": {
+                "bDepthEnable": true,
+                "DepthAccess": "ReadWrite"
+            },
+            "bUsePrepass": false
+        }
+    }
+}

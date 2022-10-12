@@ -3,7 +3,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogSoundMA);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogSoundMA, All);
 
 	TSoundMA::TSoundMA(const TString& path, const ESoundCreateFlags flags)
 		:	TSound(path, flags)

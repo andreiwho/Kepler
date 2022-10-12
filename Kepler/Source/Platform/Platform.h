@@ -10,7 +10,7 @@
 #  undef CreateWindow
 #endif
 
-DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform);
+DEFINE_UNIQUE_LOG_CHANNEL(LogPlatform, All);
 
 namespace ke
 {

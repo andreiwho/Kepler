@@ -6,6 +6,9 @@
 #include "World/Game/Helpers/EntityHelper.h"
 #include "World/Game/Components/MaterialComponent.h"
 #include "Tools/MaterialLoader.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "glm/gtc/type_ptr.inl"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
@@ -31,6 +34,11 @@ namespace ke
 				{
 					DrawCameraComponentInfo();
 				}
+
+				if (m_pWorld->IsLight(m_SelectedEntity))
+				{
+					DrawLightInfo();
+				}
 			}
 		}
 		ImGui::End();
@@ -42,7 +50,7 @@ namespace ke
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("ENTITY"))
 		{
-			if (TEditorElements::BeginFieldTable("entity", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Name");
 				char nameBuffer[TEditorElements::GMaxTextEditSymbols];
@@ -63,7 +71,7 @@ namespace ke
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("TRANSFORM"))
 		{
-			if (TEditorElements::BeginFieldTable("transform", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Location");
 				auto location = entity.GetLocation();
@@ -96,7 +104,7 @@ namespace ke
 		MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
 		{
-			if (TEditorElements::BeginFieldTable("camera", 2))
+			if (TEditorElements::BeginFieldTable("details", 2))
 			{
 				TEditorElements::NextFieldRow("Field of View");
 				auto fov = camera.GetFOV();
@@ -130,7 +138,7 @@ namespace ke
 		{
 			if (TEditorElements::Container("MATERIAL"))
 			{
-				if (TEditorElements::BeginFieldTable("material", 2))
+				if (TEditorElements::BeginFieldTable("details", 2))
 				{
 					TEditorElements::NextFieldRow("Path");
 					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
@@ -141,7 +149,7 @@ namespace ke
 					{
 						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
 
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
@@ -155,6 +163,62 @@ namespace ke
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
 					}
+
+					TEditorElements::EndFieldTable();
+				}
+			}
+		}
+	}
+
+	void TEditorDetailsPanel::DrawLightInfo()
+	{
+		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		if (!entity)
+		{
+			return;
+		}
+
+		if (auto pAmbientLight = entity.GetComponent<AmbientLightComponent>())
+		{
+			if (TEditorElements::Container("AMBIENT LIGHT"))
+			{
+				if (TEditorElements::BeginFieldTable("details", 2))
+				{
+					TEditorElements::NextFieldRow("Color");
+
+					float3 color = pAmbientLight->GetColor();
+					if (TEditorElements::DragFloat3("Ambient Color", color, 0.01f, 0.0f, 100.0f))
+					{
+						pAmbientLight->SetColor(color);
+					}
+
+					TEditorElements::EndFieldTable();
+				}
+			}
+		}
+
+		if (auto pDirLight = entity.GetComponent<DirectionalLightComponent>())
+		{
+			if (TEditorElements::Container("DIRECTIONAL LIGHT"))
+			{
+				if (TEditorElements::BeginFieldTable("details", 2))
+				{
+					TEditorElements::NextFieldRow("Color");
+					float3 color = pDirLight->GetColor();
+					if (TEditorElements::DragFloat3("Color", color, 0.01f, 0.0f, 100.0f))
+					{
+						pDirLight->SetColor(color);
+					}
+
+
+					TEditorElements::NextFieldRow("Intensity");
+					float intensity = pDirLight->GetIntensity();
+					if (TEditorElements::DragFloat1("Intensity", intensity, 0.01f, 0.0f, 100.0f))
+					{
+						pDirLight->SetIntensity(intensity);
+					}
+
+
 
 					TEditorElements::EndFieldTable();
 				}

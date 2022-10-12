@@ -15,17 +15,26 @@ namespace ke
 	// - Uniform mapping
 	// - Bunch of states (DS, RS, IA, VI, etc)
 
-	enum class EPipelineCategory
+	struct EPipelineDomain
 	{
-		Unknown,
-		DefaultUnlit,
-		PostProcess,
+		enum EValue : u8
+		{
+			Undefined,
+			Unlit,
+			Lit,
+		} Value{};
+
+		EPipelineDomain() = default;
+		EPipelineDomain(EValue value) : Value(value) {}
+		inline operator EValue() const { return Value; }
+
+		inline bool IsUndefined() const { return Value != Undefined; }
 	};
 
 	struct TGraphicsPipelineConfiguration
 	{
-		ERenderPassId RenderPassMask{ ERenderPassId::Geometry };
-		KEPLER_DEPRECATED EPipelineCategory Category{ EPipelineCategory::Unknown };
+		ERenderPassId RenderPassMask{ ERenderPassId::PrePass | ERenderPassId::Geometry };
+		EPipelineDomain Domain{ EPipelineDomain::Unlit };
 
 		struct
 		{
@@ -49,6 +58,8 @@ namespace ke
 			EStencilBufferAccess StencilAccess = EStencilBufferAccess::None;
 			EDepthComparissonMode DepthFunc = EDepthComparissonMode::Less;
 		} DepthStencil;
+		bool bUsePrepass = true;
+
 		TRef<TPipelineParamMapping> ParamMapping;
 	};
 
@@ -86,6 +97,9 @@ namespace ke
 		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
 
 		TRef<TPipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
+		inline bool UsesPrepass() const { return Configuration.bUsePrepass; }
+		inline EPipelineDomain GetDomain() const { return Configuration.Domain; }
+		void Validate() const;
 
 	protected:
 		static TRef<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);

@@ -15,6 +15,7 @@ namespace ke
 		void DrawTransformComponentInfo();
 		void DrawCameraComponentInfo();
 		void DrawMaterialComponentInfo();
+		void DrawLightInfo();
 		void DrawEntityInfo();
 
 	private:

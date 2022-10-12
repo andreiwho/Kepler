@@ -8,7 +8,8 @@
             "DepthStencil": {
                 "DepthAccess": "Write",
                 "bStencilEnable": true,
-                "StencilAccess": "ReadWrite"
+                "StencilAccess": "ReadWrite",
+                "DepthFunc": "LEqual"
             }
         },
         "Samplers": {

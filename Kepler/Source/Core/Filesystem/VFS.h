@@ -16,6 +16,7 @@ namespace ke
 		inline TString GetCurrentWorkingDirectory() { return m_Cwd.string(); }
 		void RegisterVirtualPathAlias(const TString& name, const TString& path);
 		bool ResolvePath(const TString& PathToResolve, TString& OutPath);
+		const Map<TString, TString>& GetPathAliases() const& { return m_Aliases; }
 
 	private:
 		static constexpr const char* m_VFSToken = "://";

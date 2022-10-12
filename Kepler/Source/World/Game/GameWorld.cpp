@@ -3,10 +3,13 @@
 #include "Components/TransformComponent.h"
 #include "Components/MaterialComponent.h"
 #include "../Camera/CameraComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "glm/gtc/type_ptr.inl"
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld, Info);
 
 	TGameWorld::TGameWorld(const TString& InName)
 		: TWorld(InName)
@@ -131,6 +134,11 @@ namespace ke
 	bool TGameWorld::IsCamera(TGameEntityId Entity) const
 	{
 		return HasComponent<CameraComponent>(Entity);
+	}
+
+	bool TGameWorld::IsLight(TGameEntityId Entity) const
+	{
+		return HasComponent<AmbientLightComponent>(Entity) || HasComponent<DirectionalLightComponent>(Entity);
 	}
 
 	void TGameWorld::FlushPendingDestroys()

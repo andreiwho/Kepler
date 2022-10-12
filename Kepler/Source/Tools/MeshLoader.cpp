@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	TMeshLoader* TMeshLoader::Instance = nullptr;
@@ -43,6 +43,7 @@ namespace ke
 			aiProcess_FlipUVs |
 			aiProcess_FlipWindingOrder |
 			aiProcess_GlobalScale |
+			aiProcess_CalcTangentSpace |
 			(bTryOutputSingleSection ? aiProcess_PreTransformVertices : 0));
 		CHECK(pScene);
 
@@ -114,6 +115,11 @@ namespace ke
 
 			const aiVector3D& Normal = pMesh->mNormals[idx];
 			Vertex.Normal = float3(Normal.x, Normal.y, Normal.z);
+
+			const aiVector3D& Tangent = pMesh->mTangents[idx];
+			const aiVector3D& Bitangent = pMesh->mBitangents[idx];
+			Vertex.Tangent = float3(Tangent.x, Tangent.y, Tangent.z);
+			Vertex.Bitangent = float3(Bitangent.x, Bitangent.y, Bitangent.z);
 
 			Section.Vertices.EmplaceBack(Vertex);
 		}

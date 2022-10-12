@@ -33,8 +33,25 @@ namespace ke
 
 	void TMaterial::WriteTransform(TWorldTransform transform)
 	{
-		matrix4x4 matrix = glm::transpose(transform.GenerateWorldMatrix());
-		m_ParamBuffer->Write("Transform", &matrix);
+		switch (m_Pipeline->GetDomain().Value)
+		{
+		case EPipelineDomain::Lit:
+		{
+			matrix4x4 matrix = glm::transpose(transform.GenerateWorldMatrix());
+			matrix3x3 normal = glm::transpose(transform.GenerateNormalMatrix());
+			m_ParamBuffer->Write("Transform", &matrix);
+			m_ParamBuffer->Write("NormalMatrix", &matrix);
+		}
+		break;
+		case EPipelineDomain::Unlit:
+		{
+			matrix4x4 matrix = glm::transpose(transform.GenerateWorldMatrix());
+			m_ParamBuffer->Write("Transform", &matrix);
+		}
+		break;
+		default:
+			break;
+		}
 	}
 
 	// BIG TODO: Use global renderer buffer in shaders to represent the camera state

@@ -8,7 +8,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogImageLoader);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogImageLoader, All);
 
 	TImageLoader* TImageLoader::Instance = nullptr;
 

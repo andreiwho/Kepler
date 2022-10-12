@@ -2,7 +2,7 @@
 
 using namespace ke;
 
-DEFINE_UNIQUE_LOG_CHANNEL(LogTestbed);
+DEFINE_UNIQUE_LOG_CHANNEL(LogTestbed, All);
 
 class TTestbedModule : public EngineModule
 {

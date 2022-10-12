@@ -54,12 +54,15 @@ namespace ke
 			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
 
+		inline bool HasParam(const TString& name) const { return m_ParamBuffer->HasParam(name); }
+
 		// Helper functions
 		void WriteTransform(TWorldTransform transform);
 		void WriteCamera(MathCamera camera);
 		void WriteId(i32 id);
 
 		inline const TString& GetParentAssetPath() const { return m_ParentAssetPath; }
+		inline bool UsesPrepass() const { return m_Pipeline->UsesPrepass(); }
 
 	private:
 		TRef<TGraphicsPipeline> m_Pipeline;

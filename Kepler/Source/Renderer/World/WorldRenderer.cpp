@@ -7,10 +7,12 @@
 #include "World/Game/Components/TransformComponent.h"
 #include "../HLSLShaderCompiler.h"
 #include "../Pipelines/GraphicsPipeline.h"
+#include "World/Game/Components/Light/AmbientLightComponent.h"
+#include "World/Game/Components/Light/DirectionalLightComponent.h"
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer, All);
 
 	//////////////////////////////////////////////////////////////////////////
 	TWorldRenderer::TWorldRenderer(TRef<TGameWorld> pWorld)
@@ -22,18 +24,25 @@ namespace ke
 			StaticState = ke::New<TStaticState>();
 		}
 
-		if (!StaticState->bInitialized) [[unlikely]]
-		{
-			StaticState->Init();
-		}
+			if (!StaticState->bInitialized) [[unlikely]]
+			{
+				StaticState->Init();
+			}
 	}
 
 	void TWorldRenderer::TStaticState::Init()
 	{
 		CHECK(IsRenderThread());
 		TRef<TPipelineParamMapping> RS_CameraParams = TPipelineParamMapping::New();
-		RS_CameraParams->AddParam("ViewProjection", offsetof(RS_CameraBufferStruct, ViewProjection), sizeof(RS_CameraBufferStruct::ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+		RS_CameraParams->AddParam("ViewProjection", OFFSET_PARAM_ARGS(RS_CameraBufferStruct, ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
 		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
+
+		TRef<TPipelineParamMapping> RS_LightParams = TPipelineParamMapping::New();
+		RS_LightParams->AddParam("Ambient", OFFSET_PARAM_ARGS(RS_LightBufferStruct, Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightDirection", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightDirection), EShaderStageFlags::Vertex, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightColor", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightColor), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+		RS_LightParams->AddParam("DirectionalLightIntensity", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
+		RS_LightBuffer = TParamBuffer::New(RS_LightParams);
 
 		// Setup pipeline
 		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
@@ -90,6 +99,9 @@ namespace ke
 		StaticState->RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
 		pImmCtx->BindParamBuffers(StaticState->RS_CameraBuffer, RS_Camera);
 
+		StaticState->RS_LightBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(StaticState->RS_LightBuffer, RS_Light);
+
 		// Collect renderable objects
 		// ...
 		PrePass(pImmCtx);
@@ -104,6 +116,8 @@ namespace ke
 	void TWorldRenderer::UpdateRendererMainThread(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
+		UpdateLightingData_MainThread();
+
 		auto camera = m_CurrentWorld->GetMainCamera();
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
 		{
@@ -126,6 +140,30 @@ namespace ke
 				}
 			}
 		}
+	}
+
+	void TWorldRenderer::UpdateLightingData_MainThread()
+	{
+		KEPLER_PROFILE_SCOPE();
+		float3 Ambient{ 0.0f, 0.0f, 0.0f };
+		m_CurrentWorld->GetComponentView<AmbientLightComponent>().each(
+			[&](auto, AmbientLightComponent& AL)
+			{
+				Ambient += AL.GetColor();
+			});
+
+		StaticState->RS_LightBuffer->Write("Ambient", &Ambient);
+
+		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TTransformComponent>().each(
+			[&, this](auto, DirectionalLightComponent& DLC, TTransformComponent& TC)
+			{
+				auto dir = TC.GetTransform().RotationToEuler();
+				auto color = DLC.GetColor();
+				auto intensity = DLC.GetIntensity();
+				StaticState->RS_LightBuffer->Write("DirectionalLightDirection", &dir);
+				StaticState->RS_LightBuffer->Write("DirectionalLightColor", &color);
+				StaticState->RS_LightBuffer->Write("DirectionalLightIntensity", &intensity);
+			});
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -186,12 +224,15 @@ namespace ke
 		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
 			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
 			{
-				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
-				for (const auto& Section : SM.GetStaticMesh()->GetSections())
+				if (MT.UsesPrepass())
 				{
-					pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
-					pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
-					pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+					pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+					for (const auto& Section : SM.GetStaticMesh()->GetSections())
+					{
+						pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
+						pImmCtx->BindIndexBuffer(Section.IndexBuffer, 0);
+						pImmCtx->DrawIndexed(Section.IndexBuffer->GetCount(), 0, 0);
+					}
 				}
 			}
 		);
@@ -226,7 +267,7 @@ namespace ke
 			TLowLevelRenderer::m_SwapChainFrameCount);
 		TRef<RenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
-		auto pDepthTarget = TTargetRegistry::Get()->GetReadOnlyDepthTarget("PrePassDepth");
+		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth");
 
 		// Configure render target which will contain entity ids
 		auto pIdTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(

@@ -2,10 +2,11 @@
 #include "Core/Modules/Module.h"
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
+#include "Panels/AssetBrowserPanel.h"
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogEditor, All);
 
 	class TWindow;
 	class TLogPanel;
@@ -56,7 +57,11 @@ namespace ke
 
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
 
+	protected:
+		virtual void PostWorldInit() override;
+
 	private:
+		void LoadEditorViewportIcons();
 		void SetupStyle();
 		void DrawMenuBar();
 		void DrawViewports();
@@ -75,6 +80,12 @@ namespace ke
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
+		void CreateEditorGrid();
+		void EditorCamera_FocusSelectedObject();
+
+		void DrawViewportEntityIcons();
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
+		// void DrawDirections(TGameEntityId id);
 
 	private:
 		TWindow* m_pMainWindow{};
@@ -94,6 +105,7 @@ namespace ke
 		float m_EditorCameraSpeed = 2.0f;
 
 		TSharedPtr<TLogPanel> m_LogPanel;
+		TSharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
 
 	private:
 		i32 m_EditOperationIndex = 0x7;	// Translate by default
@@ -103,5 +115,15 @@ namespace ke
 		bool m_bSnapEnabled = false;
 		ETranslationSnap m_TranslationSnap = ETranslationSnap::_1Unit;
 		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
+
+		TGameEntityId m_EditorGridEntity{};
+		const i32 m_GridSize = 1000;
+		float m_InViewportIconSize = 50.0;
+
+		// Entity icons
+		TRef<TTextureSampler2D> m_CameraIcon;
+		TRef<TTextureSampler2D> m_AmbientLightIcon;
+		TRef<TTextureSampler2D> m_DirectionalLightIcon;
+		float m_MaxViewportIconScreenCoord = 0.9f;
 	};
 }

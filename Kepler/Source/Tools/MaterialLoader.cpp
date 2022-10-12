@@ -15,7 +15,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogMaterialLoader);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogMaterialLoader, All);
 
 	namespace
 	{
@@ -27,29 +27,6 @@ namespace ke
 				ch = std::tolower(ch);
 			}
 			return outString;
-		}
-
-		//////////////////////////////////////////////////////////////////////////
-		EPipelineCategory ParsePipelineCategory(const rapidjson::Value& Object)
-		{
-			CHECK(Object.IsObject());
-			CHECK(Object.HasMember("Pipeline"));
-
-			const auto& PipelineName = Object["Pipeline"];
-			if (PipelineName.IsString())
-			{
-				auto PipelineString = PipelineName.GetString();
-				if (TString("DefaultUnlit") == PipelineString)
-				{
-					return EPipelineCategory::DefaultUnlit;
-				}
-				if (TString("PostProcess") == PipelineString)
-				{
-					return EPipelineCategory::PostProcess;
-				}
-			}
-			KEPLER_WARNING(LogMaterialLoader, "Unknown material pipeline.");
-			return EPipelineCategory::Unknown;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -144,6 +121,23 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
+		EPipelineDomain ParsePipelineDomain(const rapidjson::Value& Object)
+		{
+			CHECK(Object.IsString());
+			const auto String = Object.GetString();
+			if (TString("Unlit") == String)
+			{
+				return EPipelineDomain::Unlit;
+			}
+			if (TString("Lit") == String)
+			{
+				return EPipelineDomain::Lit;
+			}
+			// Crash on undefined or other value
+			CRASH();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
 		template<typename Enum>
 		Enum ParseAccessFlags(const rapidjson::Value& Object)
 		{
@@ -185,11 +179,17 @@ namespace ke
 
 			// Conigure the pipeline
 			TGraphicsPipelineConfiguration PipelineConfig{};
+			// Read shader domain
+			if (Pipeline.HasMember("Domain"))
+			{
+				PipelineConfig.Domain = ParsePipelineDomain(Pipeline["Domain"]);
+			}
+
 			// Vertex Input stage
 			PipelineConfig.VertexInput.VertexLayout = ShaderRef->GetReflection()->VertexLayout;
 			PipelineConfig.VertexInput.Topology =
-				Pipeline.HasMember("Primitive")
-				? ParsePrimitiveTopology(Pipeline["Primitive"])
+				Pipeline.HasMember("PrimitiveTopology")
+				? ParsePrimitiveTopology(Pipeline["PrimitiveTopology"])
 				: EPrimitiveTopology::TriangleList;
 			// Rasterizer stage
 			if (Pipeline.HasMember("Rasterizer"))
@@ -241,13 +241,21 @@ namespace ke
 					PipelineConfig.DepthStencil.DepthFunc = ParseDepthMode(DepthStencil["DepthFunc"]);
 				}
 			}
+
+			if (Pipeline.HasMember("bUsePrepass"))
+			{
+				const auto& bUsePrepass = Pipeline["bUsePrepass"];
+				CHECK(bUsePrepass.IsBool());
+				PipelineConfig.bUsePrepass = bUsePrepass.GetBool();
+			}
+
 			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;
 			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
 		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, TRef<TMaterial> Material)
 		{
-			if (!MaterialInfo.IsObject() && !MaterialInfo.HasMember("Samplers"))
+			if (!MaterialInfo.IsObject() || !MaterialInfo.HasMember("Samplers"))
 			{
 				return false;
 			}
@@ -324,6 +332,8 @@ namespace ke
 		}
 
 		LoadMaterialSamplers(Document["Material"], Material);
+
+		Material->GetPipeline()->Validate();
 		return Material;
 	}
 
