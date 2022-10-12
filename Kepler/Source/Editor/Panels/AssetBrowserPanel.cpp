@@ -235,13 +235,13 @@ namespace ke
 
 	void TAssetBrowserPanel::DrawAssetTree()
 	{
+		// TODO: Checkout if we should setup additional directories
 		if (!m_GameRootNode)
 		{
 			if (auto node = AssetManager::Get()->GetRootNode("Game://"))
 			{
 				m_GameRootNode = node.Raw();
 			}
-
 		}
 
 		if (m_bShowEngineContent)
@@ -255,19 +255,28 @@ namespace ke
 			}
 		}
 
+		const float desiredSize = ImGui::GetContentRegionAvail().x * 0.2f;
+		const float maxSize = 200.0f;
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.05f, 0.05f, 0.05f, 1.0f));
+		ImGui::BeginChild("##assettree", ImVec2(std::min(desiredSize, maxSize), 0), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+		m_bIsAssetTreeHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+
 		if (VALIDATED(m_GameRootNode))
 		{
-			const float desiredSize = ImGui::GetContentRegionAvail().x * 0.2f;
-			const float maxSize = 200.0f;
-			ImGui::BeginChild("##assettree", ImVec2(std::min(desiredSize, maxSize), 0));
-			m_bIsAssetTreeHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 			DrawAssetTreeNode("Game", m_GameRootNode);
-			if (m_bShowEngineContent)
+		}
+
+		if (m_bShowEngineContent)
+		{
+			if (VALIDATED(m_EngineRootNode))
 			{
 				DrawAssetTreeNode("Engine", m_EngineRootNode);
 			}
-			ImGui::EndChild();
 		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+		ImGui::EndChild();
 	}
 
 	void TAssetBrowserPanel::DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory)
@@ -282,7 +291,7 @@ namespace ke
 		{
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
-		
+
 		if (pDirectory->IsRoot())
 		{
 			flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -411,5 +420,4 @@ namespace ke
 			break;
 		}
 	}
-
 }

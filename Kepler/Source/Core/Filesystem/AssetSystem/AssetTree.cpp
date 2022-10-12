@@ -59,13 +59,18 @@ namespace ke
 		m_Parent = pParent;
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindChild(const TString& path)
+	TRef<AssetTreeNode> AssetTreeNode::FindNode(const TString& path)
 	{
-		return FindChildById(path);
+		return FindNodeById(path);
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindChildById(id64 id)
+	TRef<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)
 	{
+		if (id == m_UUID)
+		{
+			return RefFromThis();
+		}
+
 		for (const auto& child : m_Children)
 		{
 			if (child && child->GetUUID() == id)
@@ -75,7 +80,7 @@ namespace ke
 
 			if (child->IsDirectory())
 			{
-				if (auto otherChild = child->FindChildById(id))
+				if (auto otherChild = child->FindNodeById(id))
 				{
 					return otherChild;
 				}

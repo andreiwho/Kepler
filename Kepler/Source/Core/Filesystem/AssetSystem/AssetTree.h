@@ -80,7 +80,7 @@ namespace ke
 		static Array<EAssetSortFilter> GetEntries() { return { None, DirectoriesFirst, AssetsFirst }; }
 	};
 
-	class AssetTreeNode : public IntrusiveRefCounted
+	class AssetTreeNode : public TEnableRefFromThis<AssetTreeNode>
 	{
 	public:
 		AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath);
@@ -90,8 +90,8 @@ namespace ke
 		void RemoveChild(TRef<AssetTreeNode> child);
 		void ClearChildren();
 		void AssignParent(AssetTreeNode* pParent);
-		TRef<AssetTreeNode> FindChild(const TString& path);
-		TRef<AssetTreeNode> FindChildById(id64 id);
+		TRef<AssetTreeNode> FindNode(const TString& path);
+		TRef<AssetTreeNode> FindNodeById(id64 id);
 
 		inline TString GetPath() const { return m_UnresolvedPath; }
 		inline TString GetPath_Resolved() const { return m_ResolvedPath; }

@@ -19,46 +19,54 @@ namespace ke
 
 	TFuture<TRef<AssetTreeNode>> AssetManager::FindAssetNode(const TString& path) const
 	{
-		if (path.starts_with("Game://"))
+		return Async(
+			[this, Path = path]() -> TRef<AssetTreeNode>
+			{
+				auto pRoot = GetRootNodeFor(Path);
+				if (pRoot)
+				{
+					return pRoot->FindNode(Path);
+				}
+				return nullptr;
+			});
+	}
+
+	TRef<AssetTreeNode_Directory> AssetManager::GetRootNode(const TString& rootPath) const
+	{
+		if (m_Roots.Contains(rootPath))
 		{
-			return Async(
-				[this, Path = path]() -> TRef<AssetTreeNode>
-				{ 
-					if (Path == "Game://") 
-					{
-						return GetRootNode(Path);
-					}
-					return GetRootNode("Game://")->FindChild(Path);
-				});
+			return m_Roots[rootPath];
 		}
-		else if (path.starts_with("Engine://"))
+		return nullptr;
+	}
+
+	TRef<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const TString& rootPath) const
+	{
+		if (auto pRoot = GetRootNode(rootPath))
 		{
-			return Async(
-				[this, Path = path]() -> TRef<AssetTreeNode>
-				{ 
-					if (Path == "Engine://") 
-					{
-						return GetRootNode(Path);
-					}
-					return GetRootNode("Engine://")->FindChild(Path);
-				});
+			return pRoot;
 		}
-		CRASH();
+
+		for (const auto& [root, node] : m_Roots)
+		{
+			if (rootPath.starts_with(root))
+			{
+				return node;
+			}
+		}
+		return nullptr;
 	}
 
 	void AssetManager::FindGameAssets()
 	{
 		KEPLER_INFO(AssetManager, " ====== Finding asset files... ======");
-		if (m_GameAssetTree)
+		const Map<TString, TString>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
+		for (const auto& [key, _] : vfsAliases)
 		{
-			m_GameAssetTree = nullptr;
+			auto keyToken = key + "://";
+			m_Roots[keyToken] = ReadDirectory(keyToken, AssetTreeNode_Directory::New(nullptr, keyToken));
+			m_Roots[keyToken]->SetRoot();
 		}
-
-		m_GameAssetTree = ReadDirectory("Game://", AssetTreeNode_Directory::New(nullptr, "Game://"));
-		m_GameAssetTree->SetRoot();
-
-		m_EngineAssetTree = ReadDirectory("Engine://", AssetTreeNode_Directory::New(nullptr, "Engine://"));
-		m_EngineAssetTree->SetRoot();
 
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
