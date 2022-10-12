@@ -124,5 +124,6 @@ namespace ke
 		TRef<TTextureSampler2D> m_CameraIcon;
 		TRef<TTextureSampler2D> m_AmbientLightIcon;
 		TRef<TTextureSampler2D> m_DirectionalLightIcon;
+		float m_MaxViewportIconScreenCoord = 0.9f;
 	};
 }

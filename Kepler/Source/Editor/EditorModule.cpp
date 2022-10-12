@@ -987,7 +987,8 @@ namespace ke
 		}
 		float3 screenSpace = v / -v.w;
 
-		if (screenSpace.x < -0.95f || screenSpace.x > 0.95f || screenSpace.y < -0.95f || screenSpace.y > 0.95f || v.w < 0)
+		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord 
+			|| screenSpace.y < -m_MaxViewportIconScreenCoord|| screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
 		{
 			return;
 		}

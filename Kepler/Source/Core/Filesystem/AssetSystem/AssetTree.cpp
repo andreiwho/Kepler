@@ -48,6 +48,11 @@ namespace ke
 		CRASHMSG("Not implemented");
 	}
 
+	void AssetTreeNode::ClearChildren()
+	{
+		m_Children.Clear();
+	}
+
 	void AssetTreeNode::AssignParent(AssetTreeNode* pParent)
 	{
 		CHECKMSG(!IsRoot(), "Root directory cannot have parent");

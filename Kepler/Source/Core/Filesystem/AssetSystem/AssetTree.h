@@ -88,6 +88,7 @@ namespace ke
 		inline EAssetNodeType GetNodeType() const { return m_Type; }
 		void AddChild(TRef<AssetTreeNode> newChild);
 		void RemoveChild(TRef<AssetTreeNode> child);
+		void ClearChildren();
 		void AssignParent(AssetTreeNode* pParent);
 		TRef<AssetTreeNode> FindChild(const TString& path);
 		TRef<AssetTreeNode> FindChildById(id64 id);

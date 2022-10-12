@@ -58,9 +58,16 @@ namespace ke
 		}
 
 		template<typename ... Ts>
-		inline decltype(auto) GetComponentView()
+		inline decltype(auto) GetComponentView() 
 		{
-			return EntityRegistry.view<Ts...>();
+			if constexpr (sizeof...(Ts) > 1)
+			{
+				return EntityRegistry.group<Ts...>();
+			}
+			else
+			{
+				return EntityRegistry.view<Ts...>();
+			}
 		}
 
 		virtual void UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind) override;

@@ -21,11 +21,27 @@ namespace ke
 	{
 		if (path.starts_with("Game://"))
 		{
-			return Async([this, Path = path] { return m_GameAssetTree->FindChild(Path); });;
+			return Async(
+				[this, Path = path]() -> TRef<AssetTreeNode>
+				{ 
+					if (Path == "Game://") 
+					{
+						return GetRootNode(Path);
+					}
+					return GetRootNode("Game://")->FindChild(Path);
+				});
 		}
 		else if (path.starts_with("Engine://"))
 		{
-			return Async([this, Path = path] { return m_EngineAssetTree->FindChild(Path); });;
+			return Async(
+				[this, Path = path]() -> TRef<AssetTreeNode>
+				{ 
+					if (Path == "Engine://") 
+					{
+						return GetRootNode(Path);
+					}
+					return GetRootNode("Engine://")->FindChild(Path);
+				});
 		}
 		CRASH();
 	}
@@ -40,11 +56,9 @@ namespace ke
 
 		m_GameAssetTree = ReadDirectory("Game://", AssetTreeNode_Directory::New(nullptr, "Game://"));
 		m_GameAssetTree->SetRoot();
-		m_GameAssetTree->SortChildren(m_DefaultSortingFilter);
 
 		m_EngineAssetTree = ReadDirectory("Engine://", AssetTreeNode_Directory::New(nullptr, "Engine://"));
 		m_EngineAssetTree->SetRoot();
-		m_GameAssetTree->SortChildren(m_DefaultSortingFilter);
 
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
@@ -65,7 +79,6 @@ namespace ke
 				TRef<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
 				ReadDirectory(root, pNewDirectory);
 				pDirectory->AddChild(pNewDirectory);
-				pNewDirectory->SortChildren(m_DefaultSortingFilter);
 			}
 
 			if (fs::is_regular_file(entryPath))
@@ -87,6 +100,7 @@ namespace ke
 			}
 		}
 
+		pDirectory->SortChildren(m_DefaultSortingFilter);
 		return pDirectory;
 	}
 

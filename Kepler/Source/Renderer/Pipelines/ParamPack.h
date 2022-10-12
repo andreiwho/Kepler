@@ -4,6 +4,9 @@
 
 namespace ke
 {
+#define OFFSET_PARAM_ARGS(type, field) offsetof(type, field), sizeof(type::field) 
+
+
 	//////////////////////////////////////////////////////////////////////////
 	class TPipelineParam
 	{
