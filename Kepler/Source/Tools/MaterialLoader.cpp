@@ -133,6 +133,10 @@ namespace ke
 			{
 				return EPipelineDomain::Lit;
 			}
+			if (TString("Other") == String)
+			{
+				return EPipelineDomain::Other;
+			}
 			// Crash on undefined or other value
 			CRASH();
 		}

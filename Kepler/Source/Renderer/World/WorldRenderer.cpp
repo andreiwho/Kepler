@@ -9,6 +9,7 @@
 #include "../Pipelines/GraphicsPipeline.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "../Subrenderer/Subrenderer2D.h"
 
 namespace ke
 {
@@ -106,8 +107,10 @@ namespace ke
 		// ...
 		PrePass(pImmCtx);
 
+		m_LLR->RenderSubrenderers<ESubrendererOrder::Background>(pImmCtx);
 		// Draw meshes
 		MeshPass(pImmCtx);
+		m_LLR->RenderSubrenderers<ESubrendererOrder::Overlay>(pImmCtx);
 
 		// Tonemapping
 		FlushPass(pImmCtx);
@@ -140,6 +143,7 @@ namespace ke
 				}
 			}
 		}
+		m_LLR->UpdateSubrenderersMainThread(deltaTime);
 	}
 
 	void TWorldRenderer::UpdateLightingData_MainThread()

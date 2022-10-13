@@ -32,6 +32,6 @@ namespace ke
 		virtual void RT_Resize(usize size) override;
 
 	private:
-		ID3D11Buffer* m_Buffer;
+		ID3D11Buffer* m_Buffer{};
 	};
 }

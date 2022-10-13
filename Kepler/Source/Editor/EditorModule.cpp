@@ -35,6 +35,7 @@
 #include "Tools/ImageLoader.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "Renderer/Subrenderer/Subrenderer2D.h"
 
 namespace ke
 {
@@ -965,7 +966,7 @@ namespace ke
 
 				if (m_SelectedEntity == entity)
 				{
-					// DrawDirections(entity);
+					DrawDirections(entity);
 				}
 			});
 	}
@@ -1017,6 +1018,13 @@ namespace ke
 		}
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(3);
+	}
+
+	void EditorModule::DrawDirections(TGameEntityId id)
+	{
+		TEntityHandle handle{ m_pEditedWorld, id };
+		static constexpr float drawLineLen = 1.0f;
+		Subrenderer2D::Get()->AddLine(handle->GetLocation(), handle->GetLocation() + (handle->GetForwardVector() * drawLineLen));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

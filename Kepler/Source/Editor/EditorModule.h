@@ -85,7 +85,7 @@ namespace ke
 
 		void DrawViewportEntityIcons();
 		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
-		// void DrawDirections(TGameEntityId id);
+		void DrawDirections(TGameEntityId id);
 
 	private:
 		TWindow* m_pMainWindow{};

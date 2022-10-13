@@ -51,6 +51,9 @@ namespace ke
 
 		inline bool HasParam(const TString& name) const { return Params.Contains(name); }
 
+		inline bool HasParams() const { return !Params.IsEmpty(); }
+		inline bool HasSamplers() const { return !Samplers.IsEmpty(); }
+
 	private:
 		Map<TString, TPipelineParam> Params;
 		EShaderStageFlags ParamShaderStages{ 0 };

@@ -8,7 +8,7 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer, Info);
 
 	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data)
-		:	TVertexBuffer(InAccess, Data), TempDataBlob(Data)
+		: TVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		CHECK(Data);
 
@@ -36,7 +36,7 @@ namespace ke
 		{
 			if (Desc.CPUAccessFlags != 0)
 			{
-				KEPLER_WARNING(LogVertexBuffer, "You cannot mix EBufferUsageFlags::GPUOnly with other ones." 
+				KEPLER_WARNING(LogVertexBuffer, "You cannot mix EBufferUsageFlags::GPUOnly with other ones."
 					" If using GPUOnly, other flags will be ignored.");
 			}
 
@@ -48,7 +48,7 @@ namespace ke
 		D3D11_SUBRESOURCE_DATA BufferData{};
 		ZeroMemory(&BufferData, sizeof(BufferData));
 		BufferData.pSysMem = Data->GetData();
-		
+
 		HRCHECK(Device->CreateBuffer(&Desc, &BufferData, &Buffer));
 
 		// This is used to ensure that the data buffer will live long enough on the render thread to copy the buffer data into the buffer
@@ -66,16 +66,19 @@ namespace ke
 	}
 
 	DynamicVertexBufferD3D11::DynamicVertexBufferD3D11(EBufferAccessFlags flags, usize size, usize stride)
-		:	DynamicVertexBuffer(flags, size, stride)
+		: DynamicVertexBuffer(flags, size, stride)
 	{
 		RT_Resize(m_Size);
 	}
 
 	DynamicVertexBufferD3D11::~DynamicVertexBufferD3D11()
 	{
-		if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+		if (m_Buffer)
 		{
-			pDevice->RegisterPendingDeleteResource(m_Buffer);
+			if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+			{
+				pDevice->RegisterPendingDeleteResource(m_Buffer);
+			}
 		}
 	}
 

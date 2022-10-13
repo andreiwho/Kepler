@@ -188,6 +188,11 @@ namespace ke
 	{
 		CHECK(IsRenderThread());
 
+		if (!Samplers)
+		{
+			return;
+		}
+
 		Array<ID3D11SamplerState*> ppSamplers;
 		Array<ID3D11ShaderResourceView*> ppShaderResources;
 

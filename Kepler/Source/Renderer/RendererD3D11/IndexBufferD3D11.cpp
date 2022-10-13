@@ -75,10 +75,13 @@ namespace ke
 
 	DynamicIndexBufferD3D11::~DynamicIndexBufferD3D11()
 	{
-		if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+		if (m_Buffer)
 		{
-			pDevice->RegisterPendingDeleteResource(m_Buffer);
-			m_Buffer = nullptr;
+			if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+			{
+				pDevice->RegisterPendingDeleteResource(m_Buffer);
+				m_Buffer = nullptr;
+			}
 		}
 	}
 

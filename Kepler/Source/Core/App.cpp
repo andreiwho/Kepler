@@ -29,6 +29,7 @@
 #include "World/Game/Helpers/EntityHelper.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "Renderer/Subrenderer/Subrenderer2D.h"
 
 namespace ke
 {
@@ -73,6 +74,7 @@ namespace ke
 		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
+		m_LowLevelRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
 		m_WorldRegistry = MakeShared<TWorldRegistry>();
 	}
 
@@ -176,15 +178,13 @@ namespace ke
 					TRef<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
 					Renderer->UpdateRendererMainThread(mainTimer.Delta());
 					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
-					
+
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
 							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
-
-
 
 #ifdef ENABLE_EDITOR
 					//Await(renderTask);
@@ -196,6 +196,7 @@ namespace ke
 #else
 					(void)renderTask;
 #endif
+					m_LowLevelRenderer->ClearSubrenderersState();
 					m_LowLevelRenderer->PresentAll();
 
 					if (pPlatform->IsMainWindowUnfocused())
