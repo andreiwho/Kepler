@@ -71,7 +71,7 @@ namespace ke
 		}
 	}
 
-	void TTransferBufferD3D11::Transfer(TRef<GraphicsCommandListImmediate> pImmCmd, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	void TTransferBufferD3D11::Transfer(TRef<GraphicsCommandListImmediate> pImmCmd, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
 	{
 		CHECK(IsRenderThread());
 		CHECK(m_Buffer);

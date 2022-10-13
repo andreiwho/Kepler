@@ -136,6 +136,20 @@ namespace ke
 		}
 	}
 
+	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(TRef<DynamicVertexBuffer> pBuffer)
+	{
+		CHECK(IsRenderThread());
+		if (TRef<DynamicVertexBufferD3D11> MyBuffer = RefCast<DynamicVertexBufferD3D11>(pBuffer))
+		{
+			if (ID3D11Buffer* Buffer = MyBuffer->GetBuffer())
+			{
+				UINT Stride = (UINT)MyBuffer->GetStride();
+				UINT BindOffset = 0;
+				Context->IASetVertexBuffers(0, 1, &Buffer, &Stride, &BindOffset);
+			}
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void GraphicsCommandListImmediateD3D11::BindShader(TRef<TShader> Shader)
 	{
@@ -351,7 +365,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void* GraphicsCommandListImmediateD3D11::MapBuffer(TRef<Buffer> buffer)
+	void* GraphicsCommandListImmediateD3D11::MapBuffer(TRef<IBuffer> buffer)
 	{
 		CHECK(IsRenderThread());
 
@@ -362,7 +376,7 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::UnmapBuffer(TRef<Buffer> Buffer)
+	void GraphicsCommandListImmediateD3D11::UnmapBuffer(TRef<IBuffer> Buffer)
 	{
 		CHECK(IsRenderThread());
 		Context->Unmap((ID3D11Resource*)Buffer->GetNativeHandle(), 0);
@@ -473,7 +487,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::Transfer(TRef<TTransferBuffer> From, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	void GraphicsCommandListImmediateD3D11::Transfer(TRef<TTransferBuffer> From, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
 	{
 		CHECK(IsRenderThread());
 

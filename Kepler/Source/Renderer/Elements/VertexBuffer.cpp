@@ -17,4 +17,17 @@ namespace ke
 		return GetRenderDevice()->CreateVertexBuffer(InAccessFlags, Data);
 	}
 
+	DynamicVertexBuffer::DynamicVertexBuffer(EBufferAccessFlags accessFlags, usize size, usize stride)
+		:	m_AccessFlags(accessFlags)
+		,	m_Size(size)
+		,	m_Stride(stride)
+
+	{
+	}
+
+	TRef<DynamicVertexBuffer> DynamicVertexBuffer::New(EBufferAccessFlags accessFlags, usize size, usize stride)
+	{
+		return GetRenderDevice()->CreateDynamicVertexBuffer(accessFlags, size, stride);
+	}
+
 }

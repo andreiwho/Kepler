@@ -18,4 +18,20 @@ namespace ke
 		ID3D11Buffer* Buffer{};
 		TRef<AsyncDataBlob> TempDataBlob{};
 	};
+
+	class DynamicIndexBufferD3D11 : public DynamicIndexBuffer
+	{
+	public:
+		DynamicIndexBufferD3D11() = default;
+		DynamicIndexBufferD3D11(EBufferAccessFlags flags, usize size, usize stride);
+		~DynamicIndexBufferD3D11();
+
+		inline ID3D11Buffer* GetBuffer() const { return m_Buffer; }
+		virtual void* GetNativeHandle() const override { return m_Buffer; }
+
+		virtual void RT_Resize(usize size) override;
+
+	private:
+		ID3D11Buffer* m_Buffer;
+	};
 }

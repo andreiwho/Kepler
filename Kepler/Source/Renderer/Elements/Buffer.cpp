@@ -14,5 +14,4 @@ namespace ke
 	{
 		return GetRenderDevice()->CreateTransferBuffer(Size, InitialData);
 	}
-
 }
