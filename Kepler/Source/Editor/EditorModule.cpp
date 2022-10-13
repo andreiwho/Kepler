@@ -238,6 +238,7 @@ namespace ke
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonDown);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonUp);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseScroll);
 	}
 
 	void EditorModule::PostWorldInit()
@@ -782,6 +783,19 @@ namespace ke
 		{
 			TPlatform::Get()->SetCursorMode(ECursorMode::HiddenLocked);
 			m_bIsControllingCamera = true;
+		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool EditorModule::OnMouseScroll(const TMouseScrollWheelEvent& event)
+	{
+		if (m_bIsControllingCamera)
+		{
+			m_EditorCameraSpeed += event.Amount * GGlobalTimer->Delta() * 10.0f;
+			m_EditorCameraSpeed = glm::clamp(m_EditorCameraSpeed, 0.0f, 100.0f);
+
+			return true;
 		}
 		return false;
 	}

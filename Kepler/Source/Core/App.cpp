@@ -127,7 +127,7 @@ namespace ke
 		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
 		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
 		pDLC->SetIntensity(1.0f);
-		dirLight->SetRotation(float3(-45, 0, 90.0f));
+		dirLight->SetRotation(float3(-135, 0, 90.0f));
 		dirLight->SetLocation(float3(-3, 0.0f, 0.0f));
 
 		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
@@ -185,7 +185,6 @@ namespace ke
 							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
-
 #ifdef ENABLE_EDITOR
 					//Await(renderTask);
 

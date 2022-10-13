@@ -77,6 +77,7 @@ namespace ke
 		bool OnMouseButtonDown(const TMouseButtonDownEvent& event);
 		bool OnMouseButtonUp(const TMouseButtonUpEvent& event);
 		bool OnMouseMove(const TMouseMoveEvent& event);
+		bool OnMouseScroll(const TMouseScrollWheelEvent& event);
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
