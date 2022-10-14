@@ -26,6 +26,7 @@ namespace ke
 
 	void Subrenderer2D::AddLine(float3 start, float3 end, float3 color)
 	{
+		KEPLER_PROFILE_SCOPE();
 		std::lock_guard lck{ m_LinesMutex };
 		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetNextFrameIndex();
 		m_LinesBatch[currentFrameIndex].Data.EmplaceBack(LineDataVertex{ start, color });
@@ -34,6 +35,7 @@ namespace ke
 
 	void Subrenderer2D::AddArrow(float3 start, float3 forward, float3 right, float len, float3 color)
 	{
+		KEPLER_PROFILE_SCOPE();
 		const float3 lineEnd = start + forward * len;
 		const float3 arrowMidpoint = forward * len * 0.7f;
 		constexpr float wingLen = 0.05f;
@@ -53,6 +55,7 @@ namespace ke
 
 	void Subrenderer2D::UpdateRendererMainThread(float deltaTime)
 	{
+		KEPLER_PROFILE_SCOPE();
 		if (!m_LinesMaterial)
 		{
 			m_LinesMaterial = TMaterialLoader::Get()->LoadMaterial("Engine://Materials/Mat_DefaultLines.kmat", true);
@@ -62,6 +65,8 @@ namespace ke
 
 	void Subrenderer2D::Render(TRef<GraphicsCommandListImmediate> pImmCmd)
 	{
+		KEPLER_PROFILE_SCOPE();
+		pImmCmd->BeginDebugEvent("Subrenderer2D Render");
 		CHECK(IsRenderThread());
 		// Push all data to the GPU
 		{
@@ -81,10 +86,12 @@ namespace ke
 
 		// Now draw the stuff
 		RT_DrawLines(pImmCmd);
+		pImmCmd->EndDebugEvent();
 	}
 
 	void Subrenderer2D::ClearState()
 	{
+		KEPLER_PROFILE_SCOPE();
 		std::lock_guard lck{ m_LinesMutex };
 		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
 		m_LinesBatch[currentFrameIndex].Data.Clear();
@@ -92,6 +99,7 @@ namespace ke
 
 	void Subrenderer2D::RT_DrawLines(TRef<GraphicsCommandListImmediate> pImmCmd)
 	{
+		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
 		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
 		pImmCmd->BindVertexBuffers(m_LinesBatch[currentFrameIndex].VertexBuffer);
