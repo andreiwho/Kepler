@@ -32,6 +32,8 @@ namespace ke
 		// A version for multiple buffers (called like this for optimization reasons)
 		virtual void BindVertexBuffers(const Array<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets) = 0;
 
+		virtual void BindVertexBuffers(TRef<DynamicVertexBuffer> pBuffer) = 0;
+
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) = 0;
 
 		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) = 0;
@@ -75,15 +77,15 @@ namespace ke
 	class GraphicsCommandListImmediate : public GraphicsCommandList
 	{
 	public:
-		virtual void* MapBuffer(TRef<Buffer> Buffer) = 0;
+		virtual void* MapBuffer(TRef<IBuffer> Buffer) = 0;
 
 		virtual void* MapImage2D(TRef<TImage2D> Image, usize& OutAlignment) = 0;
 
 		virtual void UnmapImage2D(TRef<TImage2D> Image) = 0;
 
-		virtual void UnmapBuffer(TRef<Buffer> Buffer) = 0;
+		virtual void UnmapBuffer(TRef<IBuffer> Buffer) = 0;
 
-		virtual void Transfer(TRef<TTransferBuffer> From, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
 
 		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data) = 0;
 	};

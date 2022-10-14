@@ -41,8 +41,13 @@ namespace ke
 			CHECK(mappings->HasParam("EntityId"));
 		}
 		break;
+		case EPipelineDomain::Other:
+		{
+			break;
+		}
 		default:
 			CRASH();
+			break;
 		}
 #endif
 	}

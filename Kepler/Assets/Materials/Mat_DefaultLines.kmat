@@ -1,0 +1,22 @@
+{
+    "Material": {
+        "Pipeline": {
+            "Domain": "Other",
+            "Shader": "EngineShaders://DefaultLines.hlsl",
+            "PrimitiveTopology": "Lines",
+            "Rasterizer": {
+                "bDisabled": false,
+                "FillMode": "Solid",
+                "CullMode": "Back",
+                "bEnableScissor": false
+            },
+            "DepthStencil": {
+                "bDepthEnable": true,
+                "DepthAccess": "Read",
+                "DepthFunc": "LEqual",
+                "bStencilEnable": false,
+                "StencilAccess": "None"
+            }
+        }
+    }
+}

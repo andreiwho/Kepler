@@ -26,6 +26,7 @@ namespace ke
 
 		// Command list interface
 		virtual void BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) override;
+		virtual void BindVertexBuffers(TRef<DynamicVertexBuffer> pBuffer) override;
 		virtual void BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset) override;
 		virtual void BindVertexBuffers(const Array<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets) override;
 		virtual void BindShader(TRef<TShader> Shader) override;
@@ -43,10 +44,10 @@ namespace ke
 		virtual void ClearDepthTarget(TRef<DepthStencilTarget2D> Target, bool bCleanStencil = false) override;
 
 		// CommandListImmediate interface
-		virtual void* MapBuffer(TRef<Buffer> Buffer) override;
-		virtual void UnmapBuffer(TRef<Buffer> Buffer) override;
+		virtual void* MapBuffer(TRef<IBuffer> Buffer) override;
+		virtual void UnmapBuffer(TRef<IBuffer> Buffer) override;
 		virtual void Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data) override;
-		virtual void Transfer(TRef<TTransferBuffer> From, TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
+		virtual void Transfer(TRef<TTransferBuffer> From, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
 
 		virtual void BeginDebugEvent(const char* Name) override;
 		virtual void EndDebugEvent() override;

@@ -16,4 +16,16 @@ namespace ke
 		return GetRenderDevice()->CreateIndexBuffer(InAccessFlags, Data);
 	}
 
+	DynamicIndexBuffer::DynamicIndexBuffer(EBufferAccessFlags accessFlags, usize size, usize stride)
+		:	m_AccessFlags(accessFlags)
+		,	m_Size(size)
+		,	m_Stride(stride)
+	{
+	}
+
+	TRef<DynamicIndexBuffer> DynamicIndexBuffer::New(EBufferAccessFlags accessFlags, usize size, usize stride)
+	{
+		return GetRenderDevice()->CreateDynamicIndexBuffer(accessFlags, size, stride);
+	}
+
 }

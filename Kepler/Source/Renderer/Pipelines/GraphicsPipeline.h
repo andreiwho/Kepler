@@ -22,6 +22,7 @@ namespace ke
 			Undefined,
 			Unlit,
 			Lit,
+			Other,
 		} Value{};
 
 		EPipelineDomain() = default;

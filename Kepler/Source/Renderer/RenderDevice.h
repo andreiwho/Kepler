@@ -25,7 +25,9 @@ namespace ke
 
 		inline TRef<GraphicsCommandListImmediate> GetImmediateCommandList() const { return m_ImmediateCommandList; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags access, TRef<AsyncDataBlob> pData) = 0;
+		virtual TRef<DynamicVertexBuffer> CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride) = 0;
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags access, TRef<AsyncDataBlob> pData) = 0;
+		virtual TRef<DynamicIndexBuffer> CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride) = 0;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> params) = 0;
 		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize size, TRef<AsyncDataBlob> pInitialData) = 0;
 		virtual TRef<TImage2D> CreateImage2D(u32 width, u32 height, EFormat format, EImageUsage usage, u32 mips = 1, u32 layers = 1) = 0;
@@ -33,6 +35,7 @@ namespace ke
 		virtual TRef<DepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0, bool bReadOnly = false) = 0;
 		virtual TRef<TTextureSampler2D> CreateTextureSampler2D(TRef<TImage2D> pImage, u32 mip = 0, u32 layer = 0) = 0;
 		virtual bool RT_FlushPendingDeleteResources() = 0;
+
 
 	protected:
 		TRef<GraphicsCommandListImmediate> m_ImmediateCommandList{};

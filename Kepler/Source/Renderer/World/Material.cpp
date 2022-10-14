@@ -14,8 +14,15 @@ namespace ke
 				auto ParamMapping = This->GetPipeline()->GetParamMapping();
 				if (ParamMapping)
 				{
-					This->m_ParamBuffer = TParamBuffer::New(ParamMapping);
-					This->m_Samplers = ParamMapping->CreateSamplerPack();
+					if (ParamMapping->HasParams())
+					{
+						This->m_ParamBuffer = TParamBuffer::New(ParamMapping);
+					}
+
+					if (ParamMapping->HasSamplers())
+					{
+						This->m_Samplers = ParamMapping->CreateSamplerPack();
+					}
 				}
 			}));
 	}

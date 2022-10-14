@@ -79,11 +79,27 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	TRef<DynamicVertexBuffer> TRenderDeviceD3D11::CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard	lck{ ResourceMutex };
+		return MakeRef(New<DynamicVertexBufferD3D11>(access, size, stride));
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	TRef<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
 		return MakeRef(New<TIndexBufferD3D11>(InAccessFlags, Data));
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	TRef<DynamicIndexBuffer> TRenderDeviceD3D11::CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride)
+	{
+		CHECK(IsRenderThread());
+		std::lock_guard	lck{ ResourceMutex };
+		return MakeRef(New<DynamicIndexBufferD3D11>(access, size, stride));
 	}
 
 	//////////////////////////////////////////////////////////////////////////

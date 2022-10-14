@@ -6,7 +6,7 @@
 
 namespace ke
 {
-	class TParamBuffer : public Buffer
+	class TParamBuffer : public IBuffer
 	{
 	protected:
 		TParamBuffer(TRef<TPipelineParamMapping> ParamPack);

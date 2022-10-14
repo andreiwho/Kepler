@@ -1,6 +1,7 @@
 #include "IndexBufferD3D11.h"
 #include "RenderDeviceD3D11.h"
 #include "Core/Log.h"
+#include "../RenderGlobals.h"
 
 namespace ke
 {
@@ -65,6 +66,60 @@ namespace ke
 		{
 			Device->RegisterPendingDeleteResource(Buffer);
 		}
+	}
+
+	DynamicIndexBufferD3D11::DynamicIndexBufferD3D11(EBufferAccessFlags flags, usize size, usize stride)
+		:	DynamicIndexBuffer(flags, size, stride)
+	{
+	}
+
+	DynamicIndexBufferD3D11::~DynamicIndexBufferD3D11()
+	{
+		if (m_Buffer)
+		{
+			if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+			{
+				pDevice->RegisterPendingDeleteResource(m_Buffer);
+				m_Buffer = nullptr;
+			}
+		}
+	}
+
+	void DynamicIndexBufferD3D11::RT_Resize(usize size)
+	{
+		CHECK(IsRenderThread());
+		m_Size = size;
+
+		if (m_Buffer)
+		{
+			if (TRenderDeviceD3D11* pDevice = TRenderDeviceD3D11::Get())
+			{
+				pDevice->RegisterPendingDeleteResource(m_Buffer);
+				m_Buffer = nullptr;
+			}
+		}
+
+		D3D11_BUFFER_DESC Desc{};
+		ZeroMemory(&Desc, sizeof(Desc));
+		Desc.ByteWidth = m_Size;
+		Desc.Usage = D3D11_USAGE_DYNAMIC;
+		Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		Desc.CPUAccessFlags = 0;
+
+		if (m_AccessFlags & EBufferAccessFlags::ReadAccess)
+		{
+			Desc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+		}
+
+		if (m_AccessFlags & EBufferAccessFlags::WriteAccess)
+		{
+			Desc.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
+		}
+
+		Desc.StructureByteStride = (UINT)m_Stride;
+
+		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
+		HRCHECK(Device->CreateBuffer(&Desc, nullptr, &m_Buffer));
 	}
 
 }

@@ -13,7 +13,7 @@ namespace ke
 
 		virtual void* GetNativeHandle() const override { return m_Buffer; }
 		virtual void Write(TRef<GraphicsCommandListImmediate> CommandList, TRef<AsyncDataBlob> Data) override;
-		virtual void Transfer(TRef<GraphicsCommandListImmediate> pImmCmd,TRef<Buffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
+		virtual void Transfer(TRef<GraphicsCommandListImmediate> pImmCmd,TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) override;
 
 	private:
 		ID3D11Buffer* m_Buffer{ nullptr };

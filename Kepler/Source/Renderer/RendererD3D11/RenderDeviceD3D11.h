@@ -40,7 +40,9 @@ namespace ke
 		inline ID3D11DeviceContext4* GetImmediateContext() const { return ImmediateContext; }
 		inline ID3D11ClassLinkage* GetClassLinkage() const { return ClassLinkage; }
 		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data) override;
+		virtual TRef<DynamicVertexBuffer> CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
 		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data) override;
+		virtual TRef<DynamicIndexBuffer> CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
 		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize Size, TRef<AsyncDataBlob> InitialData) override;
 		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) override;
 		virtual TRef<TSwapChain> CreateSwapChainForWindow(TWindow* Window) override;
