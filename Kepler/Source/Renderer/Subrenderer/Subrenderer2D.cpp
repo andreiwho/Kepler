@@ -7,7 +7,7 @@ namespace ke
 {
 
 	Subrenderer2D* Subrenderer2D::Instance = nullptr;
-	
+
 	Subrenderer2D::Subrenderer2D()
 	{
 		Instance = this;
@@ -30,6 +30,25 @@ namespace ke
 		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetNextFrameIndex();
 		m_LinesBatch[currentFrameIndex].Data.EmplaceBack(LineDataVertex{ start, color });
 		m_LinesBatch[currentFrameIndex].Data.EmplaceBack(LineDataVertex{ end, color });
+	}
+
+	void Subrenderer2D::AddArrow(float3 start, float3 forward, float3 right, float len, float3 color)
+	{
+		const float3 lineEnd = start + forward * len;
+		const float3 arrowMidpoint = forward * len * 0.7f;
+		constexpr float wingLen = 0.05f;
+		const float3 up = glm::cross(forward, right);
+		const float3 midpointStart = start + arrowMidpoint;
+		const float3 startRight = midpointStart + right * wingLen;
+		const float3 startLeft = midpointStart - right * wingLen;
+		const float3 startUp = midpointStart - up * wingLen;
+		const float3 startDown = midpointStart + up * wingLen;
+
+		AddLine(start, lineEnd, float3(1.0f, 0.0f, 0.0f));
+		AddLine(startRight, lineEnd, float3(0.0f, 1.0f, 0.0f));
+		AddLine(startLeft, lineEnd, float3(0.0f, 1.0f, 0.0f));
+		AddLine(startUp, lineEnd, float3(0.0f, 0.0f, 1.0f));
+		AddLine(startDown, lineEnd, float3(0.0f, 0.0f, 1.0f));
 	}
 
 	void Subrenderer2D::UpdateRendererMainThread(float deltaTime)

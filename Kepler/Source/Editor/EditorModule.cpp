@@ -268,19 +268,19 @@ namespace ke
 		// TEXT
 		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-		
+
 		// WINDOWS
 		colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.94f);
 		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 		colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
 		colors[ImGuiCol_Border] = ImVec4(0.2f, 0.2f, 0.2f, 0.50f);
 		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		
+
 		// FRAMES
 		colors[ImGuiCol_FrameBg] = ImVec4(0.24f, 0.24f, 0.24f, 0.54f);
 		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.47f, 0.47f, 0.47f, 0.40f);
 		colors[ImGuiCol_FrameBgActive] = ImVec4(0.7f, 0.7f, 0.7f, 0.67f);
-		
+
 		// TITLES
 		colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.05f, 0.05f, 0.05f, 1.00f);
@@ -315,7 +315,7 @@ namespace ke
 		colors[ImGuiCol_TabUnfocusedActive] = ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f);
 		colors[ImGuiCol_DockingPreview] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
 		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-		
+
 		// Other
 		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
@@ -633,7 +633,7 @@ namespace ke
 		{
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
-			
+
 			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
 			camera->SetHideInSceneGraph(true);
 		}
@@ -1002,8 +1002,8 @@ namespace ke
 		}
 		float3 screenSpace = v / -v.w;
 
-		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord 
-			|| screenSpace.y < -m_MaxViewportIconScreenCoord|| screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
+		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord
+			|| screenSpace.y < -m_MaxViewportIconScreenCoord || screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
 		{
 			return;
 		}
@@ -1013,7 +1013,7 @@ namespace ke
 
 		const auto iconSize = m_InViewportIconSize - v.w;
 
-		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f};
+		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f };
 		ImGui::SetCursorPos(iconPos);
 
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -1024,9 +1024,9 @@ namespace ke
 		bool bDisabled = m_bIsGizmoHovered || m_bIsGizmoUsed;
 		if (bDisabled)
 		{
-			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
+			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1, 1, 1, 0.5f));
 		}
-		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
+		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
 		{
 			m_SelectedEntity = entity;
 		}
@@ -1036,9 +1036,12 @@ namespace ke
 
 	void EditorModule::DrawDirections(TGameEntityId id)
 	{
-		TEntityHandle handle{ m_pEditedWorld, id };
-		static constexpr float drawLineLen = 1.0f;
-		Subrenderer2D::Get()->AddLine(handle->GetLocation(), handle->GetLocation() + (handle->GetForwardVector() * drawLineLen));
+		if (Subrenderer2D* pS2D = Subrenderer2D::Get())
+		{
+			TEntityHandle handle{ m_pEditedWorld, id };
+			static constexpr float drawLineLen = 0.5f;
+			pS2D->AddArrow(handle->GetLocation(), handle->GetForwardVector(), handle->GetRightVector(), 0.5f);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

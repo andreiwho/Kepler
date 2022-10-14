@@ -26,6 +26,7 @@ namespace ke
 		Subrenderer2D();
 
 		void AddLine(float3 start, float3 end, float3 color = float3(1.0f, 1.0f, 1.0f));
+		void AddArrow(float3 start, float3 forward, float3 right, float len, float3 color = float3(1.0f));
 		virtual void UpdateRendererMainThread(float deltaTime) override;
 		virtual void Render(TRef<GraphicsCommandListImmediate> pImmCmd) override;
 		virtual void ClearState() override;
