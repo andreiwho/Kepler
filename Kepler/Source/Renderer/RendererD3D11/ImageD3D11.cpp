@@ -9,11 +9,11 @@ namespace ke
 	// IMAGE2D
 	//////////////////////////////////////////////////////////////////////////
 	TImage2D_D3D11::TImage2D_D3D11(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
-		: TImage2D(InWidth, InHeight, InFormat, InUsage, InMipLevels, InArraySize)
+		: IImage2D(InWidth, InHeight, InFormat, InUsage, InMipLevels, InArraySize)
 	{
 		CD3D11_TEXTURE2D_DESC Desc;
-		Desc.Width = Width;
-		Desc.Height = Height;
+		Desc.Width = m_Width;
+		Desc.Height = m_Height;
 		Desc.MipLevels = InMipLevels;
 		Desc.ArraySize = InArraySize;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
@@ -21,15 +21,15 @@ namespace ke
 		Desc.BindFlags = 0;
 		Desc.SampleDesc = { 1, 0 };
 
-		if (Usage & EImageUsage::ShaderResource)
+		if (m_Usage & EImageUsage::ShaderResource)
 		{
 			Desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 		}
-		if (Usage & EImageUsage::DepthTarget)
+		if (m_Usage & EImageUsage::DepthTarget)
 		{
 			Desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		}
-		if (Usage & EImageUsage::RenderTarget)
+		if (m_Usage & EImageUsage::RenderTarget)
 		{
 			Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		}
@@ -42,7 +42,7 @@ namespace ke
 		{
 			HRCHECK(Device->GetDevice()->CreateTexture2D(&Desc, nullptr, &Image));
 
-			if (Usage & EImageUsage::AllowCPURead)
+			if (m_Usage & EImageUsage::AllowCPURead)
 			{
 				// Create readback image	
 				Desc.Usage = D3D11_USAGE_STAGING;
@@ -72,7 +72,7 @@ namespace ke
 		}
 	}
 
-	void TImage2D_D3D11::RequireReadbackCopy(RefPtr<class GraphicsCommandListImmediate> pImmCtx)
+	void TImage2D_D3D11::RequireReadbackCopy(RefPtr<class ICommandListImmediate> pImmCtx)
 	{
 		auto MyCtx = RefCast<GraphicsCommandListImmediateD3D11>(pImmCtx);
 		ID3D11DeviceContext4* pCtx = MyCtx->GetContext();

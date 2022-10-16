@@ -5,25 +5,25 @@
 namespace ke
 {
 
-	class IBuffer : public TEnableRefFromThis<IBuffer>
+	class IBuffer : public EnableRefPtrFromThis<IBuffer>
 	{
 	public:
 		virtual void* GetNativeHandle() const = 0;
 	};
 
-	class TTransferBuffer : public IBuffer
+	class ITransferBuffer : public IBuffer
 	{
 	protected:
-		TTransferBuffer(usize Size, RefPtr<AsyncDataBlob> InitialData = nullptr);
+		ITransferBuffer(usize size, RefPtr<IAsyncDataBlob> pData = nullptr);
 
 	public:
-		static RefPtr<TTransferBuffer> New(usize Size, RefPtr<AsyncDataBlob> InitialData = nullptr);
-		virtual void Write(RefPtr<class GraphicsCommandListImmediate> CommandList, RefPtr<AsyncDataBlob> Data) = 0;
-		virtual void Transfer(RefPtr<GraphicsCommandListImmediate> pImmCmd, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+		static RefPtr<ITransferBuffer> New(usize size, RefPtr<IAsyncDataBlob> pData = nullptr);
+		virtual void Write(RefPtr<class ICommandListImmediate> pImmCtx, RefPtr<IAsyncDataBlob> pData) = 0;
+		virtual void Transfer(RefPtr<ICommandListImmediate> pImmCmd, RefPtr<IBuffer> pTo, usize dstOffset, usize srcOffset, usize size) = 0;
 
-		inline usize GetSize() const { return Size; }
+		inline usize GetSize() const { return m_Size; }
 
 	protected:
-		usize Size = 0;
+		usize m_Size = 0;
 	};
 }

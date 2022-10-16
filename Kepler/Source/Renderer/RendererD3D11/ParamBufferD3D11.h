@@ -6,13 +6,13 @@
 
 namespace ke
 {
-	class TParamBufferD3D11 : public TParamBuffer
+	class TParamBufferD3D11 : public IParamBuffer
 	{
 	public:
-		TParamBufferD3D11(RefPtr<TPipelineParamMapping> Params);
+		TParamBufferD3D11(RefPtr<PipelineParamMapping> Params);
 		~TParamBufferD3D11();
 
-		virtual void RT_UploadToGPU(RefPtr<class GraphicsCommandListImmediate> pImmContext) override;
+		virtual void RT_UploadToGPU(RefPtr<class ICommandListImmediate> pImmContext) override;
 
 		virtual void* GetNativeHandle() const override { return Buffer[LowLevelRenderer::Get()->GetFrameIndex()]; }
 		void* GetNextFrameHandle() const { return Buffer[LowLevelRenderer::Get()->GetNextFrameIndex()]; }

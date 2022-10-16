@@ -4,9 +4,9 @@
 
 namespace ke
 {
-	class THLSLShader : public TShader 
+	class HLSLShader : public IShader 
 	{
 	public:
-		THLSLShader(const TString& Name, const Array<TShaderModule>& Modules);
+		HLSLShader(const TString& name, const Array<ShaderModule>& modules);
 	};
 }

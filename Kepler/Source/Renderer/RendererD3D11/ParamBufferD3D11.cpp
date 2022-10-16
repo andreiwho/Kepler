@@ -8,14 +8,14 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer, Info);
 
-	TParamBufferD3D11::TParamBufferD3D11(RefPtr<TPipelineParamMapping> Mapping)
-		:	TParamBuffer(Mapping)
+	TParamBufferD3D11::TParamBufferD3D11(RefPtr<PipelineParamMapping> Mapping)
+		:	IParamBuffer(Mapping)
 	{
-		CHECK(Params);
+		CHECK(m_pParams);
 		auto Device = CHECKED(TRenderDeviceD3D11::Get()->GetDevice());
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
-		Desc.ByteWidth = Params->GetDataSize();
+		Desc.ByteWidth = m_pParams->GetDataSize();
 		Desc.Usage = D3D11_USAGE_DYNAMIC;
 		Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -33,18 +33,18 @@ namespace ke
 			Desc.ByteWidth = CONSTANT_BUFFER_MULTIPLE;
 		}
 
-		Desc.StructureByteStride = Params->GetDataSize();
+		Desc.StructureByteStride = m_pParams->GetDataSize();
 
 		D3D11_SUBRESOURCE_DATA BufferData{};
 		ZeroMemory(&BufferData, sizeof(BufferData));
-		BufferData.pSysMem = Params->GetDataPointer();
+		BufferData.pSysMem = m_pParams->GetDataPointer();
 
 		for (u8 idx = 0; idx < Buffer.size(); ++idx)
 		{
 			HRCHECK(Device->CreateBuffer(&Desc, &BufferData, &Buffer[idx]));
 		}
 
-		KEPLER_TRACE(LogParamBuffer, "Created Param Buffer with size {}", Params->GetDataSize());
+		KEPLER_TRACE(LogParamBuffer, "Created Param Buffer with size {}", m_pParams->GetDataSize());
 	}
 
 	TParamBufferD3D11::~TParamBufferD3D11()
@@ -59,7 +59,7 @@ namespace ke
 		}
 	}
 
-	void TParamBufferD3D11::RT_UploadToGPU(RefPtr<GraphicsCommandListImmediate> pImmContext)
+	void TParamBufferD3D11::RT_UploadToGPU(RefPtr<ICommandListImmediate> pImmContext)
 	{
 		CHECK(IsRenderThread());
 
@@ -71,7 +71,7 @@ namespace ke
 				void* Memory = MyCmd->MapParamBuffer_NextFrame(RefFromThis<TParamBufferD3D11>());
 				if (Memory)
 				{
-					memcpy(Memory, Params->GetDataPointer(), Params->GetDataSize());
+					memcpy(Memory, m_pParams->GetDataPointer(), m_pParams->GetDataSize());
 					MyCmd->UnmapParamBuffer_NextFrame(RefFromThis<TParamBufferD3D11>());
 				}
 			}

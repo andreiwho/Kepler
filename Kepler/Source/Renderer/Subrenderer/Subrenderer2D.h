@@ -13,8 +13,8 @@ namespace ke
 
 	struct S2D_PrimitiveBatch
 	{
-		RefPtr<DynamicVertexBuffer> VertexBuffer{};
-		RefPtr<DynamicIndexBuffer> IndexBuffer{};
+		RefPtr<IVertexBufferDynamic> VertexBuffer{};
+		RefPtr<IIndexBufferDynamic> IndexBuffer{};
 		Array<LineDataVertex> Data{};
 		Array<u32> Indices{};
 	};
@@ -28,13 +28,13 @@ namespace ke
 		void AddLine(float3 start, float3 end, float3 color = float3(1.0f, 1.0f, 1.0f));
 		void AddArrow(float3 start, float3 forward, float3 right, float len, float3 color = float3(1.0f));
 		virtual void UpdateRendererMainThread(float deltaTime) override;
-		virtual void Render(RefPtr<GraphicsCommandListImmediate> pImmCmd) override;
+		virtual void Render(RefPtr<ICommandListImmediate> pImmCmd) override;
 		virtual void ClearState() override;
 
 		static Subrenderer2D* Get() { return Instance; }
 
 	private:
-		void RT_DrawLines(RefPtr<GraphicsCommandListImmediate> pImmCmd);
+		void RT_DrawLines(RefPtr<ICommandListImmediate> pImmCmd);
 
 	private:
 		static constexpr usize s_InitialLinesSize = 1024;

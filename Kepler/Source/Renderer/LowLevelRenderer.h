@@ -44,7 +44,7 @@ namespace ke
 	public:
 		inline RefPtr<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
 
-		inline RefPtr<TSwapChain> GetSwapChain(u32 idx) const
+		inline RefPtr<ISwapChain> GetSwapChain(u32 idx) const
 		{
 			if (m_SwapChains.GetLength() > idx)
 			{
@@ -90,7 +90,7 @@ namespace ke
 		void InitScreenQuad();
 
 		template<ESubrendererOrder TOrder>
-		void RenderSubrenderers(RefPtr<GraphicsCommandListImmediate> pImmCtx)
+		void RenderSubrenderers(RefPtr<ICommandListImmediate> pImmCtx)
 		{
 			for (auto& pSr : GetSubrenderers<TOrder>())
 			{
@@ -113,14 +113,14 @@ namespace ke
 		// Screen quad
 		struct TScreenQuad
 		{
-			RefPtr<TGraphicsPipeline> Pipeline{};
-			RefPtr<TVertexBuffer> VertexBuffer{};
-			RefPtr<TIndexBuffer> IndexBuffer{};
-			RefPtr<TPipelineSamplerPack> Samplers{};
+			RefPtr<IGraphicsPipeline> Pipeline{};
+			RefPtr<IVertexBuffer> VertexBuffer{};
+			RefPtr<IIndexBuffer> IndexBuffer{};
+			RefPtr<PipelineSamplerPack> Samplers{};
 		} m_ScreenQuad{};
 
 	private:
-		RefPtr<TSwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
+		RefPtr<ISwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
 
 	private:
 		TRenderThread m_RenderThread{};
@@ -131,7 +131,7 @@ namespace ke
 		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;
 
 		RefPtr<TRenderDevice> m_RenderDevice{};
-		Array<RefPtr<TSwapChain>> m_SwapChains;
+		Array<RefPtr<ISwapChain>> m_SwapChains;
 		TAtomic<u64> m_FrameCounter = 0;
 		TAtomic<u8> m_SwapChainFrame = 0;
 		u8 m_NextFrameIndex = 1;

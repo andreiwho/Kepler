@@ -13,60 +13,60 @@
 
 namespace ke
 {
-	class TSwapChain;
-	class RenderTarget2D;
-	class DepthStencilTarget2D;
+	class ISwapChain;
+	class IRenderTarget2D;
+	class IDepthStencilTarget2D;
 
-	class GraphicsCommandList : public TEnableRefFromThis<GraphicsCommandList>
+	class IGfxCommandList : public EnableRefPtrFromThis<IGfxCommandList>
 	{
 	public:
-		virtual ~GraphicsCommandList() = default;
+		virtual ~IGfxCommandList() = default;
 
-		virtual void StartDrawingToSwapChainImage(RefPtr<TSwapChain> pSwapChain, RefPtr<DepthStencilTarget2D> pDepthStencil = nullptr) = 0;
+		virtual void StartDrawingToSwapChainImage(RefPtr<ISwapChain> pSwapChain, RefPtr<IDepthStencilTarget2D> pDepthStencil = nullptr) = 0;
 
-		virtual void ClearSwapChainImage(RefPtr<TSwapChain> SwapChain, float4 ClearColor) = 0;
+		virtual void ClearSwapChainImage(RefPtr<ISwapChain> pSwapChain, float4 clearColor) = 0;
 		
 		// A version for the single buffer (called like this for optimization reasons)
-		virtual void BindVertexBuffers(RefPtr<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset) = 0;
+		virtual void BindVertexBuffers(RefPtr<IVertexBuffer> pVertexBuffer, u32 startSlot, u32 offset) = 0;
 
 		// A version for multiple buffers (called like this for optimization reasons)
-		virtual void BindVertexBuffers(const Array<RefPtr<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets) = 0;
+		virtual void BindVertexBuffers(const Array<RefPtr<IVertexBuffer>>& ppVertexBuffers, u32 startSlot, const Array<u32>& offsets) = 0;
 
-		virtual void BindVertexBuffers(RefPtr<DynamicVertexBuffer> pBuffer) = 0;
+		virtual void BindVertexBuffers(RefPtr<IVertexBufferDynamic> pBuffer) = 0;
 
-		virtual void BindIndexBuffer(RefPtr<TIndexBuffer> IndexBuffer, u32 Offset) = 0;
+		virtual void BindIndexBuffer(RefPtr<IIndexBuffer> pIndexBuffer, u32 offset) = 0;
 
-		virtual void Draw(u32 VertexCount, u32 BaseVertexIndex) = 0;
+		virtual void Draw(u32 vertexCount, u32 baseVertexIndex) = 0;
 
-		virtual void DrawIndexed(u32 IndexCount, u32 BaseIndexOffset, u32 BaseVertexOffset) = 0;
+		virtual void DrawIndexed(u32 indexCount, u32 baseIndexOffset, u32 baseVertexOffset) = 0;
 
-		virtual void BindShader(RefPtr<TShader> Shader) = 0;
+		virtual void BindShader(RefPtr<IShader> pShader) = 0;
 
-		virtual void BindSamplers(RefPtr<TPipelineSamplerPack> Samplers, u32 Slot = 0) = 0;
+		virtual void BindSamplers(RefPtr<PipelineSamplerPack> pSamplers, u32 slot = 0) = 0;
 
-		virtual void ClearSamplers(u32 Slot = 0) = 0;
+		virtual void ClearSamplers(u32 slot = 0) = 0;
 
-		virtual void BindPipeline(RefPtr<TGraphicsPipeline> Pipeline) = 0;
+		virtual void BindPipeline(RefPtr<IGraphicsPipeline> pPipeline) = 0;
 
-		virtual void SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) = 0;
+		virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
 		
-		virtual void SetScissor(float X, float Y, float Width, float Height) = 0;
+		virtual void SetScissor(float x, float y, float width, float height) = 0;
 
 		inline bool HasPipelineStateSetup() const { return m_bHasAttachedPipeline; }
 
-		virtual void BindParamBuffers(RefPtr<TParamBuffer> ParamBufer, u32 Slot) = 0;
+		virtual void BindParamBuffers(RefPtr<IParamBuffer> pParamBufer, u32 slot) = 0;
 		
-		virtual void BindParamBuffers(Array<RefPtr<TParamBuffer>> ParamBuffer, u32 Slot) = 0;
+		virtual void BindParamBuffers(Array<RefPtr<IParamBuffer>> ppParamBuffers, u32 slot) = 0;
 
-		virtual void StartDrawingToRenderTargets(RefPtr<RenderTarget2D> RenderTarget, RefPtr<DepthStencilTarget2D> DepthStencil = nullptr) = 0;
+		virtual void StartDrawingToRenderTargets(RefPtr<IRenderTarget2D> pRenderTarget, RefPtr<IDepthStencilTarget2D> pDepthStencil = nullptr) = 0;
 
-		virtual void StartDrawingToRenderTargets(const Array<RefPtr<RenderTarget2D>>& RenderTargets, RefPtr<DepthStencilTarget2D> DepthStencil = nullptr) = 0;
+		virtual void StartDrawingToRenderTargets(const Array<RefPtr<IRenderTarget2D>>& ppRenderTargets, RefPtr<IDepthStencilTarget2D> pDepthStencil = nullptr) = 0;
 
-		virtual void ClearRenderTarget(RefPtr<RenderTarget2D> Target, float4 Color) = 0;
+		virtual void ClearRenderTarget(RefPtr<IRenderTarget2D> pTarget, float4 color) = 0;
 
-		virtual void ClearDepthTarget(RefPtr<DepthStencilTarget2D> Target, bool bCleanStencil = false) = 0;
+		virtual void ClearDepthTarget(RefPtr<IDepthStencilTarget2D> pTarget, bool bCleanStencil = false) = 0;
 
-		virtual void BeginDebugEvent(const char* Name) = 0;
+		virtual void BeginDebugEvent(const char* pName) = 0;
 
 		virtual void EndDebugEvent() = 0;
 		
@@ -74,19 +74,19 @@ namespace ke
 		bool m_bHasAttachedPipeline = false;
 	};
 
-	class GraphicsCommandListImmediate : public GraphicsCommandList
+	class ICommandListImmediate : public IGfxCommandList
 	{
 	public:
-		virtual void* MapBuffer(RefPtr<IBuffer> Buffer) = 0;
+		virtual void* MapBuffer(RefPtr<IBuffer> pBuffer) = 0;
 
-		virtual void* MapImage2D(RefPtr<TImage2D> Image, usize& OutAlignment) = 0;
+		virtual void* MapImage2D(RefPtr<IImage2D> pImage, usize& outAlignment) = 0;
 
-		virtual void UnmapImage2D(RefPtr<TImage2D> Image) = 0;
+		virtual void UnmapImage2D(RefPtr<IImage2D> pImage) = 0;
 
-		virtual void UnmapBuffer(RefPtr<IBuffer> Buffer) = 0;
+		virtual void UnmapBuffer(RefPtr<IBuffer> pBuffer) = 0;
 
-		virtual void Transfer(RefPtr<TTransferBuffer> From, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+		virtual void Transfer(RefPtr<ITransferBuffer> pFrom, RefPtr<IBuffer> pTo, usize dstOffset, usize srcOffset, usize size) = 0;
 
-		virtual void Transfer(RefPtr<TImage2D> Into, usize X, usize Y, usize Width, usize Height, RefPtr<AsyncDataBlob> Data) = 0;
+		virtual void Transfer(RefPtr<IImage2D> pInto, usize x, usize y, usize width, usize height, RefPtr<IAsyncDataBlob> pData) = 0;
 	};
 }

@@ -5,7 +5,7 @@
 namespace ke
 {
 
-	TStaticMesh::TStaticMesh(RefPtr<TVertexBuffer> pVertexBuffer, RefPtr<TIndexBuffer> pIndexBuffer)
+	TStaticMesh::TStaticMesh(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer)
 		:	m_Sections({TInternalSection{pVertexBuffer, pIndexBuffer}})
 	{
 	}
@@ -17,8 +17,8 @@ namespace ke
 		TInternalSection section;
 		Await(TRenderThread::Submit([&section, vertices, indices]
 			{
-				section.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(vertices));
-				section.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
+				section.VertexBuffer = IVertexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(vertices));
+				section.IndexBuffer = IIndexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(indices));
 			}));
 		m_Sections.EmplaceBack(std::move(section));
 	}
@@ -37,8 +37,8 @@ namespace ke
 			TInternalSection outSection;
 			Await(TRenderThread::Submit([&section, &outSection]
 				{
-					outSection.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Vertices));
-					outSection.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(section.Indices));
+					outSection.VertexBuffer = IVertexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(section.Vertices));
+					outSection.IndexBuffer = IIndexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(section.Indices));
 				}));
 			m_Sections.EmplaceBack(std::move(outSection));
 		}

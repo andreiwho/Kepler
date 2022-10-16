@@ -12,18 +12,18 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogSwapchain, All);
 
 	TSwapChainD3D11::TSwapChainD3D11(class TWindow* Window)
-		: TSwapChain(Window)
+		: ISwapChain(Window)
 	{
 		CHECK(IsRenderThread());
 		DXGI_SWAP_CHAIN_DESC1 Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
-		Desc.Width = Width;
-		Desc.Height = Height;
+		Desc.Width = m_Width;
+		Desc.Height = m_Height;
 		Desc.SampleDesc = { 1, 0 };
 		Desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		Desc.Stereo = false;
 		Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		Desc.BufferCount = ImageCount;
+		Desc.BufferCount = m_ImageCount;
 		Desc.Scaling = DXGI_SCALING_STRETCH;
 		Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		Desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
@@ -109,9 +109,9 @@ namespace ke
 			RenderTargetView = nullptr;
 		}
 		
-		Width = InWidth > 0 ? InWidth : 1;
-		Height = InHeight > 0 ? InHeight : 1;
-		HRCHECK(SwapChain->ResizeBuffers(ImageCount, (UINT)Width, (UINT)Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		m_Width = InWidth > 0 ? InWidth : 1;
+		m_Height = InHeight > 0 ? InHeight : 1;
+		HRCHECK(SwapChain->ResizeBuffers(m_ImageCount, (UINT)m_Width, (UINT)m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 		CreateRenderTargets();
 	}
 }

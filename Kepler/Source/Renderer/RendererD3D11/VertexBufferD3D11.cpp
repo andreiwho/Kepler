@@ -7,8 +7,8 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer, Info);
 
-	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<AsyncDataBlob> Data)
-		: TVertexBuffer(InAccess, Data), TempDataBlob(Data)
+	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<IAsyncDataBlob> Data)
+		: IVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		CHECK(Data);
 
@@ -17,7 +17,7 @@ namespace ke
 
 		D3D11_BUFFER_DESC Desc{};
 		ZeroMemory(&Desc, sizeof(Desc));
-		Desc.ByteWidth = Size;
+		Desc.ByteWidth = m_Size;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
 		Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		Desc.CPUAccessFlags = 0;
@@ -54,7 +54,7 @@ namespace ke
 		// This is used to ensure that the data buffer will live long enough on the render thread to copy the buffer data into the buffer
 		TempDataBlob.Release();
 
-		KEPLER_TRACE(LogVertexBuffer, "Created Vertex Buffer with size {} and stride {}", Size, Stride);
+		KEPLER_TRACE(LogVertexBuffer, "Created Vertex Buffer with size {} and stride {}", m_Size, m_Stride);
 	}
 
 	TVertexBufferD3D11::~TVertexBufferD3D11()
@@ -66,7 +66,7 @@ namespace ke
 	}
 
 	DynamicVertexBufferD3D11::DynamicVertexBufferD3D11(EBufferAccessFlags flags, usize size, usize stride)
-		: DynamicVertexBuffer(flags, size, stride)
+		: IVertexBufferDynamic(flags, size, stride)
 	{
 		RT_Resize(m_Size);
 	}

@@ -85,7 +85,7 @@ namespace ke
 		void EditorCamera_FocusSelectedObject();
 
 		void DrawViewportEntityIcons();
-		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<TTextureSampler2D> pIcon, EViewportIndex viewport);
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport);
 		void DrawDirections(TGameEntityId id);
 
 	private:
@@ -122,9 +122,9 @@ namespace ke
 		float m_InViewportIconSize = 50.0;
 
 		// Entity icons
-		RefPtr<TTextureSampler2D> m_CameraIcon;
-		RefPtr<TTextureSampler2D> m_AmbientLightIcon;
-		RefPtr<TTextureSampler2D> m_DirectionalLightIcon;
+		RefPtr<ITextureSampler2D> m_CameraIcon;
+		RefPtr<ITextureSampler2D> m_AmbientLightIcon;
+		RefPtr<ITextureSampler2D> m_DirectionalLightIcon;
 		float m_MaxViewportIconScreenCoord = 0.9f;
 	};
 }

@@ -71,7 +71,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
+	RefPtr<IVertexBuffer> TRenderDeviceD3D11::CreateVertexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<IAsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -79,7 +79,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<DynamicVertexBuffer> TRenderDeviceD3D11::CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride)
+	RefPtr<IVertexBufferDynamic> TRenderDeviceD3D11::CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard	lck{ ResourceMutex };
@@ -87,7 +87,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
+	RefPtr<IIndexBuffer> TRenderDeviceD3D11::CreateIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<IAsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -95,7 +95,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<DynamicIndexBuffer> TRenderDeviceD3D11::CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride)
+	RefPtr<IIndexBufferDynamic> TRenderDeviceD3D11::CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard	lck{ ResourceMutex };
@@ -103,7 +103,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(RefPtr<TPipelineParamMapping> Params)
+	RefPtr<IParamBuffer> TRenderDeviceD3D11::CreateParamBuffer(RefPtr<PipelineParamMapping> Params)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -111,7 +111,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TSwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
+	RefPtr<ISwapChain> TRenderDeviceD3D11::CreateSwapChainForWindow(class TWindow* Window)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -182,14 +182,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TTextureSampler2D> TRenderDeviceD3D11::CreateTextureSampler2D(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<ITextureSampler2D> TRenderDeviceD3D11::CreateTextureSampler2D(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 		return MakeRef(New<TTextureSampler2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TTransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, RefPtr<AsyncDataBlob> InitialData)
+	RefPtr<ITransferBuffer> TRenderDeviceD3D11::CreateTransferBuffer(usize Size, RefPtr<IAsyncDataBlob> InitialData)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -197,7 +197,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
+	RefPtr<IImage2D> TRenderDeviceD3D11::CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize)
 	{
 		CHECK(IsRenderThread());
 		std::lock_guard lck{ ResourceMutex };
@@ -205,13 +205,13 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<RenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<IRenderTarget2D> TRenderDeviceD3D11::CreateRenderTarget2D(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return MakeRef(New<RenderTarget2D_D3D11>(InImage, MipLevel, ArrayLayer));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<DepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly)
+	RefPtr<IDepthStencilTarget2D> TRenderDeviceD3D11::CreateDepthStencilTarget2D(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly)
 	{
 		return MakeRef(New<DepthStencilTarget2D_D3D11>(InImage, MipLevel, ArrayLayer, bReadOnly));
 	}

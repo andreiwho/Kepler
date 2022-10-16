@@ -11,18 +11,18 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TGraphicsPipeline::TGraphicsPipeline(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& Config)
+	IGraphicsPipeline::IGraphicsPipeline(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Config)
 		: Handle(TGraphicsPipelineHandle::CreatePipelineHandle(InShader, Config))
 		, Shader(InShader)
 		, Configuration(Config)
 	{
 	}
 
-	void TGraphicsPipeline::UploadParameters(RefPtr<GraphicsCommandListImmediate> pImmCmdList)
+	void IGraphicsPipeline::UploadParameters(RefPtr<ICommandListImmediate> pImmCmdList)
 	{
 	}
 
-	void TGraphicsPipeline::Validate() const
+	void IGraphicsPipeline::Validate() const
 	{
 #ifdef ENABLE_DEBUG
 		auto mappings = GetParamMapping();
@@ -52,13 +52,13 @@ namespace ke
 #endif
 	}
 
-	RefPtr<TShader> TGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
+	RefPtr<IShader> IGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
 	{
 		RefPtr<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
 		return Compiler->CompileShader(Shader, Stages);
 	}
 
-	void TGraphicsPipeline::DeferredInit(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
+	void IGraphicsPipeline::DeferredInit(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
 	{
 		Handle = TGraphicsPipelineHandle::CreatePipelineHandle(InShader, InConfiguration);
 		Shader = InShader;
@@ -72,12 +72,12 @@ namespace ke
 		return Pipelines.Contains(Name);
 	}
 
-	void TGraphicsPipelineCache::Add(const TString& Name, RefPtr<TGraphicsPipeline> Pipeline)
+	void TGraphicsPipelineCache::Add(const TString& Name, RefPtr<IGraphicsPipeline> Pipeline)
 	{
 		Pipelines.Insert(Name, Pipeline);
 	}
 
-	RefPtr<TGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
+	RefPtr<IGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
 	{
 		CHECK(Pipelines.Contains(Name));
 		return Pipelines[Name];
@@ -88,7 +88,7 @@ namespace ke
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	RefPtr<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
 		switch (GRenderAPI)
 		{

@@ -151,16 +151,16 @@ namespace ke
 				config.VertexInput.VertexLayout = pShader->GetReflection()->VertexLayout;
 				config.ParamMapping = pShader->GetReflection()->ParamMapping;
 
-				m_ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(pShader, config));
-				m_ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(QuadVertices));
-				m_ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
+				m_ScreenQuad.Pipeline = MakeRef(New<IGraphicsPipeline>(pShader, config));
+				m_ScreenQuad.VertexBuffer = IVertexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(QuadVertices));
+				m_ScreenQuad.IndexBuffer = IIndexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(indices));
 				m_ScreenQuad.Samplers = m_ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
 			});
 		Await(task);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TSwapChain> LowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
+	RefPtr<ISwapChain> LowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
 	{
 		auto foundSwapChain = m_SwapChains.Find(
 			[pWindow](const auto& pSwapChain)

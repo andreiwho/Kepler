@@ -5,8 +5,8 @@
 
 namespace ke
 {
-	TTextureSampler2D_D3D11::TTextureSampler2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-		: TTextureSampler2D(InImage)
+	TTextureSampler2D_D3D11::TTextureSampler2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+		: ITextureSampler2D(InImage)
 	{
 		CHECK(IsRenderThread());
 		CHECK(InImage);

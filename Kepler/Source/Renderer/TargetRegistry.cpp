@@ -25,14 +25,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<RenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
+	RefPtr<IRenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
 	{
 		CHECK(idx < m_ArrayLayers);
 		return m_RenderTargets[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
+	RefPtr<ITextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
 	{
 		CHECK(idx < m_ArrayLayers);
 		return m_TextureSamplers[idx];
@@ -47,17 +47,17 @@ namespace ke
 			m_Height = height > 0 ? height : 1;
 			m_Format = format;
 
-			RefPtr<TImage2D> pTargetImage = TImage2D::New(m_Width, m_Height, format, 
+			RefPtr<IImage2D> pTargetImage = IImage2D::New(m_Width, m_Height, format, 
 				EImageUsage::RenderTarget 
 				| (bAllowCPURead ? EImageUsage::AllowCPURead : EImageUsage::ShaderResource), 
 				1, 
 				m_ArrayLayers);
 			for (u32 idx = 0; idx < m_ArrayLayers; ++idx)
 			{
-				m_RenderTargets[idx] = RenderTarget2D::New(pTargetImage, 0, idx);
+				m_RenderTargets[idx] = IRenderTarget2D::New(pTargetImage, 0, idx);
 				if (!bAllowCPURead)
 				{
-					m_TextureSamplers[idx] = TTextureSampler2D::New(pTargetImage, 0, idx);
+					m_TextureSamplers[idx] = ITextureSampler2D::New(pTargetImage, 0, idx);
 				}
 			}
 		}
@@ -111,7 +111,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<DepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
+	RefPtr<IDepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
 	{
 		// Create
 		auto newWidth = width > 0 ? width : 1;
@@ -125,18 +125,18 @@ namespace ke
 				Flags.Mask |= EImageUsage::ShaderResource;
 			}
 
-			RefPtr<TImage2D> DepthImage = TImage2D::New(newWidth, newHeight, format, Flags);
-			m_DepthTargets[name] = DepthStencilTarget2D::New(DepthImage);
+			RefPtr<IImage2D> DepthImage = IImage2D::New(newWidth, newHeight, format, Flags);
+			m_DepthTargets[name] = IDepthStencilTarget2D::New(DepthImage);
 		}
 
 		// Acquire | Resize
-		RefPtr<DepthStencilTarget2D> depthTarget = m_DepthTargets[name];
+		RefPtr<IDepthStencilTarget2D> depthTarget = m_DepthTargets[name];
 		if (newWidth != UINT32_MAX || newHeight != UINT32_MAX)
 		{
 			if (depthTarget->GetWidth() != newWidth || depthTarget->GetHeight() != newHeight)
 			{
-				RefPtr<TImage2D> depthImage = TImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
-				depthTarget = DepthStencilTarget2D::New(depthImage);
+				RefPtr<IImage2D> depthImage = IImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
+				depthTarget = IDepthStencilTarget2D::New(depthImage);
 				m_DepthTargets[name] = depthTarget;
 
 				if (m_ReadOnlyDepthTargets.Contains(name))
@@ -148,7 +148,7 @@ namespace ke
 		return depthTarget;
 	}
 
-	RefPtr<DepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
+	RefPtr<IDepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
 	{
 		if (m_ReadOnlyDepthTargets.Contains(name))
 		{
@@ -156,8 +156,8 @@ namespace ke
 		}
 
 		CHECK(m_DepthTargets.Contains(name));
-		RefPtr<TImage2D> pTargetImage = CHECKED(m_DepthTargets[name]->GetImage());
-		RefPtr<DepthStencilTarget2D> pOutTarget = DepthStencilTarget2D::NewReadOnly(pTargetImage);
+		RefPtr<IImage2D> pTargetImage = CHECKED(m_DepthTargets[name]->GetImage());
+		RefPtr<IDepthStencilTarget2D> pOutTarget = IDepthStencilTarget2D::NewReadOnly(pTargetImage);
 		m_ReadOnlyDepthTargets[name] = pOutTarget;
 		return pOutTarget;
 	}

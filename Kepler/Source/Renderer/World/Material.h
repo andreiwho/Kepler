@@ -7,13 +7,13 @@
 
 namespace ke
 {
-	class TMaterial : public TEnableRefFromThis<TMaterial>
+	class TMaterial : public EnableRefPtrFromThis<TMaterial>
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(RefPtr<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
+		TMaterial(RefPtr<IGraphicsPipeline> pipeline, const TString& parentAssetPath);
 
-		void RT_Update(RefPtr<class GraphicsCommandListImmediate> pImmCmd);
+		void RT_Update(RefPtr<class ICommandListImmediate> pImmCmd);
 
 		template<typename T>
 		void WriteParamData(const TString& param, const T* pData)
@@ -36,20 +36,20 @@ namespace ke
 			return m_ParamBuffer->ReadParamValue<T>(param);
 		}
 
-		inline RefPtr<TParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
+		inline RefPtr<IParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
 
-		inline RefPtr<TPipelineSamplerPack> GetSamplers() const { return m_Samplers; }
+		inline RefPtr<PipelineSamplerPack> GetSamplers() const { return m_Samplers; }
 
-		inline RefPtr<TGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
+		inline RefPtr<IGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
 
-		void WriteSampler(const TString& Name, RefPtr<TTextureSampler2D> Data);
+		void WriteSampler(const TString& Name, RefPtr<ITextureSampler2D> Data);
 
 		static RefPtr<TMaterial> New()
 		{
 			return MakeRef(ke::New<TMaterial>());
 		}
 
-		static RefPtr<TMaterial> New(RefPtr<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+		static RefPtr<TMaterial> New(RefPtr<IGraphicsPipeline> pPipeline, const TString& parentAssetPath)
 		{
 			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
@@ -65,9 +65,9 @@ namespace ke
 		inline bool UsesPrepass() const { return m_Pipeline->UsesPrepass(); }
 
 	private:
-		RefPtr<TGraphicsPipeline> m_Pipeline;
-		RefPtr<TParamBuffer> m_ParamBuffer;
-		RefPtr<TPipelineSamplerPack> m_Samplers;
+		RefPtr<IGraphicsPipeline> m_Pipeline;
+		RefPtr<IParamBuffer> m_ParamBuffer;
+		RefPtr<PipelineSamplerPack> m_Samplers;
 		TString m_ParentAssetPath{};
 	};
 }

@@ -167,7 +167,7 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		RefPtr<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
+		RefPtr<IGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
 		{
 			CHECK(Object.IsObject());
 			CHECK(Object.HasMember("Pipeline"));
@@ -254,7 +254,7 @@ namespace ke
 			}
 
 			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;
-			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
+			return MakeRef(New<IGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
 		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, RefPtr<TMaterial> Material)

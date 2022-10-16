@@ -4,11 +4,11 @@
 
 namespace ke
 {
-	class TIndexBufferD3D11 : public TIndexBuffer
+	class TIndexBufferD3D11 : public IIndexBuffer
 	{
 	public:
 		TIndexBufferD3D11() = default;
-		TIndexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<AsyncDataBlob> Data);
+		TIndexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<IAsyncDataBlob> Data);
 		~TIndexBufferD3D11();
 		
 		inline ID3D11Buffer* GetBuffer() const { return Buffer; }
@@ -16,10 +16,10 @@ namespace ke
 
 	private:
 		ID3D11Buffer* Buffer{};
-		RefPtr<AsyncDataBlob> TempDataBlob{};
+		RefPtr<IAsyncDataBlob> TempDataBlob{};
 	};
 
-	class DynamicIndexBufferD3D11 : public DynamicIndexBuffer
+	class DynamicIndexBufferD3D11 : public IIndexBufferDynamic
 	{
 	public:
 		DynamicIndexBufferD3D11() = default;

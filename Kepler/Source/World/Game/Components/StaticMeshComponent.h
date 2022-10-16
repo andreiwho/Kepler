@@ -9,7 +9,7 @@ namespace ke
 	public:
 		TStaticMeshComponent() = default;
 		TStaticMeshComponent(RefPtr<TStaticMesh> InStaticMesh);
-		TStaticMeshComponent(RefPtr<TVertexBuffer> InVertexBuffer, RefPtr<TIndexBuffer> InIndexBuffer);
+		TStaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer);
 		TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices);
 		TStaticMeshComponent(const Array<TStaticMeshSection>& Sections);
 

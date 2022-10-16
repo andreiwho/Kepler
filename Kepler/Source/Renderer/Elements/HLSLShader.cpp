@@ -2,8 +2,8 @@
 
 namespace ke
 {
-	THLSLShader::THLSLShader(const TString& Name, const Array<TShaderModule>& Modules)
-		:	TShader(Name, Modules)
+	HLSLShader::HLSLShader(const TString& name, const Array<ShaderModule>& modules)
+		:	IShader(name, modules)
 	{
 	}
 }

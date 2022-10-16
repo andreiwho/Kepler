@@ -34,16 +34,16 @@ namespace ke
 	void TWorldRenderer::TStaticState::Init()
 	{
 		CHECK(IsRenderThread());
-		RefPtr<TPipelineParamMapping> RS_CameraParams = TPipelineParamMapping::New();
+		RefPtr<PipelineParamMapping> RS_CameraParams = PipelineParamMapping::New();
 		RS_CameraParams->AddParam("ViewProjection", OFFSET_PARAM_ARGS(RS_CameraBufferStruct, ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-		RS_CameraBuffer = TParamBuffer::New(RS_CameraParams);
+		RS_CameraBuffer = IParamBuffer::New(RS_CameraParams);
 
-		RefPtr<TPipelineParamMapping> RS_LightParams = TPipelineParamMapping::New();
+		RefPtr<PipelineParamMapping> RS_LightParams = PipelineParamMapping::New();
 		RS_LightParams->AddParam("Ambient", OFFSET_PARAM_ARGS(RS_LightBufferStruct, Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float4);
 		RS_LightParams->AddParam("DirectionalLightDirection", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightDirection), EShaderStageFlags::Vertex, EShaderInputType::Float4);
 		RS_LightParams->AddParam("DirectionalLightColor", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightColor), EShaderStageFlags::Pixel, EShaderInputType::Float4);
 		RS_LightParams->AddParam("DirectionalLightIntensity", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
-		RS_LightBuffer = TParamBuffer::New(RS_LightParams);
+		RS_LightBuffer = IParamBuffer::New(RS_LightParams);
 
 		// Setup pipeline
 		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
@@ -57,7 +57,7 @@ namespace ke
 		config.DepthStencil.DepthAccess = EDepthBufferAccess::Write;
 		config.Rasterizer.bRasterDisabled = true;
 
-		StaticState->PrePassPipeline = MakeRef(ke::New<TGraphicsPipeline>(prePassShader, config));
+		StaticState->PrePassPipeline = MakeRef(ke::New<IGraphicsPipeline>(prePassShader, config));
 		bInitialized = true;
 	}
 
@@ -82,7 +82,7 @@ namespace ke
 		m_CurrentViewport = vpSize;
 
 		// Upload material data to the GPU
-		RefPtr<GraphicsCommandListImmediate> pImmCtx = m_LLR->GetRenderDevice()->GetImmediateCommandList();
+		RefPtr<ICommandListImmediate> pImmCtx = m_LLR->GetRenderDevice()->GetImmediateCommandList();
 
 		RT_UpdateMaterialComponents(pImmCtx);
 
@@ -191,7 +191,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::RT_UpdateMaterialComponents(RefPtr<GraphicsCommandListImmediate> pImmCtx)
+	void TWorldRenderer::RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
@@ -210,7 +210,7 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 	}
 
-	void TWorldRenderer::PrePass(RefPtr<GraphicsCommandListImmediate> pImmCtx)
+	void TWorldRenderer::PrePass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("PrePass");
@@ -247,15 +247,15 @@ namespace ke
 	{
 		struct TDrawCall
 		{
-			RefPtr<TParamBuffer> ParamBuffer;
-			RefPtr<TGraphicsPipeline> Pipeline;
-			RefPtr<TPipelineSamplerPack> Samplers;
+			RefPtr<IParamBuffer> ParamBuffer;
+			RefPtr<IGraphicsPipeline> Pipeline;
+			RefPtr<PipelineSamplerPack> Samplers;
 			RefPtr<TStaticMesh> StaticMesh;
 		};
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::MeshPass(RefPtr<GraphicsCommandListImmediate> pImmCtx)
+	void TWorldRenderer::MeshPass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("MeshPass");
@@ -269,7 +269,7 @@ namespace ke
 			m_CurrentViewport.Height,
 			EFormat::R8G8B8A8_UNORM,
 			LowLevelRenderer::m_SwapChainFrameCount);
-		RefPtr<RenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
+		RefPtr<IRenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
 		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth");
 
@@ -307,7 +307,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::FlushPass(RefPtr<GraphicsCommandListImmediate> pImmCtx)
+	void TWorldRenderer::FlushPass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		// For now just flush the mesh pass image
@@ -322,7 +322,7 @@ namespace ke
 			LowLevelRenderer::m_SwapChainFrameCount);
 
 		const u32 frameIndex = m_LLR->GetFrameIndex();
-		RefPtr<RenderTarget2D> pCurRenderTarget = pTargetGroup->GetRenderTargetAtArrayLayer(frameIndex);
+		RefPtr<IRenderTarget2D> pCurRenderTarget = pTargetGroup->GetRenderTargetAtArrayLayer(frameIndex);
 		pImmCtx->StartDrawingToRenderTargets(pCurRenderTarget, nullptr);
 		pImmCtx->ClearRenderTarget(pCurRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
 		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);

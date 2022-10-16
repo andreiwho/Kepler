@@ -4,10 +4,10 @@
 
 namespace ke
 {
-	class TTextureSampler2D_D3D11 : public TTextureSampler2D
+	class TTextureSampler2D_D3D11 : public ITextureSampler2D
 	{
 	public:
-		TTextureSampler2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer);
+		TTextureSampler2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer);
 		~TTextureSampler2D_D3D11();
 
 		inline ID3D11ShaderResourceView* GetView() const { return View; }

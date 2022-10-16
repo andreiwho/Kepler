@@ -7,33 +7,33 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TImage::TImage(EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
-		:	Format(InFormat)
-		,	Usage(InUsage)
-		,	MipLevels(InMipLevels)
-		,	ArraySize(InArraySize)
+	IImage::IImage(EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
+		:	m_Format(InFormat)
+		,	m_Usage(InUsage)
+		,	m_MipLevels(InMipLevels)
+		,	m_ArraySize(InArraySize)
 	{
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TImage2D::TImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
-		: TImage(InFormat, InUsage, InMipLevels, ArraySize)
-		, Width(InWidth)
-		, Height(InHeight)
+	IImage2D::IImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
+		: IImage(InFormat, InUsage, InMipLevels, m_ArraySize)
+		, m_Width(InWidth)
+		, m_Height(InHeight)
 	{
 	}
 
-	void TImage2D::Write(RefPtr<GraphicsCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, RefPtr<AsyncDataBlob> Data)
+	void IImage2D::Write(RefPtr<ICommandListImmediate> pImmCmd, usize x, usize y, usize width, usize height, RefPtr<IAsyncDataBlob> pData)
 	{
 		CHECK(IsRenderThread());
 		if (pImmCmd)
 		{
-			pImmCmd->Transfer(RefCast<TImage2D>(RefFromThis()), X, Y, Width, Height, Data);
+			pImmCmd->Transfer(RefCast<IImage2D>(RefFromThis()), x, y, width, height, pData);
 		}
 	}
 
-	RefPtr<TImage2D> TImage2D::New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
+	RefPtr<IImage2D> IImage2D::New(u32 width, u32 height, EFormat format, EImageUsage usage, u32 mipLevels, u32 arraySize)
 	{
-		return GetRenderDevice()->CreateImage2D(InWidth, InHeight, InFormat, InUsage, InMipLevels, InArraySize);
+		return GetRenderDevice()->CreateImage2D(width, height, format, usage, mipLevels, arraySize);
 	}
 }

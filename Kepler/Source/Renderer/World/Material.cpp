@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	TMaterial::TMaterial(RefPtr<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+	TMaterial::TMaterial(RefPtr<IGraphicsPipeline> pPipeline, const TString& parentAssetPath)
 		: m_Pipeline(pPipeline), m_ParentAssetPath(parentAssetPath)
 	{
 		CHECK(!IsRenderThread());
@@ -16,7 +16,7 @@ namespace ke
 				{
 					if (ParamMapping->HasParams())
 					{
-						This->m_ParamBuffer = TParamBuffer::New(ParamMapping);
+						This->m_ParamBuffer = IParamBuffer::New(ParamMapping);
 					}
 
 					if (ParamMapping->HasSamplers())
@@ -27,13 +27,13 @@ namespace ke
 			}));
 	}
 
-	void TMaterial::RT_Update(RefPtr<class GraphicsCommandListImmediate> pImmCmd)
+	void TMaterial::RT_Update(RefPtr<class ICommandListImmediate> pImmCmd)
 	{
 		CHECK(IsRenderThread());
 		m_ParamBuffer->RT_UploadToGPU(pImmCmd);
 	}
 
-	void TMaterial::WriteSampler(const TString& name, RefPtr<TTextureSampler2D> data)
+	void TMaterial::WriteSampler(const TString& name, RefPtr<ITextureSampler2D> data)
 	{
 		m_Samplers->Write(name, data);
 	}

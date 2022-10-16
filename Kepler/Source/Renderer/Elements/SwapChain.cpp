@@ -7,11 +7,11 @@
 namespace ke
 {
 
-	TSwapChain::TSwapChain(class TWindow* Window)
-		: MyWindow(Window)
-		, Width(Window->GetWidth())
-		, Height(Window->GetHeight())
-		, ImageCount(3)
+	ISwapChain::ISwapChain(class TWindow* pWindow)
+		: m_Window(pWindow)
+		, m_Width(pWindow->GetWidth())
+		, m_Height(pWindow->GetHeight())
+		, m_ImageCount(3)
 	{
 		CHECK(IsRenderThread());
 	}

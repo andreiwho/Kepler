@@ -17,8 +17,8 @@ namespace ke
 			for (usize index = 0; index < LowLevelRenderer::m_SwapChainFrameCount; ++index)
 			{
 				// Preallocate space for 1024 line vertices and indices
-				m_LinesBatch[index].VertexBuffer = DynamicVertexBuffer::New(EBufferAccessFlags::WriteAccess, s_InitialLinesSize, sizeof(LineDataVertex));
-				m_LinesBatch[index].IndexBuffer = DynamicIndexBuffer::New(EBufferAccessFlags::WriteAccess, s_InitialLinesSize, sizeof(u32));
+				m_LinesBatch[index].VertexBuffer = IVertexBufferDynamic::New(EBufferAccessFlags::WriteAccess, s_InitialLinesSize, sizeof(LineDataVertex));
+				m_LinesBatch[index].IndexBuffer = IIndexBufferDynamic::New(EBufferAccessFlags::WriteAccess, s_InitialLinesSize, sizeof(u32));
 				m_LinesBatch[index].Data.Reserve(s_InitialLinesSize);
 			}
 		}
@@ -63,7 +63,7 @@ namespace ke
 		}
 	}
 
-	void Subrenderer2D::Render(RefPtr<GraphicsCommandListImmediate> pImmCmd)
+	void Subrenderer2D::Render(RefPtr<ICommandListImmediate> pImmCmd)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCmd->BeginDebugEvent("Subrenderer2D Render");
@@ -98,7 +98,7 @@ namespace ke
 		m_LinesBatch[currentFrameIndex].Data.Clear();
 	}
 
-	void Subrenderer2D::RT_DrawLines(RefPtr<GraphicsCommandListImmediate> pImmCmd)
+	void Subrenderer2D::RT_DrawLines(RefPtr<ICommandListImmediate> pImmCmd)
 	{
 		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());

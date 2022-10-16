@@ -16,6 +16,6 @@ namespace ke
 	public:
 		static RefPtr<THLSLShaderCompiler> CreateShaderCompiler();
 
-		virtual RefPtr<TShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
+		virtual RefPtr<IShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
 	};
 }

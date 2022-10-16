@@ -17,7 +17,7 @@ namespace ke
 	// The main reason of this being a distinct parent class is that worlds can 
 	// each-other handle different kinds of entities, thus, having different kinds of registries and components
 	// This is a subject to change
-	class TWorld : public TEnableRefFromThis<TWorld>
+	class TWorld : public EnableRefPtrFromThis<TWorld>
 	{
 	public:
 		~TWorld();

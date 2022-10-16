@@ -80,7 +80,7 @@ namespace ke
 		static Array<EAssetSortFilter> GetEntries() { return { None, DirectoriesFirst, AssetsFirst }; }
 	};
 
-	class AssetTreeNode : public TEnableRefFromThis<AssetTreeNode>
+	class AssetTreeNode : public EnableRefPtrFromThis<AssetTreeNode>
 	{
 	public:
 		AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath);

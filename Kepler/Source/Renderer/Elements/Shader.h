@@ -8,18 +8,18 @@ namespace ke
 {
 	// This is a basic class for all kinds of shader handles 
 	// - For D3D11 it is TShaderHandleD3D11, which holds the ID3D11VertexShader*, ID3D11PixelShader* and other kinds of handles
-	struct TShaderHandle : public IntrusiveRefCounted
+	struct IShaderHandle : public IntrusiveRefCounted
 	{
 		EShaderStageFlags StageMask;
 	};
 
-	struct TShaderModule
+	struct ShaderModule
 	{
-		RefPtr<AsyncDataBlob> ByteCode;
+		RefPtr<IAsyncDataBlob> ByteCode;
 		EShaderStageFlags StageFlags;
 	};
 
-	class TShader;
+	class IShader;
 	class TShaderCache
 	{
 		static TShaderCache* Instance;
@@ -28,36 +28,36 @@ namespace ke
 
 		TShaderCache() { Instance = this; }
 
-		bool Exists(const TString& Name) const;
-		void Add(const TString& Name, RefPtr<TShader> Shader);
-		RefPtr<TShader> GetShader(const TString& Name) const;
+		bool Exists(const TString& name) const;
+		void Add(const TString& name, RefPtr<IShader> pShader);
+		RefPtr<IShader> GetShader(const TString& name) const;
 		void Invalidate();
 
 	private:
-		Map<TString, RefPtr<TShader>> LoadedShaders;
+		Map<TString, RefPtr<IShader>> m_LoadedShaders;
 	};
 
-	class TShader : public IntrusiveRefCounted
+	class IShader : public IntrusiveRefCounted
 	{
 	public:
-		TShader(const TString& InName, const Array<TShaderModule>& ShaderModules);
-		virtual ~TShader() = default;
+		IShader(const TString& name, const Array<ShaderModule>& shaderModules);
+		virtual ~IShader() = default;
 
-		inline RefPtr<TShaderHandle> GetHandle() const { return Handle; }
-		inline const TString& GetName() const { return Name; }
-		inline RefPtr<AsyncDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
-		inline RefPtr<TShaderModuleReflection> GetReflection() const { return ReflectionData; }
+		inline RefPtr<IShaderHandle> GetHandle() const { return m_Handle; }
+		inline const TString& GetName() const { return m_Name; }
+		inline RefPtr<IAsyncDataBlob> GetVertexShaderBytecode() const { return m_TempVertexShaderBytecode; }
+		inline RefPtr<TShaderModuleReflection> GetReflection() const { return m_ReflectionData; }
 
 	protected:
-		RefPtr<TShaderHandle> Handle{};
-		RefPtr<AsyncDataBlob> TempVertexShaderBytecode;
-		EShaderStageFlags ShaderStageMask{};
+		RefPtr<IShaderHandle> m_Handle{};
+		RefPtr<IAsyncDataBlob> m_TempVertexShaderBytecode;
+		EShaderStageFlags m_ShaderStageMask{};
 
 		// This data gets created and maintained by the child shader class.
 		// May be NULL
-		RefPtr<TShaderModuleReflection> ReflectionData{};
+		RefPtr<TShaderModuleReflection> m_ReflectionData{};
 
 	private:
-		TString Name{};
+		TString m_Name{};
 	};
 }

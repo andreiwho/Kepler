@@ -110,7 +110,7 @@ namespace ke
 		}
 	}
 
-	void TAssetBrowserPanel::DrawAsset(std::string_view label, i32 itemIndex, RefPtr<TTextureSampler2D> icon)
+	void TAssetBrowserPanel::DrawAsset(std::string_view label, i32 itemIndex, RefPtr<ITextureSampler2D> icon)
 	{
 		ImGui::BeginGroup();
 		TString visibleLabel = fmt::format("##{}", label.data());
@@ -210,7 +210,7 @@ namespace ke
 		}
 	}
 
-	void TAssetBrowserPanel::DrawNavButton(RefPtr<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
+	void TAssetBrowserPanel::DrawNavButton(RefPtr<ITextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
 	{
 		if (bDisabled)
 		{

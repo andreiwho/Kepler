@@ -29,14 +29,14 @@ namespace ke
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TPipelineParamMapping : public TEnableRefFromThis<TPipelineParamMapping>
+	class PipelineParamMapping : public EnableRefPtrFromThis<PipelineParamMapping>
 	{
 	public:
 		void AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type);
 		void AddTextureSampler(const TString& Name, EShaderStageFlags Stage, u32 Register);
 
 		RefPtr<class TPipelineParamPack> CreateParamPack();
-		RefPtr<class TPipelineSamplerPack> CreateSamplerPack();
+		RefPtr<class PipelineSamplerPack> CreateSamplerPack();
 
 		inline const auto& GetParams() const { return Params; }
 		inline EShaderStageFlags GetParamShaderStages() const { return ParamShaderStages; }
@@ -44,9 +44,9 @@ namespace ke
 		inline const auto& GetSamplers() const { return Samplers; }
 		inline EShaderStageFlags GetSamplerShaderStages() const { return SamplerShaderStages; }
 
-		static RefPtr<TPipelineParamMapping> New()
+		static RefPtr<PipelineParamMapping> New()
 		{
-			return MakeRef(ke::New<TPipelineParamMapping>());
+			return MakeRef(ke::New<PipelineParamMapping>());
 		}
 
 		inline bool HasParam(const TString& name) const { return Params.Contains(name); }
@@ -66,7 +66,7 @@ namespace ke
 	class TPipelineParamPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineParamPack(RefPtr<TPipelineParamMapping> Mapping);
+		TPipelineParamPack(RefPtr<PipelineParamMapping> Mapping);
 
 		template<typename T>
 		void Write(const TString& Param, const T* Data)
@@ -104,29 +104,29 @@ namespace ke
 		static u8 GetBufferIndex() noexcept;
 
 	private:
-		RefPtr<TPipelineParamMapping> Params;
+		RefPtr<PipelineParamMapping> Params;
 		Array<ubyte> CPUData;
 		bool bIsCompiled = false;
 		usize SinglePackStride = 0;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TTextureSampler2D;
-	class TPipelineSamplerPack : public IntrusiveRefCounted
+	class ITextureSampler2D;
+	class PipelineSamplerPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineSamplerPack(RefPtr<TPipelineParamMapping> Mapping);
+		PipelineSamplerPack(RefPtr<PipelineParamMapping> Mapping);
 
-		void Write(const TString& Name, RefPtr<TTextureSampler2D> Data);
+		void Write(const TString& Name, RefPtr<ITextureSampler2D> Data);
 
-		RefPtr<TTextureSampler2D> GetSampler(const TString& Name);
+		RefPtr<ITextureSampler2D> GetSampler(const TString& Name);
 
-		RefPtr<TPipelineParamMapping> GetParamMappings() const { return Params; }
+		RefPtr<PipelineParamMapping> GetParamMappings() const { return Params; }
 
-		const Array<RefPtr<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
+		const Array<RefPtr<ITextureSampler2D>>& GetSamplers() const { return Samplers; }
 
 	private:
-		RefPtr<TPipelineParamMapping> Params;
-		Array<RefPtr<TTextureSampler2D>> Samplers;
+		RefPtr<PipelineParamMapping> Params;
+		Array<RefPtr<ITextureSampler2D>> Samplers;
 	};
 }

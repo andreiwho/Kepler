@@ -5,10 +5,10 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	class RenderTarget2D_D3D11 : public RenderTarget2D
+	class RenderTarget2D_D3D11 : public IRenderTarget2D
 	{
 	public:
-		RenderTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
+		RenderTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0);
 		~RenderTarget2D_D3D11();
 
 		inline ID3D11RenderTargetView* GetView() const { return m_RenderTarget; }
@@ -18,10 +18,10 @@ namespace ke
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class DepthStencilTarget2D_D3D11 : public DepthStencilTarget2D
+	class DepthStencilTarget2D_D3D11 : public IDepthStencilTarget2D
 	{
 	public:
-		DepthStencilTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false);
+		DepthStencilTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false);
 		~DepthStencilTarget2D_D3D11();
 
 		inline ID3D11DepthStencilView* GetView() const { return m_View; }

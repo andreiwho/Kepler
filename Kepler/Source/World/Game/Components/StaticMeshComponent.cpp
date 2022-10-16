@@ -8,7 +8,7 @@ namespace ke
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(RefPtr<TVertexBuffer> InVertexBuffer, RefPtr<TIndexBuffer> InIndexBuffer)
+	TStaticMeshComponent::TStaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer)
 		:	StaticMesh(TStaticMesh::New(InVertexBuffer, InIndexBuffer))
 	{
 	}

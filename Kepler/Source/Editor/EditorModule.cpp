@@ -872,8 +872,8 @@ namespace ke
 		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
 			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
-			RefPtr<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
-			RefPtr<TImage2D> pTargetImage = pTarget->GetImage();
+			RefPtr<IRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			RefPtr<IImage2D> pTargetImage = pTarget->GetImage();
 			if (auto pImmCmd = LowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
 			{
 				i32 idColor = Await(TRenderThread::Submit([&, this]
@@ -985,7 +985,7 @@ namespace ke
 			});
 	}
 
-	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<TTextureSampler2D> pIcon, EViewportIndex viewport)
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport)
 	{
 		KEPLER_PROFILE_SCOPE();
 		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };

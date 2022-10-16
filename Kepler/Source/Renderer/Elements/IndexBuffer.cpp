@@ -4,26 +4,26 @@
 
 namespace ke
 {
-	TIndexBuffer::TIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
-		: AccessFlags(InAccessFlags)
-		, Size(Data ? Data->GetSize() : 0)
-		, Stride(Data ? Data->GetStride() : 0)
+	IIndexBuffer::IIndexBuffer(EBufferAccessFlags accessFlags, RefPtr<IAsyncDataBlob> pData)
+		: m_AccessFlags(accessFlags)
+		, m_Size(pData ? pData->GetSize() : 0)
+		, m_Stride(pData ? pData->GetStride() : 0)
 	{
 	}
 
-	RefPtr<TIndexBuffer> TIndexBuffer::New(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
+	RefPtr<IIndexBuffer> IIndexBuffer::New(EBufferAccessFlags accessFlags, RefPtr<IAsyncDataBlob> pData)
 	{
-		return GetRenderDevice()->CreateIndexBuffer(InAccessFlags, Data);
+		return GetRenderDevice()->CreateIndexBuffer(accessFlags, pData);
 	}
 
-	DynamicIndexBuffer::DynamicIndexBuffer(EBufferAccessFlags accessFlags, usize size, usize stride)
+	IIndexBufferDynamic::IIndexBufferDynamic(EBufferAccessFlags accessFlags, usize size, usize stride)
 		:	m_AccessFlags(accessFlags)
 		,	m_Size(size)
 		,	m_Stride(stride)
 	{
 	}
 
-	RefPtr<DynamicIndexBuffer> DynamicIndexBuffer::New(EBufferAccessFlags accessFlags, usize size, usize stride)
+	RefPtr<IIndexBufferDynamic> IIndexBufferDynamic::New(EBufferAccessFlags accessFlags, usize size, usize stride)
 	{
 		return GetRenderDevice()->CreateDynamicIndexBuffer(accessFlags, size, stride);
 	}

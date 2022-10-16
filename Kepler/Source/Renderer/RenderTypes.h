@@ -169,13 +169,13 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	class AsyncDataBlob : public IntrusiveRefCounted
+	class IAsyncDataBlob : public IntrusiveRefCounted
 	{
 	public:
-		static RefPtr<AsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
+		static RefPtr<IAsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
 
 		template<typename T>
-		static RefPtr<AsyncDataBlob> New(const Array<T>& data)
+		static RefPtr<IAsyncDataBlob> New(const Array<T>& data)
 		{
 			return CreateGraphicsDataBlob(data.GetData(), data.GetLength() * sizeof(T), sizeof(T));
 		}

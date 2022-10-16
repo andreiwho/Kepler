@@ -6,8 +6,8 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogStagingBuffer, Info);
 
-	TTransferBufferD3D11::TTransferBufferD3D11(usize Size, RefPtr<AsyncDataBlob> InitialData)
-		: TTransferBuffer(Size, InitialData)
+	TTransferBufferD3D11::TTransferBufferD3D11(usize Size, RefPtr<IAsyncDataBlob> InitialData)
+		: ITransferBuffer(Size, InitialData)
 		, m_TempDataBlob(InitialData)
 	{
 		CHECK(IsRenderThread());
@@ -46,10 +46,10 @@ namespace ke
 		}
 	}
 
-	void TTransferBufferD3D11::Write(RefPtr<class GraphicsCommandListImmediate> pImmCmd, RefPtr<AsyncDataBlob> Data)
+	void TTransferBufferD3D11::Write(RefPtr<class ICommandListImmediate> pImmCmd, RefPtr<IAsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
-		if (Size < Data->GetSize())
+		if (m_Size < Data->GetSize())
 		{
 			if (m_Buffer)
 			{
@@ -71,7 +71,7 @@ namespace ke
 		}
 	}
 
-	void TTransferBufferD3D11::Transfer(RefPtr<GraphicsCommandListImmediate> pImmCmd, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	void TTransferBufferD3D11::Transfer(RefPtr<ICommandListImmediate> pImmCmd, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
 	{
 		CHECK(IsRenderThread());
 		CHECK(m_Buffer);

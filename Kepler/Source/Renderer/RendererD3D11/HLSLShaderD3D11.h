@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	struct TShaderHandleD3D11 : public TShaderHandle
+	struct TShaderHandleD3D11 : public IShaderHandle
 	{
 		TShaderHandleD3D11() = default;
 		~TShaderHandleD3D11();
@@ -24,21 +24,21 @@ namespace ke
 		ID3D11ComputeShader* ComputeShader{};
 	};
 
-	class THLSLShaderD3D11 : public THLSLShader
+	class THLSLShaderD3D11 : public HLSLShader
 	{
 	public:
-		THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules);
+		THLSLShaderD3D11(const TString& Name, const Array<ShaderModule>& Modules);
 
 	protected:
-		inline RefPtr<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(Handle); }
+		inline RefPtr<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(m_Handle); }
 
 	private:
 		void InitHandle();
-		void InitShaders(const Array<TShaderModule>& Modules);
+		void InitShaders(const Array<ShaderModule>& Modules);
 
 		// Reflection interface
-		void InitReflection(const Array<TShaderModule>& Modules);
-		TVertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule);
-		RefPtr<TPipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<TPipelineParamMapping> ToMerge);
+		void InitReflection(const Array<ShaderModule>& Modules);
+		VertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const ShaderModule& VertexShaderModule);
+		RefPtr<PipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge);
 	};
 }

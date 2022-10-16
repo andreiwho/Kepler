@@ -8,7 +8,7 @@
 
 namespace ke
 {
-	class GraphicsCommandListImmediate;
+	class ICommandListImmediate;
 
 	// What pipeline needs
 	// - Input layout.
@@ -40,7 +40,7 @@ namespace ke
 		struct
 		{
 			EPrimitiveTopology Topology = EPrimitiveTopology::TriangleList;
-			TVertexLayout VertexLayout{};
+			VertexLayout VertexLayout{};
 		} VertexInput;
 
 		struct
@@ -61,16 +61,16 @@ namespace ke
 		} DepthStencil;
 		bool bUsePrepass = true;
 
-		RefPtr<TPipelineParamMapping> ParamMapping;
+		RefPtr<PipelineParamMapping> ParamMapping;
 	};
 
 	class TGraphicsPipelineHandle : public IntrusiveRefCounted
 	{
 	public:
-		static RefPtr<TGraphicsPipelineHandle> CreatePipelineHandle(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		static RefPtr<TGraphicsPipelineHandle> CreatePipelineHandle(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config);
 	};
 
-	class TGraphicsPipeline;
+	class IGraphicsPipeline;
 	class TGraphicsPipelineCache
 	{
 		static TGraphicsPipelineCache* Instance;
@@ -79,36 +79,36 @@ namespace ke
 		TGraphicsPipelineCache() { Instance = this; }
 
 		bool Exists(const TString& Name) const;
-		void Add(const TString& Name, RefPtr<TGraphicsPipeline> Pipeline);
-		RefPtr<TGraphicsPipeline> GetPipeline(const TString& Name) const;
+		void Add(const TString& Name, RefPtr<IGraphicsPipeline> Pipeline);
+		RefPtr<IGraphicsPipeline> GetPipeline(const TString& Name) const;
 
 	private:
-		Map<TString, RefPtr<TGraphicsPipeline>> Pipelines;
+		Map<TString, RefPtr<IGraphicsPipeline>> Pipelines;
 	};
 
-	class TGraphicsPipeline : public IntrusiveRefCounted
+	class IGraphicsPipeline : public IntrusiveRefCounted
 	{
 	public:
-		TGraphicsPipeline() = default;
-		TGraphicsPipeline(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		IGraphicsPipeline() = default;
+		IGraphicsPipeline(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
-		virtual void UploadParameters(RefPtr<GraphicsCommandListImmediate> pImmCmdList);
+		virtual void UploadParameters(RefPtr<ICommandListImmediate> pImmCmdList);
 
-		RefPtr<TShader> GetShader() const { return Shader; }
+		RefPtr<IShader> GetShader() const { return Shader; }
 		RefPtr<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
 
-		RefPtr<TPipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
+		RefPtr<PipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
 		inline bool UsesPrepass() const { return Configuration.bUsePrepass; }
 		inline EPipelineDomain GetDomain() const { return Configuration.Domain; }
 		void Validate() const;
 
 	protected:
-		static RefPtr<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
-		void DeferredInit(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		static RefPtr<IShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
+		void DeferredInit(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
 
 	private:
 		RefPtr<TGraphicsPipelineHandle> Handle{};
-		RefPtr<TShader> Shader{};
+		RefPtr<IShader> Shader{};
 		TGraphicsPipelineConfiguration Configuration{};
 	};
 }

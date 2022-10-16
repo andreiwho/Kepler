@@ -4,10 +4,10 @@
 
 namespace ke
 {
-	class TPipelineParamMapping;
+	class PipelineParamMapping;
 	struct TShaderModuleReflection : public IntrusiveRefCounted
 	{
-		TVertexLayout VertexLayout{};
-		RefPtr<TPipelineParamMapping> ParamMapping;
+		VertexLayout VertexLayout{};
+		RefPtr<PipelineParamMapping> ParamMapping;
 	};
 }

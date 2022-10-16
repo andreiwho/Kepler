@@ -22,19 +22,19 @@ namespace ke
 		Array<u32> Indices{};
 	};
 
-	class TStaticMesh : public TEnableRefFromThis<TStaticMesh>
+	class TStaticMesh : public EnableRefPtrFromThis<TStaticMesh>
 	{
 	public:
 		TStaticMesh() = default;
-		TStaticMesh(RefPtr<TVertexBuffer> pVertexBuffer, RefPtr<TIndexBuffer> pIndexBuffer);
+		TStaticMesh(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer);
 		TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices);
 		TStaticMesh(const Array<TStaticMeshSection>& sections);
 
 	public:
 		struct TInternalSection
 		{
-			RefPtr<TVertexBuffer> VertexBuffer{};
-			RefPtr<TIndexBuffer> IndexBuffer{};
+			RefPtr<IVertexBuffer> VertexBuffer{};
+			RefPtr<IIndexBuffer> IndexBuffer{};
 		};
 
 		void SetSections(const Array<TStaticMeshSection>& sections);
@@ -44,7 +44,7 @@ namespace ke
 			return MakeRef(ke::New<TStaticMesh>());
 		}
 
-		static RefPtr<TStaticMesh> New(RefPtr<TVertexBuffer> pVertexBuffer, RefPtr<TIndexBuffer> pIndexBuffer)
+		static RefPtr<TStaticMesh> New(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer)
 		{
 			return MakeRef(ke::New<TStaticMesh>(pVertexBuffer, pIndexBuffer));
 		}

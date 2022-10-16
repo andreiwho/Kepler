@@ -207,7 +207,7 @@ namespace ke
 	}
 
 	template<typename T>
-	struct TEnableRefFromThis : public IntrusiveRefCounted
+	struct EnableRefPtrFromThis : public IntrusiveRefCounted
 	{
 		inline RefPtr<T> RefFromThis()
 		{

@@ -43,7 +43,7 @@ namespace ke
 
 				return TImageData
 				{
-					AsyncDataBlob::New(DataArray),
+					IAsyncDataBlob::New(DataArray),
 					(u32)Width,
 					(u32)Height,
 					COMPONENT_COUNT
@@ -51,7 +51,7 @@ namespace ke
 			});
 	}
 
-	RefPtr<TTextureSampler2D> TImageLoader::LoadSamplerCached(const TString& Path)
+	RefPtr<ITextureSampler2D> TImageLoader::LoadSamplerCached(const TString& Path)
 	{
 		CHECK(!IsRenderThread());
 
@@ -63,9 +63,9 @@ namespace ke
 		auto ImageData = Await(Load(Path));
 		auto Task = TRenderThread::Submit([&] 
 			{
-				auto SampledImage = TImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
+				auto SampledImage = IImage2D::New(ImageData.Width, ImageData.Height, EFormat::R8G8B8A8_UNORM, EImageUsage::ShaderResource);
 				SampledImage->Write(LowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList(), 0, 0, ImageData.Width, ImageData.Height, ImageData.Data);
-				return TTextureSampler2D::New(SampledImage);
+				return ITextureSampler2D::New(SampledImage);
 			});
 		LoadedSamplers[Path] = Await(Task);
 		return LoadedSamplers[Path];

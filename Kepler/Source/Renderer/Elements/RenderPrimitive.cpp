@@ -4,14 +4,14 @@
 namespace ke
 {
 
-	void TRenderPrimitive::AddRef() const
+	void IRenderPrimitive::AddRef() const
 	{
-		ReferenceCount++;
+		m_ReferenceCount++;
 	}
 
-	void TRenderPrimitive::Release() const
+	void IRenderPrimitive::Release() const
 	{
-		ReferenceCount--;
+		m_ReferenceCount--;
 		
 	}
 

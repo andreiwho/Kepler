@@ -30,7 +30,7 @@ namespace ke
 		CRASHMSG("Failed to create render device. Unknown render API");
 	}
 
-	RefPtr<AsyncDataBlob> AsyncDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
+	RefPtr<IAsyncDataBlob> IAsyncDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
 	{
 		switch (GRenderAPI)
 		{

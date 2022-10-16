@@ -10,7 +10,7 @@
 
 namespace ke
 {
-	RefPtr<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
+	RefPtr<IShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
 	{
 		if (TShaderCache::Get()->Exists(Path))
 		{
@@ -29,7 +29,7 @@ namespace ke
 		}
 
 		const auto Stages = TypeMask.Separate();
-		Array<std::future<TShaderModule>> ModuleFutures;
+		Array<std::future<ShaderModule>> ModuleFutures;
 		for (const EShaderStageFlags::Type Stage : Stages)
 		{
 			ModuleFutures.EmplaceBack(Async(
@@ -40,7 +40,7 @@ namespace ke
 			);
 		}
 
-		Array<TShaderModule> Modules;
+		Array<ShaderModule> Modules;
 		Modules.Reserve(ModuleFutures.GetLength());
 		for (auto& Future : ModuleFutures)
 		{
@@ -52,9 +52,9 @@ namespace ke
 		return OutShader;
 	}
 
-	TShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flag, const TString& Source)
+	ShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flag, const TString& Source)
 	{
-		TShaderModule OutShaderModule{};
+		ShaderModule OutShaderModule{};
 		OutShaderModule.StageFlags = Flag;
 
 		const TString EntryPoint = std::invoke([Flag]
@@ -77,7 +77,7 @@ namespace ke
 		return OutShaderModule;
 	}
 
-	RefPtr<AsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
+	RefPtr<IAsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
 		const TString& EntryPoint,
 		EShaderStageFlags::Type Type,
 		const TString& Code)
@@ -139,7 +139,7 @@ namespace ke
 			{
 				KEPLER_WARNING(LogShaderCompiler, "While compiling {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
 			}
-			return AsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
+			return IAsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
 		}
 		return nullptr;
 	}

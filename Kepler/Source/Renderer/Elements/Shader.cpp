@@ -4,41 +4,41 @@ namespace ke
 {
 	TShaderCache* TShaderCache::Instance;
 
-	bool TShaderCache::Exists(const TString& Name) const
+	bool TShaderCache::Exists(const TString& name) const
 	{
-		return LoadedShaders.Contains(Name);
+		return m_LoadedShaders.Contains(name);
 	}
 
-	void TShaderCache::Add(const TString& Name, RefPtr<TShader> Shader)
+	void TShaderCache::Add(const TString& name, RefPtr<IShader> pShader)
 	{
-		LoadedShaders.Insert(Name, Shader);
+		m_LoadedShaders.Insert(name, pShader);
 	}
 
-	RefPtr<TShader> TShaderCache::GetShader(const TString& Name) const
+	RefPtr<IShader> TShaderCache::GetShader(const TString& name) const
 	{
-		CHECK(LoadedShaders.Contains(Name));
-		return LoadedShaders[Name];
+		CHECK(m_LoadedShaders.Contains(name));
+		return m_LoadedShaders[name];
 	}
 
 	void TShaderCache::Invalidate()
 	{
-		LoadedShaders.Clear();
+		m_LoadedShaders.Clear();
 	}
 
-	TShader::TShader(const TString& InName, const Array<TShaderModule>& ShaderModules)
-		:	Name(InName)
+	IShader::IShader(const TString& name, const Array<ShaderModule>& shaderModules)
+		:	m_Name(name)
 	{
 		// Combine the shader stage mask
-		for (const auto& Module : ShaderModules)
+		for (const auto& Module : shaderModules)
 		{
 			if (Module.ByteCode)
 			{
-				ShaderStageMask = ShaderStageMask | Module.StageFlags;
+				m_ShaderStageMask = m_ShaderStageMask | Module.StageFlags;
 			}
 
 			if (Module.StageFlags & EShaderStageFlags::Vertex)
 			{
-				TempVertexShaderBytecode = Module.ByteCode;
+				m_TempVertexShaderBytecode = Module.ByteCode;
 			}
 		}
 	}

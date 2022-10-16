@@ -5,9 +5,9 @@
 namespace ke
 {
 
-	RefPtr<TTextureSampler2D> TTextureSampler2D::New(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<ITextureSampler2D> ITextureSampler2D::New(RefPtr<IImage2D> pImage, u32 mipLevel, u32 arrayLayer)
 	{
-		return GetRenderDevice()->CreateTextureSampler2D(InImage, MipLevel, ArrayLayer);
+		return GetRenderDevice()->CreateTextureSampler2D(pImage, mipLevel, arrayLayer);
 	}
 
 }

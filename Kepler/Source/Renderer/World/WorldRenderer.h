@@ -34,11 +34,11 @@ namespace ke
 
 		static void ClearStaticState();
 	private:
-		void RT_UpdateMaterialComponents(RefPtr<GraphicsCommandListImmediate> pImmCtx);
+		void RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
-		void PrePass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
-		void MeshPass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
-		void FlushPass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
+		void PrePass(RefPtr<ICommandListImmediate> pImmCtx);
+		void MeshPass(RefPtr<ICommandListImmediate> pImmCtx);
+		void FlushPass(RefPtr<ICommandListImmediate> pImmCtx);
 
 	private:
 		TViewport2D m_CurrentViewport{};
@@ -51,9 +51,9 @@ namespace ke
 			void Clear();
 
 			bool bInitialized = false;
-			RefPtr<TParamBuffer> RS_CameraBuffer;
-			RefPtr<TParamBuffer> RS_LightBuffer;
-			RefPtr<TGraphicsPipeline> PrePassPipeline;
+			RefPtr<IParamBuffer> RS_CameraBuffer;
+			RefPtr<IParamBuffer> RS_LightBuffer;
+			RefPtr<IGraphicsPipeline> PrePassPipeline;
 		};
 
 		struct RS_CameraBufferStruct

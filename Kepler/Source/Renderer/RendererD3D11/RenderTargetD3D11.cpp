@@ -7,8 +7,8 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RenderTarget2D_D3D11::RenderTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-		:	RenderTarget2D(InImage, MipLevel, ArrayLayer)
+	RenderTarget2D_D3D11::RenderTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+		:	IRenderTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
@@ -41,8 +41,8 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
-		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
+		:	IDepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
