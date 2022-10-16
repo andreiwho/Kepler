@@ -49,7 +49,7 @@ namespace ke
 		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
 			->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
 
-		TGraphicsPipelineConfiguration config{};
+		GraphicsPipelineConfig config{};
 		config.VertexInput.Topology = EPrimitiveTopology::TriangleList;
 		config.VertexInput.VertexLayout = prePassShader->GetReflection()->VertexLayout;
 		config.ParamMapping = prePassShader->GetReflection()->ParamMapping;

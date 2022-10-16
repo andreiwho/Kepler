@@ -4,10 +4,10 @@
 
 namespace ke
 {
-	class TGraphicsPipelineHandleD3D11 : public TGraphicsPipelineHandle
+	class TGraphicsPipelineHandleD3D11 : public IGraphicsPipelineHandle
 	{
 	public:
-		TGraphicsPipelineHandleD3D11(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		TGraphicsPipelineHandleD3D11(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config);
 		~TGraphicsPipelineHandleD3D11();
 
 		inline ID3D11RasterizerState* GetRasterState() const { return RasterState; }
@@ -16,9 +16,9 @@ namespace ke
 		inline D3D11_PRIMITIVE_TOPOLOGY GetPrimitiveTopology() const { return PrimitiveTopology; }
 
 	private:
-		void SetupRasterizer(const TGraphicsPipelineConfiguration& Config);
-		void SetupDepthStencil(const TGraphicsPipelineConfiguration& Config);
-		void SetupInputLayout(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		void SetupRasterizer(const GraphicsPipelineConfig& Config);
+		void SetupDepthStencil(const GraphicsPipelineConfig& Config);
+		void SetupInputLayout(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config);
 
 	private:
 		ID3D11RasterizerState* RasterState{};

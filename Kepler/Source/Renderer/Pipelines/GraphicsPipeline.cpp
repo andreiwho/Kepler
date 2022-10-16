@@ -11,10 +11,10 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	IGraphicsPipeline::IGraphicsPipeline(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Config)
-		: Handle(TGraphicsPipelineHandle::CreatePipelineHandle(InShader, Config))
-		, Shader(InShader)
-		, Configuration(Config)
+	IGraphicsPipeline::IGraphicsPipeline(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config)
+		: m_Handle(IGraphicsPipelineHandle::CreatePipelineHandle(pShader, config))
+		, m_Shader(pShader)
+		, m_Configuration(config)
 	{
 	}
 
@@ -52,35 +52,35 @@ namespace ke
 #endif
 	}
 
-	RefPtr<IShader> IGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
+	RefPtr<IShader> IGraphicsPipeline::LoadHLSLShader(const TString& pShader, EShaderStageFlags stages)
 	{
-		RefPtr<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
-		return Compiler->CompileShader(Shader, Stages);
+		RefPtr<THLSLShaderCompiler> pCompiler = THLSLShaderCompiler::CreateShaderCompiler();
+		return pCompiler->CompileShader(pShader, stages);
 	}
 
-	void IGraphicsPipeline::DeferredInit(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
+	void IGraphicsPipeline::DeferredInit(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config)
 	{
-		Handle = TGraphicsPipelineHandle::CreatePipelineHandle(InShader, InConfiguration);
-		Shader = InShader;
-		Configuration = InConfiguration;
+		m_Handle = IGraphicsPipelineHandle::CreatePipelineHandle(pShader, config);
+		m_Shader = pShader;
+		m_Configuration = config;
 	}
 
-	TGraphicsPipelineCache* TGraphicsPipelineCache::Instance;
+	GraphicsPipelineCache* GraphicsPipelineCache::Instance;
 
-	bool TGraphicsPipelineCache::Exists(const TString& Name) const
+	bool GraphicsPipelineCache::Exists(const TString& name) const
 	{
-		return Pipelines.Contains(Name);
+		return m_Pipelines.Contains(name);
 	}
 
-	void TGraphicsPipelineCache::Add(const TString& Name, RefPtr<IGraphicsPipeline> Pipeline)
+	void GraphicsPipelineCache::Add(const TString& name, RefPtr<IGraphicsPipeline> pPipeline)
 	{
-		Pipelines.Insert(Name, Pipeline);
+		m_Pipelines.Insert(name, pPipeline);
 	}
 
-	RefPtr<IGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
+	RefPtr<IGraphicsPipeline> GraphicsPipelineCache::GetPipeline(const TString& name) const
 	{
-		CHECK(Pipelines.Contains(Name));
-		return Pipelines[Name];
+		CHECK(m_Pipelines.Contains(name));
+		return m_Pipelines[name];
 	}
 }
 
@@ -88,12 +88,12 @@ namespace ke
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	RefPtr<IGraphicsPipelineHandle> IGraphicsPipelineHandle::CreatePipelineHandle(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config)
 	{
 		switch (GRenderAPI)
 		{
 		case ke::ERenderAPI::DirectX11:
-			return MakeRef(New<TGraphicsPipelineHandleD3D11>(Shader, Config));
+			return MakeRef(New<TGraphicsPipelineHandleD3D11>(pShader, config));
 			break;
 		default:
 			CHECK(false);

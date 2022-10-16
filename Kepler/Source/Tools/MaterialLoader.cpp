@@ -182,7 +182,7 @@ namespace ke
 			CHECK(ShaderRef);
 
 			// Conigure the pipeline
-			TGraphicsPipelineConfiguration PipelineConfig{};
+			GraphicsPipelineConfig PipelineConfig{};
 			// Read shader domain
 			if (Pipeline.HasMember("Domain"))
 			{
@@ -320,9 +320,9 @@ namespace ke
 		RefPtr<TMaterial> Material;
 		if (!bForce)
 		{
-			if (TGraphicsPipelineCache::Get()->Exists(Path))
+			if (GraphicsPipelineCache::Get()->Exists(Path))
 			{
-				auto Pipeline = TGraphicsPipelineCache::Get()->GetPipeline(Path);
+				auto Pipeline = GraphicsPipelineCache::Get()->GetPipeline(Path);
 				Material = TMaterial::New(Pipeline, Path);
 			}
 		}
@@ -330,7 +330,7 @@ namespace ke
 		if (bForce || !Material)
 		{
 			auto Pipeline = Await(TRenderThread::Submit([&Document, &Path, bForce] { return LoadGraphicsPipeline(Document["Material"], Path, bForce); }));
-			TGraphicsPipelineCache::Get()->Add(Path, Pipeline);
+			GraphicsPipelineCache::Get()->Add(Path, Pipeline);
 			Material = TMaterial::New(Pipeline, Path);
 			LoadMaterialSamplers(Document["Material"], Material);
 		}

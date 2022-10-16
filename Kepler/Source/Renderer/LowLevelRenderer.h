@@ -125,7 +125,7 @@ namespace ke
 	private:
 		TRenderThread m_RenderThread{};
 		SharedPtr<TShaderCache> m_ShaderCache{};
-		SharedPtr<TGraphicsPipelineCache> m_PipelineCache{};
+		SharedPtr<GraphicsPipelineCache> m_PipelineCache{};
 		SharedPtr<TTargetRegistry> m_TargetRegistry{};
 		Array<SharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
 		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;

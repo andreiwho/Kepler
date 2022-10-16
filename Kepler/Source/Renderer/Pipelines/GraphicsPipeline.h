@@ -32,7 +32,7 @@ namespace ke
 		inline bool IsUndefined() const { return Value != Undefined; }
 	};
 
-	struct TGraphicsPipelineConfiguration
+	struct GraphicsPipelineConfig
 	{
 		ERenderPassId RenderPassMask{ ERenderPassId::PrePass | ERenderPassId::Geometry };
 		EPipelineDomain Domain{ EPipelineDomain::Unlit };
@@ -64,51 +64,52 @@ namespace ke
 		RefPtr<PipelineParamMapping> ParamMapping;
 	};
 
-	class TGraphicsPipelineHandle : public IntrusiveRefCounted
+	class IGraphicsPipelineHandle : public IntrusiveRefCounted
 	{
 	public:
-		static RefPtr<TGraphicsPipelineHandle> CreatePipelineHandle(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		static RefPtr<IGraphicsPipelineHandle> CreatePipelineHandle(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config);
 	};
 
 	class IGraphicsPipeline;
-	class TGraphicsPipelineCache
-	{
-		static TGraphicsPipelineCache* Instance;
-	public:
-		static TGraphicsPipelineCache* Get() { return Instance; }
-		TGraphicsPipelineCache() { Instance = this; }
 
-		bool Exists(const TString& Name) const;
-		void Add(const TString& Name, RefPtr<IGraphicsPipeline> Pipeline);
-		RefPtr<IGraphicsPipeline> GetPipeline(const TString& Name) const;
+	class GraphicsPipelineCache
+	{
+		static GraphicsPipelineCache* Instance;
+	public:
+		static GraphicsPipelineCache* Get() { return Instance; }
+		GraphicsPipelineCache() { Instance = this; }
+
+		bool Exists(const TString& name) const;
+		void Add(const TString& name, RefPtr<IGraphicsPipeline> pPipeline);
+		RefPtr<IGraphicsPipeline> GetPipeline(const TString& name) const;
 
 	private:
-		Map<TString, RefPtr<IGraphicsPipeline>> Pipelines;
+		Map<TString, RefPtr<IGraphicsPipeline>> m_Pipelines;
 	};
 
 	class IGraphicsPipeline : public IntrusiveRefCounted
 	{
 	public:
 		IGraphicsPipeline() = default;
-		IGraphicsPipeline(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		IGraphicsPipeline(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config);
 
 		virtual void UploadParameters(RefPtr<ICommandListImmediate> pImmCmdList);
 
-		RefPtr<IShader> GetShader() const { return Shader; }
-		RefPtr<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
+		RefPtr<IShader> GetShader() const { return m_Shader; }
+		RefPtr<IGraphicsPipelineHandle> GetHandle() const { return m_Handle; }
 
-		RefPtr<PipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
-		inline bool UsesPrepass() const { return Configuration.bUsePrepass; }
-		inline EPipelineDomain GetDomain() const { return Configuration.Domain; }
+		RefPtr<PipelineParamMapping> GetParamMapping() const { return m_Configuration.ParamMapping; }
+		inline bool UsesPrepass() const { return m_Configuration.bUsePrepass; }
+		inline EPipelineDomain GetDomain() const { return m_Configuration.Domain; }
 		void Validate() const;
 
 	protected:
-		static RefPtr<IShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
-		void DeferredInit(RefPtr<IShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		static RefPtr<IShader> LoadHLSLShader(const TString& shaderPath, EShaderStageFlags stages);
+		void DeferredInit(RefPtr<IShader> pShader, const GraphicsPipelineConfig& configuration);
 
 	private:
-		RefPtr<TGraphicsPipelineHandle> Handle{};
-		RefPtr<IShader> Shader{};
-		TGraphicsPipelineConfiguration Configuration{};
+		RefPtr<IGraphicsPipelineHandle> m_Handle{};
+		RefPtr<IShader> m_Shader{};
+		GraphicsPipelineConfig m_Configuration{};
 	};
 }

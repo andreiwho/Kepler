@@ -7,7 +7,7 @@
 namespace ke
 {
 
-	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config)
 	{
 		SetupRasterizer(Config);
 		SetupDepthStencil(Config);
@@ -38,7 +38,7 @@ namespace ke
 		}
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupRasterizer(const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupRasterizer(const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		CD3D11_RASTERIZER_DESC Desc(D3D11_DEFAULT);
@@ -80,7 +80,7 @@ namespace ke
 		HRCHECK(Device->CreateRasterizerState(&Desc, &RasterState));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupDepthStencil(const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupDepthStencil(const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		CD3D11_DEPTH_STENCIL_DESC Desc(D3D11_DEFAULT);
@@ -151,7 +151,7 @@ namespace ke
 		HRCHECK(Device->CreateDepthStencilState(&Desc, &DepthStencil));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupInputLayout(RefPtr<IShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupInputLayout(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		PrimitiveTopology = std::invoke([&Config]

@@ -20,7 +20,7 @@ namespace ke
 			});
 		TRenderThread::Wait();
 		m_ShaderCache = MakeShared<TShaderCache>();
-		m_PipelineCache = MakeShared<TGraphicsPipelineCache>();
+		m_PipelineCache = MakeShared<GraphicsPipelineCache>();
 
 		InitScreenQuad();
 		m_TargetRegistry = MakeShared<TTargetRegistry>();
@@ -146,7 +146,7 @@ namespace ke
 				auto pShader = pCompiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 				CHECK(pShader);
 
-				TGraphicsPipelineConfiguration config{};
+				GraphicsPipelineConfig config{};
 				config.DepthStencil.bDepthEnable = false;
 				config.VertexInput.VertexLayout = pShader->GetReflection()->VertexLayout;
 				config.ParamMapping = pShader->GetReflection()->ParamMapping;
