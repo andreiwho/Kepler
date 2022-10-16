@@ -8,7 +8,7 @@ namespace ke
 	{
 	public:
 		TVertexBufferD3D11() = default;
-		TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data);
+		TVertexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<AsyncDataBlob> Data);
 		~TVertexBufferD3D11();
 		
 		inline ID3D11Buffer* GetBuffer() const { return Buffer; }
@@ -16,7 +16,7 @@ namespace ke
 
 	private:
 		ID3D11Buffer* Buffer{};
-		TRef<AsyncDataBlob> TempDataBlob{};
+		RefPtr<AsyncDataBlob> TempDataBlob{};
 	};
 
 	class DynamicVertexBufferD3D11 : public DynamicVertexBuffer

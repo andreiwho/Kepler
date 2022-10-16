@@ -237,12 +237,12 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TPipelineParamMapping> THLSLShaderD3D11::ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, TRef<TPipelineParamMapping> ToMerge)
+	RefPtr<TPipelineParamMapping> THLSLShaderD3D11::ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<TPipelineParamMapping> ToMerge)
 	{
 		D3D11_SHADER_DESC Desc;
 		HRCHECK(pReflection->GetDesc(&Desc));
 		
-		TRef<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
+		RefPtr<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
 		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
 			// Reflect constant buffers

@@ -5,12 +5,12 @@
 
 namespace ke
 {
-	TTransferBuffer::TTransferBuffer(usize InSize, TRef<AsyncDataBlob> InitialData)
+	TTransferBuffer::TTransferBuffer(usize InSize, RefPtr<AsyncDataBlob> InitialData)
 		:	Size(InSize)
 	{
 	}
 
-	TRef<TTransferBuffer> TTransferBuffer::New(usize Size, TRef<AsyncDataBlob> InitialData)
+	RefPtr<TTransferBuffer> TTransferBuffer::New(usize Size, RefPtr<AsyncDataBlob> InitialData)
 	{
 		return GetRenderDevice()->CreateTransferBuffer(Size, InitialData);
 	}

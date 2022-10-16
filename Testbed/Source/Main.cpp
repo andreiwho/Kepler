@@ -4,7 +4,7 @@ using namespace ke;
 
 DEFINE_UNIQUE_LOG_CHANNEL(LogTestbed, All);
 
-class TTestbedModule : public EngineModule
+class TestbedModule : public EngineModule
 {
 public:
 	virtual void OnAttach() override
@@ -13,12 +13,12 @@ public:
 	}
 };
 
-class TTestbed : public ke::Engine
+class TestbedEngine : public ke::Engine
 {
 	using Base = Engine;
 
 public:
-	TTestbed(const TApplicationLaunchParams& LaunchParams)
+	TestbedEngine(const TApplicationLaunchParams& LaunchParams)
 		: Base(LaunchParams)
 	{
 	}
@@ -26,13 +26,13 @@ public:
 protected:
 	virtual void ChildSetupModuleStack(TModuleStack& ModuleStack) override
 	{
-		ModuleStack.PushModule(MakeRef(New<TTestbedModule>()), EModulePushStrategy::Normal);
+		ModuleStack.PushModule(MakeRef(New<TestbedModule>()), EModulePushStrategy::Normal);
 	}
 };
 
-TSharedPtr<Engine> ke::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
+SharedPtr<Engine> ke::MakeRuntimeApplication(TApplicationLaunchParams const& LaunchParams)
 {
-	TSharedPtr<Engine> App = MakeShared<TTestbed>(LaunchParams);
+	SharedPtr<Engine> App = MakeShared<TestbedEngine>(LaunchParams);
 	// ... Do some processing if needed
 	return App;
 }

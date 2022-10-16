@@ -8,7 +8,7 @@ namespace ke
 {
 	struct TImageData
 	{
-		TRef<AsyncDataBlob> Data;
+		RefPtr<AsyncDataBlob> Data;
 		u32 Width, Height, Components;
 	};
 
@@ -27,9 +27,9 @@ namespace ke
 		// This is the old version, which should not be used if the loaded sampler is your goal.
 		static std::future<TImageData> Load(const TString& Path);
 
-		TRef<TTextureSampler2D> LoadSamplerCached(const TString& Path);
+		RefPtr<TTextureSampler2D> LoadSamplerCached(const TString& Path);
 
 	private:
-		Map<TString, TRef<TTextureSampler2D>> LoadedSamplers;
+		Map<TString, RefPtr<TTextureSampler2D>> LoadedSamplers;
 	};
 }

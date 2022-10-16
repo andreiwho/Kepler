@@ -2,13 +2,13 @@
 
 namespace ke
 {
-	TMaterialComponent::TMaterialComponent(TRef<TMaterial> InMaterial)
+	TMaterialComponent::TMaterialComponent(RefPtr<TMaterial> InMaterial)
 		: Material(InMaterial)
 	{
 
 	}
 
-	void TMaterialComponent::SetMaterial(TRef<TMaterial> InMaterial)
+	void TMaterialComponent::SetMaterial(RefPtr<TMaterial> InMaterial)
 	{
 		Material = InMaterial;
 	}

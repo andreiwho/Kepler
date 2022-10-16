@@ -69,13 +69,13 @@ namespace ke
 		windowParams.bMaximized = false;
 		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1920, 1080, "Kepler", windowParams));
 
-		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
+		m_LowLevelRenderer = MakeShared<LowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
 		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
 		m_LowLevelRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
-		m_WorldRegistry = MakeShared<TWorldRegistry>();
+		m_WorldRegistry = MakeShared<WorldRegistry>();
 	}
 
 	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)
@@ -107,7 +107,7 @@ namespace ke
 		InitApplicationModules();
 
 		// Create the world
-		m_CurrentWorld = m_WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
+		m_CurrentWorld = m_WorldRegistry->CreateWorld<GameWorld>("MainWorld");
 
 		// Begin main loop
 		TTimer mainTimer{};
@@ -175,7 +175,7 @@ namespace ke
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
 					// Initialize the renderer
-					TRef<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
+					RefPtr<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
 					Renderer->UpdateRendererMainThread(mainTimer.Delta());
 					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 

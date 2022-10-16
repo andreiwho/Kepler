@@ -172,10 +172,10 @@ namespace ke
 	class AsyncDataBlob : public IntrusiveRefCounted
 	{
 	public:
-		static TRef<AsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
+		static RefPtr<AsyncDataBlob> CreateGraphicsDataBlob(const void* pData = nullptr, usize size = 0, usize stride = 0);
 
 		template<typename T>
-		static TRef<AsyncDataBlob> New(const Array<T>& data)
+		static RefPtr<AsyncDataBlob> New(const Array<T>& data)
 		{
 			return CreateGraphicsDataBlob(data.GetData(), data.GetLength() * sizeof(T), sizeof(T));
 		}

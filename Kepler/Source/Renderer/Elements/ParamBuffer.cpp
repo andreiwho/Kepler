@@ -4,12 +4,12 @@
 
 namespace ke
 {
-	TParamBuffer::TParamBuffer(TRef<TPipelineParamMapping> Mapping)
+	TParamBuffer::TParamBuffer(RefPtr<TPipelineParamMapping> Mapping)
 		:	Params(Mapping->CreateParamPack())
 	{
 	}
 
-	TRef<TParamBuffer> TParamBuffer::New(TRef<TPipelineParamMapping> ParamPack)
+	RefPtr<TParamBuffer> TParamBuffer::New(RefPtr<TPipelineParamMapping> ParamPack)
 	{
 		return GetRenderDevice()->CreateParamBuffer(ParamPack);
 	}

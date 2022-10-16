@@ -50,7 +50,7 @@ namespace ke
 		void DrawEditor();
 		virtual void OnUpdate(float deltaTime) override;
 		void EndGUIPass();
-		void SetEditedWorld(TRef<TGameWorld> pWorld);
+		void SetEditedWorld(RefPtr<GameWorld> pWorld);
 		void SelectEntity(TGameEntityId id);
 		void UnselectEverything();
 		EViewportIndex GetHoveredViewport() const { return m_HoveredViewport; }
@@ -85,7 +85,7 @@ namespace ke
 		void EditorCamera_FocusSelectedObject();
 
 		void DrawViewportEntityIcons();
-		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<TTextureSampler2D> pIcon, EViewportIndex viewport);
 		void DrawDirections(TGameEntityId id);
 
 	private:
@@ -93,7 +93,7 @@ namespace ke
 		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
 		float2 m_ViewportPositions[(u32)EViewportIndex::Max]{};
 
-		TRef<TGameWorld> m_pEditedWorld{};
+		RefPtr<GameWorld> m_pEditedWorld{};
 		TGameEntityId m_SelectedEntity{};
 		EViewportIndex m_HoveredViewport = EViewportIndex::Max;
 		TGameEntityId m_EditorCameraEntity{};
@@ -105,8 +105,8 @@ namespace ke
 		float m_EditorCameraSensitivity = 32;
 		float m_EditorCameraSpeed = 2.0f;
 
-		TSharedPtr<TLogPanel> m_LogPanel;
-		TSharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
+		SharedPtr<TLogPanel> m_LogPanel;
+		SharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
 
 	private:
 		i32 m_EditOperationIndex = 0x7;	// Translate by default
@@ -122,9 +122,9 @@ namespace ke
 		float m_InViewportIconSize = 50.0;
 
 		// Entity icons
-		TRef<TTextureSampler2D> m_CameraIcon;
-		TRef<TTextureSampler2D> m_AmbientLightIcon;
-		TRef<TTextureSampler2D> m_DirectionalLightIcon;
+		RefPtr<TTextureSampler2D> m_CameraIcon;
+		RefPtr<TTextureSampler2D> m_AmbientLightIcon;
+		RefPtr<TTextureSampler2D> m_DirectionalLightIcon;
 		float m_MaxViewportIconScreenCoord = 0.9f;
 	};
 }

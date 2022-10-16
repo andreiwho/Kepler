@@ -7,7 +7,7 @@ namespace ke
 	class TGraphicsPipelineHandleD3D11 : public TGraphicsPipelineHandle
 	{
 	public:
-		TGraphicsPipelineHandleD3D11(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		TGraphicsPipelineHandleD3D11(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
 		~TGraphicsPipelineHandleD3D11();
 
 		inline ID3D11RasterizerState* GetRasterState() const { return RasterState; }
@@ -18,7 +18,7 @@ namespace ke
 	private:
 		void SetupRasterizer(const TGraphicsPipelineConfiguration& Config);
 		void SetupDepthStencil(const TGraphicsPipelineConfiguration& Config);
-		void SetupInputLayout(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		void SetupInputLayout(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
 
 	private:
 		ID3D11RasterizerState* RasterState{};

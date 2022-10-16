@@ -7,10 +7,10 @@
 namespace ke
 {
 
-	TLowLevelRenderer* TLowLevelRenderer::Instance;
+	LowLevelRenderer* LowLevelRenderer::Instance;
 
 	//////////////////////////////////////////////////////////////////////////
-	TLowLevelRenderer::TLowLevelRenderer()
+	LowLevelRenderer::LowLevelRenderer()
 	{
 		Instance = this;
 		TRenderThread::Submit([this]
@@ -27,7 +27,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TLowLevelRenderer::~TLowLevelRenderer()
+	LowLevelRenderer::~LowLevelRenderer()
 	{
 		m_OverlaySubrenderers.Clear();
 		m_BackgroundSubrenderers.Clear();
@@ -48,7 +48,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* pWindow)
+	void LowLevelRenderer::InitRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]()
@@ -59,7 +59,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::PresentAll()
+	void LowLevelRenderer::PresentAll()
 	{
 		KEPLER_PROFILE_SCOPE();
 		TRenderThread::Submit(
@@ -86,7 +86,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* pWindow)
+	void LowLevelRenderer::DestroyRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]
@@ -107,7 +107,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::OnWindowResized(class TWindow* pWindow)
+	void LowLevelRenderer::OnWindowResized(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]
@@ -120,7 +120,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::InitScreenQuad()
+	void LowLevelRenderer::InitScreenQuad()
 	{
 		struct TVertex
 		{
@@ -160,7 +160,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
+	RefPtr<TSwapChain> LowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
 	{
 		auto foundSwapChain = m_SwapChains.Find(
 			[pWindow](const auto& pSwapChain)

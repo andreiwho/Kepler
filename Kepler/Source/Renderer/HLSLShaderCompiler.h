@@ -14,8 +14,8 @@ namespace ke
 	class THLSLShaderCompiler : public IntrusiveRefCounted
 	{
 	public:
-		static TRef<THLSLShaderCompiler> CreateShaderCompiler();
+		static RefPtr<THLSLShaderCompiler> CreateShaderCompiler();
 
-		virtual TRef<TShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
+		virtual RefPtr<TShader> CompileShader(const TString& path, EShaderStageFlags typeMask) = 0;
 	};
 }

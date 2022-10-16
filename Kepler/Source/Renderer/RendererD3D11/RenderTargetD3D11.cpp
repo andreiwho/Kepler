@@ -7,12 +7,12 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RenderTarget2D_D3D11::RenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RenderTarget2D_D3D11::RenderTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 		:	RenderTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
 		CHECKMSG(MyImage, "Attempted to create a render target from null image");
 		ID3D11Texture2D* Texture = MyImage->GetImage();
 		CHECK(Texture);
@@ -41,12 +41,12 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
 		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
 		CHECKMSG(MyImage, "Attempted to create a depth stencil target from null image");
 		ID3D11Texture2D* Texture = MyImage->GetImage();
 		CHECK(Texture);

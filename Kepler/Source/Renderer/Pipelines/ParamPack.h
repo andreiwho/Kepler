@@ -35,8 +35,8 @@ namespace ke
 		void AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type);
 		void AddTextureSampler(const TString& Name, EShaderStageFlags Stage, u32 Register);
 
-		TRef<class TPipelineParamPack> CreateParamPack();
-		TRef<class TPipelineSamplerPack> CreateSamplerPack();
+		RefPtr<class TPipelineParamPack> CreateParamPack();
+		RefPtr<class TPipelineSamplerPack> CreateSamplerPack();
 
 		inline const auto& GetParams() const { return Params; }
 		inline EShaderStageFlags GetParamShaderStages() const { return ParamShaderStages; }
@@ -44,7 +44,7 @@ namespace ke
 		inline const auto& GetSamplers() const { return Samplers; }
 		inline EShaderStageFlags GetSamplerShaderStages() const { return SamplerShaderStages; }
 
-		static TRef<TPipelineParamMapping> New()
+		static RefPtr<TPipelineParamMapping> New()
 		{
 			return MakeRef(ke::New<TPipelineParamMapping>());
 		}
@@ -66,7 +66,7 @@ namespace ke
 	class TPipelineParamPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineParamPack(TRef<TPipelineParamMapping> Mapping);
+		TPipelineParamPack(RefPtr<TPipelineParamMapping> Mapping);
 
 		template<typename T>
 		void Write(const TString& Param, const T* Data)
@@ -104,7 +104,7 @@ namespace ke
 		static u8 GetBufferIndex() noexcept;
 
 	private:
-		TRef<TPipelineParamMapping> Params;
+		RefPtr<TPipelineParamMapping> Params;
 		Array<ubyte> CPUData;
 		bool bIsCompiled = false;
 		usize SinglePackStride = 0;
@@ -115,18 +115,18 @@ namespace ke
 	class TPipelineSamplerPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping);
+		TPipelineSamplerPack(RefPtr<TPipelineParamMapping> Mapping);
 
-		void Write(const TString& Name, TRef<TTextureSampler2D> Data);
+		void Write(const TString& Name, RefPtr<TTextureSampler2D> Data);
 
-		TRef<TTextureSampler2D> GetSampler(const TString& Name);
+		RefPtr<TTextureSampler2D> GetSampler(const TString& Name);
 
-		TRef<TPipelineParamMapping> GetParamMappings() const { return Params; }
+		RefPtr<TPipelineParamMapping> GetParamMappings() const { return Params; }
 
-		const Array<TRef<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
+		const Array<RefPtr<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
 
 	private:
-		TRef<TPipelineParamMapping> Params;
-		Array<TRef<TTextureSampler2D>> Samplers;
+		RefPtr<TPipelineParamMapping> Params;
+		Array<RefPtr<TTextureSampler2D>> Samplers;
 	};
 }

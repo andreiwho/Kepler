@@ -15,7 +15,7 @@ namespace ke
 
 	struct TShaderModule
 	{
-		TRef<AsyncDataBlob> ByteCode;
+		RefPtr<AsyncDataBlob> ByteCode;
 		EShaderStageFlags StageFlags;
 	};
 
@@ -29,12 +29,12 @@ namespace ke
 		TShaderCache() { Instance = this; }
 
 		bool Exists(const TString& Name) const;
-		void Add(const TString& Name, TRef<TShader> Shader);
-		TRef<TShader> GetShader(const TString& Name) const;
+		void Add(const TString& Name, RefPtr<TShader> Shader);
+		RefPtr<TShader> GetShader(const TString& Name) const;
 		void Invalidate();
 
 	private:
-		Map<TString, TRef<TShader>> LoadedShaders;
+		Map<TString, RefPtr<TShader>> LoadedShaders;
 	};
 
 	class TShader : public IntrusiveRefCounted
@@ -43,19 +43,19 @@ namespace ke
 		TShader(const TString& InName, const Array<TShaderModule>& ShaderModules);
 		virtual ~TShader() = default;
 
-		inline TRef<TShaderHandle> GetHandle() const { return Handle; }
+		inline RefPtr<TShaderHandle> GetHandle() const { return Handle; }
 		inline const TString& GetName() const { return Name; }
-		inline TRef<AsyncDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
-		inline TRef<TShaderModuleReflection> GetReflection() const { return ReflectionData; }
+		inline RefPtr<AsyncDataBlob> GetVertexShaderBytecode() const { return TempVertexShaderBytecode; }
+		inline RefPtr<TShaderModuleReflection> GetReflection() const { return ReflectionData; }
 
 	protected:
-		TRef<TShaderHandle> Handle{};
-		TRef<AsyncDataBlob> TempVertexShaderBytecode;
+		RefPtr<TShaderHandle> Handle{};
+		RefPtr<AsyncDataBlob> TempVertexShaderBytecode;
 		EShaderStageFlags ShaderStageMask{};
 
 		// This data gets created and maintained by the child shader class.
 		// May be NULL
-		TRef<TShaderModuleReflection> ReflectionData{};
+		RefPtr<TShaderModuleReflection> ReflectionData{};
 
 	private:
 		TString Name{};

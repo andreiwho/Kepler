@@ -9,7 +9,7 @@
 
 namespace ke
 {
-	TRef<THLSLShaderCompiler> THLSLShaderCompiler::CreateShaderCompiler()
+	RefPtr<THLSLShaderCompiler> THLSLShaderCompiler::CreateShaderCompiler()
 	{
 		switch (GRenderAPI)
 		{

@@ -23,7 +23,7 @@ namespace ke
 	{
 	}
 
-	void TImage2D::Write(TRef<GraphicsCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data)
+	void TImage2D::Write(RefPtr<GraphicsCommandListImmediate> pImmCmd, usize X, usize Y, usize Width, usize Height, RefPtr<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		if (pImmCmd)
@@ -32,7 +32,7 @@ namespace ke
 		}
 	}
 
-	TRef<TImage2D> TImage2D::New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
+	RefPtr<TImage2D> TImage2D::New(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels, u32 InArraySize)
 	{
 		return GetRenderDevice()->CreateImage2D(InWidth, InHeight, InFormat, InUsage, InMipLevels, InArraySize);
 	}

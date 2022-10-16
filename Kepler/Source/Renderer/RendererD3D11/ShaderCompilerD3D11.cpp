@@ -10,7 +10,7 @@
 
 namespace ke
 {
-	TRef<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
+	RefPtr<TShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
 	{
 		if (TShaderCache::Get()->Exists(Path))
 		{
@@ -77,7 +77,7 @@ namespace ke
 		return OutShaderModule;
 	}
 
-	TRef<AsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
+	RefPtr<AsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
 		const TString& EntryPoint,
 		EShaderStageFlags::Type Type,
 		const TString& Code)

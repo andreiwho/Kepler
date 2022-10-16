@@ -17,7 +17,7 @@ namespace ke
 	public:
 		virtual void SetCamera(const MathCamera& camera) {};
 		virtual void UpdateRendererMainThread(float deltaTime) = 0;
-		virtual void Render(TRef<GraphicsCommandListImmediate> pImmCmd) = 0;
+		virtual void Render(RefPtr<GraphicsCommandListImmediate> pImmCmd) = 0;
 		virtual void ClearState() = 0;
 	};
 }

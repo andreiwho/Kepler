@@ -7,7 +7,7 @@
 namespace ke
 {
 
-	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
 		SetupRasterizer(Config);
 		SetupDepthStencil(Config);
@@ -151,7 +151,7 @@ namespace ke
 		HRCHECK(Device->CreateDepthStencilState(&Desc, &DepthStencil));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupInputLayout(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupInputLayout(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
 		CHECK(IsRenderThread());
 		PrimitiveTopology = std::invoke([&Config]
@@ -222,7 +222,7 @@ namespace ke
 		}
 		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
 		CHECK(Device);
-		TRef<AsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
+		RefPtr<AsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
 		HRCHECK(Device->CreateInputLayout(Elements.GetData(), (UINT)Elements.GetLength(), VertexShaderBytecode->GetData(), VertexShaderBytecode->GetSize(), &InputLayout));
 	}
 

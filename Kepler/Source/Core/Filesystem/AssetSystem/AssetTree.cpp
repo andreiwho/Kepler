@@ -32,7 +32,7 @@ namespace ke
 		}
 	}
 
-	void AssetTreeNode::AddChild(TRef<AssetTreeNode> newChild)
+	void AssetTreeNode::AddChild(RefPtr<AssetTreeNode> newChild)
 	{
 		m_Children.AppendBack(newChild);
 		if (newChild->IsDirectory())
@@ -43,7 +43,7 @@ namespace ke
 		KEPLER_INFO(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
 	}
 
-	void AssetTreeNode::RemoveChild(TRef<AssetTreeNode> child)
+	void AssetTreeNode::RemoveChild(RefPtr<AssetTreeNode> child)
 	{
 		CRASHMSG("Not implemented");
 	}
@@ -59,12 +59,12 @@ namespace ke
 		m_Parent = pParent;
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindNode(const TString& path)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const TString& path)
 	{
 		return FindNodeById(path);
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)
 	{
 		if (id == m_UUID)
 		{
@@ -92,7 +92,7 @@ namespace ke
 	namespace
 	{
 		template<EAssetNodeType::EValue CheckedType>
-		static bool SortComparator(const TRef<AssetTreeNode>& lhs, const TRef<AssetTreeNode>& rhs)
+		static bool SortComparator(const RefPtr<AssetTreeNode>& lhs, const RefPtr<AssetTreeNode>& rhs)
 		{
 			if (!lhs || !rhs)
 			{

@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+	TMaterial::TMaterial(RefPtr<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
 		: m_Pipeline(pPipeline), m_ParentAssetPath(parentAssetPath)
 	{
 		CHECK(!IsRenderThread());
@@ -27,13 +27,13 @@ namespace ke
 			}));
 	}
 
-	void TMaterial::RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd)
+	void TMaterial::RT_Update(RefPtr<class GraphicsCommandListImmediate> pImmCmd)
 	{
 		CHECK(IsRenderThread());
 		m_ParamBuffer->RT_UploadToGPU(pImmCmd);
 	}
 
-	void TMaterial::WriteSampler(const TString& name, TRef<TTextureSampler2D> data)
+	void TMaterial::WriteSampler(const TString& name, RefPtr<TTextureSampler2D> data)
 	{
 		m_Samplers->Write(name, data);
 	}

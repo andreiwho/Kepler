@@ -7,7 +7,7 @@ namespace ke
 {
 	class TGameEntityId
 	{
-		friend class TGameWorld;
+		friend class GameWorld;
 		friend class TGameEntity;
 
 	public:

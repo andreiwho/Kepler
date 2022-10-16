@@ -7,10 +7,10 @@ namespace ke
 	{
 	public:
 		TMaterialComponent() = default;
-		TMaterialComponent(TRef<TMaterial> InMaterial);
+		TMaterialComponent(RefPtr<TMaterial> InMaterial);
 
-		inline TRef<TMaterial> GetMaterial() { return Material; }
-		void SetMaterial(TRef<TMaterial> InMaterial);
+		inline RefPtr<TMaterial> GetMaterial() { return Material; }
+		void SetMaterial(RefPtr<TMaterial> InMaterial);
 
 		inline const TString& GetMaterialParentAssetPath() const
 		{
@@ -20,6 +20,6 @@ namespace ke
 		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
 
 	private:
-		TRef<TMaterial> Material;
+		RefPtr<TMaterial> Material;
 	};
 }

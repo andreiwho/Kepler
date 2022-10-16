@@ -7,7 +7,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogIndexBuffer, Info);
 
-	TIndexBufferD3D11::TIndexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data)
+	TIndexBufferD3D11::TIndexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<AsyncDataBlob> Data)
 		:	TIndexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		if (!Data)

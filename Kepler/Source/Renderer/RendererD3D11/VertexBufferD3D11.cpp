@@ -7,7 +7,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogVertexBuffer, Info);
 
-	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, TRef<AsyncDataBlob> Data)
+	TVertexBufferD3D11::TVertexBufferD3D11(EBufferAccessFlags InAccess, RefPtr<AsyncDataBlob> Data)
 		: TVertexBuffer(InAccess, Data), TempDataBlob(Data)
 	{
 		CHECK(Data);

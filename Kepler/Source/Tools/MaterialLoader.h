@@ -15,7 +15,7 @@ namespace ke
 
 		void ClearLoadedMaterialCache();
 
-		TRef<TMaterial> LoadMaterial(const TString& Path, bool bForce = false);
+		RefPtr<TMaterial> LoadMaterial(const TString& Path, bool bForce = false);
 
 		inline static TMaterialLoader* Get() { return Instance; }
 	};

@@ -11,8 +11,8 @@ namespace ke
 		return std::this_thread::get_id() == GRenderThreadID;
 	}
 
-	class TRef<TRenderDevice> GetRenderDevice()
+	class RefPtr<TRenderDevice> GetRenderDevice()
 	{
-		return TLowLevelRenderer::Get()->GetRenderDevice();
+		return LowLevelRenderer::Get()->GetRenderDevice();
 	}
 }

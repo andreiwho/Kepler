@@ -11,14 +11,14 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TGraphicsPipeline::TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Config)
+	TGraphicsPipeline::TGraphicsPipeline(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& Config)
 		: Handle(TGraphicsPipelineHandle::CreatePipelineHandle(InShader, Config))
 		, Shader(InShader)
 		, Configuration(Config)
 	{
 	}
 
-	void TGraphicsPipeline::UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList)
+	void TGraphicsPipeline::UploadParameters(RefPtr<GraphicsCommandListImmediate> pImmCmdList)
 	{
 	}
 
@@ -52,13 +52,13 @@ namespace ke
 #endif
 	}
 
-	TRef<TShader> TGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
+	RefPtr<TShader> TGraphicsPipeline::LoadHLSLShader(const TString& Shader, EShaderStageFlags Stages)
 	{
-		TRef<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
+		RefPtr<THLSLShaderCompiler> Compiler = THLSLShaderCompiler::CreateShaderCompiler();
 		return Compiler->CompileShader(Shader, Stages);
 	}
 
-	void TGraphicsPipeline::DeferredInit(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
+	void TGraphicsPipeline::DeferredInit(RefPtr<TShader> InShader, const TGraphicsPipelineConfiguration& InConfiguration)
 	{
 		Handle = TGraphicsPipelineHandle::CreatePipelineHandle(InShader, InConfiguration);
 		Shader = InShader;
@@ -72,12 +72,12 @@ namespace ke
 		return Pipelines.Contains(Name);
 	}
 
-	void TGraphicsPipelineCache::Add(const TString& Name, TRef<TGraphicsPipeline> Pipeline)
+	void TGraphicsPipelineCache::Add(const TString& Name, RefPtr<TGraphicsPipeline> Pipeline)
 	{
 		Pipelines.Insert(Name, Pipeline);
 	}
 
-	TRef<TGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
+	RefPtr<TGraphicsPipeline> TGraphicsPipelineCache::GetPipeline(const TString& Name) const
 	{
 		CHECK(Pipelines.Contains(Name));
 		return Pipelines[Name];
@@ -88,7 +88,7 @@ namespace ke
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	RefPtr<TGraphicsPipelineHandle> TGraphicsPipelineHandle::CreatePipelineHandle(RefPtr<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
 	{
 		switch (GRenderAPI)
 		{

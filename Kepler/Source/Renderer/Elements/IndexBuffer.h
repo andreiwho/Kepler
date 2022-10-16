@@ -10,14 +10,14 @@ namespace ke
 	{
 	protected:
 		TIndexBuffer() = default;
-		TIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data = nullptr);
+		TIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data = nullptr);
 	
 	public:
 		inline usize GetSize() const { return Size; }
 		inline usize GetStride() const { return Stride; }
 		inline usize GetCount() const { return Size / Stride; }
 
-		static TRef<TIndexBuffer> New(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data = nullptr);
+		static RefPtr<TIndexBuffer> New(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data = nullptr);
 
 	protected:
 		EBufferAccessFlags AccessFlags{};
@@ -35,7 +35,7 @@ namespace ke
 		inline usize GetSize() const { return m_Size; }
 		inline usize GetStride() const { return m_Stride; }
 
-		static TRef<DynamicIndexBuffer> New(EBufferAccessFlags accessFlags, usize size, usize stride);
+		static RefPtr<DynamicIndexBuffer> New(EBufferAccessFlags accessFlags, usize size, usize stride);
 		// Resize and invalidate buffer contents (note: buffer data should be rewritten)
 		virtual void RT_Resize(usize size) = 0;
 

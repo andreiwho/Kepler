@@ -28,7 +28,7 @@ namespace ke
 
 		static TPlatform* Get();
 
-		static TSharedPtr<TPlatform> CreatePlatformInterface();
+		static SharedPtr<TPlatform> CreatePlatformInterface();
 
 		static bool HandleCrashReported(const TString& Message);
 

@@ -14,7 +14,7 @@ namespace ke
 
 		CHECK(IsRenderThread());
 		{
-			for (usize index = 0; index < TLowLevelRenderer::m_SwapChainFrameCount; ++index)
+			for (usize index = 0; index < LowLevelRenderer::m_SwapChainFrameCount; ++index)
 			{
 				// Preallocate space for 1024 line vertices and indices
 				m_LinesBatch[index].VertexBuffer = DynamicVertexBuffer::New(EBufferAccessFlags::WriteAccess, s_InitialLinesSize, sizeof(LineDataVertex));
@@ -28,7 +28,7 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		std::lock_guard lck{ m_LinesMutex };
-		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetNextFrameIndex();
+		const auto currentFrameIndex = LowLevelRenderer::Get()->GetNextFrameIndex();
 		m_LinesBatch[currentFrameIndex].Data.EmplaceBack(LineDataVertex{ start, color });
 		m_LinesBatch[currentFrameIndex].Data.EmplaceBack(LineDataVertex{ end, color });
 	}
@@ -63,14 +63,14 @@ namespace ke
 		}
 	}
 
-	void Subrenderer2D::Render(TRef<GraphicsCommandListImmediate> pImmCmd)
+	void Subrenderer2D::Render(RefPtr<GraphicsCommandListImmediate> pImmCmd)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCmd->BeginDebugEvent("Subrenderer2D Render");
 		CHECK(IsRenderThread());
 		// Push all data to the GPU
 		{
-			const u8 currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
+			const u8 currentFrameIndex = LowLevelRenderer::Get()->GetFrameIndex();
 			S2D_PrimitiveBatch& currentBatch = m_LinesBatch[currentFrameIndex];
 
 			const auto lineVtxCount = currentBatch.Data.GetLength();
@@ -94,15 +94,15 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		std::lock_guard lck{ m_LinesMutex };
-		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
+		const auto currentFrameIndex = LowLevelRenderer::Get()->GetFrameIndex();
 		m_LinesBatch[currentFrameIndex].Data.Clear();
 	}
 
-	void Subrenderer2D::RT_DrawLines(TRef<GraphicsCommandListImmediate> pImmCmd)
+	void Subrenderer2D::RT_DrawLines(RefPtr<GraphicsCommandListImmediate> pImmCmd)
 	{
 		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
-		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
+		const auto currentFrameIndex = LowLevelRenderer::Get()->GetFrameIndex();
 		S2D_PrimitiveBatch& currentBatch = m_LinesBatch[currentFrameIndex];
 
 		pImmCmd->BindVertexBuffers(currentBatch.VertexBuffer);

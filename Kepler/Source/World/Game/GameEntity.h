@@ -5,7 +5,7 @@
 
 namespace ke
 {
-	class TGameWorld;
+	class GameWorld;
 
 	struct TIdComponent
 	{
@@ -20,7 +20,7 @@ namespace ke
 	class TGameEntity
 	{
 	public:
-		TGameEntity(TGameWorld* InWorld, entt::entity Id);
+		TGameEntity(GameWorld* InWorld, entt::entity Id);
 
 		TString GetName() const;
 
@@ -28,7 +28,7 @@ namespace ke
 
 		id64 GetGUID() const;
 
-		inline TRef<TGameWorld> GetWorld() const { return World; }
+		inline RefPtr<GameWorld> GetWorld() const { return World; }
 
 		void SetNeedsUpdate(bool bInShouldUpdate);
 		
@@ -70,10 +70,10 @@ namespace ke
 	private:
 		bool bHideInSceneGraph = false;
 
-		friend class TGameWorld;
+		friend class GameWorld;
 		TGameEntityId Internal_GetId() const { return Entity; }
 		
-		TGameWorld* World{};
+		GameWorld* World{};
 		TGameEntityId Entity{};
 		
 		float LifeSpan = -1.0f;

@@ -8,6 +8,6 @@ namespace ke
 	struct TShaderModuleReflection : public IntrusiveRefCounted
 	{
 		TVertexLayout VertexLayout{};
-		TRef<TPipelineParamMapping> ParamMapping;
+		RefPtr<TPipelineParamMapping> ParamMapping;
 	};
 }

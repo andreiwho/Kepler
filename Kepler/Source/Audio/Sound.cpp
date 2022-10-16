@@ -9,7 +9,7 @@ namespace ke
 	{
 	}
 
-	TRef<TSound> TSound::New(const TString& path, ESoundCreateFlags flags)
+	RefPtr<TSound> TSound::New(const TString& path, ESoundCreateFlags flags)
 	{
 		switch (GAudioEngineAPI)
 		{

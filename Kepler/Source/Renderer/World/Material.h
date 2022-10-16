@@ -11,9 +11,9 @@ namespace ke
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(TRef<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
+		TMaterial(RefPtr<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
 
-		void RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd);
+		void RT_Update(RefPtr<class GraphicsCommandListImmediate> pImmCmd);
 
 		template<typename T>
 		void WriteParamData(const TString& param, const T* pData)
@@ -36,20 +36,20 @@ namespace ke
 			return m_ParamBuffer->ReadParamValue<T>(param);
 		}
 
-		inline TRef<TParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
+		inline RefPtr<TParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
 
-		inline TRef<TPipelineSamplerPack> GetSamplers() const { return m_Samplers; }
+		inline RefPtr<TPipelineSamplerPack> GetSamplers() const { return m_Samplers; }
 
-		inline TRef<TGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
+		inline RefPtr<TGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
 
-		void WriteSampler(const TString& Name, TRef<TTextureSampler2D> Data);
+		void WriteSampler(const TString& Name, RefPtr<TTextureSampler2D> Data);
 
-		static TRef<TMaterial> New()
+		static RefPtr<TMaterial> New()
 		{
 			return MakeRef(ke::New<TMaterial>());
 		}
 
-		static TRef<TMaterial> New(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+		static RefPtr<TMaterial> New(RefPtr<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
 		{
 			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
@@ -65,9 +65,9 @@ namespace ke
 		inline bool UsesPrepass() const { return m_Pipeline->UsesPrepass(); }
 
 	private:
-		TRef<TGraphicsPipeline> m_Pipeline;
-		TRef<TParamBuffer> m_ParamBuffer;
-		TRef<TPipelineSamplerPack> m_Samplers;
+		RefPtr<TGraphicsPipeline> m_Pipeline;
+		RefPtr<TParamBuffer> m_ParamBuffer;
+		RefPtr<TPipelineSamplerPack> m_Samplers;
 		TString m_ParentAssetPath{};
 	};
 }

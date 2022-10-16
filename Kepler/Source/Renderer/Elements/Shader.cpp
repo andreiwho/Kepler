@@ -9,12 +9,12 @@ namespace ke
 		return LoadedShaders.Contains(Name);
 	}
 
-	void TShaderCache::Add(const TString& Name, TRef<TShader> Shader)
+	void TShaderCache::Add(const TString& Name, RefPtr<TShader> Shader)
 	{
 		LoadedShaders.Insert(Name, Shader);
 	}
 
-	TRef<TShader> TShaderCache::GetShader(const TString& Name) const
+	RefPtr<TShader> TShaderCache::GetShader(const TString& Name) const
 	{
 		CHECK(LoadedShaders.Contains(Name));
 		return LoadedShaders[Name];

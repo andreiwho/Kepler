@@ -8,7 +8,7 @@
 
 namespace ke
 {
-	TRef<ke::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI overrideApi)
+	RefPtr<ke::TRenderDevice> TRenderDevice::CreateRenderDevice(ERenderAPI overrideApi)
 	{
 		switch (overrideApi)
 		{
@@ -30,7 +30,7 @@ namespace ke
 		CRASHMSG("Failed to create render device. Unknown render API");
 	}
 
-	TRef<AsyncDataBlob> AsyncDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
+	RefPtr<AsyncDataBlob> AsyncDataBlob::CreateGraphicsDataBlob(const void* pData, usize size, usize elemSize)
 	{
 		switch (GRenderAPI)
 		{

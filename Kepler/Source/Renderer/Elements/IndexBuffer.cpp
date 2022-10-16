@@ -4,14 +4,14 @@
 
 namespace ke
 {
-	TIndexBuffer::TIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
+	TIndexBuffer::TIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
 		: AccessFlags(InAccessFlags)
 		, Size(Data ? Data->GetSize() : 0)
 		, Stride(Data ? Data->GetStride() : 0)
 	{
 	}
 
-	TRef<TIndexBuffer> TIndexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
+	RefPtr<TIndexBuffer> TIndexBuffer::New(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data)
 	{
 		return GetRenderDevice()->CreateIndexBuffer(InAccessFlags, Data);
 	}
@@ -23,7 +23,7 @@ namespace ke
 	{
 	}
 
-	TRef<DynamicIndexBuffer> DynamicIndexBuffer::New(EBufferAccessFlags accessFlags, usize size, usize stride)
+	RefPtr<DynamicIndexBuffer> DynamicIndexBuffer::New(EBufferAccessFlags accessFlags, usize size, usize stride)
 	{
 		return GetRenderDevice()->CreateDynamicIndexBuffer(accessFlags, size, stride);
 	}

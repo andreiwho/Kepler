@@ -8,7 +8,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogParamBuffer, Info);
 
-	TParamBufferD3D11::TParamBufferD3D11(TRef<TPipelineParamMapping> Mapping)
+	TParamBufferD3D11::TParamBufferD3D11(RefPtr<TPipelineParamMapping> Mapping)
 		:	TParamBuffer(Mapping)
 	{
 		CHECK(Params);
@@ -59,7 +59,7 @@ namespace ke
 		}
 	}
 
-	void TParamBufferD3D11::RT_UploadToGPU(TRef<GraphicsCommandListImmediate> pImmContext)
+	void TParamBufferD3D11::RT_UploadToGPU(RefPtr<GraphicsCommandListImmediate> pImmContext)
 	{
 		CHECK(IsRenderThread());
 

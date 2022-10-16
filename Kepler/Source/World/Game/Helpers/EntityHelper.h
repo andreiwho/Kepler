@@ -10,12 +10,12 @@ namespace ke
 	class TEntityHandle
 	{
 	public:
-		TEntityHandle(TRef<TGameWorld> World, TGameEntityId EntityId);
+		TEntityHandle(RefPtr<GameWorld> world, TGameEntityId id);
 		
 		template<typename T>
 		T* GetComponent() 
 		{ 
-			if (!GameWorld || !Entity)
+			if (!m_GameWorld || !m_Entity)
 			{
 				return nullptr;
 			}
@@ -25,13 +25,13 @@ namespace ke
 				return nullptr;
 			}
 
-			return &GameWorld->GetComponent<T>(Id);
+			return &m_GameWorld->GetComponent<T>(m_Id);
 		}
 
 		template<typename T>
 		const T* GetComponent() const
 		{
-			if (!GameWorld || !Entity)
+			if (!m_GameWorld || !m_Entity)
 			{
 				return nullptr;
 			}
@@ -41,37 +41,37 @@ namespace ke
 				return nullptr;
 			}
 
-			return &GameWorld->GetComponent<T>();
+			return &m_GameWorld->GetComponent<T>();
 		}
 
 		template<typename T, typename ... ARGS>
 		T* AddComponent(ARGS&&... Args)
 		{
-			if (!GameWorld || !Entity)
+			if (!m_GameWorld || !m_Entity)
 			{
 				return nullptr;
 			}
 
-			return &GameWorld->AddComponent<T>(Id, std::forward<ARGS>(Args)...);
+			return &m_GameWorld->AddComponent<T>(m_Id, std::forward<ARGS>(Args)...);
 		}
 
 		template<typename T>
 		inline bool HasComponent() const
 		{
-			return GameWorld->HasComponent<T>(Id);
+			return m_GameWorld->HasComponent<T>(m_Id);
 		}
 
-		inline operator bool() const { return !!Entity && !!GameWorld; }
-		inline operator TGameEntityId() const { return Id; }
+		inline operator bool() const { return !!m_Entity && !!m_GameWorld; }
+		inline operator TGameEntityId() const { return m_Id; }
 
-		TGameEntity* operator->() { return Entity; }
-		const TGameEntity* operator->() const { return Entity; }
-		TGameEntity& operator*() { CHECK(*this); return *Entity; }
-		const TGameEntity& operator*() const { CHECK(*this); return *Entity; }
+		TGameEntity* operator->() { return m_Entity; }
+		const TGameEntity* operator->() const { return m_Entity; }
+		TGameEntity& operator*() { CHECK(*this); return *m_Entity; }
+		const TGameEntity& operator*() const { CHECK(*this); return *m_Entity; }
 
 	private:
-		TGameEntityId Id;
-		TGameWorld* GameWorld;
-		TGameEntity* Entity{};
+		TGameEntityId m_Id;
+		GameWorld* m_GameWorld;
+		TGameEntity* m_Entity{};
 	};
 }

@@ -83,7 +83,7 @@ namespace ke
 		{
 			auto initTask = TRenderThread::Submit([]
 				{
-					auto pDevice = RefCast<TRenderDeviceD3D11>(TLowLevelRenderer::Get()->GetRenderDevice());
+					auto pDevice = RefCast<TRenderDeviceD3D11>(LowLevelRenderer::Get()->GetRenderDevice());
 					auto pDeviceHandle = pDevice->GetDevice();
 					auto pContextHandle = pDevice->GetImmediateContext();
 					CHECK(ImGui_ImplDX11_Init(pDeviceHandle, pContextHandle));
@@ -179,7 +179,7 @@ namespace ke
 		Await(TRenderThread::Submit(
 			[]
 			{
-				auto pLLR = TLowLevelRenderer::Get();
+				auto pLLR = LowLevelRenderer::Get();
 				auto pSwapChain = pLLR->GetSwapChain(0);
 				auto pImmCtx = pLLR->GetRenderDevice()->GetImmediateCommandList();
 				pImmCtx->StartDrawingToSwapChainImage(pSwapChain);
@@ -205,7 +205,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void EditorModule::SetEditedWorld(TRef<TGameWorld> pWorld)
+	void EditorModule::SetEditedWorld(RefPtr<GameWorld> pWorld)
 	{
 		KEPLER_PROFILE_SCOPE();
 		m_pEditedWorld = pWorld;
@@ -377,7 +377,7 @@ namespace ke
 
 			m_ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(region.x, region.y);
 			m_ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
-			auto pLLR = TLowLevelRenderer::Get();
+			auto pLLR = LowLevelRenderer::Get();
 
 			auto pRenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
 			auto pViewportSampler = pRenderTargetGroup->GetTextureSamplerAtArrayLayer(pLLR->GetFrameIndex());
@@ -872,9 +872,9 @@ namespace ke
 		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
 			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
-			TRef<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
-			TRef<TImage2D> pTargetImage = pTarget->GetImage();
-			if (auto pImmCmd = TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
+			RefPtr<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			RefPtr<TImage2D> pTargetImage = pTarget->GetImage();
+			if (auto pImmCmd = LowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
 			{
 				i32 idColor = Await(TRenderThread::Submit([&, this]
 					{
@@ -985,7 +985,7 @@ namespace ke
 			});
 	}
 
-	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<TTextureSampler2D> pIcon, EViewportIndex viewport)
 	{
 		KEPLER_PROFILE_SCOPE();
 		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };

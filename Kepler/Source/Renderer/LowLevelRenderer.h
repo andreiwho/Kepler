@@ -17,13 +17,13 @@ namespace ke
 		Overlay
 	};
 
-	class TLowLevelRenderer : public IntrusiveRefCounted
+	class LowLevelRenderer : public IntrusiveRefCounted
 	{
-		static TLowLevelRenderer* Instance;
+		static LowLevelRenderer* Instance;
 
 	public:
-		TLowLevelRenderer();
-		~TLowLevelRenderer();
+		LowLevelRenderer();
+		~LowLevelRenderer();
 
 		void InitRenderStateForWindow(class TWindow* pWindow);
 		void PresentAll();
@@ -40,11 +40,11 @@ namespace ke
 			return m_NextFrameIndex;
 		}
 
-		static TLowLevelRenderer* Get() { return Instance; }
+		static LowLevelRenderer* Get() { return Instance; }
 	public:
-		inline TRef<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
+		inline RefPtr<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
 
-		inline TRef<TSwapChain> GetSwapChain(u32 idx) const
+		inline RefPtr<TSwapChain> GetSwapChain(u32 idx) const
 		{
 			if (m_SwapChains.GetLength() > idx)
 			{
@@ -54,7 +54,7 @@ namespace ke
 		}
 
 		template<typename T, ESubrendererOrder TOrder, typename ... Args>
-		inline TSharedPtr<T> PushSubrenderer(Args&&... args)
+		inline SharedPtr<T> PushSubrenderer(Args&&... args)
 		{
 			static_assert(std::is_base_of_v<ISubrenderer, T>);
 			auto pSubrenderer = Await(TRenderThread::Submit([&] { return MakeShared<T>(std::forward<Args>(args)...); }));
@@ -75,7 +75,7 @@ namespace ke
 		}
 
 		template<ESubrendererOrder TOrder>
-		Array<TSharedPtr<ISubrenderer>>& GetSubrenderers()
+		Array<SharedPtr<ISubrenderer>>& GetSubrenderers()
 		{
 			if constexpr (TOrder == ESubrendererOrder::Overlay)
 			{
@@ -90,7 +90,7 @@ namespace ke
 		void InitScreenQuad();
 
 		template<ESubrendererOrder TOrder>
-		void RenderSubrenderers(TRef<GraphicsCommandListImmediate> pImmCtx)
+		void RenderSubrenderers(RefPtr<GraphicsCommandListImmediate> pImmCtx)
 		{
 			for (auto& pSr : GetSubrenderers<TOrder>())
 			{
@@ -113,25 +113,25 @@ namespace ke
 		// Screen quad
 		struct TScreenQuad
 		{
-			TRef<TGraphicsPipeline> Pipeline{};
-			TRef<TVertexBuffer> VertexBuffer{};
-			TRef<TIndexBuffer> IndexBuffer{};
-			TRef<TPipelineSamplerPack> Samplers{};
+			RefPtr<TGraphicsPipeline> Pipeline{};
+			RefPtr<TVertexBuffer> VertexBuffer{};
+			RefPtr<TIndexBuffer> IndexBuffer{};
+			RefPtr<TPipelineSamplerPack> Samplers{};
 		} m_ScreenQuad{};
 
 	private:
-		TRef<TSwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
+		RefPtr<TSwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
 
 	private:
 		TRenderThread m_RenderThread{};
-		TSharedPtr<TShaderCache> m_ShaderCache{};
-		TSharedPtr<TGraphicsPipelineCache> m_PipelineCache{};
-		TSharedPtr<TTargetRegistry> m_TargetRegistry{};
-		Array<TSharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
-		Array<TSharedPtr<ISubrenderer>> m_OverlaySubrenderers;
+		SharedPtr<TShaderCache> m_ShaderCache{};
+		SharedPtr<TGraphicsPipelineCache> m_PipelineCache{};
+		SharedPtr<TTargetRegistry> m_TargetRegistry{};
+		Array<SharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
+		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;
 
-		TRef<TRenderDevice> m_RenderDevice{};
-		Array<TRef<TSwapChain>> m_SwapChains;
+		RefPtr<TRenderDevice> m_RenderDevice{};
+		Array<RefPtr<TSwapChain>> m_SwapChains;
 		TAtomic<u64> m_FrameCounter = 0;
 		TAtomic<u8> m_SwapChainFrame = 0;
 		u8 m_NextFrameIndex = 1;

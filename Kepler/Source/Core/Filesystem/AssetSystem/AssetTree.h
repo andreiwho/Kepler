@@ -86,12 +86,12 @@ namespace ke
 		AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath);
 		virtual ~AssetTreeNode() = default;
 		inline EAssetNodeType GetNodeType() const { return m_Type; }
-		void AddChild(TRef<AssetTreeNode> newChild);
-		void RemoveChild(TRef<AssetTreeNode> child);
+		void AddChild(RefPtr<AssetTreeNode> newChild);
+		void RemoveChild(RefPtr<AssetTreeNode> child);
 		void ClearChildren();
 		void AssignParent(AssetTreeNode* pParent);
-		TRef<AssetTreeNode> FindNode(const TString& path);
-		TRef<AssetTreeNode> FindNodeById(id64 id);
+		RefPtr<AssetTreeNode> FindNode(const TString& path);
+		RefPtr<AssetTreeNode> FindNodeById(id64 id);
 
 		inline TString GetPath() const { return m_UnresolvedPath; }
 		inline TString GetPath_Resolved() const { return m_ResolvedPath; }
@@ -102,7 +102,7 @@ namespace ke
 		inline bool IsAssetMetadata() const { return m_Type == EAssetNodeType::AssetMetadata; }
 		inline bool IsPlainAsset() const { return m_Type == EAssetNodeType::PlainAsset; }
 		inline id64 GetUUID() const { return m_UUID; }
-		inline const Array<TRef<AssetTreeNode>>& GetChildren() const
+		inline const Array<RefPtr<AssetTreeNode>>& GetChildren() const
 		{
 			return m_Children;
 		}
@@ -113,14 +113,14 @@ namespace ke
 
 	protected:
 		template<typename T>
-		static TRef<T> New(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<T> New(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
 		{
 			return MakeRef(ke::New<T>(type, pParent, unresolvedPath));
 		}
 
 	private:
 		AssetTreeNode* m_Parent{};
-		Array<TRef<AssetTreeNode>> m_Children{};
+		Array<RefPtr<AssetTreeNode>> m_Children{};
 		// A resolved asset path
 		TString m_ResolvedPath;
 		// An unresolved asset path
@@ -140,7 +140,7 @@ namespace ke
 			:	AssetTreeNode(type, pParent, unresolvedPath)
 		{}
 
-		static TRef<AssetTreeNode_Directory> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<AssetTreeNode_Directory> New(AssetTreeNode* pParent, const TString& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_Directory>(EAssetNodeType::Directory, pParent, unresolvedPath);
 		}
@@ -153,7 +153,7 @@ namespace ke
 			: AssetTreeNode(type, pParent, unresolvedPath)
 		{}
 
-		static TRef<AssetTreeNode_AssetMetadata> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<AssetTreeNode_AssetMetadata> New(AssetTreeNode* pParent, const TString& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_AssetMetadata>(EAssetNodeType::AssetMetadata, pParent, unresolvedPath);
 		}
@@ -208,7 +208,7 @@ namespace ke
 			: AssetTreeNode(type, pParent, unresolvedPath)
 		{}
 
-		static TRef<AssetTreeNode_PlainAsset> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<AssetTreeNode_PlainAsset> New(AssetTreeNode* pParent, const TString& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_PlainAsset>(EAssetNodeType::PlainAsset, pParent, unresolvedPath);
 		}

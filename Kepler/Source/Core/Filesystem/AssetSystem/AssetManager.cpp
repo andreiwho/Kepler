@@ -17,10 +17,10 @@ namespace ke
 		FindGameAssets();
 	}
 
-	TFuture<TRef<AssetTreeNode>> AssetManager::FindAssetNode(const TString& path) const
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(const TString& path) const
 	{
 		return Async(
-			[this, Path = path]() -> TRef<AssetTreeNode>
+			[this, Path = path]() -> RefPtr<AssetTreeNode>
 			{
 				auto pRoot = GetRootNodeFor(Path);
 				if (pRoot)
@@ -31,7 +31,7 @@ namespace ke
 			});
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::GetRootNode(const TString& rootPath) const
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNode(const TString& rootPath) const
 	{
 		if (m_Roots.Contains(rootPath))
 		{
@@ -40,7 +40,7 @@ namespace ke
 		return nullptr;
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const TString& rootPath) const
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const TString& rootPath) const
 	{
 		if (auto pRoot = GetRootNode(rootPath))
 		{
@@ -71,7 +71,7 @@ namespace ke
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::ReadDirectory(const TString& root, TRef<AssetTreeNode_Directory> pDirectory)
+	RefPtr<AssetTreeNode_Directory> AssetManager::ReadDirectory(const TString& root, RefPtr<AssetTreeNode_Directory> pDirectory)
 	{
 		const TString rootPath = VFSResolvePath(root);
 
@@ -84,7 +84,7 @@ namespace ke
 
 			if (fs::is_directory(entryPath))
 			{
-				TRef<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
+				RefPtr<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
 				ReadDirectory(root, pNewDirectory);
 				pDirectory->AddChild(pNewDirectory);
 			}

@@ -5,7 +5,7 @@
 namespace ke
 {
 
-	TStaticMesh::TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
+	TStaticMesh::TStaticMesh(RefPtr<TVertexBuffer> pVertexBuffer, RefPtr<TIndexBuffer> pIndexBuffer)
 		:	m_Sections({TInternalSection{pVertexBuffer, pIndexBuffer}})
 	{
 	}

@@ -8,12 +8,12 @@ namespace ke
 {
 	class TGameEntity;
 
-	class TGameWorld : public TWorld
+	class GameWorld : public TWorld
 	{
 	public:
-		TGameWorld(const TString& InName);
+		GameWorld(const TString& InName);
 
-		~TGameWorld();
+		~GameWorld();
 
 		TGameEntityId CreateEntity(const TString& Name);
 		TGameEntityId CreateCamera(const TString& Name, float Fov = 45.0f, float Width = 0, float Height = 0, float Near = 0.1f, float Far = 100.0f);

@@ -72,7 +72,7 @@ namespace ke
 		}
 	}
 
-	void TImage2D_D3D11::RequireReadbackCopy(TRef<class GraphicsCommandListImmediate> pImmCtx)
+	void TImage2D_D3D11::RequireReadbackCopy(RefPtr<class GraphicsCommandListImmediate> pImmCtx)
 	{
 		auto MyCtx = RefCast<GraphicsCommandListImmediateD3D11>(pImmCtx);
 		ID3D11DeviceContext4* pCtx = MyCtx->GetContext();

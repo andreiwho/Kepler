@@ -7,7 +7,7 @@ namespace ke
 	class TEditorDetailsPanel
 	{
 	public:
-		TEditorDetailsPanel(TRef<TGameWorld> pWorld, TGameEntityId entity);
+		TEditorDetailsPanel(RefPtr<GameWorld> pWorld, TGameEntityId entity);
 		
 		void Draw();
 
@@ -19,7 +19,7 @@ namespace ke
 		void DrawEntityInfo();
 
 	private:
-		TRef<TGameWorld> m_pWorld;
+		RefPtr<GameWorld> m_pWorld;
 		TGameEntityId m_SelectedEntity;
 	};
 }

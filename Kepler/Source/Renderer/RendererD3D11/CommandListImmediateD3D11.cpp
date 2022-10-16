@@ -39,11 +39,11 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::StartDrawingToSwapChainImage(TRef<TSwapChain> pSwapChain, TRef<DepthStencilTarget2D> pDepthStencil)
+	void GraphicsCommandListImmediateD3D11::StartDrawingToSwapChainImage(RefPtr<TSwapChain> pSwapChain, RefPtr<DepthStencilTarget2D> pDepthStencil)
 	{
 		CHECK(IsRenderThread());
 		CHECK(pSwapChain && Context);
-		TRef<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(pSwapChain);
+		RefPtr<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(pSwapChain);
 		ID3D11RenderTargetView* ppRTV[] = { CHECKED(MySwapChain->GetRenderTargetView()) };
 		ID3D11DepthStencilView* pDsv = nullptr;
 		if (pDepthStencil)
@@ -60,11 +60,11 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::ClearSwapChainImage(TRef<TSwapChain> SwapChain, float4 ClearColor)
+	void GraphicsCommandListImmediateD3D11::ClearSwapChainImage(RefPtr<TSwapChain> SwapChain, float4 ClearColor)
 	{
 		CHECK(IsRenderThread());
 		CHECK(SwapChain && Context);
-		TRef<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(SwapChain);
+		RefPtr<TSwapChainD3D11> MySwapChain = RefCast<TSwapChainD3D11>(SwapChain);
 		const float NewColor[4] = { ClearColor.r, ClearColor.g, ClearColor.b, ClearColor.a };
 		Context->ClearRenderTargetView(MySwapChain->GetRenderTargetView(), NewColor);
 	}
@@ -80,10 +80,10 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(TRef<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset)
+	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(RefPtr<TVertexBuffer> VertexBuffer, u32 StartSlot, u32 Offset)
 	{
 		CHECK(IsRenderThread());
-		if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(VertexBuffer))
+		if (RefPtr<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(VertexBuffer))
 		{
 			if (ID3D11Buffer* Buffer = MyBuffer->GetBuffer())
 			{
@@ -95,7 +95,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(const Array<TRef<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets)
+	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(const Array<RefPtr<TVertexBuffer>>& VertexBuffers, u32 StartSlot, const Array<u32>& Offsets)
 	{
 		CHECK(IsRenderThread());
 		const bool bOffsetsHasEntries = Offsets.GetLength() > 0;
@@ -121,7 +121,7 @@ namespace ke
 			{
 				if (Buffer)
 				{
-					if (TRef<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(Buffer))
+					if (RefPtr<TVertexBufferD3D11> MyBuffer = RefCast<TVertexBufferD3D11>(Buffer))
 					{
 						ppBuffers.EmplaceBack(MyBuffer->GetBuffer());
 						pStrides.EmplaceBack((u32)MyBuffer->GetStride());
@@ -136,10 +136,10 @@ namespace ke
 		}
 	}
 
-	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(TRef<DynamicVertexBuffer> pBuffer)
+	void GraphicsCommandListImmediateD3D11::BindVertexBuffers(RefPtr<DynamicVertexBuffer> pBuffer)
 	{
 		CHECK(IsRenderThread());
-		if (TRef<DynamicVertexBufferD3D11> MyBuffer = RefCast<DynamicVertexBufferD3D11>(pBuffer))
+		if (RefPtr<DynamicVertexBufferD3D11> MyBuffer = RefCast<DynamicVertexBufferD3D11>(pBuffer))
 		{
 			if (ID3D11Buffer* Buffer = MyBuffer->GetBuffer())
 			{
@@ -151,7 +151,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindShader(TRef<TShader> Shader)
+	void GraphicsCommandListImmediateD3D11::BindShader(RefPtr<TShader> Shader)
 	{
 		CHECK(IsRenderThread());
 		if (!Shader)
@@ -159,7 +159,7 @@ namespace ke
 			return;
 		}
 
-		TRef<TShaderHandleD3D11> MyShader = RefCast<TShaderHandleD3D11>(Shader->GetHandle());
+		RefPtr<TShaderHandleD3D11> MyShader = RefCast<TShaderHandleD3D11>(Shader->GetHandle());
 		// TODO: Make handling for HLSL Class Instances (or should we?)
 		if (MyShader)
 		{
@@ -184,7 +184,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindSamplers(TRef<TPipelineSamplerPack> Samplers, u32 Slot)
+	void GraphicsCommandListImmediateD3D11::BindSamplers(RefPtr<TPipelineSamplerPack> Samplers, u32 Slot)
 	{
 		CHECK(IsRenderThread());
 
@@ -229,11 +229,11 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindPipeline(TRef<TGraphicsPipeline> Pipeline)
+	void GraphicsCommandListImmediateD3D11::BindPipeline(RefPtr<TGraphicsPipeline> Pipeline)
 	{
 		CHECK(IsRenderThread());
 		BindShader(Pipeline->GetShader());
-		TRef<TGraphicsPipelineHandleD3D11> Handle = RefCast<TGraphicsPipelineHandleD3D11>(Pipeline->GetHandle());
+		RefPtr<TGraphicsPipelineHandleD3D11> Handle = RefCast<TGraphicsPipelineHandleD3D11>(Pipeline->GetHandle());
 		if (Handle && BoundGraphicsPipeline != Pipeline.Raw())
 		{
 			Context->IASetPrimitiveTopology(Handle->GetPrimitiveTopology());
@@ -287,13 +287,13 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::StartDrawingToRenderTargets(TRef<RenderTarget2D> RenderTarget, TRef<DepthStencilTarget2D> DepthStencil)
+	void GraphicsCommandListImmediateD3D11::StartDrawingToRenderTargets(RefPtr<RenderTarget2D> RenderTarget, RefPtr<DepthStencilTarget2D> DepthStencil)
 	{
 		CHECK(IsRenderThread());
 		ID3D11RenderTargetView* View = nullptr;
 		if (RenderTarget)
 		{
-			TRef<RenderTarget2D_D3D11> MyTarget = RefCast<RenderTarget2D_D3D11>(RenderTarget);
+			RefPtr<RenderTarget2D_D3D11> MyTarget = RefCast<RenderTarget2D_D3D11>(RenderTarget);
 			if (MyTarget)
 			{
 				View = MyTarget->GetView();
@@ -313,7 +313,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::StartDrawingToRenderTargets(const Array<TRef<RenderTarget2D>>& RenderTargets, TRef<DepthStencilTarget2D> DepthStencil)
+	void GraphicsCommandListImmediateD3D11::StartDrawingToRenderTargets(const Array<RefPtr<RenderTarget2D>>& RenderTargets, RefPtr<DepthStencilTarget2D> DepthStencil)
 	{
 		CHECK(IsRenderThread());
 
@@ -323,7 +323,7 @@ namespace ke
 		if (RenderTargets.GetLength() > 0)
 		{
 			ppRTVs.Reserve(RenderTargets.GetLength());
-			for (TRef<RenderTarget2D> Target : RenderTargets)
+			for (RefPtr<RenderTarget2D> Target : RenderTargets)
 			{
 				if (auto MyTarget = RefCast<RenderTarget2D_D3D11>(Target))
 				{
@@ -341,7 +341,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::ClearRenderTarget(TRef<RenderTarget2D> Target, float4 Color)
+	void GraphicsCommandListImmediateD3D11::ClearRenderTarget(RefPtr<RenderTarget2D> Target, float4 Color)
 	{
 		if (auto MyTarget = RefCast<RenderTarget2D_D3D11>(Target))
 		{
@@ -355,7 +355,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::ClearDepthTarget(TRef<DepthStencilTarget2D> Target, bool bClearStencil)
+	void GraphicsCommandListImmediateD3D11::ClearDepthTarget(RefPtr<DepthStencilTarget2D> Target, bool bClearStencil)
 	{
 		CHECK(IsRenderThread());
 
@@ -370,7 +370,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void* GraphicsCommandListImmediateD3D11::MapBuffer(TRef<IBuffer> buffer)
+	void* GraphicsCommandListImmediateD3D11::MapBuffer(RefPtr<IBuffer> buffer)
 	{
 		CHECK(IsRenderThread());
 
@@ -381,14 +381,14 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::UnmapBuffer(TRef<IBuffer> Buffer)
+	void GraphicsCommandListImmediateD3D11::UnmapBuffer(RefPtr<IBuffer> Buffer)
 	{
 		CHECK(IsRenderThread());
 		Context->Unmap((ID3D11Resource*)Buffer->GetNativeHandle(), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindParamBuffers(TRef<TParamBuffer> ParamBuffer, u32 Slot)
+	void GraphicsCommandListImmediateD3D11::BindParamBuffers(RefPtr<TParamBuffer> ParamBuffer, u32 Slot)
 	{
 		CHECK(IsRenderThread());
 		CHECK(ParamBuffer);
@@ -421,7 +421,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindParamBuffers(Array<TRef<TParamBuffer>> ParamBuffers, u32 Slot)
+	void GraphicsCommandListImmediateD3D11::BindParamBuffers(Array<RefPtr<TParamBuffer>> ParamBuffers, u32 Slot)
 	{
 		CHECK(IsRenderThread());
 		bool bAllocatedVSBuffers = false;
@@ -492,7 +492,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::Transfer(TRef<TTransferBuffer> From, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
+	void GraphicsCommandListImmediateD3D11::Transfer(RefPtr<TTransferBuffer> From, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size)
 	{
 		CHECK(IsRenderThread());
 
@@ -504,7 +504,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::Transfer(TRef<TImage2D> Into, usize X, usize Y, usize Width, usize Height, TRef<AsyncDataBlob> Data)
+	void GraphicsCommandListImmediateD3D11::Transfer(RefPtr<TImage2D> Into, usize X, usize Y, usize Width, usize Height, RefPtr<AsyncDataBlob> Data)
 	{
 		CHECK(IsRenderThread());
 		if (auto MyImage = RefCast<TImage2D_D3D11>(Into))
@@ -542,10 +542,10 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void* GraphicsCommandListImmediateD3D11::MapImage2D(TRef<TImage2D> Image, usize& OutAlignment)
+	void* GraphicsCommandListImmediateD3D11::MapImage2D(RefPtr<TImage2D> Image, usize& OutAlignment)
 	{
 		CHECK(IsRenderThread());
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
 		MyImage->RequireReadbackCopy(RefCast<GraphicsCommandListImmediate>(RefFromThis()));
 
 		D3D11_MAPPED_SUBRESOURCE Subresource;
@@ -556,14 +556,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::UnmapImage2D(TRef<TImage2D> Image)
+	void GraphicsCommandListImmediateD3D11::UnmapImage2D(RefPtr<TImage2D> Image)
 	{
 		CHECK(IsRenderThread());
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
 		Context->Unmap(MyImage->GetReadbackImage(), 0);
 	}
 
-	void* GraphicsCommandListImmediateD3D11::MapParamBuffer_NextFrame(TRef<TParamBufferD3D11> buffer)
+	void* GraphicsCommandListImmediateD3D11::MapParamBuffer_NextFrame(RefPtr<TParamBufferD3D11> buffer)
 	{
 		CHECK(IsRenderThread());
 
@@ -572,14 +572,14 @@ namespace ke
 		return Subresource.pData;
 	}
 
-	void GraphicsCommandListImmediateD3D11::UnmapParamBuffer_NextFrame(TRef<TParamBufferD3D11> Buffer)
+	void GraphicsCommandListImmediateD3D11::UnmapParamBuffer_NextFrame(RefPtr<TParamBufferD3D11> Buffer)
 	{
 		CHECK(IsRenderThread());
 		Context->Unmap((ID3D11Resource*)Buffer->GetNextFrameHandle(), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void GraphicsCommandListImmediateD3D11::BindIndexBuffer(TRef<TIndexBuffer> IndexBuffer, u32 Offset)
+	void GraphicsCommandListImmediateD3D11::BindIndexBuffer(RefPtr<TIndexBuffer> IndexBuffer, u32 Offset)
 	{
 		CHECK(IsRenderThread());
 		if (auto MyBuffer = RefCast<TIndexBufferD3D11>(IndexBuffer))

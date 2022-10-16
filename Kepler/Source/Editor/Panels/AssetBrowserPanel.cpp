@@ -110,7 +110,7 @@ namespace ke
 		}
 	}
 
-	void TAssetBrowserPanel::DrawAsset(std::string_view label, i32 itemIndex, TRef<TTextureSampler2D> icon)
+	void TAssetBrowserPanel::DrawAsset(std::string_view label, i32 itemIndex, RefPtr<TTextureSampler2D> icon)
 	{
 		ImGui::BeginGroup();
 		TString visibleLabel = fmt::format("##{}", label.data());
@@ -146,7 +146,7 @@ namespace ke
 
 	void TAssetBrowserPanel::OnDoubleClick(i32 itemIndex)
 	{
-		TRef<AssetTreeNode> item = m_CurrentDirectory->GetChildren()[itemIndex];
+		RefPtr<AssetTreeNode> item = m_CurrentDirectory->GetChildren()[itemIndex];
 		if (item->IsDirectory())
 		{
 			m_BackStack.AppendBack(m_CurrentDirectory);
@@ -210,7 +210,7 @@ namespace ke
 		}
 	}
 
-	void TAssetBrowserPanel::DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
+	void TAssetBrowserPanel::DrawNavButton(RefPtr<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)())
 	{
 		if (bDisabled)
 		{
@@ -400,8 +400,8 @@ namespace ke
 					itemIndex++;
 				}
 				ImGui::EndTable();
-				ImGui::EndChild();
 			}
+			ImGui::EndChild();
 		}
 		ImGui::End();
 	}

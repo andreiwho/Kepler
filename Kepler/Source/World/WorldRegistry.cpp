@@ -3,19 +3,19 @@
 namespace ke
 {
 	
-	ke::TWorldRegistry* TWorldRegistry::Instance;
+	ke::WorldRegistry* WorldRegistry::Instance;
 
-	TWorldRegistry::TWorldRegistry()
+	WorldRegistry::WorldRegistry()
 	{
 		Instance = this;
 	}
 
-	TWorldRegistry::~TWorldRegistry()
+	WorldRegistry::~WorldRegistry()
 	{
 		LoadedWorlds.Clear();
 	}
 
-	void TWorldRegistry::DestroyWorld(TRef<TWorld> World)
+	void WorldRegistry::DestroyWorld(RefPtr<TWorld> World)
 	{
 		auto Iter = LoadedWorlds.FindIterator([World](const auto& Other) { return Other.Raw() == World.Raw(); });
 		if (LoadedWorlds.IsValidIterator(Iter))

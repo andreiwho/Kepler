@@ -3,27 +3,27 @@
 
 namespace ke
 {
-	class TWorldRegistry
+	class WorldRegistry
 	{
-		static TWorldRegistry* Instance;
+		static WorldRegistry* Instance;
 
 	public:
-		TWorldRegistry();
-		~TWorldRegistry();
+		WorldRegistry();
+		~WorldRegistry();
 
 		template<typename T, typename... ARGS>
-		TRef<T> CreateWorld(const TString& Name, ARGS&&... InArgs)
+		RefPtr<T> CreateWorld(const TString& Name, ARGS&&... InArgs)
 		{
-			TRef<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
+			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
 			LoadedWorlds.EmplaceBack(OutWorld);
 			return OutWorld;
 		}
 
-		void DestroyWorld(TRef<TWorld> World);
+		void DestroyWorld(RefPtr<TWorld> World);
 
-		static TWorldRegistry* Get() { return Instance; }
+		static WorldRegistry* Get() { return Instance; }
 
 	private:
-		Array<TRef<TWorld>> LoadedWorlds;
+		Array<RefPtr<TWorld>> LoadedWorlds;
 	};
 }

@@ -13,8 +13,8 @@ namespace ke
 	class TModuleStack
 	{
 	public:
-		void PushModule(TRef<EngineModule> pModule, EModulePushStrategy strategy = EModulePushStrategy::Normal);
-		void RemoveModule(TRef<EngineModule> pModule);
+		void PushModule(RefPtr<EngineModule> pModule, EModulePushStrategy strategy = EModulePushStrategy::Normal);
+		void RemoveModule(RefPtr<EngineModule> pModule);
 		void Clear();
 		void HandlePlatformEvent(const TPlatformEventBase& event);
 
@@ -27,6 +27,6 @@ namespace ke
 		void Terminate();
 
 	private:
-		Array<TRef<EngineModule>> m_Modules{};
+		Array<RefPtr<EngineModule>> m_Modules{};
 	};
 }

@@ -144,7 +144,7 @@ namespace ke
 		m_Windows.Clear();
 	}
 
-	TSharedPtr<TPlatform> TPlatform::CreatePlatformInterface()
+	SharedPtr<TPlatform> TPlatform::CreatePlatformInterface()
 	{
 		return MakeShared<TPlatformGLFW>();
 	}

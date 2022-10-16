@@ -25,14 +25,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<RenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
+	RefPtr<RenderTarget2D> TRenderTargetGroup::GetRenderTargetAtArrayLayer(u32 idx) const
 	{
 		CHECK(idx < m_ArrayLayers);
 		return m_RenderTargets[idx];
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
+	RefPtr<TTextureSampler2D> TRenderTargetGroup::GetTextureSamplerAtArrayLayer(u32 idx) const
 	{
 		CHECK(idx < m_ArrayLayers);
 		return m_TextureSamplers[idx];
@@ -47,7 +47,7 @@ namespace ke
 			m_Height = height > 0 ? height : 1;
 			m_Format = format;
 
-			TRef<TImage2D> pTargetImage = TImage2D::New(m_Width, m_Height, format, 
+			RefPtr<TImage2D> pTargetImage = TImage2D::New(m_Width, m_Height, format, 
 				EImageUsage::RenderTarget 
 				| (bAllowCPURead ? EImageUsage::AllowCPURead : EImageUsage::ShaderResource), 
 				1, 
@@ -64,7 +64,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTargetGroup> TRenderTargetGroup::New(u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
+	RefPtr<TRenderTargetGroup> TRenderTargetGroup::New(u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
 	{
 		return MakeRef(ke::New<TRenderTargetGroup>(width, height, format, layers));
 	}
@@ -86,7 +86,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& name, u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
+	RefPtr<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& name, u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_RenderTargets.Contains(name))
@@ -96,7 +96,7 @@ namespace ke
 		}
 
 		// This may cause a performance problem, or may not. Needs to be checked
-		TRef<TRenderTargetGroup> pTarget = m_RenderTargets[name];
+		RefPtr<TRenderTargetGroup> pTarget = m_RenderTargets[name];
 		if (width != UINT32_MAX || height != UINT32_MAX || format != EFormat::Unknown)
 		{
 			pTarget->Resize(width, height, format, bAllowCPURead);
@@ -111,7 +111,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<DepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
+	RefPtr<DepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
 	{
 		// Create
 		auto newWidth = width > 0 ? width : 1;
@@ -125,17 +125,17 @@ namespace ke
 				Flags.Mask |= EImageUsage::ShaderResource;
 			}
 
-			TRef<TImage2D> DepthImage = TImage2D::New(newWidth, newHeight, format, Flags);
+			RefPtr<TImage2D> DepthImage = TImage2D::New(newWidth, newHeight, format, Flags);
 			m_DepthTargets[name] = DepthStencilTarget2D::New(DepthImage);
 		}
 
 		// Acquire | Resize
-		TRef<DepthStencilTarget2D> depthTarget = m_DepthTargets[name];
+		RefPtr<DepthStencilTarget2D> depthTarget = m_DepthTargets[name];
 		if (newWidth != UINT32_MAX || newHeight != UINT32_MAX)
 		{
 			if (depthTarget->GetWidth() != newWidth || depthTarget->GetHeight() != newHeight)
 			{
-				TRef<TImage2D> depthImage = TImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
+				RefPtr<TImage2D> depthImage = TImage2D::New(newWidth, newHeight, depthTarget->GetFormat(), depthTarget->GetImage()->GetUsage());
 				depthTarget = DepthStencilTarget2D::New(depthImage);
 				m_DepthTargets[name] = depthTarget;
 
@@ -148,7 +148,7 @@ namespace ke
 		return depthTarget;
 	}
 
-	TRef<DepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
+	RefPtr<DepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
 	{
 		if (m_ReadOnlyDepthTargets.Contains(name))
 		{
@@ -156,8 +156,8 @@ namespace ke
 		}
 
 		CHECK(m_DepthTargets.Contains(name));
-		TRef<TImage2D> pTargetImage = CHECKED(m_DepthTargets[name]->GetImage());
-		TRef<DepthStencilTarget2D> pOutTarget = DepthStencilTarget2D::NewReadOnly(pTargetImage);
+		RefPtr<TImage2D> pTargetImage = CHECKED(m_DepthTargets[name]->GetImage());
+		RefPtr<DepthStencilTarget2D> pOutTarget = DepthStencilTarget2D::NewReadOnly(pTargetImage);
 		m_ReadOnlyDepthTargets[name] = pOutTarget;
 		return pOutTarget;
 	}

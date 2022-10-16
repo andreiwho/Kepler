@@ -23,27 +23,27 @@ namespace ke
 			RS_User,
 		};
 
-		TWorldRenderer(TRef<TGameWorld> pWorld);
+		TWorldRenderer(RefPtr<GameWorld> pWorld);
 		~TWorldRenderer();
 		
 		void Render(TViewport2D ViewportSize);
 		void UpdateRendererMainThread(float deltaTime);
 		void UpdateLightingData_MainThread();
 
-		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
+		static RefPtr<TWorldRenderer> New(RefPtr<GameWorld> pWorld);
 
 		static void ClearStaticState();
 	private:
-		void RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void RT_UpdateMaterialComponents(RefPtr<GraphicsCommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
-		void PrePass(TRef<GraphicsCommandListImmediate> pImmCtx);
-		void MeshPass(TRef<GraphicsCommandListImmediate> pImmCtx);
-		void FlushPass(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void PrePass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
+		void MeshPass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
+		void FlushPass(RefPtr<GraphicsCommandListImmediate> pImmCtx);
 
 	private:
 		TViewport2D m_CurrentViewport{};
-		TRef<TGameWorld> m_CurrentWorld;
-		TLowLevelRenderer* m_LLR;
+		RefPtr<GameWorld> m_CurrentWorld;
+		LowLevelRenderer* m_LLR;
 
 		struct TStaticState
 		{
@@ -51,9 +51,9 @@ namespace ke
 			void Clear();
 
 			bool bInitialized = false;
-			TRef<TParamBuffer> RS_CameraBuffer;
-			TRef<TParamBuffer> RS_LightBuffer;
-			TRef<TGraphicsPipeline> PrePassPipeline;
+			RefPtr<TParamBuffer> RS_CameraBuffer;
+			RefPtr<TParamBuffer> RS_LightBuffer;
+			RefPtr<TGraphicsPipeline> PrePassPipeline;
 		};
 
 		struct RS_CameraBufferStruct

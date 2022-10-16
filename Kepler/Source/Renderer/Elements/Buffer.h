@@ -14,12 +14,12 @@ namespace ke
 	class TTransferBuffer : public IBuffer
 	{
 	protected:
-		TTransferBuffer(usize Size, TRef<AsyncDataBlob> InitialData = nullptr);
+		TTransferBuffer(usize Size, RefPtr<AsyncDataBlob> InitialData = nullptr);
 
 	public:
-		static TRef<TTransferBuffer> New(usize Size, TRef<AsyncDataBlob> InitialData = nullptr);
-		virtual void Write(TRef<class GraphicsCommandListImmediate> CommandList, TRef<AsyncDataBlob> Data) = 0;
-		virtual void Transfer(TRef<GraphicsCommandListImmediate> pImmCmd, TRef<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
+		static RefPtr<TTransferBuffer> New(usize Size, RefPtr<AsyncDataBlob> InitialData = nullptr);
+		virtual void Write(RefPtr<class GraphicsCommandListImmediate> CommandList, RefPtr<AsyncDataBlob> Data) = 0;
+		virtual void Transfer(RefPtr<GraphicsCommandListImmediate> pImmCmd, RefPtr<IBuffer> To, usize DstOffset, usize SrcOffset, usize Size) = 0;
 
 		inline usize GetSize() const { return Size; }
 

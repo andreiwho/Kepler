@@ -17,10 +17,10 @@ namespace ke
 		virtual void Play(const TString& path, ESoundCreateFlags flags) override;
 		virtual void PlayAt(const TString& path, float3 position, ESoundCreateFlags flags = 0) override;
 		virtual void UnloadPlaybackCache(bool bAlsoForPlaying) override;
-		virtual TRef<TSound> GetOrLoadSound(const TString& path, ESoundCreateFlags flags = 0) override;
+		virtual RefPtr<TSound> GetOrLoadSound(const TString& path, ESoundCreateFlags flags = 0) override;
 
 	private:
 		ma_engine m_Engine;
-		Map<TString, TRef<TSoundMA>> m_Sounds;
+		Map<TString, RefPtr<TSoundMA>> m_Sounds;
 	};
 }

@@ -5,28 +5,28 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RenderTarget2D::RenderTarget2D(TRef<TImage2D> InImage, u32 MipLevl, u32 ArrayLayer)
+	RenderTarget2D::RenderTarget2D(RefPtr<TImage2D> InImage, u32 MipLevl, u32 ArrayLayer)
 		:	m_Image(InImage)
 	{
 	}
 
-	TRef<RenderTarget2D> RenderTarget2D::New(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<RenderTarget2D> RenderTarget2D::New(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return GetRenderDevice()->CreateRenderTarget2D(InImage, MipLevel, ArrayLayer);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	DepthStencilTarget2D::DepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly)
+	DepthStencilTarget2D::DepthStencilTarget2D(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly)
 		:	m_Image(InImage)
 	{
 	}
 
-	TRef<DepthStencilTarget2D> DepthStencilTarget2D::New(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<DepthStencilTarget2D> DepthStencilTarget2D::New(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return GetRenderDevice()->CreateDepthStencilTarget2D(InImage, MipLevel, ArrayLayer);
 	}
 
-	TRef<DepthStencilTarget2D> DepthStencilTarget2D::NewReadOnly(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+	RefPtr<DepthStencilTarget2D> DepthStencilTarget2D::NewReadOnly(RefPtr<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
 	{
 		return GetRenderDevice()->CreateDepthStencilTarget2D(InImage, MipLevel, ArrayLayer, true);
 	}

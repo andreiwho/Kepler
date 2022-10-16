@@ -38,7 +38,7 @@ namespace ke
 
 	// --------------------------------------------
 	// This is an important class.
-	// - All of the internal initialization and application logic will happen inside the IApplication::Run function
+	// - All of the internal initialization and application logic will happen inside the Engine::Run function
 	// --------------------------------------------
 	class Engine : public IPlatformEventListener
 	{
@@ -62,23 +62,23 @@ namespace ke
 		bool OnKeyDown(const TKeyDownEvent& evemt);
 	private:
 		TWindow* m_MainWindow{};
-		TSharedPtr<TLowLevelRenderer> m_LowLevelRenderer{};
-		TSharedPtr<AudioEngine> m_AudioEngine{};
-		TSharedPtr<TWorldRegistry> m_WorldRegistry{};
-		TSharedPtr<AssetManager> m_AssetManager{};
+		SharedPtr<LowLevelRenderer> m_LowLevelRenderer{};
+		SharedPtr<AudioEngine> m_AudioEngine{};
+		SharedPtr<WorldRegistry> m_WorldRegistry{};
+		SharedPtr<AssetManager> m_AssetManager{};
 
 		TMaterialLoader m_MaterialLoader;
 		TImageLoader m_ImageLoader;
 		TMeshLoader m_MeshLoader;
 
-		TRef<TGameWorld> m_CurrentWorld;
+		RefPtr<GameWorld> m_CurrentWorld;
 		
 #ifdef ENABLE_EDITOR
-		TRef<class EditorModule> m_Editor;
+		RefPtr<class EditorModule> m_Editor;
 #endif
 
 		TModuleStack m_ModuleStack{};
 	};
 
-	extern TSharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
+	extern SharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);
 }

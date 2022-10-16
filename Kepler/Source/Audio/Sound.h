@@ -21,7 +21,7 @@ namespace ke
 			m_bIsLooping = bLooping;
 		}
 
-		static TRef<TSound> New(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
+		static RefPtr<TSound> New(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
 	
 	protected:
 		TString m_Path{};

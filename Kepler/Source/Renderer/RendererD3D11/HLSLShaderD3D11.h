@@ -30,7 +30,7 @@ namespace ke
 		THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules);
 
 	protected:
-		inline TRef<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(Handle); }
+		inline RefPtr<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(Handle); }
 
 	private:
 		void InitHandle();
@@ -39,6 +39,6 @@ namespace ke
 		// Reflection interface
 		void InitReflection(const Array<TShaderModule>& Modules);
 		TVertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule);
-		TRef<TPipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, TRef<TPipelineParamMapping> ToMerge);
+		RefPtr<TPipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<TPipelineParamMapping> ToMerge);
 	};
 }

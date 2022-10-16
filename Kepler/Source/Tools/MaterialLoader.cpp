@@ -167,7 +167,7 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		TRef<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
+		RefPtr<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
 		{
 			CHECK(Object.IsObject());
 			CHECK(Object.HasMember("Pipeline"));
@@ -257,7 +257,7 @@ namespace ke
 			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
-		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, TRef<TMaterial> Material)
+		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, RefPtr<TMaterial> Material)
 		{
 			if (!MaterialInfo.IsObject() || !MaterialInfo.HasMember("Samplers"))
 			{
@@ -298,7 +298,7 @@ namespace ke
 	{
 	}
 
-	TRef<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path, bool bForce)
+	RefPtr<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path, bool bForce)
 	{
 		if (!TFileUtils::PathExists(Path))
 		{
@@ -317,7 +317,7 @@ namespace ke
 		CHECK(Document.IsObject());
 		CHECK(Document.HasMember("Material"));
 
-		TRef<TMaterial> Material;
+		RefPtr<TMaterial> Material;
 		if (!bForce)
 		{
 			if (TGraphicsPipelineCache::Get()->Exists(Path))

@@ -19,7 +19,7 @@ namespace ke
 	private:
 		void DrawAddressBar();
 		void ZeroSelectionCache();
-		void DrawAsset(std::string_view label, i32 itemIndex, TRef<TTextureSampler2D> icon);
+		void DrawAsset(std::string_view label, i32 itemIndex, RefPtr<TTextureSampler2D> icon);
 		void OnDoubleClick(i32 itemIndex);
 
 		void OnTreeNavigateUp();
@@ -28,7 +28,7 @@ namespace ke
 		void OnNavOpenSettings();
 		void DrawSettingsPopup();
 
-		void DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
+		void DrawNavButton(RefPtr<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
 		void DrawAssetTree();
 		void DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory);
 		void DrawAddressBarAddressNode(AssetTreeNode_Directory* pDirectory);
@@ -40,15 +40,15 @@ namespace ke
 
 	private:
 		// Icons
-		TRef<TTextureSampler2D> m_FolderIcon;
-		TRef<TTextureSampler2D> m_FileIcon;
-		TRef<TTextureSampler2D> m_UnknownIcon;
+		RefPtr<TTextureSampler2D> m_FolderIcon;
+		RefPtr<TTextureSampler2D> m_FileIcon;
+		RefPtr<TTextureSampler2D> m_UnknownIcon;
 
 		// Nav
-		TRef<TTextureSampler2D> m_NavSettingsIcon;
-		TRef<TTextureSampler2D> m_NavUpIcon;
-		TRef<TTextureSampler2D> m_NavBackIcon;
-		TRef<TTextureSampler2D> m_NavFwdIcon;
+		RefPtr<TTextureSampler2D> m_NavSettingsIcon;
+		RefPtr<TTextureSampler2D> m_NavUpIcon;
+		RefPtr<TTextureSampler2D> m_NavBackIcon;
+		RefPtr<TTextureSampler2D> m_NavFwdIcon;
 
 		AssetTreeNode_Directory* m_CurrentDirectory{nullptr};
 		AssetTreeNode_Directory* m_GameRootNode{ nullptr };

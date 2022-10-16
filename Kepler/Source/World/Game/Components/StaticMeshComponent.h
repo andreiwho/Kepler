@@ -8,19 +8,19 @@ namespace ke
 	{
 	public:
 		TStaticMeshComponent() = default;
-		TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh);
-		TStaticMeshComponent(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
+		TStaticMeshComponent(RefPtr<TStaticMesh> InStaticMesh);
+		TStaticMeshComponent(RefPtr<TVertexBuffer> InVertexBuffer, RefPtr<TIndexBuffer> InIndexBuffer);
 		TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices);
 		TStaticMeshComponent(const Array<TStaticMeshSection>& Sections);
 
-		inline TRef<TStaticMesh> GetStaticMesh() const
+		inline RefPtr<TStaticMesh> GetStaticMesh() const
 		{
 			return StaticMesh;
 		}
 
-		void SetStaticMesh(TRef<TStaticMesh> NewMesh);
+		void SetStaticMesh(RefPtr<TStaticMesh> NewMesh);
 
 	private:
-		TRef<TStaticMesh> StaticMesh{};
+		RefPtr<TStaticMesh> StaticMesh{};
 	};
 }

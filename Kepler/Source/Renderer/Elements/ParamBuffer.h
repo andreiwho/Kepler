@@ -9,7 +9,7 @@ namespace ke
 	class TParamBuffer : public IBuffer
 	{
 	protected:
-		TParamBuffer(TRef<TPipelineParamMapping> ParamPack);
+		TParamBuffer(RefPtr<TPipelineParamMapping> ParamPack);
 
 	public:
 		template<typename T>
@@ -41,18 +41,18 @@ namespace ke
 			return Params->HasParam(param);
 		}
 
-		virtual void RT_UploadToGPU(TRef<class GraphicsCommandListImmediate> pImmContext) = 0;
+		virtual void RT_UploadToGPU(RefPtr<class GraphicsCommandListImmediate> pImmContext) = 0;
 
 		inline EShaderStageFlags GetShaderStages() const { return Params->GetShaderStages(); }
 
-		static TRef<TParamBuffer> New(TRef<TPipelineParamMapping> ParamPack);
+		static RefPtr<TParamBuffer> New(RefPtr<TPipelineParamMapping> ParamPack);
 
 	protected:
 		inline void MarkRenderStateDirty() { bRenderStateDirty = true; }
 		inline bool IsRenderStateDirty() const { return bRenderStateDirty; }
 		inline void ResetRenderState() { bRenderStateDirty = false; }
 
-		TRef<TPipelineParamPack> Params;
+		RefPtr<TPipelineParamPack> Params;
 	
 	private:
 		TAtomic<bool> bRenderStateDirty = true;

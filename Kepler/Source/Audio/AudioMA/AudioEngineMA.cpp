@@ -50,7 +50,7 @@ namespace ke
 		}
 	}
 
-	TRef<TSound> AudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
+	RefPtr<TSound> AudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
 	{
 		if (!m_Sounds.Contains(path))
 		{

@@ -39,17 +39,17 @@ namespace ke
 		inline IDXGIInfoQueue* GetInfoQueue() const { return InfoQueue; }
 		inline ID3D11DeviceContext4* GetImmediateContext() const { return ImmediateContext; }
 		inline ID3D11ClassLinkage* GetClassLinkage() const { return ClassLinkage; }
-		virtual TRef<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data) override;
-		virtual TRef<DynamicVertexBuffer> CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
-		virtual TRef<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data) override;
-		virtual TRef<DynamicIndexBuffer> CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
-		virtual TRef<TTransferBuffer> CreateTransferBuffer(usize Size, TRef<AsyncDataBlob> InitialData) override;
-		virtual TRef<TParamBuffer> CreateParamBuffer(TRef<TPipelineParamMapping> Params) override;
-		virtual TRef<TSwapChain> CreateSwapChainForWindow(TWindow* Window) override;
-		virtual TRef<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
-		virtual TRef<RenderTarget2D> CreateRenderTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
-		virtual TRef<DepthStencilTarget2D> CreateDepthStencilTarget2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false) override;
-		virtual TRef<TTextureSampler2D> CreateTextureSampler2D(TRef<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
+		virtual RefPtr<TVertexBuffer> CreateVertexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data) override;
+		virtual RefPtr<DynamicVertexBuffer> CreateDynamicVertexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
+		virtual RefPtr<TIndexBuffer> CreateIndexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<AsyncDataBlob> Data) override;
+		virtual RefPtr<DynamicIndexBuffer> CreateDynamicIndexBuffer(EBufferAccessFlags access, usize size, usize stride) override;
+		virtual RefPtr<TTransferBuffer> CreateTransferBuffer(usize Size, RefPtr<AsyncDataBlob> InitialData) override;
+		virtual RefPtr<TParamBuffer> CreateParamBuffer(RefPtr<TPipelineParamMapping> Params) override;
+		virtual RefPtr<TSwapChain> CreateSwapChainForWindow(TWindow* Window) override;
+		virtual RefPtr<TImage2D> CreateImage2D(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 MipLevels, u32 InArraySize = 1) override;
+		virtual RefPtr<RenderTarget2D> CreateRenderTarget2D(RefPtr<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
+		virtual RefPtr<DepthStencilTarget2D> CreateDepthStencilTarget2D(RefPtr<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0, bool bReadOnly = false) override;
+		virtual RefPtr<TTextureSampler2D> CreateTextureSampler2D(RefPtr<TImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
 		Array<TString> GetInfoQueueMessages() const;

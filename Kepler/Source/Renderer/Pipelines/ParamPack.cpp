@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	TPipelineParamPack::TPipelineParamPack(TRef<TPipelineParamMapping> Mapping)
+	TPipelineParamPack::TPipelineParamPack(RefPtr<TPipelineParamMapping> Mapping)
 		:	Params(Mapping)
 	{
 		struct TLocalParam
@@ -33,14 +33,14 @@ namespace ke
 
 		// Allocate space
 		const TPipelineParam& LastParam = SortedParams[SortedParams.GetLength() - 1].Param;
-		static constexpr auto FrameCount = TLowLevelRenderer::m_SwapChainFrameCount;
+		static constexpr auto FrameCount = LowLevelRenderer::m_SwapChainFrameCount;
 		CPUData.Resize((LastParam.GetOffset() + LastParam.GetSize()) * FrameCount);	// Enable multi-buffering
 		SinglePackStride = CPUData.GetLength() / FrameCount;
 	}
 
 	u8 TPipelineParamPack::GetBufferIndex() noexcept
 	{
-		return TLowLevelRenderer::Get()->GetNextFrameIndex();
+		return LowLevelRenderer::Get()->GetNextFrameIndex();
 	}
 
 	void TPipelineParamMapping::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
@@ -69,18 +69,18 @@ namespace ke
 		SamplerShaderStages |= Stage;
 	}
 
-	TRef<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
+	RefPtr<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
 	{
 		return MakeRef(ke::New<TPipelineParamPack>(RefFromThis()));
 	}
 
-	TRef<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
+	RefPtr<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
 	{
 		return MakeRef(ke::New<TPipelineSamplerPack>(RefFromThis()));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TPipelineSamplerPack::TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping)
+	TPipelineSamplerPack::TPipelineSamplerPack(RefPtr<TPipelineParamMapping> Mapping)
 		:	Params(Mapping)
 	{
 		// Get register count and allocate space for the stuff
@@ -96,7 +96,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TPipelineSamplerPack::Write(const TString& Name, TRef<TTextureSampler2D> Data)
+	void TPipelineSamplerPack::Write(const TString& Name, RefPtr<TTextureSampler2D> Data)
 	{
 		CHECK(Params);
 		CHECK(Params->GetSamplers().Contains(Name));
@@ -105,7 +105,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTextureSampler2D> TPipelineSamplerPack::GetSampler(const TString& Name)
+	RefPtr<TTextureSampler2D> TPipelineSamplerPack::GetSampler(const TString& Name)
 	{
 		CHECK(Params);
 		CHECK(Params->GetSamplers().Contains(Name));

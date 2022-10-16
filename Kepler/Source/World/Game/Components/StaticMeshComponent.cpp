@@ -3,12 +3,12 @@
 namespace ke
 {
 
-	TStaticMeshComponent::TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh)
+	TStaticMeshComponent::TStaticMeshComponent(RefPtr<TStaticMesh> InStaticMesh)
 		:	StaticMesh(InStaticMesh)
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
+	TStaticMeshComponent::TStaticMeshComponent(RefPtr<TVertexBuffer> InVertexBuffer, RefPtr<TIndexBuffer> InIndexBuffer)
 		:	StaticMesh(TStaticMesh::New(InVertexBuffer, InIndexBuffer))
 	{
 	}
@@ -24,7 +24,7 @@ namespace ke
 
 	}
 
-	void TStaticMeshComponent::SetStaticMesh(TRef<TStaticMesh> NewMesh)
+	void TStaticMeshComponent::SetStaticMesh(RefPtr<TStaticMesh> NewMesh)
 	{
 		StaticMesh = NewMesh;
 	}
