@@ -70,18 +70,19 @@ namespace ke
 		CHECK(IsRenderThread());
 		// Push all data to the GPU
 		{
-			const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
+			const u8 currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
+			S2D_PrimitiveBatch& currentBatch = m_LinesBatch[currentFrameIndex];
 
-			const auto lineVtxCount = m_LinesBatch[currentFrameIndex].Data.GetLength();
-			if (m_LinesBatch[currentFrameIndex].VertexBuffer->GetSize() < lineVtxCount)
+			const auto lineVtxCount = currentBatch.Data.GetLength();
+			if (currentBatch.VertexBuffer->GetSize() < lineVtxCount)
 			{
-				m_LinesBatch[currentFrameIndex].VertexBuffer->RT_Resize(lineVtxCount);
+				currentBatch.VertexBuffer->RT_Resize(lineVtxCount);
 			}
 
 			pImmCmd->BindPipeline(m_LinesMaterial->GetPipeline());
-			void* pLines = pImmCmd->MapBuffer(m_LinesBatch[currentFrameIndex].VertexBuffer);
-			std::memcpy(pLines, m_LinesBatch[currentFrameIndex].Data.GetData(), m_LinesBatch[currentFrameIndex].Data.GetLength() * sizeof(LineDataVertex));
-			pImmCmd->UnmapBuffer(m_LinesBatch[currentFrameIndex].VertexBuffer);
+			void* pLines = pImmCmd->MapBuffer(currentBatch.VertexBuffer);
+			std::memcpy(pLines, currentBatch.Data.GetData(), currentBatch.Data.GetLength() * sizeof(LineDataVertex));
+			pImmCmd->UnmapBuffer(currentBatch.VertexBuffer);
 		}
 
 		// Now draw the stuff
@@ -102,8 +103,10 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
 		const auto currentFrameIndex = TLowLevelRenderer::Get()->GetFrameIndex();
-		pImmCmd->BindVertexBuffers(m_LinesBatch[currentFrameIndex].VertexBuffer);
-		pImmCmd->Draw(m_LinesBatch[currentFrameIndex].Data.GetLength(), 0);
+		S2D_PrimitiveBatch& currentBatch = m_LinesBatch[currentFrameIndex];
+
+		pImmCmd->BindVertexBuffers(currentBatch.VertexBuffer);
+		pImmCmd->Draw(currentBatch.Data.GetLength(), 0);
 	}
 
 }
