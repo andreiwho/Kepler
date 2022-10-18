@@ -1,12 +1,16 @@
 #pragma once
 #include "World/World.h"
 #include "GameEntityId.h"
+#include "Components/EntityComponent.h"
 
 #include <entt/entt.hpp>
 
 namespace ke
 {
 	class TGameEntity;
+
+	template<typename T>
+	concept entity_component_typename = std::is_base_of_v<EntityComponent, T>;
 
 	class GameWorld : public TWorld
 	{
@@ -27,37 +31,40 @@ namespace ke
 
 		bool IsValidEntity(TGameEntityId Id) const;
 
-		template<typename T, typename ... ARGS>
+		template<entity_component_typename T, typename ... ARGS>
 		T& AddComponent(TGameEntityId Entity, ARGS&&... InArgs)
 		{
-			return EntityRegistry.emplace<T>(Entity.Entity, std::forward<ARGS>(InArgs)...);
+			T& component = EntityRegistry.emplace<T>(Entity.Entity, std::forward<ARGS>(InArgs)...);
+			component.SetOwner(Entity);
+			component.SetWorld(this);
+			return component;
 		}
 
-		template<typename T>
+		template<entity_component_typename T>
 		T& GetComponent(TGameEntityId Entity)
 		{
 			return EntityRegistry.get<T>(Entity.Entity);
 		}
 
-		template<typename T>
+		template<entity_component_typename T>
 		const T& GetComponent(TGameEntityId Entity) const
 		{
 			return EntityRegistry.get<T>(Entity.Entity);
 		}
 
-		template<typename T>
+		template<entity_component_typename T>
 		inline bool HasComponent(TGameEntityId Entity) const
 		{
 			return EntityRegistry.any_of<T>(Entity.Entity);
 		}
 
-		template<typename T> 
+		template<entity_component_typename T>
 		void RemoveComponent(TGameEntityId Entity) 
 		{
 			EntityRegistry.remove<T>(Entity.Entity);
 		}
 
-		template<typename ... Ts>
+		template<entity_component_typename ... Ts>
 		inline decltype(auto) GetComponentView() 
 		{
 			if constexpr (sizeof...(Ts) > 1)

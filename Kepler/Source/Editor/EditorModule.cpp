@@ -525,11 +525,12 @@ namespace ke
 		i32 idx = 0;
 		if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
 		{
-			m_pEditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
-				[&, this](auto id, TNameComponent& NC, TGameEntity& GE)
+			m_pEditedWorld->GetComponentView<TNameComponent>().each(
+				[&, this](auto id, TNameComponent& NC)
 				{
 					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-					if (!GE.ShouldHideInSceneGraph())
+					auto handle = EntityHandle{ m_pEditedWorld, id };
+					if (!handle->ShouldHideInSceneGraph())
 					{
 						bool bNodeOpen = false;
 						if (m_SelectedEntity == TGameEntityId{ id })
@@ -632,7 +633,7 @@ namespace ke
 		if (!m_pEditedWorld->IsValidEntity(m_EditorCameraEntity))
 		{
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
-			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
+			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 
 			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
 			camera->SetHideInSceneGraph(true);
@@ -641,7 +642,7 @@ namespace ke
 
 		if (m_bIsControllingCamera)
 		{
-			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
+			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			ImGuiIO& IO = ImGui::GetIO();
 			auto mouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
 			float3 rotation = camera->GetRotation();
@@ -933,7 +934,7 @@ namespace ke
 		}
 
 		m_EditorGridEntity = m_pEditedWorld->CreateEntity("_editorgrid");
-		auto gridEntity = TEntityHandle{ m_pEditedWorld, m_EditorGridEntity };
+		auto gridEntity = EntityHandle{ m_pEditedWorld, m_EditorGridEntity };
 		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
 		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
 		gridEntity->SetHideInSceneGraph(true);
@@ -950,7 +951,7 @@ namespace ke
 	void EditorModule::DrawViewportEntityIcons()
 	{
 		KEPLER_PROFILE_SCOPE();
-		TEntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
+		EntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
 		auto view = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateViewMatrix();
 		auto proj = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateProjectionMatrix();
 
@@ -988,7 +989,7 @@ namespace ke
 	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport)
 	{
 		KEPLER_PROFILE_SCOPE();
-		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
+		EntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
 
 		auto transform = handle->GetTransform();
 		auto world = transform.GenerateWorldMatrix();
@@ -1038,7 +1039,7 @@ namespace ke
 	{
 		if (Subrenderer2D* pS2D = Subrenderer2D::Get())
 		{
-			TEntityHandle handle{ m_pEditedWorld, id };
+			EntityHandle handle{ m_pEditedWorld, id };
 			static constexpr float drawLineLen = 0.5f;
 			pS2D->AddArrow(handle->GetLocation(), handle->GetForwardVector(), handle->GetRightVector(), 0.5f);
 		}

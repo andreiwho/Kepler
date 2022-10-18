@@ -1,10 +1,11 @@
 #pragma once
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
+#include "EntityComponent.h"
 
 namespace ke
 {
-	class TStaticMeshComponent
+	class TStaticMeshComponent : public EntityComponent
 	{
 	public:
 		TStaticMeshComponent() = default;

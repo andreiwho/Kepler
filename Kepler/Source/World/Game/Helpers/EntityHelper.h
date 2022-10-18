@@ -7,11 +7,11 @@ namespace ke
 {
 	// NEVER SAVE THIS VALUE
 	// For in-place use only
-	class TEntityHandle
+	class EntityHandle
 	{
 	public:
-		TEntityHandle(RefPtr<GameWorld> world, TGameEntityId id);
-		
+		EntityHandle(GameWorld* world, TGameEntityId id);
+
 		template<typename T>
 		T* GetComponent() 
 		{ 

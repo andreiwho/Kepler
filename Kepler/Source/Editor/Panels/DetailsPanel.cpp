@@ -128,7 +128,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawMaterialComponentInfo()
 	{
-		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity};
 		if (!entity)
 		{
 			return;
@@ -172,7 +172,7 @@ namespace ke
 
 	void TEditorDetailsPanel::DrawLightInfo()
 	{
-		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };
 		if (!entity)
 		{
 			return;

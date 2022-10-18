@@ -1,10 +1,11 @@
 #pragma once
 #include "Core/Types.h"
 #include "Renderer/World/Camera.h"
+#include "World/Game/Components/EntityComponent.h"
 
 namespace ke
 {
-	class CameraComponent
+	class CameraComponent : public EntityComponent
 	{
 	public:
 		CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);

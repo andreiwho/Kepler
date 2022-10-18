@@ -26,11 +26,11 @@ namespace ke
 
 	TGameEntityId GameWorld::CreateEntity(const TString& Name)
 	{
-		const entt::entity EntityId = EntityRegistry.create();
+		const TGameEntityId EntityId = EntityRegistry.create();
 		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		EntityRegistry.emplace<TIdComponent>(EntityId);
-		EntityRegistry.emplace<TTransformComponent>(EntityId);
+		AddComponent<TIdComponent>(EntityId);
+		AddComponent<TTransformComponent>(EntityId);
 		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 		return EntityId;
 	}
@@ -40,9 +40,9 @@ namespace ke
 		const entt::entity EntityId = EntityRegistry.create();
 		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		EntityRegistry.emplace<TIdComponent>(EntityId);
-		EntityRegistry.emplace<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
+		AddComponent<TIdComponent>(EntityId);
+		AddComponent<TTransformComponent>(EntityId);
+		AddComponent<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
 		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 
 		if (!IsValidEntity(MainCamera))

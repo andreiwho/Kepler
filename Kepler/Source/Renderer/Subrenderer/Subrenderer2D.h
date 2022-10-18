@@ -42,7 +42,6 @@ namespace ke
 		std::array<S2D_PrimitiveBatch, LowLevelRenderer::m_SwapChainFrameCount> m_LinesBatch{};
 
 		RefPtr<TMaterial> m_LinesMaterial{};
-
 		matrix4x4 m_ViewProjectionMatrix{};
 	};
 }

@@ -3,11 +3,11 @@
 namespace ke
 {
 
-	TEntityHandle::TEntityHandle(RefPtr<GameWorld> world, TGameEntityId id)
-		: m_GameWorld(world.Raw())
+	EntityHandle::EntityHandle(GameWorld* world, TGameEntityId id)
+		: m_GameWorld(world)
 		, m_Id(id)
 	{
-		m_GameWorld = world.Raw();
+		m_GameWorld = world;
 		if (m_GameWorld)
 		{
 			if(m_GameWorld->IsValidEntity(id))

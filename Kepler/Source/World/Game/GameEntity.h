@@ -2,17 +2,18 @@
 #include "Core/Core.h"
 #include "GameEntityId.h"
 #include "Renderer/World/WorldTransform.h"
+#include "World/Game/Components/EntityComponent.h"
 
 namespace ke
 {
 	class GameWorld;
 
-	struct TIdComponent
+	struct TIdComponent : public EntityComponent
 	{
 		id64 Id;
 	};
 
-	struct TNameComponent
+	struct TNameComponent : public EntityComponent
 	{
 		TString Name;
 	};

@@ -1,9 +1,10 @@
 #pragma once
 #include "Renderer/World/Material.h"
+#include "EntityComponent.h"
 
 namespace ke
 {
-	class TMaterialComponent
+	class TMaterialComponent : public EntityComponent
 	{
 	public:
 		TMaterialComponent() = default;

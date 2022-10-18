@@ -1,9 +1,10 @@
 #pragma once
 #include "Core/Core.h"
+#include "../EntityComponent.h"
 
 namespace ke
 {
-	class AmbientLightComponent
+	class AmbientLightComponent : public EntityComponent
 	{
 	public:
 		inline float3 GetColor() const { return m_Color; }

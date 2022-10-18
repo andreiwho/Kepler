@@ -180,7 +180,8 @@ namespace ke
 		T& operator*() { return *m_pMemory; }
 		const T& operator*() const { return *m_pMemory; }
 		inline operator bool() const { return !!Raw(); }
-
+		inline operator T* () { return Raw(); }
+		inline operator const T* () const { return Raw(); }
 		T* Raw() { return m_pMemory; }
 		const T* Raw() const { return m_pMemory; }
 

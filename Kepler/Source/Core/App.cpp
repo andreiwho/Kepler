@@ -117,16 +117,16 @@ namespace ke
 		GGlobalTimer = &mainTimer;
 		float displayInfoTime = 0.0f;
 
-		auto mainCamera = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
+		auto mainCamera = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 
-		auto ambientLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
+		auto ambientLight = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
 		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
 		pALC->SetColor(float3(0.3f, 0.3f, 0.3f));
 		ambientLight->SetLocation(float3(-2.0f, 0.0f, 0.0f));
 		
-		auto dirLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("Directional Light") };
+		auto dirLight = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("Directional Light") };
 		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
 		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
 		pDLC->SetIntensity(1.0f);
@@ -144,7 +144,7 @@ namespace ke
 				y++;
 			}
 
-			auto entity = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
+			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<TStaticMeshComponent>(mesh);
 			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
 			entity->SetScale(float3(0.3f));
