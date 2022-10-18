@@ -1013,6 +1013,10 @@ namespace ke
 		auto vpSize = m_ViewportSizes[(usize)viewport];
 
 		const auto iconSize = m_InViewportIconSize - v.w;
+		if (iconSize < 0)
+		{
+			return;
+		}
 
 		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f };
 		ImGui::SetCursorPos(iconPos);
