@@ -6,6 +6,7 @@
 #include "Renderer/RenderThread.h"
 #include "Renderer/LowLevelRenderer.h"
 #include "Tools/MaterialLoader.h"
+#include "Renderer/World/WorldRenderer.h"
 
 #include "Audio/AudioEngine.h"
 
@@ -72,6 +73,7 @@ namespace ke
 		TMeshLoader m_MeshLoader;
 
 		RefPtr<GameWorld> m_CurrentWorld;
+		RefPtr<WorldRenderer> m_WorldRenderer;
 		
 #ifdef ENABLE_EDITOR
 		RefPtr<class EditorModule> m_Editor;

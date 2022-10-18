@@ -11,12 +11,6 @@
 
 namespace ke
 {
-	enum class ESubrendererOrder
-	{
-		Background,
-		Overlay
-	};
-
 	class LowLevelRenderer : public IntrusiveRefCounted
 	{
 		static LowLevelRenderer* Instance;
@@ -53,62 +47,10 @@ namespace ke
 			return nullptr;
 		}
 
-		template<typename T, ESubrendererOrder TOrder, typename ... Args>
-		inline SharedPtr<T> PushSubrenderer(Args&&... args)
-		{
-			static_assert(std::is_base_of_v<ISubrenderer, T>);
-			auto pSubrenderer = Await(TRenderThread::Submit([&] { return MakeShared<T>(std::forward<Args>(args)...); }));
-
-			switch (TOrder)
-			{
-			case ESubrendererOrder::Background:
-				m_BackgroundSubrenderers.AppendBack(pSubrenderer);
-				break;
-			case ESubrendererOrder::Overlay:
-				m_OverlaySubrenderers.AppendBack(pSubrenderer);
-				break;
-			default:
-				CRASH();
-				break;
-			}
-			return pSubrenderer;
-		}
-
-		template<ESubrendererOrder TOrder>
-		Array<SharedPtr<ISubrenderer>>& GetSubrenderers()
-		{
-			if constexpr (TOrder == ESubrendererOrder::Overlay)
-			{
-				return m_OverlaySubrenderers;
-			}
-			return m_BackgroundSubrenderers;
-		}
-
 		static constexpr u32 m_SwapChainFrameCount = 3;
 		static constexpr u32 m_FramesInFlight = 3;
 
 		void InitScreenQuad();
-
-		template<ESubrendererOrder TOrder>
-		void RenderSubrenderers(RefPtr<ICommandListImmediate> pImmCtx)
-		{
-			for (auto& pSr : GetSubrenderers<TOrder>())
-			{
-				pSr->Render(pImmCtx);
-			}
-		}
-
-		void UpdateSubrenderersMainThread(float deltaTime)
-		{
-			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->UpdateRendererMainThread(deltaTime); }
-			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->UpdateRendererMainThread(deltaTime); }
-		}
-
-		void ClearSubrenderersState()
-		{
-			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->ClearState(); }
-			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->ClearState(); }
-		}
 
 		// Screen quad
 		struct TScreenQuad
@@ -127,8 +69,6 @@ namespace ke
 		SharedPtr<TShaderCache> m_ShaderCache{};
 		SharedPtr<GraphicsPipelineCache> m_PipelineCache{};
 		SharedPtr<TTargetRegistry> m_TargetRegistry{};
-		Array<SharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
-		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;
 
 		RefPtr<TRenderDevice> m_RenderDevice{};
 		Array<RefPtr<ISwapChain>> m_SwapChains;

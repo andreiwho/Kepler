@@ -16,52 +16,43 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer, All);
 
 	//////////////////////////////////////////////////////////////////////////
-	TWorldRenderer::TWorldRenderer(RefPtr<GameWorld> pWorld)
-		: m_CurrentWorld(pWorld)
-		, m_LLR(LowLevelRenderer::Get())
+	WorldRenderer::WorldRenderer()
+		: m_LLR(LowLevelRenderer::Get())
 	{
-		if (!StaticState) [[unlikely]]
+		if (!bInitialized)
 		{
-			StaticState = ke::New<TStaticState>();
+			CHECK(IsRenderThread());
+			RefPtr<PipelineParamMapping> RS_CameraParams = PipelineParamMapping::New();
+			RS_CameraParams->AddParam("ViewProjection", OFFSET_PARAM_ARGS(RS_CameraBufferStruct, ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
+			RS_CameraBuffer = IParamBuffer::New(RS_CameraParams);
+
+			RefPtr<PipelineParamMapping> RS_LightParams = PipelineParamMapping::New();
+			RS_LightParams->AddParam("Ambient", OFFSET_PARAM_ARGS(RS_LightBufferStruct, Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+			RS_LightParams->AddParam("DirectionalLightDirection", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightDirection), EShaderStageFlags::Vertex, EShaderInputType::Float4);
+			RS_LightParams->AddParam("DirectionalLightColor", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightColor), EShaderStageFlags::Pixel, EShaderInputType::Float4);
+			RS_LightParams->AddParam("DirectionalLightIntensity", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
+			RS_LightBuffer = IParamBuffer::New(RS_LightParams);
+
+			// Setup pipeline
+			auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
+				->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
+
+			GraphicsPipelineConfig config{};
+			config.VertexInput.Topology = EPrimitiveTopology::TriangleList;
+			config.VertexInput.VertexLayout = prePassShader->GetReflection()->VertexLayout;
+			config.ParamMapping = prePassShader->GetReflection()->ParamMapping;
+			config.DepthStencil.bDepthEnable = true;
+			config.DepthStencil.DepthAccess = EDepthBufferAccess::Write;
+			config.Rasterizer.bRasterDisabled = true;
+
+			PrePassPipeline = MakeRef(ke::New<IGraphicsPipeline>(prePassShader, config));
+			bInitialized = true;
 		}
 
-			if (!StaticState->bInitialized) [[unlikely]]
-			{
-				StaticState->Init();
-			}
 	}
 
-	void TWorldRenderer::TStaticState::Init()
-	{
-		CHECK(IsRenderThread());
-		RefPtr<PipelineParamMapping> RS_CameraParams = PipelineParamMapping::New();
-		RS_CameraParams->AddParam("ViewProjection", OFFSET_PARAM_ARGS(RS_CameraBufferStruct, ViewProjection), EShaderStageFlags::Vertex, EShaderInputType::Matrix4x4);
-		RS_CameraBuffer = IParamBuffer::New(RS_CameraParams);
-
-		RefPtr<PipelineParamMapping> RS_LightParams = PipelineParamMapping::New();
-		RS_LightParams->AddParam("Ambient", OFFSET_PARAM_ARGS(RS_LightBufferStruct, Ambient), EShaderStageFlags::Pixel, EShaderInputType::Float4);
-		RS_LightParams->AddParam("DirectionalLightDirection", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightDirection), EShaderStageFlags::Vertex, EShaderInputType::Float4);
-		RS_LightParams->AddParam("DirectionalLightColor", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightColor), EShaderStageFlags::Pixel, EShaderInputType::Float4);
-		RS_LightParams->AddParam("DirectionalLightIntensity", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
-		RS_LightBuffer = IParamBuffer::New(RS_LightParams);
-
-		// Setup pipeline
-		auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
-			->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
-
-		GraphicsPipelineConfig config{};
-		config.VertexInput.Topology = EPrimitiveTopology::TriangleList;
-		config.VertexInput.VertexLayout = prePassShader->GetReflection()->VertexLayout;
-		config.ParamMapping = prePassShader->GetReflection()->ParamMapping;
-		config.DepthStencil.bDepthEnable = true;
-		config.DepthStencil.DepthAccess = EDepthBufferAccess::Write;
-		config.Rasterizer.bRasterDisabled = true;
-
-		StaticState->PrePassPipeline = MakeRef(ke::New<IGraphicsPipeline>(prePassShader, config));
-		bInitialized = true;
-	}
-
-	void TWorldRenderer::TStaticState::Clear()
+	//////////////////////////////////////////////////////////////////////////
+	WorldRenderer::~WorldRenderer()
 	{
 		if (!bInitialized)
 		{
@@ -69,13 +60,13 @@ namespace ke
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	TWorldRenderer::~TWorldRenderer()
+	void WorldRenderer::InitFrame(RefPtr<GameWorld> pWorld)
 	{
+		m_CurrentWorld = pWorld;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::Render(TViewport2D vpSize)
+	void WorldRenderer::Render(TViewport2D vpSize)
 	{
 		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
@@ -97,26 +88,28 @@ namespace ke
 		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
 
 		// Bind static camera
-		StaticState->RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
-		pImmCtx->BindParamBuffers(StaticState->RS_CameraBuffer, RS_Camera);
+		RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(RS_CameraBuffer, RS_Camera);
 
-		StaticState->RS_LightBuffer->RT_UploadToGPU(pImmCtx);
-		pImmCtx->BindParamBuffers(StaticState->RS_LightBuffer, RS_Light);
+		RS_LightBuffer->RT_UploadToGPU(pImmCtx);
+		pImmCtx->BindParamBuffers(RS_LightBuffer, RS_Light);
 
 		// Collect renderable objects
 		// ...
 		PrePass(pImmCtx);
 
-		m_LLR->RenderSubrenderers<ESubrendererOrder::Background>(pImmCtx);
+		// Render background subrenderers
+		RenderSubrenderers<ESubrendererOrder::Background>(pImmCtx);
 		// Draw meshes
 		MeshPass(pImmCtx);
-		m_LLR->RenderSubrenderers<ESubrendererOrder::Overlay>(pImmCtx);
+		// Render overlay subrenderers
+		RenderSubrenderers<ESubrendererOrder::Overlay>(pImmCtx);
 
 		// Tonemapping
 		FlushPass(pImmCtx);
 	}
 
-	void TWorldRenderer::UpdateRendererMainThread(float deltaTime)
+	void WorldRenderer::UpdateRendererMainThread(float deltaTime)
 	{
 		KEPLER_PROFILE_SCOPE();
 		UpdateLightingData_MainThread();
@@ -135,7 +128,7 @@ namespace ke
 
 					// Write it here, though there may be a better place for it
 					const auto viewProj = glm::transpose(mathCamera.GenerateViewProjectionMatrix());
-					StaticState->RS_CameraBuffer->Write("ViewProjection", &viewProj);
+					RS_CameraBuffer->Write("ViewProjection", &viewProj);
 				}
 				else
 				{
@@ -143,10 +136,10 @@ namespace ke
 				}
 			}
 		}
-		m_LLR->UpdateSubrenderersMainThread(deltaTime);
+		UpdateSubrenderersMainThread(deltaTime);
 	}
 
-	void TWorldRenderer::UpdateLightingData_MainThread()
+	void WorldRenderer::UpdateLightingData_MainThread()
 	{
 		KEPLER_PROFILE_SCOPE();
 		float3 Ambient{ 0.0f, 0.0f, 0.0f };
@@ -156,7 +149,7 @@ namespace ke
 				Ambient += AL.GetColor();
 			});
 
-		StaticState->RS_LightBuffer->Write("Ambient", &Ambient);
+		RS_LightBuffer->Write("Ambient", &Ambient);
 
 		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TTransformComponent>().each(
 			[&, this](auto, DirectionalLightComponent& DLC, TTransformComponent& TC)
@@ -164,34 +157,21 @@ namespace ke
 				auto dir = TC.GetTransform().RotationToEuler();
 				auto color = DLC.GetColor();
 				auto intensity = DLC.GetIntensity();
-				StaticState->RS_LightBuffer->Write("DirectionalLightDirection", &dir);
-				StaticState->RS_LightBuffer->Write("DirectionalLightColor", &color);
-				StaticState->RS_LightBuffer->Write("DirectionalLightIntensity", &intensity);
+				RS_LightBuffer->Write("DirectionalLightDirection", &dir);
+				RS_LightBuffer->Write("DirectionalLightColor", &color);
+				RS_LightBuffer->Write("DirectionalLightIntensity", &intensity);
 			});
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TWorldRenderer> TWorldRenderer::New(RefPtr<GameWorld> pWorld)
+	RefPtr<WorldRenderer> WorldRenderer::New()
 	{
 		KEPLER_PROFILE_SCOPE();
-		return MakeRef(ke::New<TWorldRenderer>(pWorld));
-	}
-
-	void TWorldRenderer::ClearStaticState()
-	{
-		if (StaticState)
-		{
-			StaticState->Clear();
-
-			// MSVC makes fun of me, so 'inlining' the ke::Delete function here
-			StaticState->~TStaticState();
-			TMalloc* Alloc = TMalloc::Get();
-			Alloc->Free(StaticState);
-		}
+		return MakeRef(ke::New<WorldRenderer>());
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx)
+	void WorldRenderer::RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
@@ -205,12 +185,12 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::CollectRenderableViews()
+	void WorldRenderer::CollectRenderableViews()
 	{
 		KEPLER_PROFILE_SCOPE();
 	}
 
-	void TWorldRenderer::PrePass(RefPtr<ICommandListImmediate> pImmCtx)
+	void WorldRenderer::PrePass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("PrePass");
@@ -224,7 +204,7 @@ namespace ke
 		pImmCtx->StartDrawingToRenderTargets(nullptr, pDepthTarget);
 		pImmCtx->ClearDepthTarget(pDepthTarget, true);
 
-		pImmCtx->BindPipeline(StaticState->PrePassPipeline);
+		pImmCtx->BindPipeline(PrePassPipeline);
 		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
 			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
 			{
@@ -255,7 +235,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::MeshPass(RefPtr<ICommandListImmediate> pImmCtx)
+	void WorldRenderer::MeshPass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("MeshPass");
@@ -307,7 +287,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TWorldRenderer::FlushPass(RefPtr<ICommandListImmediate> pImmCtx)
+	void WorldRenderer::FlushPass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		// For now just flush the mesh pass image
@@ -347,6 +327,4 @@ namespace ke
 		pImmCtx->DrawIndexed(m_LLR->m_ScreenQuad.IndexBuffer->GetCount(), 0, 0);
 		pImmCtx->EndDebugEvent();
 	}
-
-	TWorldRenderer::TStaticState* TWorldRenderer::StaticState = nullptr;
 }

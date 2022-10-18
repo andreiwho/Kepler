@@ -105,9 +105,9 @@ namespace ke
 		CComPtr<ID3DBlob> Blob;
 
 		Array<D3D_SHADER_MACRO> shaderMacros;
-		TString CameraSlot = MakeBufferSlotString(TWorldRenderer::RS_Camera);
-		TString LightSlot = MakeBufferSlotString(TWorldRenderer::RS_Light);
-		TString UserSlot = MakeBufferSlotString(TWorldRenderer::RS_User);
+		TString CameraSlot = MakeBufferSlotString(WorldRenderer::RS_Camera);
+		TString LightSlot = MakeBufferSlotString(WorldRenderer::RS_Light);
+		TString UserSlot = MakeBufferSlotString(WorldRenderer::RS_User);
 
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Camera", CameraSlot.c_str()});
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Light", LightSlot.c_str()});

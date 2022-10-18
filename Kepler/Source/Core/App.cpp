@@ -74,8 +74,10 @@ namespace ke
 		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
-		m_LowLevelRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
 		m_WorldRegistry = MakeShared<WorldRegistry>();
+
+		m_WorldRenderer = Await(TRenderThread::Submit([this] { return WorldRenderer::New(); }));
+		m_WorldRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
 	}
 
 	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)
@@ -88,6 +90,7 @@ namespace ke
 
 	Engine::~Engine()
 	{
+		m_WorldRenderer.Release();
 		m_MeshLoader.ClearCache();
 		m_ImageLoader.ClearCache();
 		m_MaterialLoader.ClearLoadedMaterialCache();
@@ -175,14 +178,14 @@ namespace ke
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
 					// Initialize the renderer
-					RefPtr<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
-					Renderer->UpdateRendererMainThread(mainTimer.Delta());
+					m_WorldRenderer->InitFrame(m_CurrentWorld);
+					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
 					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
-							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
+							m_WorldRenderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
 #ifdef ENABLE_EDITOR
@@ -195,7 +198,7 @@ namespace ke
 #else
 					(void)renderTask;
 #endif
-					m_LowLevelRenderer->ClearSubrenderersState();
+					m_WorldRenderer->ClearSubrenderersState();
 					m_LowLevelRenderer->PresentAll();
 
 					if (pPlatform->IsMainWindowUnfocused())
@@ -225,7 +228,6 @@ namespace ke
 #endif
 			}
 		}
-		TWorldRenderer::ClearStaticState();
 		TerminateModuleStack();
 	}
 

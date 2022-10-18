@@ -29,8 +29,6 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	LowLevelRenderer::~LowLevelRenderer()
 	{
-		m_OverlaySubrenderers.Clear();
-		m_BackgroundSubrenderers.Clear();
 		m_TargetRegistry.reset();
 		m_ShaderCache.reset();
 		m_PipelineCache.reset();

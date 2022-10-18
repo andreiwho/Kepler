@@ -254,7 +254,7 @@ namespace ke
 			{
 				D3D11_SHADER_INPUT_BIND_DESC bindDesc;
 				HRCHECK(pReflection->GetResourceBindingDescByName(BufferDesc.Name, &bindDesc));
-				if (bindDesc.BindPoint < TWorldRenderer::RS_User)
+				if (bindDesc.BindPoint < WorldRenderer::RS_User)
 				{
 					continue;
 				}

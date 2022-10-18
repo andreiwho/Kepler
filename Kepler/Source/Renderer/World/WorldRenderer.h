@@ -4,6 +4,7 @@
 #include "Renderer/Elements/CommandList.h"
 #include "World/Game/GameWorld.h"
 #include "../LowLevelRenderer.h"
+#include "../Subrenderer/Subrenderer.h"
 
 namespace ke
 {
@@ -13,7 +14,13 @@ namespace ke
 		u32 Width = 0, Height = 0;
 	};
 
-	class TWorldRenderer : public IntrusiveRefCounted
+	enum class ESubrendererOrder
+	{
+		Background,
+		Overlay
+	};
+
+	class WorldRenderer : public IntrusiveRefCounted
 	{
 	public:
 		enum EReservedSlots
@@ -23,16 +30,69 @@ namespace ke
 			RS_User,
 		};
 
-		TWorldRenderer(RefPtr<GameWorld> pWorld);
-		~TWorldRenderer();
+		WorldRenderer();
+		~WorldRenderer();
 		
+		void InitFrame(RefPtr<GameWorld> pWorld);
 		void Render(TViewport2D ViewportSize);
 		void UpdateRendererMainThread(float deltaTime);
 		void UpdateLightingData_MainThread();
 
-		static RefPtr<TWorldRenderer> New(RefPtr<GameWorld> pWorld);
+		static RefPtr<WorldRenderer> New();
 
-		static void ClearStaticState();
+		template<typename T, ESubrendererOrder TOrder, typename ... Args>
+		inline SharedPtr<T> PushSubrenderer(Args&&... args)
+		{
+			static_assert(std::is_base_of_v<ISubrenderer, T>);
+			auto pSubrenderer = Await(TRenderThread::Submit([&] { return MakeShared<T>(std::forward<Args>(args)...); }));
+
+			switch (TOrder)
+			{
+			case ESubrendererOrder::Background:
+				m_BackgroundSubrenderers.AppendBack(pSubrenderer);
+				break;
+			case ESubrendererOrder::Overlay:
+				m_OverlaySubrenderers.AppendBack(pSubrenderer);
+				break;
+			default:
+				CRASH();
+				break;
+			}
+			return pSubrenderer;
+		}
+
+		template<ESubrendererOrder TOrder>
+		void RenderSubrenderers(RefPtr<ICommandListImmediate> pImmCtx)
+		{
+			for (auto& pSr : GetSubrenderers<TOrder>())
+			{
+				pSr->Render(pImmCtx);
+			}
+		}
+
+		template<ESubrendererOrder TOrder>
+		Array<SharedPtr<ISubrenderer>>& GetSubrenderers()
+		{
+			if constexpr (TOrder == ESubrendererOrder::Overlay)
+			{
+				return m_OverlaySubrenderers;
+			}
+			return m_BackgroundSubrenderers;
+		}
+
+		void UpdateSubrenderersMainThread(float deltaTime)
+		{
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->UpdateRendererMainThread(deltaTime); }
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->UpdateRendererMainThread(deltaTime); }
+		}
+
+		void ClearSubrenderersState()
+		{
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->ClearState(); }
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->ClearState(); }
+		}
+
+
 	private:
 		void RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
@@ -44,17 +104,13 @@ namespace ke
 		TViewport2D m_CurrentViewport{};
 		RefPtr<GameWorld> m_CurrentWorld;
 		LowLevelRenderer* m_LLR;
+		Array<SharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
+		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;
 
-		struct TStaticState
-		{
-			void Init();
-			void Clear();
-
-			bool bInitialized = false;
-			RefPtr<IParamBuffer> RS_CameraBuffer;
-			RefPtr<IParamBuffer> RS_LightBuffer;
-			RefPtr<IGraphicsPipeline> PrePassPipeline;
-		};
+		bool bInitialized = false;
+		RefPtr<IParamBuffer> RS_CameraBuffer;
+		RefPtr<IParamBuffer> RS_LightBuffer;
+		RefPtr<IGraphicsPipeline> PrePassPipeline;
 
 		struct RS_CameraBufferStruct
 		{
@@ -68,7 +124,5 @@ namespace ke
 			float4 DirectionalLightColor;
 			float DirectionalLightIntensity;
 		};
-
-		static TStaticState* StaticState;
 	};
 }
