@@ -5,7 +5,7 @@ namespace ke
 {
 	class GameWorld;
 
-	class EntityComponent
+	reflected class EntityComponent
 	{
 	public:
 		virtual ~EntityComponent() = default;

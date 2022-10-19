@@ -41,3 +41,5 @@ if(WIN32)
   "d3dcompiler"
   "dxguid")
 endif()
+
+add_subdirectory(Apps)

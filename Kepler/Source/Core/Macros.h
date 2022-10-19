@@ -52,3 +52,6 @@
 # define KEPLER_PROFILE_SCOPE(...)
 # define KEPLER_PROFILE_INIT_THREAD(...)
 #endif
+
+// Macros for KEReflector
+#define reflected
