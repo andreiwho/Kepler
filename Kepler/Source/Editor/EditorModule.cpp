@@ -212,7 +212,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void EditorModule::SelectEntity(TGameEntityId id)
+	void EditorModule::SelectEntity(GameEntityId id)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld || !m_pEditedWorld->IsValidEntity(id))
@@ -226,7 +226,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::UnselectEverything()
 	{
-		m_SelectedEntity = TGameEntityId{};
+		m_SelectedEntity = GameEntityId{};
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -533,7 +533,7 @@ namespace ke
 					if (!handle->ShouldHideInSceneGraph())
 					{
 						bool bNodeOpen = false;
-						if (m_SelectedEntity == TGameEntityId{ id })
+						if (m_SelectedEntity == GameEntityId{ id })
 						{
 							flags |= ImGuiTreeNodeFlags_Selected;
 						}
@@ -541,7 +541,7 @@ namespace ke
 						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
 						if (ImGui::IsItemClicked())
 						{
-							m_SelectedEntity = TGameEntityId{ id };
+							m_SelectedEntity = GameEntityId{ id };
 						}
 
 						if (bNodeOpen)
@@ -897,11 +897,11 @@ namespace ke
 
 				if (idColor != -1)
 				{
-					m_SelectedEntity = TGameEntityId{ (entt::entity)idColor };
+					m_SelectedEntity = GameEntityId{ (entt::entity)idColor };
 				}
 				else
 				{
-					m_SelectedEntity = TGameEntityId{ (entt::entity)entt::null };
+					m_SelectedEntity = GameEntityId{ (entt::entity)entt::null };
 				}
 			}
 		}
@@ -963,20 +963,20 @@ namespace ke
 					return;
 				}
 
-				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, GameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
 			});
 
 		m_pEditedWorld->GetComponentView<AmbientLightComponent>().each(
 			[&proj, &view, this](auto e, auto&)
 			{
-				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, GameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
 			});
 
 
 		m_pEditedWorld->GetComponentView<DirectionalLightComponent>().each(
 			[&proj, &view, this](auto e, auto&)
 			{
-				TGameEntityId entity{ e };
+				GameEntityId entity{ e };
 				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, entity, m_DirectionalLightIcon, EViewportIndex::Viewport1);
 
 				if (m_SelectedEntity == entity)
@@ -986,10 +986,10 @@ namespace ke
 			});
 	}
 
-	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport)
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, GameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport)
 	{
 		KEPLER_PROFILE_SCOPE();
-		EntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
+		EntityHandle handle{ m_pEditedWorld, GameEntityId{entity} };
 
 		auto transform = handle->GetTransform();
 		auto world = transform.GenerateWorldMatrix();
@@ -1039,7 +1039,7 @@ namespace ke
 		ImGui::PopStyleColor(3);
 	}
 
-	void EditorModule::DrawDirections(TGameEntityId id)
+	void EditorModule::DrawDirections(GameEntityId id)
 	{
 		if (Subrenderer2D* pS2D = Subrenderer2D::Get())
 		{

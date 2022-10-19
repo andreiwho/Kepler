@@ -147,6 +147,7 @@ namespace ke
 			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<TStaticMeshComponent>(mesh);
 			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
+
 			entity->SetScale(float3(0.3f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
 			entity->SetLocation(float3(x, y, 0.0f));

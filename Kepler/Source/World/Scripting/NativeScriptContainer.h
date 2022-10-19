@@ -1,5 +1,6 @@
 #pragma once
 #include "World/Game/Components/EntityComponent.h"
+#include "NativeScriptComponent.h"
 
 namespace ke
 {
@@ -7,11 +8,19 @@ namespace ke
 	{
 	public:
 		NativeScriptContainerComponent();
-		
+
 		void Init();
 		void Update(float deltaTime);
 		void Destroying();
-	
-	private:
+
+		template<typename T>
+		void AddComponent()
+		{
+		}
+
+		template<typename T>
+		void RemoveComponent()
+		{
+		}
 	};
 }

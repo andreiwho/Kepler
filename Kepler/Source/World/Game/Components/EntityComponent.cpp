@@ -2,7 +2,7 @@
 
 namespace ke
 {
-	void EntityComponent::SetOwner(TGameEntityId ownerId)
+	void EntityComponent::SetOwner(GameEntityId ownerId)
 	{
 		m_OwnerId = ownerId;
 	}

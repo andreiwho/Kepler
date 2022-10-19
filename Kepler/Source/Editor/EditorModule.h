@@ -51,7 +51,7 @@ namespace ke
 		virtual void OnUpdate(float deltaTime) override;
 		void EndGUIPass();
 		void SetEditedWorld(RefPtr<GameWorld> pWorld);
-		void SelectEntity(TGameEntityId id);
+		void SelectEntity(GameEntityId id);
 		void UnselectEverything();
 		EViewportIndex GetHoveredViewport() const { return m_HoveredViewport; }
 
@@ -85,8 +85,8 @@ namespace ke
 		void EditorCamera_FocusSelectedObject();
 
 		void DrawViewportEntityIcons();
-		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport);
-		void DrawDirections(TGameEntityId id);
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, GameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport);
+		void DrawDirections(GameEntityId id);
 
 	private:
 		TWindow* m_pMainWindow{};
@@ -94,9 +94,9 @@ namespace ke
 		float2 m_ViewportPositions[(u32)EViewportIndex::Max]{};
 
 		RefPtr<GameWorld> m_pEditedWorld{};
-		TGameEntityId m_SelectedEntity{};
+		GameEntityId m_SelectedEntity{};
 		EViewportIndex m_HoveredViewport = EViewportIndex::Max;
-		TGameEntityId m_EditorCameraEntity{};
+		GameEntityId m_EditorCameraEntity{};
 		bool m_bIsControllingCamera = false;
 		bool m_bIsCursorInViewport = false;
 		bool m_bIsGizmoHovered = false;
@@ -117,7 +117,7 @@ namespace ke
 		ETranslationSnap m_TranslationSnap = ETranslationSnap::_1Unit;
 		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
 
-		TGameEntityId m_EditorGridEntity{};
+		GameEntityId m_EditorGridEntity{};
 		const i32 m_GridSize = 1000;
 		float m_InViewportIconSize = 50.0;
 
