@@ -9,7 +9,7 @@ namespace ke
 	{
 	}
 
-	void TTransformComponent::SetTransform(TWorldTransform NewTransform)
+	void TTransformComponent::SetTransform(WorldTransform NewTransform)
 	{
 		Transform = NewTransform;
 	}

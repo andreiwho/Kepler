@@ -3,7 +3,7 @@
 namespace ke
 {
 	
-	TWorld::TWorld(const TString& InName)
+	TWorld::TWorld(const String& InName)
 		:	Name(InName)
 	{
 	}

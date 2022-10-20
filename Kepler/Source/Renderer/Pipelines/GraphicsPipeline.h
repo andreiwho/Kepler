@@ -79,12 +79,12 @@ namespace ke
 		static GraphicsPipelineCache* Get() { return Instance; }
 		GraphicsPipelineCache() { Instance = this; }
 
-		bool Exists(const TString& name) const;
-		void Add(const TString& name, RefPtr<IGraphicsPipeline> pPipeline);
-		RefPtr<IGraphicsPipeline> GetPipeline(const TString& name) const;
+		bool Exists(const String& name) const;
+		void Add(const String& name, RefPtr<IGraphicsPipeline> pPipeline);
+		RefPtr<IGraphicsPipeline> GetPipeline(const String& name) const;
 
 	private:
-		Map<TString, RefPtr<IGraphicsPipeline>> m_Pipelines;
+		Map<String, RefPtr<IGraphicsPipeline>> m_Pipelines;
 	};
 
 	class IGraphicsPipeline : public IntrusiveRefCounted
@@ -104,7 +104,7 @@ namespace ke
 		void Validate() const;
 
 	protected:
-		static RefPtr<IShader> LoadHLSLShader(const TString& shaderPath, EShaderStageFlags stages);
+		static RefPtr<IShader> LoadHLSLShader(const String& shaderPath, EShaderStageFlags stages);
 		void DeferredInit(RefPtr<IShader> pShader, const GraphicsPipelineConfig& configuration);
 
 	private:

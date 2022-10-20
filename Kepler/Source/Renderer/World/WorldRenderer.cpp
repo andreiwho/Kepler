@@ -176,8 +176,8 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("RT_UpdateMaterialComponents");
 
-		m_CurrentWorld->GetComponentView<TMaterialComponent>().each(
-			[this, pImmCtx](auto, TMaterialComponent& component)
+		m_CurrentWorld->GetComponentView<MaterialComponent>().each(
+			[this, pImmCtx](auto, MaterialComponent& component)
 			{
 				component.GetMaterial()->RT_Update(pImmCtx);
 			});
@@ -205,8 +205,8 @@ namespace ke
 		pImmCtx->ClearDepthTarget(pDepthTarget, true);
 
 		pImmCtx->BindPipeline(PrePassPipeline);
-		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
-			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
+		m_CurrentWorld->GetComponentView<MaterialComponent, StaticMeshComponent>().each(
+			[pImmCtx](auto, MaterialComponent& MT, StaticMeshComponent& SM)
 			{
 				if (MT.UsesPrepass())
 				{
@@ -230,7 +230,7 @@ namespace ke
 			RefPtr<IParamBuffer> ParamBuffer;
 			RefPtr<IGraphicsPipeline> Pipeline;
 			RefPtr<PipelineSamplerPack> Samplers;
-			RefPtr<TStaticMesh> StaticMesh;
+			RefPtr<StaticMesh> Mesh;
 		};
 	}
 
@@ -269,8 +269,8 @@ namespace ke
 		pImmCtx->ClearRenderTarget(pIdTarget, float4(-1.0f));
 
 		// For now just draw all the meshes with no pipeline sorting
-		m_CurrentWorld->GetComponentView<TMaterialComponent, TStaticMeshComponent>().each(
-			[pImmCtx](auto, TMaterialComponent& MT, TStaticMeshComponent& SM)
+		m_CurrentWorld->GetComponentView<MaterialComponent, StaticMeshComponent>().each(
+			[pImmCtx](auto, MaterialComponent& MT, StaticMeshComponent& SM)
 			{
 				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
 				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline());

@@ -27,7 +27,7 @@ namespace ke
 	class THLSLShaderD3D11 : public HLSLShader
 	{
 	public:
-		THLSLShaderD3D11(const TString& Name, const Array<ShaderModule>& Modules);
+		THLSLShaderD3D11(const String& Name, const Array<ShaderModule>& Modules);
 
 	protected:
 		inline RefPtr<TShaderHandleD3D11> GetD3D11Handle() const { return RefCast<TShaderHandleD3D11>(m_Handle); }

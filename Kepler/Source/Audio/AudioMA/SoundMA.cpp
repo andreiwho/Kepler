@@ -5,7 +5,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogSoundMA, All);
 
-	TSoundMA::TSoundMA(const TString& path, const ESoundCreateFlags flags)
+	TSoundMA::TSoundMA(const String& path, const ESoundCreateFlags flags)
 		:	TSound(path, flags)
 	{
 		// We need to avoid the thread lock if the sound is streamed

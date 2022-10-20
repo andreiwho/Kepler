@@ -31,17 +31,17 @@ namespace ke
 	{
 		friend class NativeScriptContainerComponent;
 	public:
-		GameWorld(const TString& InName);
+		GameWorld(const String& InName);
 
 		~GameWorld();
 
-		GameEntityId CreateEntity(const TString& Name);
-		GameEntityId CreateCamera(const TString& Name, float Fov = 45.0f, float Width = 0, float Height = 0, float Near = 0.1f, float Far = 100.0f);
+		GameEntityId CreateEntity(const String& Name);
+		GameEntityId CreateCamera(const String& Name, float Fov = 45.0f, float Width = 0, float Height = 0, float Near = 0.1f, float Far = 100.0f);
 		TGameEntity& GetEntityFromId(GameEntityId Id);
 
 		void DestroyEntity(GameEntityId Entity);
 
-		TString GetEntityName(GameEntityId Entity);
+		String GetEntityName(GameEntityId Entity);
 
 		id64 GetEntityUUID(GameEntityId Entity) const;
 
@@ -116,14 +116,14 @@ namespace ke
 		{
 			if constexpr (std::is_base_of_v<NativeScriptComponent, T>)
 			{
-				T& component = EntityRegistry.emplace<T>(entity);
+				T& component = m_EntityRegistry.emplace<T>(entity);
 				SetupNativeComponent<T>();
 				component.SetOwner(entity);
 				component.SetWorld(this);
 				return component;
 			}
 
-			T& component = EntityRegistry.emplace<T>(entity.Entity, std::forward<ARGS>(InArgs)...);
+			T& component = m_EntityRegistry.emplace<T>(entity.Entity, std::forward<ARGS>(InArgs)...);
 			component.SetOwner(entity);
 			component.SetWorld(this);
 			return component;
@@ -142,25 +142,25 @@ namespace ke
 		template<entity_component_typename T>
 		T& GetComponent(GameEntityId Entity)
 		{
-			return EntityRegistry.get<T>(Entity.Entity);
+			return m_EntityRegistry.get<T>(Entity.Entity);
 		}
 
 		template<entity_component_typename T>
 		const T& GetComponent(GameEntityId Entity) const
 		{
-			return EntityRegistry.get<T>(Entity.Entity);
+			return m_EntityRegistry.get<T>(Entity.Entity);
 		}
 
 		template<entity_component_typename T>
 		inline bool HasComponent(GameEntityId Entity) const
 		{
-			return EntityRegistry.any_of<T>(Entity.Entity);
+			return m_EntityRegistry.any_of<T>(Entity.Entity);
 		}
 
 		template<entity_component_typename T>
 		void RemoveComponent(GameEntityId Entity)
 		{
-			EntityRegistry.remove<T>(Entity.Entity);
+			m_EntityRegistry.remove<T>(Entity.Entity);
 		}
 
 		template<entity_component_typename ... Ts>
@@ -168,11 +168,11 @@ namespace ke
 		{
 			if constexpr (sizeof...(Ts) > 1)
 			{
-				return EntityRegistry.group<Ts...>();
+				return m_EntityRegistry.group<Ts...>();
 			}
 			else
 			{
-				return EntityRegistry.view<Ts...>();
+				return m_EntityRegistry.view<Ts...>();
 			}
 		}
 
@@ -180,8 +180,20 @@ namespace ke
 
 		void SetMainCamera(GameEntityId Camera);
 
-		inline GameEntityId GetMainCamera() const { return MainCamera; }
+		inline GameEntityId GetMainCamera() const { return m_MainCamera; }
 
+		inline usize GetNumEntities() const
+		{
+			return m_EntityRegistry.alive();
+		}
+
+		// The Func should be void(GameEntityId)
+		template<typename Func>
+		void ForEachEntity(Func func)
+		{
+			m_EntityRegistry.each(func);
+		}
+ 		
 		// Check functons
 		bool IsCamera(GameEntityId Entity) const;
 		bool IsLight(GameEntityId Entity) const;
@@ -189,12 +201,12 @@ namespace ke
 	private:
 		void FlushPendingDestroys();
 
-		entt::registry EntityRegistry;
+		entt::registry m_EntityRegistry;
 
-		Array<entt::entity> PendingDestroyEntities;
+		Array<entt::entity> m_PendingDestroyEntities;
 		Array<NativeComponentAccessors> m_NativeAccessors;
 		Map<u64, NativeComponentInfo> m_NativeComponentInfos;
 
-		GameEntityId MainCamera{};
+		GameEntityId m_MainCamera{};
 	};
 }

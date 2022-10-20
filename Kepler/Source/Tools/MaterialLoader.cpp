@@ -19,9 +19,9 @@ namespace ke
 
 	namespace
 	{
-		TString CaseInsensitive(const TString& string)
+		String CaseInsensitive(const String& string)
 		{
-			TString outString = string;
+			String outString = string;
 			for (auto& ch : outString)
 			{
 				ch = std::tolower(ch);
@@ -33,16 +33,16 @@ namespace ke
 		EPrimitiveTopology ParsePrimitiveTopology(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Triangles") == String)
+			const auto str = Object.GetString();
+			if (String("Triangles") == str)
 			{
 				return EPrimitiveTopology::TriangleList;
 			}
-			if (TString("Lines") == String)
+			if (String("Lines") == str)
 			{
 				return EPrimitiveTopology::LineList;
 			}
-			if (TString("Points") == String)
+			if (String("Points") == str)
 			{
 				return EPrimitiveTopology::PointList;
 			}
@@ -53,12 +53,12 @@ namespace ke
 		EPrimitiveFillMode ParseFillMode(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Solid") == String)
+			const auto str = Object.GetString();
+			if (String("Solid") == str)
 			{
 				return EPrimitiveFillMode::Solid;
 			}
-			if (TString("Wireframe") == String)
+			if (String("Wireframe") == str)
 			{
 				return EPrimitiveFillMode::Wireframe;
 			}
@@ -69,31 +69,31 @@ namespace ke
 		{
 			CHECK(Object.IsString());
 			const auto string = Object.GetString();
-			if (TString("None") == string)
+			if (String("None") == string)
 			{
 				return EDepthComparissonMode::None;
 			}
-			if (TString("Less") == string)
+			if (String("Less") == string)
 			{
 				return EDepthComparissonMode::Less;
 			}
-			if (TString("LEqual") == string)
+			if (String("LEqual") == string)
 			{
 				return EDepthComparissonMode::LEqual;
 			}
-			if (TString("Equal") == string)
+			if (String("Equal") == string)
 			{
 				return EDepthComparissonMode::Equal;
 			}
-			if (TString("Greater") == string)
+			if (String("Greater") == string)
 			{
 				return EDepthComparissonMode::Greater;
 			}
-			if (TString("GEqual") == string)
+			if (String("GEqual") == string)
 			{
 				return EDepthComparissonMode::GEqual;
 			}
-			if (TString("Always") == string)
+			if (String("Always") == string)
 			{
 				return EDepthComparissonMode::Always;
 			}
@@ -104,16 +104,16 @@ namespace ke
 		EPrimitiveCullMode ParseCullMode(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("None") == String)
+			const auto str = Object.GetString();
+			if (String("None") == str)
 			{
 				return EPrimitiveCullMode::None;
 			}
-			if (TString("Front") == String)
+			if (String("Front") == str)
 			{
 				return EPrimitiveCullMode::Front;
 			}
-			if (TString("Back") == String)
+			if (String("Back") == str)
 			{
 				return EPrimitiveCullMode::Back;
 			}
@@ -124,16 +124,16 @@ namespace ke
 		EPipelineDomain ParsePipelineDomain(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Unlit") == String)
+			const auto str = Object.GetString();
+			if (String("Unlit") == str)
 			{
 				return EPipelineDomain::Unlit;
 			}
-			if (TString("Lit") == String)
+			if (String("Lit") == str)
 			{
 				return EPipelineDomain::Lit;
 			}
-			if (TString("Other") == String)
+			if (String("Other") == str)
 			{
 				return EPipelineDomain::Other;
 			}
@@ -146,20 +146,20 @@ namespace ke
 		Enum ParseAccessFlags(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("None") == String)
+			const auto str = Object.GetString();
+			if (String("None") == str)
 			{
 				return Enum::None;
 			}
-			if (TString("Read") == String)
+			if (String("Read") == str)
 			{
 				return Enum::Read;
 			}
-			if (TString("Write") == String)
+			if (String("Write") == str)
 			{
 				return Enum::Write;
 			}
-			if (TString("ReadWrite") == String)
+			if (String("ReadWrite") == str)
 			{
 				return Enum::Read | Enum::Write;
 			}
@@ -167,7 +167,7 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		RefPtr<IGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
+		RefPtr<IGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const String& MaterialPath, bool bForce = false)
 		{
 			CHECK(Object.IsObject());
 			CHECK(Object.HasMember("Pipeline"));
@@ -298,7 +298,7 @@ namespace ke
 	{
 	}
 
-	RefPtr<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path, bool bForce)
+	RefPtr<TMaterial> TMaterialLoader::LoadMaterial(const String& Path, bool bForce)
 	{
 		if (!TFileUtils::PathExists(Path))
 		{

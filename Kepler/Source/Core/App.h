@@ -27,9 +27,9 @@ namespace ke
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;
-		TCommandLineArguments(Array<TString> const& cmdLine);
+		TCommandLineArguments(Array<String> const& cmdLine);
 
-		TString GameModuleDirectory = "";
+		String GameModuleDirectory = "";
 	};
 
 	struct TApplicationLaunchParams
@@ -70,7 +70,7 @@ namespace ke
 
 		TMaterialLoader m_MaterialLoader;
 		TImageLoader m_ImageLoader;
-		TMeshLoader m_MeshLoader;
+		MeshLoader m_MeshLoader;
 
 		RefPtr<GameWorld> m_CurrentWorld;
 		RefPtr<WorldRenderer> m_WorldRenderer;

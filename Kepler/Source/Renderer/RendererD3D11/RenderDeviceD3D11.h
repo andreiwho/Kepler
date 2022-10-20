@@ -53,7 +53,7 @@ namespace ke
 		virtual RefPtr<ITextureSampler2D> CreateTextureSampler2D(RefPtr<IImage2D> InImage, u32 MipLevel = 0, u32 ArrayLayer = 0) override;
 
 		void Internal_InitInfoMessageStartIndex_Debug();
-		Array<TString> GetInfoQueueMessages() const;
+		Array<String> GetInfoQueueMessages() const;
 
 		virtual bool RT_FlushPendingDeleteResources() override;
 

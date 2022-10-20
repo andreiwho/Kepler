@@ -6,14 +6,14 @@
 namespace ke
 {
 
-	THLSLIncludeResolverD3D11::THLSLIncludeResolverD3D11(const TString& InMyPath) 
+	THLSLIncludeResolverD3D11::THLSLIncludeResolverD3D11(const String& InMyPath) 
 		: MyPath(VFSGetParentPath(InMyPath))
 	{
 	}
 
 	HRESULT THLSLIncludeResolverD3D11::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
 	{
-		const TString LoadedPath = std::invoke([&]
+		const String LoadedPath = std::invoke([&]
 			{
 
 				switch (IncludeType)

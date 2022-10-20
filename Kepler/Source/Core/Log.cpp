@@ -14,7 +14,7 @@ namespace ke
 		Instance = this;
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const TString& name, ELogLevel level)
+	std::shared_ptr<spdlog::logger> TLog::FindOrCreateLogger(const String& name, ELogLevel level)
 	{
 		std::lock_guard lck{ m_LoggerCreationFence };
 		if (m_Loggers.contains(name))
@@ -24,7 +24,7 @@ namespace ke
 		return CreateLogger(name, level);
 	}
 
-	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const TString& name, ELogLevel level)
+	std::shared_ptr<spdlog::logger> TLog::CreateLogger(const String& name, ELogLevel level)
 	{
 #ifdef ENABLE_EDITOR
 		if (!m_EditorSink)

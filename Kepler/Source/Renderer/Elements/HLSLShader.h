@@ -7,6 +7,6 @@ namespace ke
 	class HLSLShader : public IShader 
 	{
 	public:
-		HLSLShader(const TString& name, const Array<ShaderModule>& modules);
+		HLSLShader(const String& name, const Array<ShaderModule>& modules);
 	};
 }

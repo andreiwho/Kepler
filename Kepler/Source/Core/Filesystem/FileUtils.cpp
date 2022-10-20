@@ -4,11 +4,11 @@
 
 namespace ke
 {
-	std::future<TString> TFileUtils::ReadTextFileAsync(const TString& path)
+	std::future<String> TFileUtils::ReadTextFileAsync(const String& path)
 	{
 		return Async([CopiedPath = VFSResolvePath(path)]
 			{
-				TString outStr;
+				String outStr;
 #ifdef WIN32
 				std::ifstream stream{ CopiedPath, std::ios::ate | std::ios::binary };
 #else
@@ -27,7 +27,7 @@ namespace ke
 			});
 	}
 
-	TFuture<void> TFileUtils::WriteTextFileAsync(const TString& path, const TString& text)
+	TFuture<void> TFileUtils::WriteTextFileAsync(const String& path, const String& text)
 	{
 		return Async([CopiedPath = VFSResolvePath(path), CopiedText = text]
 			{
@@ -40,7 +40,7 @@ namespace ke
 			});
 	}
 
-	std::future<Array<u8>> TFileUtils::ReadBinaryFileAsync(const TString& path)
+	std::future<Array<u8>> TFileUtils::ReadBinaryFileAsync(const String& path)
 	{
 		return Async([CopiedPath = VFSResolvePath(path)]
 			{
@@ -64,7 +64,7 @@ namespace ke
 			});
 	}
 
-	bool TFileUtils::PathExists(const TString& path)
+	bool TFileUtils::PathExists(const String& path)
 	{
 		return std::filesystem::exists(VFSResolvePath(path));
 	}

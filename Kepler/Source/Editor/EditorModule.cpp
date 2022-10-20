@@ -36,6 +36,7 @@
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
 #include "Renderer/Subrenderer/Subrenderer2D.h"
+#include "World/Game/GameWorldSerializer.h"
 
 namespace ke
 {
@@ -259,7 +260,7 @@ namespace ke
 	void EditorModule::SetupStyle()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		const TString font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
+		const String font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
 		io.Fonts->AddFontFromFileTTF(font.c_str(), 15.0f);
 
 		auto& style = ImGui::GetStyle();
@@ -343,7 +344,12 @@ namespace ke
 		{
 			if (ImGui::BeginMenu("File", true))
 			{
-				ImGui::MenuItem("NoOp", "No + Op");
+				if (ImGui::MenuItem("Save", "Ctrl + S"))
+				{
+					GameWorldSerializer serializer{ m_pEditedWorld };
+					const auto& data = serializer.GetSerializedEntityData();
+				}
+
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -617,7 +623,7 @@ namespace ke
 			{
 				float3 Location, Rotation, Scale;
 				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &Location.x, &Rotation.x, &Scale.x);
-				transformComp.SetTransform(TWorldTransform{ Location, Rotation, Scale });
+				transformComp.SetTransform(WorldTransform{ Location, Rotation, Scale });
 			}
 		}
 	}
@@ -956,8 +962,8 @@ namespace ke
 
 		m_EditorGridEntity = m_pEditedWorld->CreateEntity("_editorgrid");
 		auto gridEntity = EntityHandle{ m_pEditedWorld, m_EditorGridEntity };
-		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
-		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
+		gridEntity.AddComponent<StaticMeshComponent>(vertices, indices);
+		gridEntity.AddComponent<MaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
 		gridEntity->SetHideInSceneGraph(true);
 	}
 

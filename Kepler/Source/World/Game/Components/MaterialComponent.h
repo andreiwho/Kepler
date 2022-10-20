@@ -4,16 +4,16 @@
 
 namespace ke
 {
-	class TMaterialComponent : public EntityComponent
+	class MaterialComponent : public EntityComponent
 	{
 	public:
-		TMaterialComponent() = default;
-		TMaterialComponent(RefPtr<TMaterial> InMaterial);
+		MaterialComponent() = default;
+		MaterialComponent(RefPtr<TMaterial> InMaterial);
 
 		inline RefPtr<TMaterial> GetMaterial() { return Material; }
 		void SetMaterial(RefPtr<TMaterial> InMaterial);
 
-		inline const TString& GetMaterialParentAssetPath() const
+		inline const String& GetMaterialParentAssetPath() const
 		{
 			return Material->GetParentAssetPath();
 		}

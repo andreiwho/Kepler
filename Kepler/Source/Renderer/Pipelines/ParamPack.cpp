@@ -9,7 +9,7 @@ namespace ke
 	{
 		struct TLocalParam
 		{
-			TString Name;
+			String Name;
 			PipelineParam Param;
 		};
 
@@ -43,7 +43,7 @@ namespace ke
 		return LowLevelRenderer::Get()->GetNextFrameIndex();
 	}
 
-	void PipelineParamMapping::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
+	void PipelineParamMapping::AddParam(const String& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
 	{
 		CHECK(!Name.empty());
 
@@ -62,7 +62,7 @@ namespace ke
 		m_ParamShaderStages |= Stage;
 	}
 
-	void PipelineParamMapping::AddTextureSampler(const TString& name, EShaderStageFlags stage, u32 reg)
+	void PipelineParamMapping::AddTextureSampler(const String& name, EShaderStageFlags stage, u32 reg)
 	{
 		CHECK(!name.empty());
 		m_Samplers.Insert(name, reg);
@@ -96,7 +96,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void PipelineSamplerPack::Write(const TString& name, RefPtr<ITextureSampler2D> pData)
+	void PipelineSamplerPack::Write(const String& name, RefPtr<ITextureSampler2D> pData)
 	{
 		CHECK(m_Params);
 		CHECK(m_Params->GetSamplers().Contains(name));
@@ -105,7 +105,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<ITextureSampler2D> PipelineSamplerPack::GetSampler(const TString& name)
+	RefPtr<ITextureSampler2D> PipelineSamplerPack::GetSampler(const String& name)
 	{
 		CHECK(m_Params);
 		CHECK(m_Params->GetSamplers().Contains(name));

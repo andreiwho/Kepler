@@ -113,7 +113,7 @@ namespace ke
 	void TAssetBrowserPanel::DrawAsset(std::string_view label, i32 itemIndex, RefPtr<ITextureSampler2D> icon)
 	{
 		ImGui::BeginGroup();
-		TString visibleLabel = fmt::format("##{}", label.data());
+		String visibleLabel = fmt::format("##{}", label.data());
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, m_ItemRounding * 3);
 		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize + m_IconPadding * 2, m_IconSize)))
@@ -306,7 +306,7 @@ namespace ke
 			flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		}
 
-		const TString name = pCustomName ? pCustomName : pDirectory->GetName();
+		const String name = pCustomName ? pCustomName : pDirectory->GetName();
 		bool bOpened = ImGui::TreeNodeEx((name + "##" + pDirectory->GetPath_Resolved()).c_str(), flags);
 		bool bClicked = ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen();
 

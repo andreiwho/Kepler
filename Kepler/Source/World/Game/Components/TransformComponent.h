@@ -10,8 +10,8 @@ namespace ke
 	public:
 		TTransformComponent(float3 Location = float3(), float3 Rotation = float3(), float3 Scale = float3(1.0f));
 
-		TWorldTransform GetTransform() const { return Transform; }
-		void SetTransform(TWorldTransform NewTransform);
+		WorldTransform GetTransform() const { return Transform; }
+		void SetTransform(WorldTransform NewTransform);
 
 		void SetLocation(float3 NewLocation);
 		void SetRotation(float3 NewRotation);
@@ -26,6 +26,6 @@ namespace ke
 		float3 GetUpVector() const;
 
 	private:
-		TWorldTransform Transform;
+		WorldTransform Transform;
 	};
 }

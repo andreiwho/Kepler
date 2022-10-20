@@ -15,7 +15,7 @@ namespace ke
 
 	struct TNameComponent : public EntityComponent
 	{
-		TString Name;
+		String Name;
 	};
 
 	class TGameEntity
@@ -23,9 +23,9 @@ namespace ke
 	public:
 		TGameEntity(GameWorld* InWorld, entt::entity Id);
 
-		TString GetName() const;
+		String GetName() const;
 
-		void SetName(const TString& Name);
+		void SetName(const String& Name);
 
 		id64 GetGUID() const;
 
@@ -49,9 +49,9 @@ namespace ke
 
 		void SetScale(float3 NewScale);
 
-		TWorldTransform GetTransform() const;
+		WorldTransform GetTransform() const;
 
-		void SetTransform(TWorldTransform NewTransform);
+		void SetTransform(WorldTransform NewTransform);
 
 		inline bool IsCamera() const { return bIsCamera; }
 

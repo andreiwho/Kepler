@@ -7,9 +7,9 @@ namespace ke
 {
 	struct TFileUtils
 	{
-		static std::future<TString> ReadTextFileAsync(const TString& path);
-		static TFuture<void> WriteTextFileAsync(const TString& path, const TString& text);
-		static std::future<Array<u8>> ReadBinaryFileAsync(const TString& path);
-		static bool PathExists(const TString& path);
+		static std::future<String> ReadTextFileAsync(const String& path);
+		static TFuture<void> WriteTextFileAsync(const String& path, const String& text);
+		static std::future<Array<u8>> ReadBinaryFileAsync(const String& path);
+		static bool PathExists(const String& path);
 	};
 }

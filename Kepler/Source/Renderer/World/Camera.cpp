@@ -15,7 +15,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void MathCamera::SetTransform(const TWorldTransform& transform)
+	void MathCamera::SetTransform(const WorldTransform& transform)
 	{
 		const auto location = transform.GetLocation();
 		const auto direction = ToEuler(transform.GetRotation());

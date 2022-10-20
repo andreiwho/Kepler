@@ -5,7 +5,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogAssetTree, All);
 
-	AssetTreeNode::AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& path)
+	AssetTreeNode::AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const String& path)
 		: m_Parent(pParent)
 		, m_ResolvedPath(VFSResolvePath(path))
 		, m_UnresolvedPath(path)
@@ -59,7 +59,7 @@ namespace ke
 		m_Parent = pParent;
 	}
 
-	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const TString& path)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const String& path)
 	{
 		return FindNodeById(path);
 	}
@@ -108,8 +108,8 @@ namespace ke
 					return true;
 				}
 
-				const TString& lName = lhs->GetName();
-				const TString& rName = rhs->GetName();
+				const String& lName = lhs->GetName();
+				const String& rName = rhs->GetName();
 				const i32 commonLen = (i32)std::min(lName.length(), rName.length());
 				CHECK(commonLen > 0);
 

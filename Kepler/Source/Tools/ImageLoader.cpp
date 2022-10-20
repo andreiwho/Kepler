@@ -27,7 +27,7 @@ namespace ke
 		LoadedSamplers.Clear();
 	}
 
-	std::future<TImageData> TImageLoader::Load(const TString& Path)
+	std::future<TImageData> TImageLoader::Load(const String& Path)
 	{
 		return Async(
 			[CopiedPath = VFSResolvePath(Path)]
@@ -51,7 +51,7 @@ namespace ke
 			});
 	}
 
-	RefPtr<ITextureSampler2D> TImageLoader::LoadSamplerCached(const TString& Path)
+	RefPtr<ITextureSampler2D> TImageLoader::LoadSamplerCached(const String& Path)
 	{
 		CHECK(!IsRenderThread());
 

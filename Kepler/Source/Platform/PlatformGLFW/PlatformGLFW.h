@@ -19,11 +19,11 @@ namespace ke
 		TPlatformGLFW();
 		~TPlatformGLFW();
 
-		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) override;
+		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const String& title, const TWindowParams& params = {}) override;
 		virtual void Update() override;
 		virtual bool HasActiveMainWindow() const override;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;
-		static bool HandleCrashReported_Impl(const TString& msg);
+		static bool HandleCrashReported_Impl(const String& msg);
 		inline virtual bool IsMainWindow(TWindow* pWindow) const override { return !m_Windows.IsEmpty() && (m_Windows[0].get() == pWindow); }
 		virtual void SetCursorMode(ECursorMode mode) override;
 

@@ -5,12 +5,12 @@
 namespace ke
 {
 
-	TStaticMesh::TStaticMesh(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer)
+	StaticMesh::StaticMesh(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer)
 		:	m_Sections({TInternalSection{pVertexBuffer, pIndexBuffer}})
 	{
 	}
 
-	TStaticMesh::TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices)
+	StaticMesh::StaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices)
 	{
 		CHECK(!IsRenderThread());
 
@@ -23,12 +23,14 @@ namespace ke
 		m_Sections.EmplaceBack(std::move(section));
 	}
 
-	TStaticMesh::TStaticMesh(const Array<TStaticMeshSection>& sections)
+	StaticMesh::StaticMesh(const Array<TStaticMeshSection>& sections, const String& assetPath, bool bForcedSingleSection)
+		:	m_ParentAssetName(assetPath)
+		,	m_bForcedSingleSection(bForcedSingleSection)
 	{
 		SetSections(sections);
 	}
 
-	void TStaticMesh::SetSections(const Array<TStaticMeshSection>& sections)
+	void StaticMesh::SetSections(const Array<TStaticMeshSection>& sections)
 	{
 		m_Sections.Clear();
 		m_Sections.Reserve(sections.GetLength());

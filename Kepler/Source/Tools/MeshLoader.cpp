@@ -12,27 +12,33 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogMeshLoader, All);
 
 	//////////////////////////////////////////////////////////////////////////
-	TMeshLoader* TMeshLoader::Instance = nullptr;
+	MeshLoader* MeshLoader::Instance = nullptr;
 
 	//////////////////////////////////////////////////////////////////////////
-	TMeshLoader::TMeshLoader()
+	MeshLoader::MeshLoader()
 	{
 		Instance = this;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TMeshLoader::~TMeshLoader()
+	MeshLoader::~MeshLoader()
 	{
 		ClearCache();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TMeshLoader::ClearCache()
+	void MeshLoader::ClearCache()
 	{
 	}
 
+	RefPtr<StaticMesh> MeshLoader::LoadStaticMesh(const String& meshPath, bool bTryOutputSingleSection)
+	{
+		Array<TStaticMeshSection> sections = LoadStaticMeshSections(meshPath, bTryOutputSingleSection);
+		return StaticMesh::New(sections, meshPath, bTryOutputSingleSection);
+	}
+
 	//////////////////////////////////////////////////////////////////////////
-	Array<TStaticMeshSection> TMeshLoader::LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection)
+	Array<TStaticMeshSection> MeshLoader::LoadStaticMeshSections(const String& MeshPath, bool bTryOutputSingleSection)
 	{
 		Assimp::Importer Importer{};
 		Array<u8> Binary = Await(TFileUtils::ReadBinaryFileAsync(MeshPath));
@@ -58,7 +64,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections)
+	bool MeshLoader::ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pNode)
 		{
@@ -88,7 +94,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TMeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections)
+	bool MeshLoader::ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections)
 	{
 		if (!pMesh || !pScene)
 		{

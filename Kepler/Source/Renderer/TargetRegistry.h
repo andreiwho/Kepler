@@ -40,25 +40,25 @@ namespace ke
 		// - If size is different from the actual size, the render target is recreated and returned
 		// - If no render target exists with this name, the new one gets created
 		// Name is required, Width, Height, Format are important only for the first time.
-		RefPtr<TRenderTargetGroup> GetRenderTargetGroup(const TString& name, u32 width = UINT32_MAX, u32 height = UINT32_MAX, EFormat format = EFormat::Unknown, u32 layers = UINT32_MAX, bool bAllowCPURead = false);
+		RefPtr<TRenderTargetGroup> GetRenderTargetGroup(const String& name, u32 width = UINT32_MAX, u32 height = UINT32_MAX, EFormat format = EFormat::Unknown, u32 layers = UINT32_MAX, bool bAllowCPURead = false);
 
-		bool RenderTargetGroupExists(const TString& name) const;
-
-		// Returns a depth target with a specified name, size and format
-		// - If size is different from the actual size, the depth target is recreated and returned
-		// - If no depth target exists with this name, the new one gets created
-		// Name is required, Width, Height, Format are important only for the first time.
-		RefPtr<IDepthStencilTarget2D> GetDepthTarget(const TString& name, u32 width = UINT32_MAX, u32 height = UINT32_MAX, EFormat format = EFormat::Unknown, bool bSampled = false);
+		bool RenderTargetGroupExists(const String& name) const;
 
 		// Returns a depth target with a specified name, size and format
 		// - If size is different from the actual size, the depth target is recreated and returned
 		// - If no depth target exists with this name, the new one gets created
 		// Name is required, Width, Height, Format are important only for the first time.
-		RefPtr<IDepthStencilTarget2D> GetReadOnlyDepthTarget(const TString& name);
+		RefPtr<IDepthStencilTarget2D> GetDepthTarget(const String& name, u32 width = UINT32_MAX, u32 height = UINT32_MAX, EFormat format = EFormat::Unknown, bool bSampled = false);
+
+		// Returns a depth target with a specified name, size and format
+		// - If size is different from the actual size, the depth target is recreated and returned
+		// - If no depth target exists with this name, the new one gets created
+		// Name is required, Width, Height, Format are important only for the first time.
+		RefPtr<IDepthStencilTarget2D> GetReadOnlyDepthTarget(const String& name);
 
 	private:
-		Map<TString, RefPtr<TRenderTargetGroup>> m_RenderTargets;
-		Map<TString, RefPtr<IDepthStencilTarget2D>> m_DepthTargets;
-		Map<TString, RefPtr<IDepthStencilTarget2D>> m_ReadOnlyDepthTargets;
+		Map<String, RefPtr<TRenderTargetGroup>> m_RenderTargets;
+		Map<String, RefPtr<IDepthStencilTarget2D>> m_DepthTargets;
+		Map<String, RefPtr<IDepthStencilTarget2D>> m_ReadOnlyDepthTargets;
 	};
 }

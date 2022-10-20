@@ -11,7 +11,7 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld, Info);
 
-	GameWorld::GameWorld(const TString& InName)
+	GameWorld::GameWorld(const String& InName)
 		: TWorld(InName)
 	{
 		KEPLER_INFO(LogGameWorld, "Created GameWorld with name {}", InName);
@@ -24,28 +24,28 @@ namespace ke
 		KEPLER_INFO(LogGameWorld, "Destroyed GameWorld with name {}", Name);
 	}
 
-	GameEntityId GameWorld::CreateEntity(const TString& Name)
+	GameEntityId GameWorld::CreateEntity(const String& Name)
 	{
-		const GameEntityId EntityId = EntityRegistry.create();
-		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
+		const GameEntityId EntityId = m_EntityRegistry.create();
+		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
 		AddComponent<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 		return EntityId;
 	}
 
-	GameEntityId GameWorld::CreateCamera(const TString& Name, float Fov, float Width, float Height, float Near, float Far)
+	GameEntityId GameWorld::CreateCamera(const String& Name, float Fov, float Width, float Height, float Near, float Far)
 	{
-		const entt::entity EntityId = EntityRegistry.create();
-		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
+		const entt::entity EntityId = m_EntityRegistry.create();
+		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
 		AddComponent<TTransformComponent>(EntityId);
 		AddComponent<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
-		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 
-		if (!IsValidEntity(MainCamera))
+		if (!IsValidEntity(m_MainCamera))
 		{
 			SetMainCamera(EntityId);
 		}
@@ -55,35 +55,35 @@ namespace ke
 
 	TGameEntity& GameWorld::GetEntityFromId(GameEntityId Id)
 	{
-		return EntityRegistry.get<TGameEntity>(Id.Entity);
+		return m_EntityRegistry.get<TGameEntity>(Id.Entity);
 	}
 
 	void GameWorld::DestroyEntity(GameEntityId Entity)
 	{
-		PendingDestroyEntities.EmplaceBack(Entity.Entity);
+		m_PendingDestroyEntities.EmplaceBack(Entity.Entity);
 	}
 
-	TString GameWorld::GetEntityName(GameEntityId Entity)
+	String GameWorld::GetEntityName(GameEntityId Entity)
 	{
-		if (EntityRegistry.valid(Entity.Entity))
+		if (m_EntityRegistry.valid(Entity.Entity))
 		{
-			return EntityRegistry.get<TNameComponent>(Entity.Entity).Name;
+			return m_EntityRegistry.get<TNameComponent>(Entity.Entity).Name;
 		}
 		return "";
 	}
 
 	id64 GameWorld::GetEntityUUID(GameEntityId Entity) const
 	{
-		if (EntityRegistry.valid(Entity.Entity))
+		if (m_EntityRegistry.valid(Entity.Entity))
 		{
-			return EntityRegistry.get<TIdComponent>(Entity.Entity).Id;
+			return m_EntityRegistry.get<TIdComponent>(Entity.Entity).Id;
 		}
 		return {};
 	}
 
 	bool GameWorld::IsValidEntity(GameEntityId Id) const
 	{
-		return EntityRegistry.valid(Id);
+		return m_EntityRegistry.valid(Id);
 	}
 
 	void GameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
@@ -94,16 +94,16 @@ namespace ke
 			return;
 		}
 
-		if (IsValidEntity(MainCamera))
+		if (IsValidEntity(m_MainCamera))
 		{
-			auto& CameraEntity = GetEntityFromId(MainCamera);
-			auto& camera = GetComponent<CameraComponent>(MainCamera).GetCamera();
+			auto& CameraEntity = GetEntityFromId(m_MainCamera);
+			auto& camera = GetComponent<CameraComponent>(m_MainCamera).GetCamera();
 			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
 		// Update components for entities
-		EntityRegistry.view<TMaterialComponent, TTransformComponent>().each(
-			[this](auto Id, TMaterialComponent& MC, TTransformComponent& TC) 
+		m_EntityRegistry.view<MaterialComponent, TTransformComponent>().each(
+			[this](auto Id, MaterialComponent& MC, TTransformComponent& TC) 
 			{
 				RefPtr<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());
@@ -111,7 +111,7 @@ namespace ke
 				Material->WriteId((i32)Id);
 			});
 
-		EntityRegistry.view<TGameEntity>().each(
+		m_EntityRegistry.view<TGameEntity>().each(
 			[DeltaTime](TGameEntity& Entity)
 			{
 				Entity.Update(DeltaTime);
@@ -130,7 +130,7 @@ namespace ke
 	{
 		if (IsValidEntity(Camera))
 		{
-			MainCamera = Camera;
+			m_MainCamera = Camera;
 			return;
 		}
 		KEPLER_WARNING(LogGameWorld, "GameWorld::SetMainCamera - passed null as camera.");
@@ -150,11 +150,11 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		// Flush pending destroys
-		for (auto Id : PendingDestroyEntities)
+		for (auto Id : m_PendingDestroyEntities)
 		{
-			EntityRegistry.destroy(Id);
+			m_EntityRegistry.destroy(Id);
 		}
-		PendingDestroyEntities.Clear();
+		m_PendingDestroyEntities.Clear();
 	}
 
 }

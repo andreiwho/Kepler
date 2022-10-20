@@ -10,14 +10,14 @@
 
 namespace ke
 {
-	RefPtr<IShader> THLSLShaderCompilerD3D11::CompileShader(const TString& Path, EShaderStageFlags TypeMask)
+	RefPtr<IShader> THLSLShaderCompilerD3D11::CompileShader(const String& Path, EShaderStageFlags TypeMask)
 	{
 		if (TShaderCache::Get()->Exists(Path))
 		{
 			return TShaderCache::Get()->GetShader(Path);
 		}
 
-		TString Source;
+		String Source;
 		try
 		{
 			Source = Await(TFileUtils::ReadTextFileAsync(Path));
@@ -52,12 +52,12 @@ namespace ke
 		return OutShader;
 	}
 
-	ShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flag, const TString& Source)
+	ShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const String& SourceName, EShaderStageFlags::Type Flag, const String& Source)
 	{
 		ShaderModule OutShaderModule{};
 		OutShaderModule.StageFlags = Flag;
 
-		const TString EntryPoint = std::invoke([Flag]
+		const String EntryPoint = std::invoke([Flag]
 		{
 			switch (Flag)
 			{
@@ -77,14 +77,14 @@ namespace ke
 		return OutShaderModule;
 	}
 
-	RefPtr<IAsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const TString& SourceName,
-		const TString& EntryPoint,
+	RefPtr<IAsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const String& SourceName,
+		const String& EntryPoint,
 		EShaderStageFlags::Type Type,
-		const TString& Code)
+		const String& Code)
 	{
 		KEPLER_TRACE(LogShaderCompiler, "Compiling shader '{}' as {}", SourceName, EShaderStageFlags::ToString(Type));
 
-		TString ShaderType;
+		String ShaderType;
 		switch (Type)
 		{
 		case ke::EShaderStageFlags::Vertex:
@@ -105,9 +105,9 @@ namespace ke
 		ID3DBlob* Blob;
 
 		Array<D3D_SHADER_MACRO> shaderMacros;
-		TString CameraSlot = MakeBufferSlotString(WorldRenderer::RS_Camera);
-		TString LightSlot = MakeBufferSlotString(WorldRenderer::RS_Light);
-		TString UserSlot = MakeBufferSlotString(WorldRenderer::RS_User);
+		String CameraSlot = MakeBufferSlotString(WorldRenderer::RS_Camera);
+		String LightSlot = MakeBufferSlotString(WorldRenderer::RS_Light);
+		String UserSlot = MakeBufferSlotString(WorldRenderer::RS_User);
 
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Camera", CameraSlot.c_str()});
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Light", LightSlot.c_str()});
@@ -128,7 +128,7 @@ namespace ke
 		{
 			if (ErrorBlob)
 			{
-				TString Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
+				String Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
 				KEPLER_ERROR_STOP(LogShaderCompiler, "{}", Message);
 				SAFE_RELEASE(Blob);
 				SAFE_RELEASE(ErrorBlob);
@@ -149,7 +149,7 @@ namespace ke
 		return nullptr;
 	}
 
-	TString THLSLShaderCompilerD3D11::MakeBufferSlotString(i32 index)
+	String THLSLShaderCompilerD3D11::MakeBufferSlotString(i32 index)
 	{
 		return fmt::format("b{}", index);
 	}

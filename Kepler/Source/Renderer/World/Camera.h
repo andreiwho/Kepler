@@ -28,7 +28,7 @@ namespace ke
 		inline void SetTarget(float3 target) { m_Target = target; }
 		inline float3 GetTarget() const { return m_Target; }
 
-		void SetTransform(const TWorldTransform& Transform);
+		void SetTransform(const WorldTransform& Transform);
 		static float3 ToEuler(float3 Vector);
 
 	private:

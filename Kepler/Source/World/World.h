@@ -24,17 +24,17 @@ namespace ke
 
 		void Internal_Update(float DeltaTime);
 
-		const TString& GetName() const { return Name; }
+		const String& GetName() const { return Name; }
 
 	protected:
 		// The constructor
-		TWorld(const TString& Name);
+		TWorld(const String& Name);
 		
 		// Every world should override this function in order to produce some functionality
 		virtual void UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind);
 
 		// The name of the world
-		TString Name{"NoName"};
+		String Name{"NoName"};
 
 		// The UUID of the world (will be used mostly for parent-child behaviour)
 		id64 UUID{};

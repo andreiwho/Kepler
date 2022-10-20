@@ -41,7 +41,7 @@ namespace ke
 		}
 
 		inline operator u32() const { return Value; }
-		TString ToString() const;
+		String ToString() const;
 	};
 
 	struct EPlatformEventCategory
@@ -61,7 +61,7 @@ namespace ke
 		}
 
 		inline operator u32() const { return Value; }
-		TString ToString() const;
+		String ToString() const;
 	};
 
 	struct TPlatformEventBase
@@ -76,7 +76,7 @@ namespace ke
 			return TypeMask == T::StaticMask;
 		}
 
-		virtual TString ToString() const 
+		virtual String ToString() const 
 		{
 			return "PlatformEventBase";
 		}
@@ -97,7 +97,7 @@ namespace ke
 		TEvent(class TWindow* window)\
 			: TPlatformEventBase(window, EPlatformEventType::##Type, EPlatformEventCategory::##Category){}\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline TString ToString() const override {return #Type;}\
+		virtual inline String ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -111,7 +111,7 @@ namespace ke
 			, p0n(arg0) {}\
 		const p0t p0n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline TString ToString() const override {return #Type;}\
+		virtual inline String ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -126,7 +126,7 @@ namespace ke
 		const p0t p0n;\
 		const p1t p1n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline TString ToString() const override {return #Type;}\
+		virtual inline String ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 
@@ -143,7 +143,7 @@ namespace ke
 		const p1t p1n;\
 		const p2t p2n;\
 		static constexpr u32 StaticMask = EPlatformEventType::##Type | EPlatformEventCategory::##Category;\
-		virtual inline TString ToString() const override {return #Type;}\
+		virtual inline String ToString() const override {return #Type;}\
 	};\
 	using T##Type##Event = TEvent<EPlatformEventType::##Type, EPlatformEventCategory::##Category>
 

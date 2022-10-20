@@ -3,11 +3,11 @@
 
 namespace ke
 {
-	class TWorldTransform
+	class WorldTransform
 	{
 	public:
-		TWorldTransform() = default;
-		TWorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));
+		WorldTransform() = default;
+		WorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));
 
 		inline float3 GetLocation() const { return m_Location; }
 		inline float3 GetRotation() const { return m_Rotation; }

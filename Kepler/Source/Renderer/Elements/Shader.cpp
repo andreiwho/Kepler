@@ -4,17 +4,17 @@ namespace ke
 {
 	TShaderCache* TShaderCache::Instance;
 
-	bool TShaderCache::Exists(const TString& name) const
+	bool TShaderCache::Exists(const String& name) const
 	{
 		return m_LoadedShaders.Contains(name);
 	}
 
-	void TShaderCache::Add(const TString& name, RefPtr<IShader> pShader)
+	void TShaderCache::Add(const String& name, RefPtr<IShader> pShader)
 	{
 		m_LoadedShaders.Insert(name, pShader);
 	}
 
-	RefPtr<IShader> TShaderCache::GetShader(const TString& name) const
+	RefPtr<IShader> TShaderCache::GetShader(const String& name) const
 	{
 		CHECK(m_LoadedShaders.Contains(name));
 		return m_LoadedShaders[name];
@@ -25,7 +25,7 @@ namespace ke
 		m_LoadedShaders.Clear();
 	}
 
-	IShader::IShader(const TString& name, const Array<ShaderModule>& shaderModules)
+	IShader::IShader(const String& name, const Array<ShaderModule>& shaderModules)
 		:	m_Name(name)
 	{
 		// Combine the shader stage mask

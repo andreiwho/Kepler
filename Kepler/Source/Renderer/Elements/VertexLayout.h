@@ -9,14 +9,14 @@ namespace ke
 	struct VertexAttribute
 	{
 		VertexAttribute() = default;
-		VertexAttribute(const TString& name, u32 id, EShaderInputType type, usize offset)
+		VertexAttribute(const String& name, u32 id, EShaderInputType type, usize offset)
 			:	AttributeName(name)
 			,	AttributeId(id)
 			,	InputType(type)
 			,	Offset(offset)
 		{}
 
-		TString AttributeName{};
+		String AttributeName{};
 		u32 AttributeId{};
 		EShaderInputType InputType{EShaderInputType::Float4};
 		usize Offset{};
@@ -31,7 +31,7 @@ namespace ke
 			:	m_Stride(stride)
 		{}
 
-		inline void AddAttribute(const TString& name, u32 id, EShaderInputType type, usize offset)
+		inline void AddAttribute(const String& name, u32 id, EShaderInputType type, usize offset)
 		{
 			m_Attributes.EmplaceBack(name, id, type, offset);
 		}

@@ -12,7 +12,7 @@ namespace ke
 		~WorldRegistry();
 
 		template<typename T, typename... ARGS>
-		RefPtr<T> CreateWorld(const TString& Name, ARGS&&... InArgs)
+		RefPtr<T> CreateWorld(const String& Name, ARGS&&... InArgs)
 		{
 			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
 			LoadedWorlds.EmplaceBack(OutWorld);

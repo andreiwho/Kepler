@@ -134,7 +134,7 @@ namespace ke
 			return;
 		}
 
-		if (auto pMaterialComponent = entity.GetComponent<TMaterialComponent>())
+		if (auto pMaterialComponent = entity.GetComponent<MaterialComponent>())
 		{
 			if (TEditorElements::Container("MATERIAL"))
 			{

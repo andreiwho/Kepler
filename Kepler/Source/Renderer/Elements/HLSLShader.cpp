@@ -2,7 +2,7 @@
 
 namespace ke
 {
-	HLSLShader::HLSLShader(const TString& name, const Array<ShaderModule>& modules)
+	HLSLShader::HLSLShader(const String& name, const Array<ShaderModule>& modules)
 		:	IShader(name, modules)
 	{
 	}

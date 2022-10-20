@@ -10,6 +10,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <optional>
 
 namespace ke
 {
@@ -31,22 +32,22 @@ namespace ke
 	using isize = i64;
 
 	template<typename T> using TAtomic = std::atomic<T>;
-	using TString = std::string;
+	using String = std::string;
 	using TWideString = std::wstring;
 	using TPath = std::filesystem::path;
 
 	using CStr = const char*;
 	using WStr = const wchar_t*;
 
-	TString ConvertToAnsiString(const TWideString& wide);
-	TWideString ConvertToWideString(const TString& ansi);
+	String ConvertToAnsiString(const TWideString& wide);
+	TWideString ConvertToWideString(const String& ansi);
 
 	// a 64 bit identifier, which claims to be unique
 	struct id64
 	{
 		id64();
 		id64(u64 InValue) : Value(InValue) {}
-		id64(const TString& HashableString);
+		id64(const String& HashableString);
 		id64(const id64& Other) noexcept { Value = Other.Value; }
 		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
 
@@ -72,6 +73,8 @@ namespace ke
 	using matrix4x3 = glm::mat4x3;
 	using matrix4x4 = glm::mat4x4;
 	using matrix = matrix4x4;
+
+	template<typename T> using Option = std::optional<T>;
 }
 
 namespace std

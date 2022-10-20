@@ -12,7 +12,7 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection, All);
 
 	//////////////////////////////////////////////////////////////////////////
-	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const Array<ShaderModule>& Modules)
+	THLSLShaderD3D11::THLSLShaderD3D11(const String& Name, const Array<ShaderModule>& Modules)
 		: HLSLShader(Name, Modules)
 	{
 		InitHandle();

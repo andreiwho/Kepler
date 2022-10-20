@@ -145,7 +145,7 @@ namespace ke
 			return OutFlags;
 		}
 
-		static TString ToString(Type Value)
+		static String ToString(Type Value)
 		{
 			return std::invoke([Value]
 				{

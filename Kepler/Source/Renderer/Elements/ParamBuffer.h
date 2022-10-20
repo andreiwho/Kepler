@@ -13,7 +13,7 @@ namespace ke
 
 	public:
 		template<typename T>
-		void Write(const TString& param, const T* pData)
+		void Write(const String& param, const T* pData)
 		{
 			m_pParams->Write<T>(param, pData);
 			m_bRenderStateDirty = true;
@@ -23,20 +23,20 @@ namespace ke
 		// So calling this function may cause unexpected performance loss.
 		// If you have intended to only read the value, then use ReadParamValue function, which does not invalidate the buffer contents
 		template<typename T>
-		T& GetParamForWriting(const TString& param)
+		T& GetParamForWriting(const String& param)
 		{
 			MarkRenderStateDirty();
 			return m_pParams->GetParam<T>(param);
 		}
 
 		template<typename T>
-		const T& ReadParamValue(const TString& param) const
+		const T& ReadParamValue(const String& param) const
 		{
 			// MarkRenderStateDirty();
 			return m_pParams->GetParam<T>(param);
 		}
 
-		inline bool HasParam(const TString& param) const
+		inline bool HasParam(const String& param) const
 		{
 			return m_pParams->HasParam(param);
 		}

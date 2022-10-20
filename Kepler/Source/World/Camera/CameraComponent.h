@@ -14,11 +14,11 @@ namespace ke
 		inline MathCamera& GetCamera() { return m_Camera; }
 		inline const MathCamera& GetCamera() const { return m_Camera; }
 
-		inline void SetRenderTargetName(const TString& NewName) { m_RenderTargetName = NewName; }
-		inline const TString& GetRenderTargetName() const { return m_RenderTargetName; }
+		inline void SetRenderTargetName(const String& NewName) { m_RenderTargetName = NewName; }
+		inline const String& GetRenderTargetName() const { return m_RenderTargetName; }
 
 	private:
 		MathCamera m_Camera;
-		TString m_RenderTargetName{ "MeshPassTarget" };
+		String m_RenderTargetName{ "MeshPassTarget" };
 	};
 }

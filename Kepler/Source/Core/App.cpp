@@ -33,7 +33,7 @@
 
 namespace ke
 {
-	TCommandLineArguments::TCommandLineArguments(Array<TString> const& cmdLine)
+	TCommandLineArguments::TCommandLineArguments(Array<String> const& cmdLine)
 	{
 		// Parse command line args
 		// Game module name must always be the first arg
@@ -133,7 +133,7 @@ namespace ke
 		dirLight->SetRotation(float3(-135, 0, 90.0f));
 		dirLight->SetLocation(float3(-3, 0.0f, 0.0f));
 
-		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
+		auto mesh = m_MeshLoader.LoadStaticMesh("Game://LP.fbx", true);
 		i32 x = 0;
 		i32 y = 0;
 		for (i32 idx = 0; idx < 10; ++idx)
@@ -145,8 +145,8 @@ namespace ke
 			}
 
 			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
-			entity.AddComponent<TStaticMeshComponent>(mesh);
-			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
+			entity.AddComponent<StaticMeshComponent>(mesh);
+			entity.AddComponent<MaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
 
 			entity->SetScale(float3(0.3f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));

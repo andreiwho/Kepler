@@ -3,29 +3,29 @@
 namespace ke
 {
 
-	TWorldTransform::TWorldTransform(float3 location, float3 rotation, float3 scale)
+	WorldTransform::WorldTransform(float3 location, float3 rotation, float3 scale)
 		: m_Location(location)
 		, m_Rotation(rotation)
 		, m_Scale(scale)
 	{
 	}
 
-	void TWorldTransform::SetLocation(float3 location)
+	void WorldTransform::SetLocation(float3 location)
 	{
 		m_Location = location;
 	}
 
-	void TWorldTransform::SetRotation(float3 rotation)
+	void WorldTransform::SetRotation(float3 rotation)
 	{
 		m_Rotation = rotation;
 	}
 
-	void TWorldTransform::SetScale(float3 scale)
+	void WorldTransform::SetScale(float3 scale)
 	{
 		m_Scale = scale;
 	}
 
-	matrix4x4 TWorldTransform::GenerateWorldMatrix() const
+	matrix4x4 WorldTransform::GenerateWorldMatrix() const
 	{
 		matrix4x4 worldMat = matrix4x4(1.0f);
 		worldMat = glm::translate(worldMat, m_Location);
@@ -36,13 +36,13 @@ namespace ke
 		return worldMat;
 	}
 
-	matrix3x3 TWorldTransform::GenerateNormalMatrix() const
+	matrix3x3 WorldTransform::GenerateNormalMatrix() const
 	{
 		const auto worldMat = GenerateWorldMatrix();
 		return glm::transpose(glm::inverse(worldMat));
 	}
 
-	float3 TWorldTransform::RotationToEuler() const
+	float3 WorldTransform::RotationToEuler() const
 	{
 		const float yaw = m_Rotation.z + 90.0f;
 		const float pitch = m_Rotation.x;

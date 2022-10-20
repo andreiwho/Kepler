@@ -28,23 +28,23 @@ namespace ke
 
 		TShaderCache() { Instance = this; }
 
-		bool Exists(const TString& name) const;
-		void Add(const TString& name, RefPtr<IShader> pShader);
-		RefPtr<IShader> GetShader(const TString& name) const;
+		bool Exists(const String& name) const;
+		void Add(const String& name, RefPtr<IShader> pShader);
+		RefPtr<IShader> GetShader(const String& name) const;
 		void Invalidate();
 
 	private:
-		Map<TString, RefPtr<IShader>> m_LoadedShaders;
+		Map<String, RefPtr<IShader>> m_LoadedShaders;
 	};
 
 	class IShader : public IntrusiveRefCounted
 	{
 	public:
-		IShader(const TString& name, const Array<ShaderModule>& shaderModules);
+		IShader(const String& name, const Array<ShaderModule>& shaderModules);
 		virtual ~IShader() = default;
 
 		inline RefPtr<IShaderHandle> GetHandle() const { return m_Handle; }
-		inline const TString& GetName() const { return m_Name; }
+		inline const String& GetName() const { return m_Name; }
 		inline RefPtr<IAsyncDataBlob> GetVertexShaderBytecode() const { return m_TempVertexShaderBytecode; }
 		inline RefPtr<TShaderModuleReflection> GetReflection() const { return m_ReflectionData; }
 
@@ -58,6 +58,6 @@ namespace ke
 		RefPtr<TShaderModuleReflection> m_ReflectionData{};
 
 	private:
-		TString m_Name{};
+		String m_Name{};
 	};
 }

@@ -17,7 +17,7 @@ namespace ke
 		FindGameAssets();
 	}
 
-	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(const TString& path) const
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(const String& path) const
 	{
 		return Async(
 			[this, Path = path]() -> RefPtr<AssetTreeNode>
@@ -31,7 +31,7 @@ namespace ke
 			});
 	}
 
-	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNode(const TString& rootPath) const
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNode(const String& rootPath) const
 	{
 		if (m_Roots.Contains(rootPath))
 		{
@@ -40,7 +40,7 @@ namespace ke
 		return nullptr;
 	}
 
-	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const TString& rootPath) const
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const String& rootPath) const
 	{
 		if (auto pRoot = GetRootNode(rootPath))
 		{
@@ -60,7 +60,7 @@ namespace ke
 	void AssetManager::FindGameAssets()
 	{
 		KEPLER_INFO(AssetManager, " ====== Finding asset files... ======");
-		const Map<TString, TString>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
+		const Map<String, String>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
 		for (const auto& [key, _] : vfsAliases)
 		{
 			auto keyToken = key + "://";
@@ -71,15 +71,15 @@ namespace ke
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
 
-	RefPtr<AssetTreeNode_Directory> AssetManager::ReadDirectory(const TString& root, RefPtr<AssetTreeNode_Directory> pDirectory)
+	RefPtr<AssetTreeNode_Directory> AssetManager::ReadDirectory(const String& root, RefPtr<AssetTreeNode_Directory> pDirectory)
 	{
-		const TString rootPath = VFSResolvePath(root);
+		const String rootPath = VFSResolvePath(root);
 
 		for (const auto& entry : fs::directory_iterator(pDirectory->GetPath_Resolved()))
 		{
 			const fs::path& entryPath = entry.path();
 			const fs::path relativePath = fs::relative(entryPath, rootPath);
-			TString formattedPath = fmt::format("{}{}", root, relativePath.string());
+			String formattedPath = fmt::format("{}{}", root, relativePath.string());
 			std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
 
 			if (fs::is_directory(entryPath))
@@ -93,7 +93,7 @@ namespace ke
 			{
 				if (entryPath.has_extension())
 				{
-					const TString extension = entryPath.extension().string();
+					const String extension = entryPath.extension().string();
 					if (extension == ".meta")
 					{
 						auto pNewAsset = AssetTreeNode_AssetMetadata::New(pDirectory.Raw(), formattedPath);

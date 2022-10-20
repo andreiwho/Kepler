@@ -4,12 +4,12 @@
 namespace ke
 {
 
-	TSound::TSound(const TString& path, ESoundCreateFlags flags)
+	TSound::TSound(const String& path, ESoundCreateFlags flags)
 		:	m_Path(path)
 	{
 	}
 
-	RefPtr<TSound> TSound::New(const TString& path, ESoundCreateFlags flags)
+	RefPtr<TSound> TSound::New(const String& path, ESoundCreateFlags flags)
 	{
 		switch (GAudioEngineAPI)
 		{

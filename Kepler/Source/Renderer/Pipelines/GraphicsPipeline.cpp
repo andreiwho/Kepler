@@ -52,7 +52,7 @@ namespace ke
 #endif
 	}
 
-	RefPtr<IShader> IGraphicsPipeline::LoadHLSLShader(const TString& pShader, EShaderStageFlags stages)
+	RefPtr<IShader> IGraphicsPipeline::LoadHLSLShader(const String& pShader, EShaderStageFlags stages)
 	{
 		RefPtr<THLSLShaderCompiler> pCompiler = THLSLShaderCompiler::CreateShaderCompiler();
 		return pCompiler->CompileShader(pShader, stages);
@@ -67,17 +67,17 @@ namespace ke
 
 	GraphicsPipelineCache* GraphicsPipelineCache::Instance;
 
-	bool GraphicsPipelineCache::Exists(const TString& name) const
+	bool GraphicsPipelineCache::Exists(const String& name) const
 	{
 		return m_Pipelines.Contains(name);
 	}
 
-	void GraphicsPipelineCache::Add(const TString& name, RefPtr<IGraphicsPipeline> pPipeline)
+	void GraphicsPipelineCache::Add(const String& name, RefPtr<IGraphicsPipeline> pPipeline)
 	{
 		m_Pipelines.Insert(name, pPipeline);
 	}
 
-	RefPtr<IGraphicsPipeline> GraphicsPipelineCache::GetPipeline(const TString& name) const
+	RefPtr<IGraphicsPipeline> GraphicsPipelineCache::GetPipeline(const String& name) const
 	{
 		CHECK(m_Pipelines.Contains(name));
 		return m_Pipelines[name];

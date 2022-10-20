@@ -25,11 +25,11 @@ namespace ke
 		static TImageLoader* Get() { return Instance; }
 
 		// This is the old version, which should not be used if the loaded sampler is your goal.
-		static std::future<TImageData> Load(const TString& Path);
+		static std::future<TImageData> Load(const String& Path);
 
-		RefPtr<ITextureSampler2D> LoadSamplerCached(const TString& Path);
+		RefPtr<ITextureSampler2D> LoadSamplerCached(const String& Path);
 
 	private:
-		Map<TString, RefPtr<ITextureSampler2D>> LoadedSamplers;
+		Map<String, RefPtr<ITextureSampler2D>> LoadedSamplers;
 	};
 }

@@ -14,12 +14,12 @@ namespace ke
 		bIsCamera = InWorld->IsCamera(Entity);
 	}
 
-	TString TGameEntity::GetName() const
+	String TGameEntity::GetName() const
 	{
 		return World->GetEntityName(Entity);
 	}
 
-	void TGameEntity::SetName(const TString& Name)
+	void TGameEntity::SetName(const String& Name)
 	{
 		World->GetComponent<TNameComponent>(Entity).Name = Name;
 	}
@@ -88,12 +88,12 @@ namespace ke
 		World->GetComponent<TTransformComponent>(Entity).SetScale(NewScale);
 	}
 
-	TWorldTransform TGameEntity::GetTransform() const
+	WorldTransform TGameEntity::GetTransform() const
 	{
 		return World->GetComponent<TTransformComponent>(Entity).GetTransform();
 	}
 
-	void TGameEntity::SetTransform(TWorldTransform NewTransform)
+	void TGameEntity::SetTransform(WorldTransform NewTransform)
 	{
 		World->GetComponent<TTransformComponent>(Entity).SetTransform(NewTransform);
 	}

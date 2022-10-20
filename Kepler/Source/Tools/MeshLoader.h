@@ -10,20 +10,22 @@ class aiScene;
 
 namespace ke
 {
-	class TMeshLoader
+	class MeshLoader
 	{
-		static TMeshLoader* Instance;
+		static MeshLoader* Instance;
 	public:
-		static TMeshLoader* Get() { return Instance; }
+		static MeshLoader* Get() { return Instance; }
 
-		TMeshLoader();
-		~TMeshLoader();
+		MeshLoader();
+		~MeshLoader();
 
 		void ClearCache();
 
-		Array<TStaticMeshSection> LoadStaticMeshSections(const TString& MeshPath, bool bTryOutputSingleSection = false);
+		RefPtr<StaticMesh> LoadStaticMesh(const String& MeshPath, bool bTryOutputSingleSection = false);
 
 	private:
+		// For internal use only
+		Array<TStaticMeshSection> LoadStaticMeshSections(const String& MeshPath, bool bTryOutputSingleSection = false);
 		bool ProcessNode(const aiScene* pScene, const aiNode* pNode, Array<TStaticMeshSection>& OutSections);
 		bool ProcessMesh(const aiScene* pScene, const aiMesh* pMesh, const aiMatrix4x4& ParentTransform, Array<TStaticMeshSection>& OutSections);
 	};

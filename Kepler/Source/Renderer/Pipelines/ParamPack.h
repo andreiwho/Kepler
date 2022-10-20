@@ -32,8 +32,8 @@ namespace ke
 	class PipelineParamMapping : public EnableRefPtrFromThis<PipelineParamMapping>
 	{
 	public:
-		void AddParam(const TString& name, usize offset, usize size, EShaderStageFlags stage, EShaderInputType type);
-		void AddTextureSampler(const TString& name, EShaderStageFlags stage, u32 reg);
+		void AddParam(const String& name, usize offset, usize size, EShaderStageFlags stage, EShaderInputType type);
+		void AddTextureSampler(const String& name, EShaderStageFlags stage, u32 reg);
 
 		RefPtr<class TPipelineParamPack> CreateParamPack();
 		RefPtr<class PipelineSamplerPack> CreateSamplerPack();
@@ -49,16 +49,16 @@ namespace ke
 			return MakeRef(ke::New<PipelineParamMapping>());
 		}
 
-		inline bool HasParam(const TString& name) const { return m_Params.Contains(name); }
+		inline bool HasParam(const String& name) const { return m_Params.Contains(name); }
 
 		inline bool HasParams() const { return !m_Params.IsEmpty(); }
 		inline bool HasSamplers() const { return !m_Samplers.IsEmpty(); }
 
 	private:
-		Map<TString, PipelineParam> m_Params;
+		Map<String, PipelineParam> m_Params;
 		EShaderStageFlags m_ParamShaderStages{ 0 };
 
-		Map<TString, u32> m_Samplers;
+		Map<String, u32> m_Samplers;
 		EShaderStageFlags m_SamplerShaderStages{ 0 };
 	};
 
@@ -69,7 +69,7 @@ namespace ke
 		TPipelineParamPack(RefPtr<PipelineParamMapping> pMapping);
 
 		template<typename T>
-		void Write(const TString& param, const T* pData)
+		void Write(const String& param, const T* pData)
 		{
 			CHECK(m_Params);
 			CHECK(m_Params->GetParams().Contains(param));
@@ -79,7 +79,7 @@ namespace ke
 		}
 
 		template<typename T>
-		T& GetParam(const TString& param)
+		T& GetParam(const String& param)
 		{
 			CHECK(m_Params);
 			CHECK(m_Params->GetParams().Contains(param));
@@ -87,7 +87,7 @@ namespace ke
 		}
 
 		template<typename T>
-		const T& GetParam(const TString& param) const
+		const T& GetParam(const String& param) const
 		{
 			CHECK(m_Params);
 			CHECK(m_Params->GetParams().Contains(param));
@@ -98,7 +98,7 @@ namespace ke
 		usize GetDataSize() const { return m_SinglePackStride; }
 		inline EShaderStageFlags GetShaderStages() const { return m_Params->GetParamShaderStages(); }
 
-		inline bool HasParam(const TString& name) const { return m_Params->HasParam(name); }
+		inline bool HasParam(const String& name) const { return m_Params->HasParam(name); }
 
 	private:
 		static u8 GetBufferIndex() noexcept;
@@ -117,9 +117,9 @@ namespace ke
 	public:
 		PipelineSamplerPack(RefPtr<PipelineParamMapping> pMapping);
 
-		void Write(const TString& name, RefPtr<ITextureSampler2D> pData);
+		void Write(const String& name, RefPtr<ITextureSampler2D> pData);
 
-		RefPtr<ITextureSampler2D> GetSampler(const TString& name);
+		RefPtr<ITextureSampler2D> GetSampler(const String& name);
 
 		RefPtr<PipelineParamMapping> GetParamMappings() const { return m_Params; }
 

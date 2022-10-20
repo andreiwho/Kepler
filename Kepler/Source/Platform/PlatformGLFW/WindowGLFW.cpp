@@ -14,7 +14,7 @@ DEFINE_UNIQUE_LOG_CHANNEL(LogGLFWWindow, All);
 
 namespace ke
 {
-	TWindowGLFW::TWindowGLFW(i32 width, i32 height, const TString& title, const TWindowParams& params)
+	TWindowGLFW::TWindowGLFW(i32 width, i32 height, const String& title, const TWindowParams& params)
 		: TWindow(width, height, title, params)
 	{
 		glfwWindowHint(GLFW_DECORATED, params.bDecorated);
@@ -211,7 +211,7 @@ namespace ke
 			});
 	}
 
-	void TWindowGLFW::SetTitle_Impl(const TString& newTitle)
+	void TWindowGLFW::SetTitle_Impl(const String& newTitle)
 	{
 		glfwSetWindowTitle(m_Window, newTitle.c_str());
 	}

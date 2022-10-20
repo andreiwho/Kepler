@@ -6,7 +6,7 @@
 namespace ke
 {
 
-	TString EPlatformEventType::ToString() const
+	String EPlatformEventType::ToString() const
 	{
 		switch (Value)
 		{
@@ -44,7 +44,7 @@ namespace ke
 		return "Unknown";
 	}
 
-	TString EPlatformEventCategory::ToString() const
+	String EPlatformEventCategory::ToString() const
 	{
 		switch (Value)
 		{

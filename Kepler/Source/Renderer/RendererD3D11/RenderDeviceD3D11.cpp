@@ -131,10 +131,10 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	Array<TString> TRenderDeviceD3D11::GetInfoQueueMessages() const
+	Array<String> TRenderDeviceD3D11::GetInfoQueueMessages() const
 	{
 #ifdef ENABLE_DEBUG
-		Array<TString> OutMessages;
+		Array<String> OutMessages;
 		const u64 InfoMsgEndIndex = InfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 		for (u64 idx = InfoMsgStartIndex; idx < InfoMsgEndIndex; ++idx)
 		{
@@ -218,7 +218,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	static TString GetAdapterName(IDXGIAdapter* Adapter)
+	static String GetAdapterName(IDXGIAdapter* Adapter)
 	{
 		CHECK(IsRenderThread());
 		if (!Adapter)
