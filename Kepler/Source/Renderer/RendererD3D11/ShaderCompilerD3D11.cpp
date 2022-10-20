@@ -101,8 +101,8 @@ namespace ke
 			break;
 		}
 
-		CComPtr<ID3DBlob> ErrorBlob{};
-		CComPtr<ID3DBlob> Blob;
+		ID3DBlob* ErrorBlob{};
+		ID3DBlob* Blob;
 
 		Array<D3D_SHADER_MACRO> shaderMacros;
 		TString CameraSlot = MakeBufferSlotString(WorldRenderer::RS_Camera);
@@ -130,6 +130,8 @@ namespace ke
 			{
 				TString Message = fmt::format("Failed to compile {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
 				KEPLER_ERROR_STOP(LogShaderCompiler, "{}", Message);
+				SAFE_RELEASE(Blob);
+				SAFE_RELEASE(ErrorBlob);
 				CRASHMSG(fmt::format("{}", Message));
 			}
 		}
@@ -138,8 +140,11 @@ namespace ke
 			if (ErrorBlob)
 			{
 				KEPLER_WARNING(LogShaderCompiler, "While compiling {} shader: {}", EShaderStageFlags::ToString(Type), (const char*)(ErrorBlob->GetBufferPointer()));
+				SAFE_RELEASE(ErrorBlob);
 			}
-			return IAsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
+			auto outBlob = IAsyncDataBlob::CreateGraphicsDataBlob(Blob->GetBufferPointer(), Blob->GetBufferSize());
+			SAFE_RELEASE(Blob);
+			return outBlob;
 		}
 		return nullptr;
 	}

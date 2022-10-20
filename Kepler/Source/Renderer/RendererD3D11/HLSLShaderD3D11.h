@@ -38,7 +38,7 @@ namespace ke
 
 		// Reflection interface
 		void InitReflection(const Array<ShaderModule>& Modules);
-		VertexLayout ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const ShaderModule& VertexShaderModule);
-		RefPtr<PipelineParamMapping> ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge);
+		VertexLayout ReflectVertexLayout(ID3D11ShaderReflection* pReflection, const ShaderModule& VertexShaderModule);
+		RefPtr<PipelineParamMapping> ReflectParams(ID3D11ShaderReflection* pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge);
 	};
 }
