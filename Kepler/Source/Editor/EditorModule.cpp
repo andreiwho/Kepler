@@ -379,7 +379,7 @@ namespace ke
 			m_ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
 			auto pLLR = LowLevelRenderer::Get();
 
-			auto pRenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
+			auto pRenderTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
 			auto pViewportSampler = pRenderTargetGroup->GetTextureSamplerAtArrayLayer(pLLR->GetFrameIndex());
 			auto pImage = pViewportSampler->GetImage();
 			ImGui::Image(
@@ -758,6 +758,14 @@ namespace ke
 			}
 		}
 
+		if (event.Button & EMouseButton::Middle)
+		{
+			if (EntityHandle h{ m_pEditedWorld, m_EditorCameraEntity })
+			{
+				h.GetComponent<CameraComponent>()->GetCamera().SetFOV(45.0f);
+			}
+		}
+
 		if (m_AssetBrowserPanel->IsHovered())
 		{
 			m_AssetBrowserPanel->OnMouseButton(event.Button);
@@ -798,6 +806,19 @@ namespace ke
 
 			return true;
 		}
+		else
+		{
+			if (EntityHandle handle{ m_pEditedWorld, m_EditorCameraEntity })
+			{
+				auto pCameraComponent = handle.GetComponent<CameraComponent>();
+				auto& mathCam = pCameraComponent->GetCamera();
+				auto fov = mathCam.GetFOV();
+				fov -= event.Amount * GGlobalTimer->Delta() * 300.0f;
+				fov = glm::clamp(fov, 10.0f, 179.0f);
+				mathCam.SetFOV(fov);
+			}
+		}
+
 		return false;
 	}
 
@@ -870,9 +891,9 @@ namespace ke
 	void EditorModule::TrySelectEntity()
 	{
 		// Read render target
-		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
+		if (RenderTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
-			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
+			auto pTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
 			RefPtr<IRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
 			RefPtr<IImage2D> pTargetImage = pTarget->GetImage();
 			if (auto pImmCmd = LowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())

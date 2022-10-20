@@ -23,7 +23,7 @@ namespace ke
 		m_PipelineCache = MakeShared<GraphicsPipelineCache>();
 
 		InitScreenQuad();
-		m_TargetRegistry = MakeShared<TTargetRegistry>();
+		m_TargetRegistry = MakeShared<RenderTargetRegistry>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
