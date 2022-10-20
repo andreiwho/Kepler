@@ -28,14 +28,14 @@ namespace ke
 		u32 m_ArrayLayers;
 	};
 	
-	class TTargetRegistry
+	class RenderTargetRegistry
 	{
-		static TTargetRegistry* Instance;
+		static RenderTargetRegistry* Instance;
 	public:
-		TTargetRegistry();
-		~TTargetRegistry();
+		RenderTargetRegistry();
+		~RenderTargetRegistry();
 
-		static TTargetRegistry* Get() { return Instance; }
+		static RenderTargetRegistry* Get() { return Instance; }
 		// Returns a render target with a specified name, size and format
 		// - If size is different from the actual size, the render target is recreated and returned
 		// - If no render target exists with this name, the new one gets created

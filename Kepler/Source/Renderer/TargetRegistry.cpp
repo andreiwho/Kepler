@@ -72,21 +72,21 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	// RENDER TARGET REGISTRY
 	//////////////////////////////////////////////////////////////////////////
-	TTargetRegistry* TTargetRegistry::Instance = nullptr;
+	RenderTargetRegistry* RenderTargetRegistry::Instance = nullptr;
 
 	//////////////////////////////////////////////////////////////////////////
-	TTargetRegistry::TTargetRegistry()
+	RenderTargetRegistry::RenderTargetRegistry()
 	{
 		Instance = this;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TTargetRegistry::~TTargetRegistry()
+	RenderTargetRegistry::~RenderTargetRegistry()
 	{
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<TRenderTargetGroup> TTargetRegistry::GetRenderTargetGroup(const TString& name, u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
+	RefPtr<TRenderTargetGroup> RenderTargetRegistry::GetRenderTargetGroup(const TString& name, u32 width, u32 height, EFormat format, u32 layers, bool bAllowCPURead)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_RenderTargets.Contains(name))
@@ -105,13 +105,13 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TTargetRegistry::RenderTargetGroupExists(const TString& name) const
+	bool RenderTargetRegistry::RenderTargetGroupExists(const TString& name) const
 	{
 		return m_RenderTargets.Contains(name);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<IDepthStencilTarget2D> TTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
+	RefPtr<IDepthStencilTarget2D> RenderTargetRegistry::GetDepthTarget(const TString& name, u32 width, u32 height, EFormat format, bool bSampled)
 	{
 		// Create
 		auto newWidth = width > 0 ? width : 1;
@@ -148,7 +148,7 @@ namespace ke
 		return depthTarget;
 	}
 
-	RefPtr<IDepthStencilTarget2D> TTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
+	RefPtr<IDepthStencilTarget2D> RenderTargetRegistry::GetReadOnlyDepthTarget(const TString& name)
 	{
 		if (m_ReadOnlyDepthTargets.Contains(name))
 		{

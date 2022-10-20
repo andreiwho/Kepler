@@ -6,7 +6,6 @@
 #include <d3d11_4.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include <atlbase.h>
 
 #ifdef USE_ASSERT
 # define HRCHECK(x) CHECK(SUCCEEDED(x))
@@ -15,6 +14,9 @@
 # define HRCHECK(x) (void)x
 # define HRCHECK_NOTHROW(x) (void)x
 #endif
+
+#define SAFE_ADD_REF(p) if(!!(p)) (p)->AddRef()
+#define SAFE_RELEASE(p) if(!!(p)) (p)->Release() 
 
 namespace ke
 {

@@ -68,7 +68,7 @@ namespace ke
 		TRenderThread m_RenderThread{};
 		SharedPtr<TShaderCache> m_ShaderCache{};
 		SharedPtr<GraphicsPipelineCache> m_PipelineCache{};
-		SharedPtr<TTargetRegistry> m_TargetRegistry{};
+		SharedPtr<RenderTargetRegistry> m_TargetRegistry{};
 
 		RefPtr<TRenderDevice> m_RenderDevice{};
 		Array<RefPtr<ISwapChain>> m_SwapChains;

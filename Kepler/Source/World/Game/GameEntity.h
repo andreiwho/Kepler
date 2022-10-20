@@ -72,10 +72,10 @@ namespace ke
 		bool bHideInSceneGraph = false;
 
 		friend class GameWorld;
-		TGameEntityId Internal_GetId() const { return Entity; }
+		GameEntityId Internal_GetId() const { return Entity; }
 		
 		GameWorld* World{};
-		TGameEntityId Entity{};
+		GameEntityId Entity{};
 		
 		float LifeSpan = -1.0f;
 		float LifeTime = 0.0f;

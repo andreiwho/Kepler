@@ -80,7 +80,7 @@ namespace ke
 		m_ReflectionData = MakeRef(New<TShaderModuleReflection>());
 		for (const auto& Module : Modules)
 		{
-			CComPtr<ID3D11ShaderReflection> pReflection;
+			ID3D11ShaderReflection* pReflection;
 			HRCHECK(D3DReflect(Module.ByteCode->GetData(), Module.ByteCode->GetSize(), IID_PPV_ARGS(&pReflection)));
 
 			m_ReflectionData->ParamMapping = ReflectParams(pReflection, Module.StageFlags, m_ReflectionData->ParamMapping ? m_ReflectionData->ParamMapping : nullptr);
@@ -88,6 +88,8 @@ namespace ke
 			{
 				m_ReflectionData->VertexLayout = ReflectVertexLayout(pReflection, Module);
 			}
+
+			SAFE_RELEASE(pReflection);
 		}
 	}
 
@@ -205,11 +207,12 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	VertexLayout THLSLShaderD3D11::ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const ShaderModule& VertexShaderModule)
+	VertexLayout THLSLShaderD3D11::ReflectVertexLayout(ID3D11ShaderReflection* pReflection, const ShaderModule& VertexShaderModule)
 	{
 		CHECK(VertexShaderModule.StageFlags & EShaderStageFlags::Vertex);
 		CHECK(pReflection);
 		VertexLayout OutLayout;
+		SAFE_ADD_REF(pReflection);
 
 		D3D11_SHADER_DESC ShaderDesc{};
 		HRCHECK(pReflection->GetDesc(&ShaderDesc));
@@ -233,15 +236,17 @@ namespace ke
 			OutLayout.AddAttribute(Attribute);
 		}
 
+		SAFE_RELEASE(pReflection);
 		return OutLayout;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	RefPtr<PipelineParamMapping> THLSLShaderD3D11::ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge)
+	RefPtr<PipelineParamMapping> THLSLShaderD3D11::ReflectParams(ID3D11ShaderReflection* pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge)
 	{
 		D3D11_SHADER_DESC Desc;
 		HRCHECK(pReflection->GetDesc(&Desc));
-		
+		SAFE_ADD_REF(pReflection);
+
 		RefPtr<PipelineParamMapping> ParamMappings = ToMerge ? ToMerge : PipelineParamMapping::New();
 		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
@@ -286,6 +291,7 @@ namespace ke
 			}
 		}
 
+		SAFE_RELEASE(pReflection);
 		return ParamMappings;
 	}
 

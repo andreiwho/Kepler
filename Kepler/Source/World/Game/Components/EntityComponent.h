@@ -5,22 +5,19 @@ namespace ke
 {
 	class GameWorld;
 
-	class EntityComponent
+	reflected class EntityComponent
 	{
 	public:
 		virtual ~EntityComponent() = default;
 
-		void SetOwner(TGameEntityId ownerId);
+		void SetOwner(GameEntityId ownerId);
 		void SetWorld(GameWorld* pWorld);
 
-		inline TGameEntityId GetOwner() const { return m_OwnerId; }
+		inline GameEntityId GetOwner() const { return m_OwnerId; }
 		inline GameWorld* GetWorld() { return m_World; }
 
-		virtual void Init() {}
-		virtual void Update(float deltaTime) {}
-
 	private:
-		TGameEntityId m_OwnerId{};
+		GameEntityId m_OwnerId{};
 		GameWorld* m_World;
 	};
 }

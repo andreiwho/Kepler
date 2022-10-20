@@ -60,12 +60,13 @@ namespace ke
 #ifdef ENABLE_DEBUG
 		if (InfoQueue)
 		{
-			CComPtr<IDXGIDebug> Debug;
+			IDXGIDebug* Debug = nullptr;
 #ifdef FORCE_REPORT_LIVE_OBJECTS
 			HRCHECK_NOTHROW(InfoQueue->QueryInterface(&Debug));
 			HRCHECK_NOTHROW(Debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS::DXGI_DEBUG_RLO_ALL));
 #endif
-			InfoQueue->Release();
+			SAFE_RELEASE(Debug);
+			SAFE_RELEASE(InfoQueue);
 		}
 #endif
 	}
@@ -317,6 +318,11 @@ namespace ke
 				Write(Data, Size);
 			}
 		}
+	}
+
+	AsyncDataBlobD3D11::~AsyncDataBlobD3D11()
+	{
+		Blob->Release();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

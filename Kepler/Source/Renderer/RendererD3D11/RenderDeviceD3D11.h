@@ -15,6 +15,7 @@ namespace ke
 	{
 	public:
 		AsyncDataBlobD3D11(const void* Data, usize Size, usize ElemSize = 0);
+		~AsyncDataBlobD3D11();
 		virtual const void* GetData() const override;
 		virtual usize GetSize() const override;
 		virtual void Write(const void* Data, usize Size) override;
@@ -22,7 +23,7 @@ namespace ke
 		virtual usize GetStride() const override { return Stride; }
 
 	private:
-		CComPtr<ID3DBlob> Blob{};
+		ID3DBlob* Blob{};
 		usize Stride{};
 	};
 

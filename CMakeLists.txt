@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.20)
-project("KE1")
-include(Build.cmake)
+cmake_minimum_required(VERSION 3.24)
+project("KE1" CXX CSharp)
+include(Kepler/CMake/Build.cmake)
 
 add_subdirectory(Kepler)
 if(NOT ENABLE_EDITOR)

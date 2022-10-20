@@ -10,7 +10,8 @@ namespace ke
 		void End();
 
 		float Delta() const;
-		
+		static float GetTimeSeconds();
+
 	private:
 		double m_StartTime{};
 		float m_DeltaTime{};

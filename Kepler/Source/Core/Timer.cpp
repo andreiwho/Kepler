@@ -34,4 +34,9 @@ namespace ke
 		return m_DeltaTime;
 	}
 
+	float TTimer::GetTimeSeconds()
+	{
+		return (float)glfwGetTime();
+	}
+
 }

@@ -13,7 +13,7 @@
 namespace ke
 {
 
-	TEditorDetailsPanel::TEditorDetailsPanel(RefPtr<GameWorld> pWorld, TGameEntityId selectedEntity)
+	TEditorDetailsPanel::TEditorDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId selectedEntity)
 		: m_pWorld(pWorld)
 		, m_SelectedEntity(selectedEntity)
 	{

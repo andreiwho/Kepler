@@ -118,9 +118,9 @@ namespace ke
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
 		{
 			auto& cameraComp = m_CurrentWorld->GetComponent<CameraComponent>(camera);
-			if (TTargetRegistry::Get()->RenderTargetGroupExists(cameraComp.GetRenderTargetName()))
+			if (RenderTargetRegistry::Get()->RenderTargetGroupExists(cameraComp.GetRenderTargetName()))
 			{
-				if (auto pTarget = TTargetRegistry::Get()->GetRenderTargetGroup(cameraComp.GetRenderTargetName()))
+				if (auto pTarget = RenderTargetRegistry::Get()->GetRenderTargetGroup(cameraComp.GetRenderTargetName()))
 				{
 					auto& mathCamera = m_CurrentWorld->GetComponent<CameraComponent>(camera).GetCamera();
 					mathCamera.SetFrustumWidth(pTarget->GetRenderTargetAtArrayLayer(0)->GetWidth());
@@ -195,7 +195,7 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 		pImmCtx->BeginDebugEvent("PrePass");
 
-		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth",
+		auto pDepthTarget = RenderTargetRegistry::Get()->GetDepthTarget("PrePassDepth",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
 			EFormat::D24_UNORM_S8_UINT,
@@ -243,7 +243,7 @@ namespace ke
 
 		// Note: Now it is a simple forward renderer, but it needs to become deferred...
 		// Configure mesh pass render target
-		auto renderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
+		auto renderTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup(
 			"MeshPassTarget",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
@@ -251,10 +251,10 @@ namespace ke
 			LowLevelRenderer::m_SwapChainFrameCount);
 		RefPtr<IRenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
-		auto pDepthTarget = TTargetRegistry::Get()->GetDepthTarget("PrePassDepth");
+		auto pDepthTarget = RenderTargetRegistry::Get()->GetDepthTarget("PrePassDepth");
 
 		// Configure render target which will contain entity ids
-		auto pIdTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
+		auto pIdTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup(
 			"IdTarget",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
@@ -294,7 +294,7 @@ namespace ke
 		pImmCtx->BeginDebugEvent("Screen Quad Pass");
 		// Main swap chain
 #ifdef ENABLE_EDITOR
-		auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup(
+		auto pTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup(
 			"EditorViewport",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
@@ -317,7 +317,7 @@ namespace ke
 		pImmCtx->BindPipeline(m_LLR->m_ScreenQuad.Pipeline);
 
 		//Write quad sampler
-		auto pTarget = TTargetRegistry::Get()->GetRenderTargetGroup("MeshPassTarget");
+		auto pTarget = RenderTargetRegistry::Get()->GetRenderTargetGroup("MeshPassTarget");
 		CHECK(pTarget);
 		auto pSampler = pTarget->GetTextureSamplerAtArrayLayer(m_LLR->GetFrameIndex());
 

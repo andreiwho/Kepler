@@ -3,7 +3,7 @@
 namespace ke
 {
 
-	EntityHandle::EntityHandle(GameWorld* world, TGameEntityId id)
+	EntityHandle::EntityHandle(GameWorld* world, GameEntityId id)
 		: m_GameWorld(world)
 		, m_Id(id)
 	{

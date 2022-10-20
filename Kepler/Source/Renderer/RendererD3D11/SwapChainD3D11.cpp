@@ -42,7 +42,7 @@ namespace ke
 			&NewChain
 		));
 		HRCHECK(NewChain->QueryInterface(&SwapChain));
-		NewChain->Release();
+		SAFE_RELEASE(NewChain);
 
 		CreateRenderTargets();
 	}
@@ -65,13 +65,14 @@ namespace ke
 			RenderTargetView->Release();
 		}
 
-		CComPtr<ID3D11Resource> Buffer{};
+		ID3D11Resource* Buffer{};
 		HRCHECK(SwapChain->GetBuffer(0, IID_PPV_ARGS(&Buffer)));
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
 
 		HRCHECK(Device->GetDevice()->CreateRenderTargetView1(Buffer, nullptr, &RenderTargetView));
+		SAFE_RELEASE(Buffer);
 	}
 
 	void TSwapChainD3D11::Present()

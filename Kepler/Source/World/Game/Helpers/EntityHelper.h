@@ -10,7 +10,7 @@ namespace ke
 	class EntityHandle
 	{
 	public:
-		EntityHandle(GameWorld* world, TGameEntityId id);
+		EntityHandle(GameWorld* world, GameEntityId id);
 
 		template<typename T>
 		T* GetComponent() 
@@ -62,7 +62,7 @@ namespace ke
 		}
 
 		inline operator bool() const { return !!m_Entity && !!m_GameWorld; }
-		inline operator TGameEntityId() const { return m_Id; }
+		inline operator GameEntityId() const { return m_Id; }
 
 		TGameEntity* operator->() { return m_Entity; }
 		const TGameEntity* operator->() const { return m_Entity; }
@@ -70,7 +70,7 @@ namespace ke
 		const TGameEntity& operator*() const { CHECK(*this); return *m_Entity; }
 
 	private:
-		TGameEntityId m_Id;
+		GameEntityId m_Id;
 		GameWorld* m_GameWorld;
 		TGameEntity* m_Entity{};
 	};
