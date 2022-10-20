@@ -3,11 +3,10 @@ using System.IO;
 
 namespace KEReflector
 {
-    public class Class
-    {
-        public string Name { get; set; }
+    public class ReflectedClass
+    {   public string Name { get; set; }
 
-        public Class(string name)
+        public ReflectedClass(string name)
         {
             Name = name;
         }

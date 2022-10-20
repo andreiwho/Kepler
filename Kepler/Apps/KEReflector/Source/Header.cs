@@ -8,13 +8,7 @@ namespace KEReflector
     {
         public string Path { get; set; }
 
-        public HashSet<Class> Classes { get; }
-
-        private char[] _separators = new char[]
-        {
-            ' ',
-            ',',
-        };
+        public HashSet<ReflectedClass> Classes { get; }
 
         public Header(string path)
         {
@@ -22,26 +16,9 @@ namespace KEReflector
             Classes = ParseClasses();
         }
 
-        private HashSet<Class> ParseClasses()
+        private HashSet<ReflectedClass> ParseClasses()
         {
-            HashSet<Class> classes = new HashSet<Class>();
-            var tokens = File.ReadAllText(Path).Trim().Split(_separators);
-            for(int index = 0; index < tokens.Length; ++index)
-            {
-                var token = tokens[index];
-                if(token == "reflected")
-                {
-                    if(tokens.Length > index + 1)
-                    {
-                        Console.WriteLine(tokens[index + 2]);
-                    }
-                    else
-                    {
-                        Console.WriteLine(tokens.Length);
-                    }
-                }
-            }
-
+            HashSet<ReflectedClass> classes = new HashSet<ReflectedClass>();
             return classes;
         }
     }
