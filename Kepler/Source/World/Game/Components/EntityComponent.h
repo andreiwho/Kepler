@@ -1,5 +1,6 @@
 #pragma once
 #include "../GameEntityId.h"
+#include "EntityComponent.gen.h"
 
 namespace ke
 {

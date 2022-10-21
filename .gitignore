@@ -9,3 +9,5 @@ Release
 *.vcxproj
 *.filters
 *.user
+
+*.gen.h

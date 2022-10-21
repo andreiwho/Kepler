@@ -20,7 +20,7 @@ endfunction()
 
 macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
  target_compile_features(${ModuleName} PUBLIC cxx_std_20)
- target_include_directories(${ModuleName} PUBLIC Source)
+ target_include_directories(${ModuleName} PUBLIC Source Generated)
  set_target_properties(${ModuleName} PROPERTIES 
   FOLDER ${ModuleFolder}
   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL"
@@ -67,4 +67,7 @@ macro(CreateCSharpExecutable ModuleName ModuleFolder)
     FOLDER ${ModuleFolder}
     VS_DEBUGGER_COMMAND_ARGUMENTS ${ModuleName}
   )
+  set_target_properties(${this_target} PROPERTIES
+    DOTNET_SDK "Microsoft.NET.Sdk"
+    DOTNET_TARGET_FRAMEWORK "net6.0")
 endmacro()
