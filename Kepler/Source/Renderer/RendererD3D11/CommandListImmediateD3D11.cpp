@@ -223,8 +223,8 @@ namespace ke
 		for (auto& Null : Nulls) { Null = nullptr; }
 
 		// This is a little hack to do this fast and without allocations
-		Context->PSSetShaderResources(Slot, ResourceCount, (ID3D11ShaderResourceView**)Nulls.data());
-		Context->PSSetSamplers(Slot, ResourceCount, (ID3D11SamplerState**)Nulls.data());
+		Context->PSSetShaderResources(Slot, ResourceCount - Slot, (ID3D11ShaderResourceView**)Nulls.data());
+		Context->PSSetSamplers(Slot, ResourceCount - Slot, (ID3D11SamplerState**)Nulls.data());
 
 	}
 
