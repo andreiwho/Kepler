@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace KEReflector
@@ -8,9 +9,14 @@ namespace KEReflector
         public string Name { get; set; }
         public string Parent { get; set; }
 
-        public ReflectedClass(string name)
+        public List<ReflectedField> Fields { get; set; }
+
+        public ReflectedClass(string name, string parent)
         {
             Name = name;
+            Parent = parent;
+
+            Fields = new List<ReflectedField>();
         }
     }
 }

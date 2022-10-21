@@ -5,19 +5,11 @@ using System.Text;
 
 namespace KEReflector
 {
-    public enum ETokenKind
+    public class ReflectionToken
     {
-        Unknown,
-        ClassDecl,
-        ParentDecl,
-        FieldDecl,
-    }
-
-    public struct ReflectionToken
-    {
-        public string Name;
-        public string Type;
-        public ETokenKind Kind;
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Parent { get; set; }
     }
 
     public class Header
@@ -31,9 +23,9 @@ namespace KEReflector
             Path = path;
             Classes = ParseClasses();
 
-            foreach(var c in Classes)
+            foreach (var c in Classes)
             {
-                if(c.Parent != null)
+                if (c.Parent != null)
                 {
                     Console.WriteLine($"Class name: {c.Name} has parent {c.Parent}");
                 }
@@ -41,10 +33,15 @@ namespace KEReflector
                 {
                     Console.WriteLine($"Class name: {c.Name}");
                 }
+
+                foreach(var field in c.Fields)
+                {
+                    Console.WriteLine($"Class {c.Name} has field {field.Name} of type {field.Type}");
+                }
             }
         }
 
-        private static char[] _specialChars = new char[]
+        private static readonly char[] _specialChars = new char[]
         {
             ',',
             ';',
@@ -111,73 +108,86 @@ namespace KEReflector
             }
         }
 
+        enum EParseStage
+        {
+            None,
+            ParseType,
+            ParseName,
+            CheckHasParent,
+            ParseParent,
+            Finished,
+        }
+
         List<ReflectionToken> ParseTokens(List<string> tokens)
         {
             List<ReflectionToken> result = new List<ReflectionToken>();
+            EParseStage currentStage = EParseStage.None;
+            ReflectionToken currentToken = null;
 
-            bool bReflectedValue = false;
-            bool bPrevTokenWasClass = false;
-            ETokenKind tokenKind = ETokenKind.Unknown;
             foreach (var token in tokens)
             {
-                if (token == "reflected")
+                if (token == "reflected" && currentStage == EParseStage.None)
                 {
-                    bReflectedValue = true;
-                    continue;
-                }
-
-                if (token == "class" && bReflectedValue)
-                {
-                    tokenKind = ETokenKind.ClassDecl;
-                    continue;
-                }
-
-                if (bReflectedValue)
-                {
-                    switch (tokenKind)
+                    if(currentToken != null)
                     {
-                        case ETokenKind.ClassDecl:
-                            result.Add(new ReflectionToken
-                            {
-                                Name = token,
-                                Kind = tokenKind
-                            });
-                            bPrevTokenWasClass = true;
-                            tokenKind = ETokenKind.Unknown;
-                            break;
-                        case ETokenKind.ParentDecl:
-                            if(token == "public" || token == "private" || token == "protected" || token == "virtual")
-                            {
-                                continue;
-                            }
-                            result.Add(new ReflectionToken
-                            {
-                                Name = token,
-                                Kind = tokenKind
-                            });
-                            tokenKind = ETokenKind.Unknown;
-                            break;
-                        default:
-                            break;
+                        result.Add(currentToken);
                     }
+                    currentToken = new ReflectionToken();
+                    currentStage = EParseStage.ParseType;
+                    continue;
                 }
 
-                foreach (char c in _specialChars)
+                if (currentStage == EParseStage.ParseType)
                 {
-                    if (token == c.ToString())
+                    currentToken.Type = token;
+                    currentStage = EParseStage.ParseName;
+                    continue;
+                }
+
+                if (currentStage == EParseStage.ParseName)
+                {
+                    currentToken.Name = token;
+                    currentStage = EParseStage.CheckHasParent;
+                    continue;
+                }
+
+                if (currentStage == EParseStage.CheckHasParent)
+                {
+                    foreach (char c in _specialChars)
                     {
-                        if(token == ":" && bPrevTokenWasClass)
+                        if (token == c.ToString())
                         {
-                            tokenKind = ETokenKind.ParentDecl;
+                            if (token == ":")
+                            {
+                                currentStage = EParseStage.ParseParent;
+                                goto end;
+                            }
+                            currentStage = EParseStage.None;
                             goto end;
                         }
-
-                        bReflectedValue = false;
                     }
-                end:
-                    ;
                 }
+
+                if (currentStage == EParseStage.ParseParent)
+                {
+                    if(token == "public" || token == "private" || token == "protected" || token == "virtual")
+                    {
+                        continue;
+                    }
+                    currentToken.Parent = token;
+                    currentStage = EParseStage.None;
+                    result.Add(currentToken);
+                    currentToken = null;
+                }
+            end:
+                ;
             }
+            
+            if (currentToken != null)
+            {
+                result.Add(currentToken);
+            }
+
             return result;
         }
 
@@ -196,30 +206,28 @@ namespace KEReflector
             ReflectedClass currentClass = null;
             foreach (var token in reflectedTokens)
             {
-                switch (token.Kind)
+                if(token.Type == "class" || token.Type == "struct")
                 {
-                    case ETokenKind.ClassDecl:
-                        if(currentClass != null)
+                    if (currentClass != null)
+                    {
+                        classes.Add(currentClass);
+                    }
+                    currentClass = new ReflectedClass(token.Name, token.Parent);
+                }
+                else
+                {
+                    if(currentClass != null)
+                    {
+                        currentClass.Fields.Add(new ReflectedField
                         {
-                            classes.Add(currentClass);
-                        }
-                        currentClass = new ReflectedClass(token.Name);
-                        break;
-                    case ETokenKind.ParentDecl:
-                        if(currentClass != null)
-                        {
-                            currentClass.Parent = token.Name;
-                            classes.Add(currentClass);
-                            currentClass = null;
-                        }
-                        break;
-                    default:
-                        currentClass = null;
-                        break;
+                            Name = token.Name,
+                            Type = token.Type,
+                        });
+                    }
                 }
             }
 
-            if(currentClass != null)
+            if (currentClass != null)
             {
                 classes.Add(currentClass);
             }

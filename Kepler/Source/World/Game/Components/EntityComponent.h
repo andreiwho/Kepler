@@ -20,4 +20,11 @@ namespace ke
 		GameEntityId m_OwnerId{};
 		GameWorld* m_World;
 	};
+
+	reflected class TestComponent : public EntityComponent
+	{
+	public:
+		reflected float SomeValue;
+		reflected bool SomeOtherValue;
+	};
 }

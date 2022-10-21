@@ -5,7 +5,7 @@
 
 namespace ke
 {
-	class TTransformComponent : public EntityComponent
+	reflected class TTransformComponent : public EntityComponent
 	{
 	public:
 		TTransformComponent(float3 Location = float3(), float3 Rotation = float3(), float3 Scale = float3(1.0f));
