@@ -41,8 +41,14 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
  endif()
 
  add_custom_command(TARGET ${ModuleName} PRE_BUILD 
- COMMAND ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>/KEReflector.exe "${CMAKE_SOURCE_DIR}" ${ModuleName}
- DEPENDS KEReflector)
+  COMMAND ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>/KEReflector.exe "${CMAKE_SOURCE_DIR}" ${ModuleName}
+  DEPENDS 
+   KEReflector)
+
+ file(GLOB GENERATED_FILES Generated/**.h Generated/**.cpp LIST_DIRECTORIES TRUE)
+ target_sources(${ModuleName} PRIVATE ${GENERATED_FILES})
+ source_group(Generated FILES ${GENERATED_FILES})
+
 endmacro()
 
 macro(CreateLibrary ModuleName ModuleFolder)

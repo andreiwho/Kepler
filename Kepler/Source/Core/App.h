@@ -21,6 +21,7 @@
 #include "Tools/ImageLoader.h"
 #include "Tools/MeshLoader.h"
 #include "Filesystem/AssetSystem/AssetManager.h"
+#include "Reflection/ReflectionDatabase.h"
 
 namespace ke
 {
@@ -62,6 +63,7 @@ namespace ke
 		bool OnWindowResized(const TWindowSizeEvent& event);
 		bool OnKeyDown(const TKeyDownEvent& evemt);
 	private:
+		ReflectionDatabase m_ReflectionDatabase{};
 		TWindow* m_MainWindow{};
 		SharedPtr<LowLevelRenderer> m_LowLevelRenderer{};
 		SharedPtr<AudioEngine> m_AudioEngine{};

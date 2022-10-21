@@ -1,5 +1,6 @@
 #pragma once
 #include "../Game/Components/EntityComponent.h"
+#include "NativeScriptComponent.gen.h"
 
 namespace ke
 {
@@ -42,7 +43,7 @@ namespace ke
 		enum { value = sizeof(test<T>(nullptr)) == sizeof(char) };
 	};
 
-	class NativeScriptComponent : public EntityComponent
+	reflected class NativeScriptComponent : public EntityComponent
 	{
 	};
 }

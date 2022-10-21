@@ -7,8 +7,10 @@ namespace KEReflector
     public class ReflectedClass
     {   
         public string Name { get; set; }
+        public string Type { get; set; }
         public string Parent { get; set; }
-
+        public bool bIsSpecial { get; set; } = false;
+        public string HeaderPath { get; set; }
         public List<ReflectedField> Fields { get; set; }
 
         public ReflectedClass(string name, string parent)

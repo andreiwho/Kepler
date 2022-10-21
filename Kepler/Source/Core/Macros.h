@@ -55,3 +55,8 @@
 
 // Macros for KEReflector
 #define reflected
+
+// This is a special specifier, to note that this function is going to be filled in by the KEReflector
+// Can be used only once per project
+// Special class MUST have FillDatabaseEntries method
+#define holding_reflection_data

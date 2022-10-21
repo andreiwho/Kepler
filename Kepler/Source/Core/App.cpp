@@ -63,6 +63,8 @@ namespace ke
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		InitVFSAliases(launchParams);
+		m_ReflectionDatabase.FillReflectionDatabaseEntries();
+
 		m_AssetManager = MakeShared<AssetManager>();
 
 		TWindowParams windowParams{};
@@ -78,6 +80,12 @@ namespace ke
 
 		m_WorldRenderer = Await(TRenderThread::Submit([this] { return WorldRenderer::New(); }));
 		m_WorldRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
+	
+		RefPtr<ReflectedClass> refClass = GetReflectedClass<TestComponent>();
+		if (refClass)
+		{
+			KEPLER_INFO(LogApp, "Found reflected class {}", refClass->GetName());
+		}
 	}
 
 	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)

@@ -5,20 +5,21 @@ using System.Text;
 
 namespace KEReflector
 {
-    public class ReflectionToken
+    public class ParsedToken
     {
         public string Name { get; set; }
         public string Type { get; set; }
         public string Parent { get; set; }
+        public bool bIsSpecial { get; set; } = false;
     }
 
-    public class Header
+    public class ParsedHeader
     {
         public string Path { get; set; }
 
         public HashSet<ReflectedClass> Classes { get; }
 
-        public Header(string path)
+        public ParsedHeader(string path)
         {
             Path = path;
             Classes = ParseClasses();
@@ -118,66 +119,76 @@ namespace KEReflector
             Finished,
         }
 
-        List<ReflectionToken> ParseTokens(List<string> tokens)
+        List<ParsedToken> ParseTokens(List<string> tokens)
         {
-            List<ReflectionToken> result = new List<ReflectionToken>();
+            List<ParsedToken> result = new List<ParsedToken>();
             EParseStage currentStage = EParseStage.None;
-            ReflectionToken currentToken = null;
+            ParsedToken currentToken = null;
 
             foreach (var token in tokens)
             {
-                if (token == "reflected" && currentStage == EParseStage.None)
+                switch(currentStage)
                 {
-                    if(currentToken != null)
-                    {
-                        result.Add(currentToken);
-                    }
-                    currentToken = new ReflectionToken();
-                    currentStage = EParseStage.ParseType;
-                    continue;
-                }
-
-                if (currentStage == EParseStage.ParseType)
-                {
-                    currentToken.Type = token;
-                    currentStage = EParseStage.ParseName;
-                    continue;
-                }
-
-                if (currentStage == EParseStage.ParseName)
-                {
-                    currentToken.Name = token;
-                    currentStage = EParseStage.CheckHasParent;
-                    continue;
-                }
-
-                if (currentStage == EParseStage.CheckHasParent)
-                {
-                    foreach (char c in _specialChars)
-                    {
-                        if (token == c.ToString())
+                    case EParseStage.None:
+                        if(token == "reflected")
                         {
-                            if (token == ":")
+                            if (currentToken != null)
                             {
-                                currentStage = EParseStage.ParseParent;
+                                result.Add(currentToken);
+                            }
+                            currentToken = new ParsedToken();
+                            currentToken.bIsSpecial = false;
+                            currentStage = EParseStage.ParseType;
+                            continue;
+                        }
+                        else if(token == "holding_reflection_data")
+                        {
+                            if (currentToken != null)
+                            {
+                                result.Add(currentToken);
+                            }
+                            currentToken = new ParsedToken();
+                            currentToken.bIsSpecial = true;
+                            currentStage = EParseStage.ParseType;
+                            continue;
+                        }
+                        break;
+                    case EParseStage.ParseType:
+                        currentToken.Type = token;
+                        currentStage = EParseStage.ParseName;
+                        break;
+                    case EParseStage.ParseName:
+                        currentToken.Name = token;
+                        currentStage = EParseStage.CheckHasParent;
+                        break;
+                    case EParseStage.CheckHasParent:
+                        foreach (char c in _specialChars)
+                        {
+                            if (token == c.ToString())
+                            {
+                                if (token == ":")
+                                {
+                                    currentStage = EParseStage.ParseParent;
+                                    goto end;
+                                }
+                                currentStage = EParseStage.None;
                                 goto end;
                             }
-                            currentStage = EParseStage.None;
-                            goto end;
                         }
-                    }
-                }
-
-                if (currentStage == EParseStage.ParseParent)
-                {
-                    if(token == "public" || token == "private" || token == "protected" || token == "virtual")
-                    {
-                        continue;
-                    }
-                    currentToken.Parent = token;
-                    currentStage = EParseStage.None;
-                    result.Add(currentToken);
-                    currentToken = null;
+                        break;
+                    case EParseStage.ParseParent:
+                        if (currentStage == EParseStage.ParseParent)
+                        {
+                            if (token == "public" || token == "private" || token == "protected" || token == "virtual")
+                            {
+                                continue;
+                            }
+                            currentToken.Parent = token;
+                            currentStage = EParseStage.None;
+                            result.Add(currentToken);
+                            currentToken = null;
+                        }
+                        break;
                 }
             end:
                 ;
@@ -213,6 +224,9 @@ namespace KEReflector
                         classes.Add(currentClass);
                     }
                     currentClass = new ReflectedClass(token.Name, token.Parent);
+                    currentClass.bIsSpecial = token.bIsSpecial;
+                    currentClass.Type = token.Type;
+                    currentClass.HeaderPath = Path;
                 }
                 else
                 {

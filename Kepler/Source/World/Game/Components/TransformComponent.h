@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/WorldTransform.h"
 #include "EntityComponent.h"
+#include "TransformComponent.gen.h"
 
 namespace ke
 {
