@@ -2,10 +2,11 @@
 #include "Core/Types.h"
 #include "Renderer/World/Camera.h"
 #include "World/Game/Components/EntityComponent.h"
+#include "CameraComponent.gen.h"
 
 namespace ke
 {
-	class CameraComponent : public EntityComponent
+	reflected class CameraComponent : public EntityComponent
 	{
 	public:
 		CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);
@@ -17,8 +18,8 @@ namespace ke
 		inline void SetRenderTargetName(const String& NewName) { m_RenderTargetName = NewName; }
 		inline const String& GetRenderTargetName() const { return m_RenderTargetName; }
 
-	private:
-		MathCamera m_Camera;
-		String m_RenderTargetName{ "MeshPassTarget" };
+	public:
+		reflected MathCamera m_Camera;
+		reflected String m_RenderTargetName{ "MeshPassTarget" };
 	};
 }

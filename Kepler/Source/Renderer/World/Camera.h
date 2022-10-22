@@ -1,10 +1,11 @@
 #pragma once
 #include "Core/Types.h"
 #include "WorldTransform.h"
+#include "Camera.gen.h"
 
 namespace ke
 {
-	class MathCamera
+	reflected class MathCamera
 	{
 	public:
 		MathCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());
@@ -31,13 +32,13 @@ namespace ke
 		void SetTransform(const WorldTransform& Transform);
 		static float3 ToEuler(float3 Vector);
 
-	private:
-		float m_FieldOfView{};
-		float m_Width{};
-		float m_Height{};
-		float m_NearClip{};
-		float m_FarClip{};
-		float3 m_Location{};
-		float3 m_Target{};
+	public:
+		reflected float m_FieldOfView{};
+		reflected float m_Width{};
+		reflected float m_Height{};
+		reflected float m_NearClip{};
+		reflected float m_FarClip{};
+		reflected float3 m_Location{};
+		reflected float3 m_Target{};
 	};
 }

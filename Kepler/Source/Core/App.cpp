@@ -30,6 +30,7 @@
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
 #include "Renderer/Subrenderer/Subrenderer2D.h"
+#include "World/Camera/CameraComponent.h"
 
 namespace ke
 {
@@ -80,12 +81,6 @@ namespace ke
 
 		m_WorldRenderer = Await(TRenderThread::Submit([this] { return WorldRenderer::New(); }));
 		m_WorldRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
-	
-		RefPtr<ReflectedClass> refClass = GetReflectedClass<TestComponent>();
-		if (refClass)
-		{
-			KEPLER_INFO(LogApp, "Found reflected class {}", refClass->GetName());
-		}
 	}
 
 	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)
@@ -128,6 +123,15 @@ namespace ke
 		auto mainCamera = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
+
+		RefPtr<ReflectedClass> refClass = GetReflectedClass<CameraComponent>();
+		if (refClass)
+		{
+			KEPLER_INFO(LogApp, "Found reflected class {}", refClass->GetName());
+			auto& field = refClass->GetFieldByName("m_RenderTargetName");
+			String* value = field.GetValueFor<String>(mainCamera.GetComponent<CameraComponent>());
+			KEPLER_INFO(LogApp, "Render target name for main camera is: {}", *value);
+		}
 
 		auto ambientLight = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
 		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();

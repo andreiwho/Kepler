@@ -91,12 +91,6 @@ namespace KEReflector
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
 ");
-                    foreach (var field in entry.Fields)
-                    {
-                        fileWriter.WriteLine($@"
-        {field.Type}({entry.Name}::*{field.Name});");
-                    }
-
                     fileWriter.WriteLine(@"
     };");
                 }
@@ -136,7 +130,10 @@ namespace KEReflector
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
                         foreach(var field in entry.Fields)
                         {
-                            fileWriter.WriteLine($"\t\t{field.Name} = &{entry.Name}::{field.Name};");
+                            fileWriter.WriteLine($@"
+        PushField(""{field.Name}"", ReflectedField{{ id64(""{field.Type}""),
+            [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
+            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
                         }
                         fileWriter.WriteLine("\t}");
                         fileWriter.WriteLine("}");

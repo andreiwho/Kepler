@@ -75,6 +75,44 @@ namespace ke
 	using matrix = matrix4x4;
 
 	template<typename T> using Option = std::optional<T>;
+
+	enum class EBaseTypeId : u32
+	{
+		_u8,
+		_u16,
+		_u32,
+		_u64,
+
+		_i8,
+		_i16,
+		_i32,
+		_i64,
+		_usize,
+		_isize,
+
+		_bool,
+		_float,
+		_double,
+		_String,
+
+		_float2,
+		_float3,
+		_float4,
+
+		_int2,
+		_int3,
+		_int4,
+
+		_uint2,
+		_uint3,
+		_uint4,
+
+		_matrix3x3,
+		_matrix3x4,
+		_matrix4x3,
+		_matrix4x4,
+		_matrix = _matrix4x4,
+	};
 }
 
 namespace std
