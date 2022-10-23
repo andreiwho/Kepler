@@ -12,6 +12,8 @@ namespace KEReflector
         public string SourceDir { get; set; }
         public List<ParsedHeader> Headers { get; set; }
 
+        public Dictionary<string, ReflectedClass> ProjectClasses { get; set; } = new Dictionary<string, ReflectedClass>();
+
         public ParsedHeader SpecialFileHeader = null;
 
         public readonly string _generatedDirectory;
@@ -24,6 +26,21 @@ namespace KEReflector
             SourceDir = $"{ProjectDirectory}/Source";
             Headers = new List<ParsedHeader>();
             _generatedDirectory = $"{ProjectDirectory}/Generated";
+        }
+
+        Dictionary<string, ReflectedClass> CombineProjectClasses()
+        {
+            Dictionary<string, ReflectedClass> result = new Dictionary<string, ReflectedClass>();
+
+            foreach(var header in Headers)
+            {
+                foreach(var headerClass in header.Classes)
+                {
+                    result.Add(headerClass.Key, headerClass.Value);
+                }
+            }
+
+            return result;
         }
 
         void ReadDirectory(string directory)
@@ -48,6 +65,7 @@ namespace KEReflector
         public void ReadProjectFiles()
         {
             ReadDirectory(SourceDir);
+            ProjectClasses = CombineProjectClasses();
             GenerateHeaders();
         }
 
@@ -55,7 +73,7 @@ namespace KEReflector
         {
             var fileName = Path.GetFileNameWithoutExtension(header.Path);
             var generatedHeaderPath = $"{_generatedDirectory}/{fileName}.gen.h";
-            StreamWriter fileWriter = null;
+            StreamWriter fileWriter;
             if (!File.Exists(generatedHeaderPath))
             {
                 fileWriter = File.CreateText(generatedHeaderPath);
@@ -128,13 +146,10 @@ namespace KEReflector
                     {
                         fileWriter.WriteLine("namespace ke\n{");
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
-                        foreach(var field in entry.Fields)
-                        {
-                            fileWriter.WriteLine($@"
-        PushField(""{field.Name}"", ReflectedField{{ id64(""{field.Type}""),
-            [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
-                        }
+
+                        // Recursive parent fields
+                        WriteFieldAccessors(entry, ref fileWriter);
+
                         fileWriter.WriteLine("\t}");
                         fileWriter.WriteLine("}");
                     }
@@ -145,11 +160,30 @@ namespace KEReflector
             }
         }
 
+        private void WriteFieldAccessors(ReflectedClass entry, ref StreamWriter fileWriter)
+        {
+            foreach (var field in entry.Fields)
+            {
+                fileWriter.WriteLine($@"
+        PushField(""{field.Name}"", ReflectedField{{ id64(""{field.Type}""),
+            [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
+            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
+            }
+
+            if(entry.Parent != "None" && entry.Parent != null)
+            {
+                if(ProjectClasses.ContainsKey(entry.Parent))
+                {
+                    WriteFieldAccessors(ProjectClasses[entry.Parent], ref fileWriter);
+                }
+            }
+        }
+
         private void WriteSpecialCppClass(StreamWriter fileWriter, ReflectedClass entry)
         {
             foreach (var projectHeader in Headers)
             {
-                if(entry.HeaderPath == projectHeader.Path)
+                if (entry.HeaderPath == projectHeader.Path)
                 {
                     continue;
                 }

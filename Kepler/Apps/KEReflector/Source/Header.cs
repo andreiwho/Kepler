@@ -24,23 +24,6 @@ namespace KEReflector
         {
             Path = path;
             Classes = ParseClasses();
-
-            foreach (var c in Classes.Values)
-            {
-                if (c.Parent != null)
-                {
-                    Console.WriteLine($"Class name: {c.Name} has parent {c.Parent}");
-                }
-                else
-                {
-                    Console.WriteLine($"Class name: {c.Name}");
-                }
-
-                foreach (var field in c.Fields)
-                {
-                    Console.WriteLine($"Class {c.Name} has field {field.Name} of type {field.Type}");
-                }
-            }
         }
 
         private static readonly char[] _specialChars = new char[]
