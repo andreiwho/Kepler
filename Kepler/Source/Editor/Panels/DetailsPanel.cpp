@@ -9,9 +9,47 @@
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "World/Scripting/NativeScriptContainer.h"
 
 namespace ke
 {
+	namespace
+	{
+		void DrawReflectedField(const String& name, ReflectedField& field, NativeScriptComponent* pNativeComponent)
+		{	
+			TEditorElements::NextFieldRow(name.c_str());
+
+			if (field.GetTypeId() == id64("float"))
+			{
+				auto value = field.GetValueFor<float>(pNativeComponent);
+				TEditorElements::DragFloat1(name.c_str(), *value);
+			}
+
+			if (field.GetTypeId() == id64("float2"))
+			{
+				auto value = field.GetValueFor<float2>(pNativeComponent);
+				TEditorElements::DragFloat2(name.c_str(), *value);
+			}
+
+			if (field.GetTypeId() == id64("float3"))
+			{
+				auto value = field.GetValueFor<float3>(pNativeComponent);
+				TEditorElements::DragFloat3(name.c_str(), *value);
+			}
+
+			if (field.GetTypeId() == id64("float4"))
+			{
+				auto value = field.GetValueFor<float4>(pNativeComponent);
+				TEditorElements::DragFloat4(name.c_str(), *value);
+			}
+
+			if (field.GetTypeId() == id64("bool"))
+			{
+				auto value = field.GetValueFor<bool>(pNativeComponent);
+				ImGui::Checkbox(name.c_str(), value);
+			}
+		}
+	}
 
 	TEditorDetailsPanel::TEditorDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId selectedEntity)
 		: m_pWorld(pWorld)
@@ -29,7 +67,7 @@ namespace ke
 				DrawEntityInfo();
 				DrawTransformComponentInfo();
 				DrawMaterialComponentInfo();
-
+				DrawNativeComponentInfo();
 				if (m_pWorld->IsCamera(m_SelectedEntity))
 				{
 					DrawCameraComponentInfo();
@@ -61,6 +99,43 @@ namespace ke
 					entity.SetName(nameBuffer);
 				}
 				TEditorElements::EndFieldTable();
+			}
+		}
+	}
+
+	void TEditorDetailsPanel::DrawNativeComponentInfo()
+	{
+		KEPLER_PROFILE_SCOPE();
+
+		EntityHandle entity = { m_pWorld, m_SelectedEntity };
+		if (auto pNativeComp = entity.GetComponent<NativeScriptContainerComponent>())
+		{
+			for (const id64& id : pNativeComp->GetComponentIds())
+			{
+				auto pNativeComponent = m_pWorld->GetNativeComponentById(id, m_SelectedEntity);
+				if (!pNativeComponent)
+				{
+					return;
+				}
+
+				RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(id);
+				if (!pClass)
+				{
+					return;
+				}
+
+				if (TEditorElements::Container(pClass->GetName().c_str()))
+				{
+					if (TEditorElements::BeginFieldTable("details", 2))
+					{
+						for (auto& [name, field] : pClass->GetFields())
+						{
+							DrawReflectedField(name, field, pNativeComponent);
+						}
+
+						TEditorElements::EndFieldTable();
+					}
+				}
 			}
 		}
 	}
@@ -128,7 +203,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawMaterialComponentInfo()
 	{
-		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity};
+		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };
 		if (!entity)
 		{
 			return;
@@ -144,7 +219,7 @@ namespace ke
 					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
 					memset(pathBuffer, 0, sizeof(pathBuffer));
 					if (TEditorElements::EditText("Path",
-						pMaterialComponent->GetMaterialParentAssetPath().c_str(), 
+						pMaterialComponent->GetMaterialParentAssetPath().c_str(),
 						pathBuffer))
 					{
 						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';

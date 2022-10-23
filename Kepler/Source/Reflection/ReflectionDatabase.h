@@ -21,8 +21,17 @@ namespace ke
 		template<typename T>
 		RefPtr<ReflectedClass> GetClass();
 
+		RefPtr<ReflectedClass> FindClassById(id64 id)
+		{
+			if (m_Classes.Contains(id))
+			{
+				return m_Classes[id];
+			}
+			return nullptr;
+		}
+
 	private:
-		Map<String, RefPtr<ReflectedClass>> m_Classes;
+		Map<id64, RefPtr<ReflectedClass>> m_Classes;
 	};
 
 	template<typename T>

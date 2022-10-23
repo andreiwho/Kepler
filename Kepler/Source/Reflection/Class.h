@@ -23,6 +23,11 @@ namespace ke
 			m_SetAccessor(pHandler, pValue);
 		}
 
+		inline id64 GetTypeId() const
+		{
+			return m_TypeId;
+		}
+
 	private:
 		id64 m_TypeId{0};
 		GetAccessorType m_GetAccessor{};
@@ -41,6 +46,11 @@ namespace ke
 			return m_Fields;
 		}
 
+		inline Map<String, ReflectedField>& GetFields()&
+		{
+			return m_Fields;
+		}
+
 		inline ReflectedField& GetFieldByName(const String& name)
 		{
 			CHECK(m_Fields.Contains(name));
@@ -53,7 +63,10 @@ namespace ke
 			return m_Fields[name];
 		}
 
+		inline id64 GetClassId() const { return m_ClassId; }
+
 	protected:
+		id64 m_ClassId;
 		void PushField(const String& name, ReflectedField&& field);
 
 	private:

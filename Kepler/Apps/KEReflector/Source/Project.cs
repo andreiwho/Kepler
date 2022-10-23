@@ -148,6 +148,7 @@ namespace KEReflector
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
 
                         // Recursive parent fields
+                        fileWriter.WriteLine($"m_ClassId = id64(\"{entry.Name}\");");
                         WriteFieldAccessors(entry, ref fileWriter);
 
                         fileWriter.WriteLine("\t}");
@@ -226,8 +227,8 @@ namespace ke
                     fileWriter.WriteLine($@"
     template<> RefPtr<ReflectedClass> {entry.Name}::GetClass<{headerClass.Name}>() 
     {{ 
-        CHECK(m_Classes.Contains(""{headerClass.Name}"")); 
-        return m_Classes[""{headerClass.Name}""]; 
+        CHECK(m_Classes.Contains(id64(""{headerClass.Name}""))); 
+        return m_Classes[id64(""{headerClass.Name}"")]; 
     }}");
                 }
             }

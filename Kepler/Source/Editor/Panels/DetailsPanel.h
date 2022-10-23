@@ -17,6 +17,7 @@ namespace ke
 		void DrawMaterialComponentInfo();
 		void DrawLightInfo();
 		void DrawEntityInfo();
+		void DrawNativeComponentInfo();
 
 	private:
 		RefPtr<GameWorld> m_pWorld;

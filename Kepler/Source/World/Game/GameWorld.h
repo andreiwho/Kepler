@@ -6,6 +6,7 @@
 
 #include <entt/entt.hpp>
 #include <functional>
+#include "../Scripting/NativeScriptContainer.h"
 
 namespace ke
 {
@@ -19,12 +20,13 @@ namespace ke
 		std::function<void()> OnInit;
 		std::function<void(float)> OnUpdate;
 		std::function<void()> OnDestroy;
+		std::function<NativeScriptComponent* (GameEntityId id)> GetComponent;
 		std::function<void(class GameWorld*)> OnCopy;
 	};
 
 	struct NativeComponentInfo
 	{
-		bool bShouldUpdate = true;
+		u64 AccessorId = 0;
 	};
 
 	class GameWorld : public TWorld
@@ -50,9 +52,11 @@ namespace ke
 		template<typename T>
 		void SetupNativeComponent()
 		{
+			RefPtr<ReflectedClass> pComponentClass = ReflectionDatabase::Get()->GetClass<T>();
+			CHECKMSG(pComponentClass, "Native component classes must have 'reflected' specifier.");
+
 			NativeComponentAccessors accessors;
-			const u64 typeHash = typeid(T).hash_code();
-			if (m_NativeComponentInfos.Contains(typeHash))
+			if (m_NativeComponentInfos.Contains(pComponentClass->GetClassId()))
 			{
 				return;
 			}
@@ -105,10 +109,21 @@ namespace ke
 				accessors.OnDestroy = []() {};
 			}
 
+			accessors.GetComponent = [world = this](GameEntityId gameEntityId)
+			{
+				if (world->HasComponent<T>(gameEntityId))
+				{
+					return &world->GetComponent<T>(gameEntityId);
+				}
+				return (T*)nullptr;
+			};
 
 
-			m_NativeAccessors.AppendBack(accessors);
-			m_NativeComponentInfos.Insert(typeHash, {});
+			usize accessorId = m_NativeAccessors.AppendBack(accessors);
+			NativeComponentInfo info;
+			info.AccessorId = accessorId;
+
+			m_NativeComponentInfos.Insert(pComponentClass->GetClassId(), info);
 		}
 
 		template<entity_component_typename T, typename ... ARGS>
@@ -116,6 +131,9 @@ namespace ke
 		{
 			if constexpr (std::is_base_of_v<NativeScriptComponent, T>)
 			{
+				NativeScriptContainerComponent& container = GetOrAddComponent<NativeScriptContainerComponent>(entity);
+				container.AddComponent<T>();
+
 				T& component = m_EntityRegistry.emplace<T>(entity);
 				SetupNativeComponent<T>();
 				component.SetOwner(entity);
@@ -198,6 +216,17 @@ namespace ke
 		bool IsCamera(GameEntityId Entity) const;
 		bool IsLight(GameEntityId Entity) const;
 
+		NativeScriptComponent* GetNativeComponentById(id64 componentId, GameEntityId entityId)
+		{
+			if (!m_NativeComponentInfos.Contains(componentId))
+			{
+				return nullptr;
+			}
+
+			auto accessorId = m_NativeComponentInfos[componentId].AccessorId;
+			return m_NativeAccessors[accessorId].GetComponent(entityId);
+		}
+
 	private:
 		void FlushPendingDestroys();
 
@@ -205,7 +234,7 @@ namespace ke
 
 		Array<entt::entity> m_PendingDestroyEntities;
 		Array<NativeComponentAccessors> m_NativeAccessors;
-		Map<u64, NativeComponentInfo> m_NativeComponentInfos;
+		Map<id64, NativeComponentInfo> m_NativeComponentInfos;
 
 		GameEntityId m_MainCamera{};
 	};
