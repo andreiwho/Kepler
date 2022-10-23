@@ -13,14 +13,6 @@ namespace ke
 
 	}
 
-	void TWorld::Internal_Update(float DeltaTime)
-	{
-		if (bNeedsUpdate)
-		{
-			UpdateWorld(DeltaTime, EWorldUpdateKind::Game);
-		}
-	}
-
 	void TWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
 	{
 	}

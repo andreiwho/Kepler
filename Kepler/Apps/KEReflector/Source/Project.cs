@@ -108,7 +108,7 @@ namespace KEReflector
         virtual String GetName() const override {{ return ""{entry.Name}""; }}
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
-        virtual bool IsEnum() const override {{return {isEnum}; }}
+        virtual bool IsEnum() const override {{ return {isEnum}; }}
 ");
                     fileWriter.WriteLine(@"
     };");
@@ -151,7 +151,7 @@ namespace KEReflector
                         // Recursive parent fields
                         fileWriter.WriteLine($"\t\tm_ClassId = id64(\"{entry.Name}\");");
 
-                        if(entry.bIsEnum)
+                        if (entry.bIsEnum)
                         {
                             WriteEnumAccessors(entry, ref fileWriter);
                         }
@@ -192,13 +192,9 @@ namespace KEReflector
                 fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
             }
 
-            foreach(var cls in ProjectClasses.Values)
+            if (ProjectClasses.ContainsKey(field.Type) && ProjectClasses[field.Type].bIsEnum)
             {
-                if(cls.bIsEnum)
-                {
-                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
-                    break;
-                }
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
             }
         }
 
@@ -245,13 +241,13 @@ namespace KEReflector
 
         void WriteEnumAccessors(ReflectedClass entry, ref StreamWriter fileWriter)
         {
-            if(!entry.bIsEnum)
+            if (!entry.bIsEnum)
             {
                 return;
             }
 
             int index = 0;
-            foreach(var enumValue in entry.EnumValues)
+            foreach (var enumValue in entry.EnumValues)
             {
                 fileWriter.WriteLine($"\t\tPushEnumValue(\"{enumValue}\", {index});");
                 index++;

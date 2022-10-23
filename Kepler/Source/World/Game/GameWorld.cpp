@@ -89,11 +89,6 @@ namespace ke
 	void GameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (UpdateKind != EWorldUpdateKind::Game)
-		{
-			return;
-		}
-
 		if (IsValidEntity(m_MainCamera))
 		{
 			auto& CameraEntity = GetEntityFromId(m_MainCamera);
@@ -118,9 +113,12 @@ namespace ke
 			}
 		);
 
-		for (auto& accessor : m_NativeAccessors)
+		if (UpdateKind == EWorldUpdateKind::Play)
 		{
-			accessor.OnUpdate(DeltaTime);
+			for (auto& accessor : m_NativeAccessors)
+			{
+				accessor.OnUpdate(DeltaTime);
+			}
 		}
 
 		FlushPendingDestroys();

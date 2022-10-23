@@ -5,7 +5,8 @@ namespace ke
 {
 	enum class EWorldUpdateKind
 	{
-		Game,
+		Play,
+		Edit
 	};
 
 	// World - base class for all Entity-combined objects, such as:
@@ -21,8 +22,6 @@ namespace ke
 	{
 	public:
 		~TWorld();
-
-		void Internal_Update(float DeltaTime);
 
 		const String& GetName() const { return Name; }
 

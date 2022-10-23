@@ -121,7 +121,7 @@ namespace ke
 		float displayInfoTime = 0.0f;
 
 		auto mainCamera = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
-		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
+		mainCamera->SetLocation(float3(2.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 		RefPtr<ReflectedClass> refClass = GetReflectedClass<CameraComponent>();
 		if (refClass)
@@ -192,9 +192,12 @@ namespace ke
 #endif
 					// Initialize the renderer
 					m_WorldRenderer->InitFrame(m_CurrentWorld);
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
 					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
-
+#if ENABLE_EDITOR
+					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Edit);
+#else
+					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Play);
+#endif
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
@@ -307,16 +310,26 @@ namespace ke
 		return false;
 	}
 
+	TestMovementComponent::TestMovementComponent()
+	{
+		m_PerInstanceOffset = (float)(rand() % 256);
+	}
+
 	void TestMovementComponent::Update(float deltaTime)
 	{
 		if (m_MovementType == EMovementType::Dynamic)
 		{
 			EntityHandle handle{ GetWorld(), GetOwner() };
-			m_MovementValue = glm::sin(m_CurrentTime);
+			m_MovementValue = glm::sin(m_CurrentTime + m_PerInstanceOffset);
 			auto location = handle->GetLocation();
 			location.z = m_MovementValue * m_Speed;
 			handle->SetLocation(location);
 			m_CurrentTime += deltaTime;
+
+			auto rotation = handle->GetRotation();
+			rotation.z += deltaTime * m_PerInstanceOffset;
+			rotation.x = rotation.z;
+			handle->SetRotation(rotation);
 		}
 	}
 

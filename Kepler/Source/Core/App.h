@@ -35,7 +35,9 @@ namespace ke
 	reflected class TestMovementComponent : public NativeScriptComponent
 	{
 	public:
-		reflected EMovementType m_MovementType = EMovementType::Static;
+		TestMovementComponent();
+
+		reflected EMovementType m_MovementType = EMovementType::Dynamic;
 		
 		reflected kmeta(readonly)
 		float m_MovementValue = 0.0f;
@@ -45,6 +47,7 @@ namespace ke
 		void Update(float deltaTime);
 
 	private:
+		float m_PerInstanceOffset = 0.0f;
 		float m_CurrentTime = 0.0f;
 	};
 
@@ -85,6 +88,7 @@ namespace ke
 		bool OnWindowClosed(const TWindowClosedEvent& event);
 		bool OnWindowResized(const TWindowSizeEvent& event);
 		bool OnKeyDown(const TKeyDownEvent& evemt);
+
 	private:
 		ReflectionDatabase m_ReflectionDatabase{};
 		TWindow* m_MainWindow{};
