@@ -3,6 +3,7 @@ include(CSharpUtilities)
 set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "ThirdParty/CMake")
 set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL")
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE STRING INTERNAL FORCE)
 
 if(MSVC)
  add_compile_options(/MP)
@@ -11,7 +12,6 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Bin/Lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/Release)
 
 function(SetDefaultMSVCLib ModuleName)
  set_target_properties(${ModuleName} PROPERTIES 
@@ -39,13 +39,19 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
   message(FATAL_ERROR "Unsupported platform detected.")
   target_compile_definitions(${ModuleName} PRIVATE PLATFORM_OTHER)
  endif()
-
  add_custom_command(TARGET ${ModuleName} PRE_BUILD 
-  COMMAND ${CMAKE_SOURCE_DIR}/Bin/$<CONFIG>/KEReflector.exe "${CMAKE_SOURCE_DIR}" ${ModuleName}
+  COMMAND $<TARGET_FILE_DIR:KEReflector>/net6.0/KEReflector.exe "${CMAKE_SOURCE_DIR}" ${ModuleName}
   DEPENDS 
    KEReflector)
 
  file(GLOB GENERATED_FILES Generated/**.h Generated/**.cpp LIST_DIRECTORIES TRUE)
+
+ add_custom_command(TARGET ${ModuleName} PRE_BUILD 
+   COMMAND $<TARGET_FILE_DIR:KEReflector>/net6.0/KECacheChecker.exe ${CMAKE_SOURCE_DIR} 1
+   DEPENDS 
+    KECacheChecker)
+
+
  target_sources(${ModuleName} PRIVATE ${GENERATED_FILES})
  source_group(Generated FILES ${GENERATED_FILES})
 
@@ -71,9 +77,14 @@ macro(CreateCSharpExecutable ModuleName ModuleFolder)
   add_executable(${ModuleName} ${PROJECT_FILES})
   set_target_properties(${ModuleName} PROPERTIES 
     FOLDER ${ModuleFolder}
-    VS_DEBUGGER_COMMAND_ARGUMENTS ${ModuleName}
+    VS_DEBUGGER_COMMAND_ARGUMENTS "${CMAKE_SOURCE_DIR} ${ModuleName}"
   )
-  set_target_properties(${this_target} PROPERTIES
-    DOTNET_SDK "Microsoft.NET.Sdk"
-    DOTNET_TARGET_FRAMEWORK "net6.0")
+  set_target_properties(${ModuleName} PROPERTIES
+   DOTNET_SDK "Microsoft.NET.Sdk"
+   DOTNET_TARGET_FRAMEWORK "net6.0")
+
+  if(ENABLE_EDITOR)
+   target_compile_definitions(${ModuleName} PUBLIC ENABLE_EDITOR)
+  endif()
+  
 endmacro()

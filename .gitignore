@@ -12,3 +12,4 @@ Release
 
 *.gen.h
 *.gen.cpp
+*.gen.json

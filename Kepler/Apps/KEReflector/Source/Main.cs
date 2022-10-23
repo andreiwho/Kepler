@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace KEReflector
@@ -31,6 +32,25 @@ namespace KEReflector
             Console.WriteLine($"Generating reflection info for directory {args[0]}");
             Project project = ParseCommandLine(args);
             project.ReadProjectFiles();
+
+            if (project.bAnyFilesChanged)
+            {
+                RegenerateSolution(project);
+            }
+        }
+
+        public static void RegenerateSolution(Project project)
+        {
+            string markFilePath = $"{project.EngineRoot}/Intermediate/_regenerate";
+            if(File.Exists(markFilePath))
+            {
+                return;
+            }
+            else
+            {
+                File.CreateText(markFilePath).Flush();
+                Console.WriteLine("NOTE: Project regeneration requested");
+            }
         }
     }
 }

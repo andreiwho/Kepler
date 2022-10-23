@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace KEReflector
@@ -10,10 +11,13 @@ namespace KEReflector
         public string ProjectDirectory { get; set; }
         public string EngineRoot { get; set; }
         public string SourceDir { get; set; }
+        public bool bAnyFilesChanged { get; set; } = false;
         public List<ParsedHeader> Headers { get; set; }
         public Dictionary<string, ReflectedClass> ProjectClasses { get; set; } = new Dictionary<string, ReflectedClass>();
         public ParsedHeader SpecialFileHeader = null;
         public readonly string _generatedDirectory;
+
+        private SourceDatabase _sourceDb;
 
         public Project(string name, string directory, string engineRoot)
         {
@@ -23,6 +27,7 @@ namespace KEReflector
             SourceDir = $"{ProjectDirectory}/Source";
             Headers = new List<ParsedHeader>();
             _generatedDirectory = $"{ProjectDirectory}/Generated";
+            _sourceDb = new SourceDatabase(_generatedDirectory);
         }
 
         Dictionary<string, ReflectedClass> CombineProjectClasses()
@@ -53,7 +58,9 @@ namespace KEReflector
                 {
                     if (Path.GetExtension(entry) == ".h")
                     {
-                        Headers.Add(new ParsedHeader(entry.Replace('\\', '/')));
+                        var headerPath = entry.Replace('\\', '/');
+                        Headers.Add(new ParsedHeader(headerPath));
+                        _sourceDb.AddEntry(headerPath);
                     }
                 }
             }
@@ -64,6 +71,8 @@ namespace KEReflector
             ReadDirectory(SourceDir);
             ProjectClasses = CombineProjectClasses();
             GenerateHeaders();
+
+            _sourceDb.FlushDatabase();
         }
 
         void WriteHeaderFileCode(ParsedHeader header)
@@ -83,7 +92,7 @@ namespace KEReflector
             if (fileWriter != null)
             {
                 fileWriter.WriteLine("#pragma once");
-                fileWriter.WriteLine("#include \"Reflection/Class.h\"\n\n");
+                fileWriter.WriteLine("#include \"Reflection/Class.h\"\n");
                 fileWriter.WriteLine("namespace ke");
                 fileWriter.WriteLine("{");
 
@@ -306,7 +315,6 @@ namespace ke
     }}");
                 }
             }
-
             fileWriter.WriteLine("}");
         }
 
@@ -328,7 +336,37 @@ namespace ke
 
             foreach (var header in Headers)
             {
-                GenerateHeaderFiles(header);
+                if(header.Classes.Count == 0)
+                {
+                    var generatedHeaderPath = $"{_generatedDirectory}/{Path.GetFileNameWithoutExtension(header.Path)}.gen.h";
+                    var generatedCppPath = $"{_generatedDirectory}/{Path.GetFileNameWithoutExtension(header.Path)}.gen.cpp";
+                    
+                    if(File.Exists(generatedHeaderPath))
+                    {
+                        File.Delete(generatedHeaderPath);
+                    }
+
+                    if (File.Exists(generatedCppPath))
+                    {
+                        File.Delete(generatedCppPath);
+                    }
+                }
+
+                bool bHasSpecialClass = false;
+                foreach(var headerClass in header.Classes)
+                {
+                    if(headerClass.Value.bIsSpecial)
+                    {
+                        bHasSpecialClass = true;
+                        break;
+                    }
+                }
+
+                bAnyFilesChanged |= _sourceDb.HasFileChanged(header.Path);
+                if (bAnyFilesChanged || bHasSpecialClass)
+                {
+                    GenerateHeaderFiles(header);
+                }
             }
         }
     }
