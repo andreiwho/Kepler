@@ -117,14 +117,20 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorElements::EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols])
+	bool TEditorElements::EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols], bool bDisabled)
 	{
 		if (pInitialText)
 		{
 			strcpy(pOutBuffer, pInitialText);
 		}
 
-		bool bReturn = ImGui::InputText("##v", pOutBuffer, GMaxTextEditSymbols, ImGuiInputTextFlags_EnterReturnsTrue);
+		u32 flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		if (bDisabled)
+		{
+			flags |= ImGuiInputTextFlags_ReadOnly;
+		}
+
+		bool bReturn = ImGui::InputText(fmt::format("##{}", pLabel).c_str(), pOutBuffer, GMaxTextEditSymbols, flags);
 		return bReturn;
 	}
 

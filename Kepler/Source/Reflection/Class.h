@@ -3,12 +3,19 @@
 
 namespace ke
 {
+	struct FieldMetadata
+	{
+		bool bReadOnly : 1 = false;
+		bool bIsPointer : 1 = false;
+		bool bIsRefPtr : 1 = false;
+	};
+
 	class ReflectedField
 	{
 	public:
 		using GetAccessorType = void* (*)(void*);
 		using SetAccessorType = void (*)(void*, void*);
-		ReflectedField(id64 id, GetAccessorType getAccessor, SetAccessorType setAccessor);
+		ReflectedField(id64 id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
 		ReflectedField() = default;
 
 		template<typename GetType, typename HandlerType>
@@ -20,6 +27,11 @@ namespace ke
 		template<typename SetType, typename HandlerType>
 		void SetValueFor(HandlerType* pHandler, SetType* pValue)
 		{
+			if (m_Metadata.bReadOnly)
+			{
+				return;
+			}
+
 			m_SetAccessor(pHandler, pValue);
 		}
 
@@ -28,8 +40,11 @@ namespace ke
 			return m_TypeId;
 		}
 
+		const FieldMetadata& GetMetadata() const { return m_Metadata; }
+
 	private:
 		id64 m_TypeId{0};
+		FieldMetadata m_Metadata;
 		GetAccessorType m_GetAccessor{};
 		SetAccessorType m_SetAccessor{};
 	};

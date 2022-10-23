@@ -11,11 +11,8 @@ namespace KEReflector
         public string EngineRoot { get; set; }
         public string SourceDir { get; set; }
         public List<ParsedHeader> Headers { get; set; }
-
         public Dictionary<string, ReflectedClass> ProjectClasses { get; set; } = new Dictionary<string, ReflectedClass>();
-
         public ParsedHeader SpecialFileHeader = null;
-
         public readonly string _generatedDirectory;
 
         public Project(string name, string directory, string engineRoot)
@@ -32,9 +29,9 @@ namespace KEReflector
         {
             Dictionary<string, ReflectedClass> result = new Dictionary<string, ReflectedClass>();
 
-            foreach(var header in Headers)
+            foreach (var header in Headers)
             {
-                foreach(var headerClass in header.Classes)
+                foreach (var headerClass in header.Classes)
                 {
                     result.Add(headerClass.Key, headerClass.Value);
                 }
@@ -148,7 +145,7 @@ namespace KEReflector
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
 
                         // Recursive parent fields
-                        fileWriter.WriteLine($"m_ClassId = id64(\"{entry.Name}\");");
+                        fileWriter.WriteLine($"\t\tm_ClassId = id64(\"{entry.Name}\");");
                         WriteFieldAccessors(entry, ref fileWriter);
 
                         fileWriter.WriteLine("\t}");
@@ -166,14 +163,54 @@ namespace KEReflector
             foreach (var field in entry.Fields)
             {
                 fileWriter.WriteLine($@"
-        PushField(""{field.Name}"", ReflectedField{{ id64(""{field.Type}""),
+        FieldMetadata {field.DisplayName}Metadata{{}};");
+                foreach (var specifier in field.MetadataSpecifiers)
+                {
+                    if (specifier.ToLower() == "readonly")
+                    {
+                        fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bReadOnly = true;");
+                    }
+                }
+
+                if(field.bIsPointer)
+                {
+                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
+                }
+
+                if(field.bIsRefPtr)
+                {
+                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
+                }
+
+                if(field.bIsRefPtr)
+                {
+                    fileWriter.WriteLine($@"
+        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+            {field.DisplayName}Metadata,
+            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}.Raw(); }},
+            [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
+                }
+                else if (field.bIsPointer)
+                {
+                    fileWriter.WriteLine($@"
+        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+            {field.DisplayName}Metadata,
+            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}; }},
+            [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
+                }
+                else
+                {
+                    fileWriter.WriteLine($@"
+        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+            {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
             [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
+                }
             }
 
-            if(entry.Parent != "None" && entry.Parent != null)
+            if (entry.Parent != "None" && entry.Parent != null)
             {
-                if(ProjectClasses.ContainsKey(entry.Parent))
+                if (ProjectClasses.ContainsKey(entry.Parent))
                 {
                     WriteFieldAccessors(ProjectClasses[entry.Parent], ref fileWriter);
                 }

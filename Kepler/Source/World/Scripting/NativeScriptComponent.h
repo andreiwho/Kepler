@@ -46,17 +46,4 @@ namespace ke
 	reflected class NativeScriptComponent : public EntityComponent
 	{
 	};
-
-	reflected class NativeTestComponent : public NativeScriptComponent
-	{
-	public:
-		reflected float TestValue = 15.0f;
-	};
-
-	reflected class OtherNativeTestComponent : public NativeTestComponent
-	{
-	public:
-		reflected float3 OtherTestFloat3 = { 10.0f, 0.0f, 0.0f };
-		reflected bool bCheckThisOut = false;
-	};
 }

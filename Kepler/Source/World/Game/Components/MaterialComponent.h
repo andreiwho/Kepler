@@ -1,10 +1,11 @@
 #pragma once
 #include "Renderer/World/Material.h"
 #include "EntityComponent.h"
+#include "MaterialComponent.gen.h"
 
 namespace ke
 {
-	class MaterialComponent : public EntityComponent
+	reflected class MaterialComponent : public EntityComponent
 	{
 	public:
 		MaterialComponent() = default;
@@ -20,7 +21,8 @@ namespace ke
 
 		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
 
-	private:
+	public:
 		RefPtr<TMaterial> Material;
+		reflected String MaterialAssetPath;
 	};
 }

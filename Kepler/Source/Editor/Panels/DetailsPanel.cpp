@@ -15,50 +15,79 @@ namespace ke
 {
 	namespace
 	{
-		void DrawReflectedField(const String& name, ReflectedField& field, NativeScriptComponent* pNativeComponent)
+		void DrawReflectedField(const String& name, ReflectedField& field, void* pEntry)
 		{	
-			TEditorElements::NextFieldRow(name.c_str());
+			bool bNotBaseType = false;
 
-			if (field.GetTypeId() == id64("float"))
+			// Check metadata
+			if (field.GetMetadata().bReadOnly)
 			{
-				auto value = field.GetValueFor<float>(pNativeComponent);
+				ImGui::BeginDisabled(true);
+			}
+			else if (field.GetTypeId() == id64("float"))
+			{
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<float>(pEntry);
 				TEditorElements::DragFloat1(name.c_str(), *value);
 			}
-
-			if (field.GetTypeId() == id64("float2"))
+			else if (field.GetTypeId() == id64("float2"))
 			{
-				auto value = field.GetValueFor<float2>(pNativeComponent);
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<float2>(pEntry);
 				TEditorElements::DragFloat2(name.c_str(), *value);
 			}
-
-			if (field.GetTypeId() == id64("float3"))
+			else if (field.GetTypeId() == id64("float3"))
 			{
-				auto value = field.GetValueFor<float3>(pNativeComponent);
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<float3>(pEntry);
 				TEditorElements::DragFloat3(name.c_str(), *value);
 			}
-
-			if (field.GetTypeId() == id64("float4"))
+			else if (field.GetTypeId() == id64("float4"))
 			{
-				auto value = field.GetValueFor<float4>(pNativeComponent);
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<float4>(pEntry);
 				TEditorElements::DragFloat4(name.c_str(), *value);
 			}
 
-			if (field.GetTypeId() == id64("bool"))
+			else if (field.GetTypeId() == id64("bool"))
 			{
-				auto value = field.GetValueFor<bool>(pNativeComponent);
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<bool>(pEntry);
 				ImGui::Checkbox(name.c_str(), value);
 			}
-
-			if (field.GetTypeId() == id64("String"))
+			else if (field.GetTypeId() == id64("String"))
 			{
-				auto value = field.GetValueFor<String>(pNativeComponent);
+				TEditorElements::NextFieldRow(name.c_str());
+				auto value = field.GetValueFor<String>(pEntry);
 				char outBuffer[TEditorElements::GMaxTextEditSymbols];
 				memset(outBuffer, 0, sizeof(outBuffer));
-				if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer))
+				if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer, field.GetMetadata().bReadOnly))
 				{
 					outBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
 					String newValue = outBuffer;
-					field.SetValueFor(pNativeComponent, &newValue);
+					field.SetValueFor(pEntry, &newValue);
+				}
+			}
+			else
+			{
+				bNotBaseType = true;
+			}
+
+			// End metadata
+			if (field.GetMetadata().bReadOnly)
+			{
+				ImGui::EndDisabled();
+			}
+
+			if (bNotBaseType)
+			{
+				ImGui::TableHeader(name.c_str());
+				if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId()))
+				{
+					for (auto& [fieldName, classField] : pClass->GetFields())
+					{
+						DrawReflectedField(fieldName, classField, field.GetValueFor<void*>(pEntry));
+					}
 				}
 			}
 		}
@@ -189,24 +218,19 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawCameraComponentInfo()
 	{
-		MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
+		EntityHandle handle{ m_pWorld, m_SelectedEntity };
+		// MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
 		{
 			if (TEditorElements::BeginFieldTable("details", 2))
 			{
-				TEditorElements::NextFieldRow("Field of View");
-				auto fov = camera.GetFOV();
-				if (TEditorElements::DragFloat1("Field Of View", fov, 0.001f))
+				auto pClass = ReflectionDatabase::Get()->GetClass<CameraComponent>();
+				if (pClass)
 				{
-					camera.SetFOV(fov);
-				}
-
-				TEditorElements::NextFieldRow("Near/Far Clip");
-				auto frustomDepth = float2(camera.GetNearClip(), camera.GetFarClip());
-				if (TEditorElements::DragFloat2("Near/Far Clip", frustomDepth, 0.1f))
-				{
-					camera.SetNearClip(frustomDepth.x);
-					camera.SetFarClip(frustomDepth.y);
+					for (auto& [name, field] : pClass->GetFields())
+					{
+						DrawReflectedField(name, field, handle.GetComponent<CameraComponent>());
+					}
 				}
 				TEditorElements::EndFieldTable();
 			}
@@ -228,25 +252,19 @@ namespace ke
 			{
 				if (TEditorElements::BeginFieldTable("details", 2))
 				{
-					TEditorElements::NextFieldRow("Path");
-					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
-					memset(pathBuffer, 0, sizeof(pathBuffer));
-					if (TEditorElements::EditText("Path",
-						pMaterialComponent->GetMaterialParentAssetPath().c_str(),
-						pathBuffer))
+					auto pClass = ReflectionDatabase::Get()->GetClass<MaterialComponent>();
+					if (pClass)
 					{
-						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
-
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
+						for (auto& [name, field] : pClass->GetFields())
 						{
-							pMaterialComponent->SetMaterial(pMaterial);
+							DrawReflectedField(name, field, pMaterialComponent);
 						}
 					}
 
 					TEditorElements::NextFieldRow("Reload");
 					if (ImGui::Button("Reload Material"))
 					{
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pMaterialComponent->MaterialAssetPath, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}

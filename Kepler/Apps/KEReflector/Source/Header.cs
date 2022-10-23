@@ -11,6 +11,8 @@ namespace KEReflector
         public string Type { get; set; }
         public string Parent { get; set; }
         public bool bIsSpecial { get; set; } = false;
+        public bool bIsPointer { get; set; } = false;
+        public bool bIsRefPtr { get; set; } = false;
         public List<string> MetaSpecifiers { get; set; } = new List<string>();
     }
 
@@ -100,7 +102,9 @@ namespace KEReflector
             None,
             ParseMeta,
             ParseMetaArgs,
+            ParseTemplateWrapper,
             ParseType,
+            ParsePointer,
             ParseName,
             CheckHasParent,
             ParseParent,
@@ -143,7 +147,7 @@ namespace KEReflector
                         }
                         break;
                     case EParseStage.ParseMeta:
-                        if (token == "metadata")
+                        if (token == "kmeta")
                         {
                             currentStage = EParseStage.ParseMetaArgs;
                         }
@@ -171,10 +175,36 @@ namespace KEReflector
                         }
                         break;
                     case EParseStage.ParseType:
+                        if(token == "RefPtr")
+                        {
+                            currentToken.bIsRefPtr = true;
+                            currentToken.bIsPointer = true;
+                            currentStage = EParseStage.ParseTemplateWrapper;
+                            continue;
+                        }
                         currentToken.Type = token;
                         currentStage = EParseStage.ParseName;
                         break;
+                    case EParseStage.ParseTemplateWrapper:
+                        if(token == "<")
+                        {
+                            continue;
+                        }
+
+                        if (token == ">")
+                        {
+                            currentStage = EParseStage.ParseName;
+                            continue;
+                        }
+
+                        currentToken.Type = token;
+                        break;
                     case EParseStage.ParseName:
+                        if(token == "*")
+                        {
+                            currentToken.bIsPointer = true;
+                            continue;
+                        }
                         currentToken.Name = token;
                         currentStage = EParseStage.CheckHasParent;
                         break;
@@ -244,15 +274,34 @@ namespace KEReflector
                     currentClass.bIsSpecial = token.bIsSpecial;
                     currentClass.Type = token.Type;
                     currentClass.HeaderPath = Path;
+                    currentClass.MetadataSpecifiers = token.MetaSpecifiers;
                 }
                 else
                 {
                     if (currentClass != null)
                     {
+                        string DisplayName = "";
+                        if(token.Name.StartsWith("m_"))
+                        {
+                            DisplayName = token.Name.Substring(2);
+                        }
+                        else if (token.Name.StartsWith("b") || token.Name.StartsWith("_"))
+                        {
+                            DisplayName = token.Name.Substring(1);
+                        }
+                        else
+                        {
+                            DisplayName = token.Name;
+                        }
+
                         currentClass.Fields.Add(new ReflectedField
                         {
                             Name = token.Name,
                             Type = token.Type,
+                            DisplayName = DisplayName,
+                            MetadataSpecifiers = token.MetaSpecifiers,
+                            bIsPointer = token.bIsPointer,
+                            bIsRefPtr = token.bIsRefPtr,
                         });
                     }
                 }

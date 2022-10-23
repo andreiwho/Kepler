@@ -21,7 +21,7 @@ namespace ke
 		matrix3x3 GenerateNormalMatrix() const;
 		float3 RotationToEuler() const;
 
-	private:
+	public:
 		float3 m_Location = float3();
 		float3 m_Rotation = float3();
 		float3 m_Scale = float3(1.0f);

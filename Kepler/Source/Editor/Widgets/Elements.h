@@ -16,7 +16,7 @@ namespace ke
 		static bool DragFloat4(CStr pLabel, float4& OutFloat, float Speed = 1, float min = 0, float max = 0);
 
 		static bool Container(CStr pText);
-		static bool EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols]);
+		static bool EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols], bool bDisabled = false);
 
 		static bool BeginFieldTable(CStr pLabel, i32 ColumnCount);
 		static void EndFieldTable();

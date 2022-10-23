@@ -56,7 +56,7 @@
 // Macros for KEReflector
 #define reflected
 
-#define metadata(...)
+#define kmeta(...)
 
 // This is a special specifier, to note that this function is going to be filled in by the KEReflector
 // Can be used only once per project

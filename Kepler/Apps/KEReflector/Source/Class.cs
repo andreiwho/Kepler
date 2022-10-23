@@ -12,6 +12,7 @@ namespace KEReflector
         public bool bIsSpecial { get; set; } = false;
         public string HeaderPath { get; set; }
         public List<ReflectedField> Fields { get; set; }
+        public List<string> MetadataSpecifiers { get; set; } = new List<string>();
 
         public ReflectedClass(string name, string parent)
         {

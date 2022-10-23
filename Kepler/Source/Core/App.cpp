@@ -123,12 +123,11 @@ namespace ke
 		auto mainCamera = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
 		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
-
 		RefPtr<ReflectedClass> refClass = GetReflectedClass<CameraComponent>();
 		if (refClass)
 		{
 			KEPLER_INFO(LogApp, "Found reflected class {}", refClass->GetName());
-			auto& field = refClass->GetFieldByName("m_RenderTargetName");
+			auto& field = refClass->GetFieldByName("RenderTargetName");
 			String* value = field.GetValueFor<String>(mainCamera.GetComponent<CameraComponent>());
 			KEPLER_INFO(LogApp, "Render target name for main camera is: {}", *value);
 		}
@@ -159,8 +158,6 @@ namespace ke
 			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<StaticMeshComponent>(mesh);
 			entity.AddComponent<MaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
-			entity.AddComponent<NativeTestComponent>();
-			entity.AddComponent<OtherNativeTestComponent>();
 			entity->SetScale(float3(0.3f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
 			entity->SetLocation(float3(x, y, 0.0f));

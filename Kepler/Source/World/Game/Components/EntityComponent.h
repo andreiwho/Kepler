@@ -17,16 +17,8 @@ namespace ke
 		inline GameEntityId GetOwner() const { return m_OwnerId; }
 		inline GameWorld* GetWorld() { return m_World; }
 
-		reflected float ParentFloat;
 	private:
 		GameEntityId m_OwnerId{};
 		GameWorld* m_World;
-	};
-
-	reflected class TestComponent : public EntityComponent
-	{
-	public:
-		reflected metadata(readonly) float SomeValue;
-		reflected bool SomeOtherValue;
 	};
 }
