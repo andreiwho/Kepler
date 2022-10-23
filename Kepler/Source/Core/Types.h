@@ -47,7 +47,8 @@ namespace ke
 	{
 		id64();
 		id64(u64 InValue) : Value(InValue) {}
-		id64(const String& HashableString);
+		id64(const String& str);
+
 		id64(const id64& Other) noexcept { Value = Other.Value; }
 		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
 
@@ -59,6 +60,8 @@ namespace ke
 	using float2 = glm::vec2;
 	using float3 = glm::vec3;
 	using float4 = glm::vec4;
+	using color3 = float3;
+	using color4 = float4;
 
 	using int2 = glm::ivec2;
 	using int3 = glm::ivec3;

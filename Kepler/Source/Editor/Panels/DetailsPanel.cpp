@@ -48,6 +48,19 @@ namespace ke
 				auto value = field.GetValueFor<bool>(pNativeComponent);
 				ImGui::Checkbox(name.c_str(), value);
 			}
+
+			if (field.GetTypeId() == id64("String"))
+			{
+				auto value = field.GetValueFor<String>(pNativeComponent);
+				char outBuffer[TEditorElements::GMaxTextEditSymbols];
+				memset(outBuffer, 0, sizeof(outBuffer));
+				if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer))
+				{
+					outBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+					String newValue = outBuffer;
+					field.SetValueFor(pNativeComponent, &newValue);
+				}
+			}
 		}
 	}
 

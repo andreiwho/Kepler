@@ -42,9 +42,10 @@ namespace ke
 	{
 	}
 
-	id64::id64(const String& str)
+	id64::id64(const String& str) 
 		: Value(std::hash<String>{}(str))
 	{
+
 	}
 
 }
