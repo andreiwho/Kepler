@@ -45,5 +45,6 @@ namespace ke
 
 	reflected class NativeScriptComponent : public EntityComponent
 	{
+	public:
 	};
 }

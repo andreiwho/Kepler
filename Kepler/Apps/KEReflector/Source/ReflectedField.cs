@@ -10,6 +10,7 @@ namespace KEReflector
         public string DisplayName { get; set; }
         public bool bIsPointer { get; set; } = false;
         public bool bIsRefPtr { get; set; } = false;
+        public bool bIsEnum { get; set; } = false;
         public List<string> MetadataSpecifiers { get; set; } = new List<string>();
     }
 }

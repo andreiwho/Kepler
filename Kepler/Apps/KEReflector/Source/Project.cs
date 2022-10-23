@@ -96,15 +96,19 @@ namespace KEReflector
 
                     string entryParent = entry.Parent != null ? entry.Parent : "None";
                     string hasParent = entry.Parent != null ? "true" : "false";
+                    string isEnum = entry.bIsEnum ? "true" : "false";
+                    string reflectedParent = entry.bIsEnum ? "ReflectedEnum" : "ReflectedClass";
+
                     fileWriter.Write($@"
-    class {entry.Name};
-    class R{entry.Name} : public ReflectedClass
+    // class {entry.Name};
+    class R{entry.Name} : public {reflectedParent}
     {{
     public:
         R{entry.Name}();
         virtual String GetName() const override {{ return ""{entry.Name}""; }}
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
+        virtual bool IsEnum() const override {{return {isEnum}; }}
 ");
                     fileWriter.WriteLine(@"
     };");
@@ -119,15 +123,15 @@ namespace KEReflector
         void WriteHeaderFileImpl(ParsedHeader header)
         {
             var fileName = Path.GetFileNameWithoutExtension(header.Path);
-            var generatedHeaderPath = $"{_generatedDirectory}/{fileName}.gen.cpp";
+            var generatedCppPath = $"{_generatedDirectory}/{fileName}.gen.cpp";
             StreamWriter fileWriter = null;
-            if (!File.Exists(generatedHeaderPath))
+            if (!File.Exists(generatedCppPath))
             {
-                fileWriter = File.CreateText(generatedHeaderPath);
+                fileWriter = File.CreateText(generatedCppPath);
             }
             else
             {
-                fileWriter = new StreamWriter(generatedHeaderPath);
+                fileWriter = new StreamWriter(generatedCppPath);
             }
 
             if (fileWriter != null)
@@ -146,7 +150,15 @@ namespace KEReflector
 
                         // Recursive parent fields
                         fileWriter.WriteLine($"\t\tm_ClassId = id64(\"{entry.Name}\");");
-                        WriteFieldAccessors(entry, ref fileWriter);
+
+                        if(entry.bIsEnum)
+                        {
+                            WriteEnumAccessors(entry, ref fileWriter);
+                        }
+                        else
+                        {
+                            WriteFieldAccessors(entry, ref fileWriter);
+                        }
 
                         fileWriter.WriteLine("\t}");
                         fileWriter.WriteLine("}");
@@ -158,31 +170,45 @@ namespace KEReflector
             }
         }
 
+        private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field)
+        {
+            fileWriter.WriteLine($@"
+        FieldMetadata {field.DisplayName}Metadata{{}};");
+            foreach (var specifier in field.MetadataSpecifiers)
+            {
+                if (specifier.ToLower() == "readonly")
+                {
+                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bReadOnly = true;");
+                }
+            }
+
+            if (field.bIsPointer)
+            {
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
+            }
+
+            if (field.bIsRefPtr)
+            {
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
+            }
+
+            foreach(var cls in ProjectClasses.Values)
+            {
+                if(cls.bIsEnum)
+                {
+                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
+                    break;
+                }
+            }
+        }
+
         private void WriteFieldAccessors(ReflectedClass entry, ref StreamWriter fileWriter)
         {
             foreach (var field in entry.Fields)
             {
-                fileWriter.WriteLine($@"
-        FieldMetadata {field.DisplayName}Metadata{{}};");
-                foreach (var specifier in field.MetadataSpecifiers)
-                {
-                    if (specifier.ToLower() == "readonly")
-                    {
-                        fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bReadOnly = true;");
-                    }
-                }
+                FillFieldMetadata(fileWriter, field);
 
-                if(field.bIsPointer)
-                {
-                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
-                }
-
-                if(field.bIsRefPtr)
-                {
-                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
-                }
-
-                if(field.bIsRefPtr)
+                if (field.bIsRefPtr)
                 {
                     fileWriter.WriteLine($@"
         PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
@@ -214,6 +240,21 @@ namespace KEReflector
                 {
                     WriteFieldAccessors(ProjectClasses[entry.Parent], ref fileWriter);
                 }
+            }
+        }
+
+        void WriteEnumAccessors(ReflectedClass entry, ref StreamWriter fileWriter)
+        {
+            if(!entry.bIsEnum)
+            {
+                return;
+            }
+
+            int index = 0;
+            foreach(var enumValue in entry.EnumValues)
+            {
+                fileWriter.WriteLine($"\t\tPushEnumValue(\"{enumValue}\", {index});");
+                index++;
             }
         }
 

@@ -158,9 +158,11 @@ namespace ke
 			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<StaticMeshComponent>(mesh);
 			entity.AddComponent<MaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
+			entity.AddComponent<TestMovementComponent>();
 			entity->SetScale(float3(0.3f));
 			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
 			entity->SetLocation(float3(x, y, 0.0f));
+			entity.AddComponent<NativeScriptComponent>();
 
 			x++;
 		}
@@ -190,8 +192,8 @@ namespace ke
 #endif
 					// Initialize the renderer
 					m_WorldRenderer->InitFrame(m_CurrentWorld);
-					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
 					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
+					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
 
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
@@ -304,4 +306,18 @@ namespace ke
 	{
 		return false;
 	}
+
+	void TestMovementComponent::Update(float deltaTime)
+	{
+		if (m_MovementType == EMovementType::Dynamic)
+		{
+			EntityHandle handle{ GetWorld(), GetOwner() };
+			m_MovementValue = glm::sin(m_CurrentTime);
+			auto location = handle->GetLocation();
+			location.z = m_MovementValue * m_Speed;
+			handle->SetLocation(location);
+			m_CurrentTime += deltaTime;
+		}
+	}
+
 }

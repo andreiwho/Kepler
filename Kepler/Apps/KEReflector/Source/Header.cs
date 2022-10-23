@@ -13,7 +13,10 @@ namespace KEReflector
         public bool bIsSpecial { get; set; } = false;
         public bool bIsPointer { get; set; } = false;
         public bool bIsRefPtr { get; set; } = false;
+        public bool bIsEnum { get; set; } = false;
+        public bool bIsEnumClass { get; set; } = false;
         public List<string> MetaSpecifiers { get; set; } = new List<string>();
+        public List<string> EnumEntries { get; set; } = new List<string>();
     }
 
     public class ParsedHeader
@@ -106,6 +109,7 @@ namespace KEReflector
             ParseType,
             ParsePointer,
             ParseName,
+            ParseEnumValues,
             CheckHasParent,
             ParseParent,
             Finished,
@@ -182,6 +186,19 @@ namespace KEReflector
                             currentStage = EParseStage.ParseTemplateWrapper;
                             continue;
                         }
+
+                        if(token == "enum")
+                        {
+                            currentToken.bIsEnum = true;
+                            continue;
+                        }
+
+                        if(currentToken.bIsEnum && token == "class")
+                        {
+                            currentStage = EParseStage.ParseName;
+                            continue;
+                        }
+
                         currentToken.Type = token;
                         currentStage = EParseStage.ParseName;
                         break;
@@ -200,12 +217,19 @@ namespace KEReflector
                         currentToken.Type = token;
                         break;
                     case EParseStage.ParseName:
-                        if(token == "*")
+                        if (token == "*")
                         {
                             currentToken.bIsPointer = true;
                             continue;
                         }
                         currentToken.Name = token;
+
+                        if(currentToken.bIsEnum)
+                        {
+                            currentStage = EParseStage.ParseEnumValues;
+                            continue;
+                        }
+
                         currentStage = EParseStage.CheckHasParent;
                         break;
                     case EParseStage.CheckHasParent:
@@ -230,11 +254,41 @@ namespace KEReflector
                             {
                                 continue;
                             }
+
+                            if (currentToken.bIsEnum || currentToken.bIsEnumClass)
+                            {
+                                currentStage = EParseStage.ParseEnumValues;
+                                continue;
+                            }
+
+                            // TODO: Do we need to contain enum parents?
                             currentToken.Parent = token;
                             currentStage = EParseStage.None;
                             result.Add(currentToken);
                             currentToken = null;
                         }
+                        break;
+                    case EParseStage.ParseEnumValues:
+                        if(token == "{")
+                        {
+                            continue;
+                        }
+
+                        if(token == ",")
+                        {
+                            continue;
+                        }
+
+                        if(token == "}")
+                        {
+                            currentStage = EParseStage.None;
+                            result.Add(currentToken);
+                            currentToken = null;
+                            continue;
+                        }
+
+                        currentToken.EnumEntries.Add(token);
+
                         break;
                 }
             end:
@@ -264,17 +318,22 @@ namespace KEReflector
             ReflectedClass currentClass = null;
             foreach (var token in reflectedTokens)
             {
-                if (token.Type == "class" || token.Type == "struct")
+                if (token.Type == "class" || token.Type == "struct" || token.bIsEnum || token.bIsEnumClass)
                 {
                     if (currentClass != null)
                     {
                         classes.Add(currentClass.Name, currentClass);
                     }
-                    currentClass = new ReflectedClass(token.Name, token.Parent);
-                    currentClass.bIsSpecial = token.bIsSpecial;
-                    currentClass.Type = token.Type;
-                    currentClass.HeaderPath = Path;
-                    currentClass.MetadataSpecifiers = token.MetaSpecifiers;
+
+                    currentClass = new ReflectedClass(token.Name, token.Parent)
+                    {
+                        bIsSpecial = token.bIsSpecial,
+                        Type = token.Type,
+                        HeaderPath = Path,
+                        MetadataSpecifiers = token.MetaSpecifiers,
+                        bIsEnum = token.bIsEnum || token.bIsEnumClass,
+                        EnumValues = token.EnumEntries
+                    };
                 }
                 else
                 {
@@ -302,6 +361,7 @@ namespace KEReflector
                             MetadataSpecifiers = token.MetaSpecifiers,
                             bIsPointer = token.bIsPointer,
                             bIsRefPtr = token.bIsRefPtr,
+                            bIsEnum = token.bIsEnum,
                         });
                     }
                 }

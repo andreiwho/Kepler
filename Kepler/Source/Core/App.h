@@ -22,9 +22,32 @@
 #include "Tools/MeshLoader.h"
 #include "Filesystem/AssetSystem/AssetManager.h"
 #include "Reflection/ReflectionDatabase.h"
+#include "App.gen.h"
 
 namespace ke
 {
+	reflected enum class EMovementType
+	{
+		Static,
+		Dynamic,
+	};
+
+	reflected class TestMovementComponent : public NativeScriptComponent
+	{
+	public:
+		reflected EMovementType m_MovementType = EMovementType::Static;
+		
+		reflected kmeta(readonly)
+		float m_MovementValue = 0.0f;
+
+		reflected float m_Speed = 1.0f;
+
+		void Update(float deltaTime);
+
+	private:
+		float m_CurrentTime = 0.0f;
+	};
+
 	struct TCommandLineArguments
 	{
 		TCommandLineArguments() = default;

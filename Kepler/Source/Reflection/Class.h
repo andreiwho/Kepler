@@ -8,6 +8,7 @@ namespace ke
 		bool bReadOnly : 1 = false;
 		bool bIsPointer : 1 = false;
 		bool bIsRefPtr : 1 = false;
+		bool bIsEnum : 1 = false;
 	};
 
 	class ReflectedField
@@ -55,6 +56,7 @@ namespace ke
 		virtual String GetName() const = 0;
 		virtual bool HasParent() const = 0;
 		virtual String GetParentName() const = 0;
+		virtual bool IsEnum() const = 0;
 
 		inline const Map<String, ReflectedField>& GetFields() const&
 		{
@@ -86,5 +88,18 @@ namespace ke
 
 	private:
 		Map<String, ReflectedField> m_Fields;
+	};
+
+	class ReflectedEnum : public ReflectedClass
+	{
+	public:
+		inline const auto& GetEnumValues() const& { return m_EnumValues; }
+		inline auto& GetEnumValues() & { return m_EnumValues; }
+
+	protected:
+		void PushEnumValue(const String& name, u32 value);
+
+	private:
+		Array<std::pair<String, u32>> m_EnumValues;
 	};
 }

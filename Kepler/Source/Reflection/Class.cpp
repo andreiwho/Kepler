@@ -17,4 +17,10 @@ namespace ke
 		CHECK(!m_Fields.Contains(name));
 		m_Fields[name] = field;
 	}
+
+	void ReflectedEnum::PushEnumValue(const String& name, u32 value)
+	{
+		m_EnumValues.AppendBack({ name, value });
+	}
+
 }
