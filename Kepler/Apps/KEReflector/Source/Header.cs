@@ -11,20 +11,21 @@ namespace KEReflector
         public string Type { get; set; }
         public string Parent { get; set; }
         public bool bIsSpecial { get; set; } = false;
+        public List<string> MetaSpecifiers { get; set; } = new List<string>();
     }
 
     public class ParsedHeader
     {
         public string Path { get; set; }
 
-        public HashSet<ReflectedClass> Classes { get; }
+        public Dictionary<string, ReflectedClass> Classes { get; }
 
         public ParsedHeader(string path)
         {
             Path = path;
             Classes = ParseClasses();
 
-            foreach (var c in Classes)
+            foreach (var c in Classes.Values)
             {
                 if (c.Parent != null)
                 {
@@ -35,7 +36,7 @@ namespace KEReflector
                     Console.WriteLine($"Class name: {c.Name}");
                 }
 
-                foreach(var field in c.Fields)
+                foreach (var field in c.Fields)
                 {
                     Console.WriteLine($"Class {c.Name} has field {field.Name} of type {field.Type}");
                 }
@@ -57,6 +58,8 @@ namespace KEReflector
             '-',
             '*',
             '/',
+            '(',
+            ')',
         };
 
         void TokenizeLine(string line, ref List<string> tokens)
@@ -112,6 +115,8 @@ namespace KEReflector
         enum EParseStage
         {
             None,
+            ParseMeta,
+            ParseMetaArgs,
             ParseType,
             ParseName,
             CheckHasParent,
@@ -127,10 +132,11 @@ namespace KEReflector
 
             foreach (var token in tokens)
             {
-                switch(currentStage)
+            startagain:
+                switch (currentStage)
                 {
                     case EParseStage.None:
-                        if(token == "reflected")
+                        if (token == "reflected")
                         {
                             if (currentToken != null)
                             {
@@ -138,10 +144,10 @@ namespace KEReflector
                             }
                             currentToken = new ParsedToken();
                             currentToken.bIsSpecial = false;
-                            currentStage = EParseStage.ParseType;
+                            currentStage = EParseStage.ParseMeta;
                             continue;
                         }
-                        else if(token == "holding_reflection_data")
+                        else if (token == "holding_reflection_data")
                         {
                             if (currentToken != null)
                             {
@@ -151,6 +157,34 @@ namespace KEReflector
                             currentToken.bIsSpecial = true;
                             currentStage = EParseStage.ParseType;
                             continue;
+                        }
+                        break;
+                    case EParseStage.ParseMeta:
+                        if (token == "metadata")
+                        {
+                            currentStage = EParseStage.ParseMetaArgs;
+                        }
+                        else
+                        {
+                            currentStage = EParseStage.ParseType;
+                            goto startagain;
+                        }
+                        continue;
+                    case EParseStage.ParseMetaArgs:
+                        if (token == "(" || token == ",")
+                        {
+                            continue;
+                        }
+
+                        if (token == ")")
+                        {
+                            currentStage = EParseStage.ParseType;
+                            continue;
+                        }
+
+                        if (currentToken != null)
+                        {
+                            currentToken.MetaSpecifiers.Add(token);
                         }
                         break;
                     case EParseStage.ParseType:
@@ -193,7 +227,7 @@ namespace KEReflector
             end:
                 ;
             }
-            
+
             if (currentToken != null)
             {
                 result.Add(currentToken);
@@ -202,9 +236,9 @@ namespace KEReflector
             return result;
         }
 
-        private HashSet<ReflectedClass> ParseClasses()
+        private Dictionary<string, ReflectedClass> ParseClasses()
         {
-            HashSet<ReflectedClass> classes = new HashSet<ReflectedClass>();
+            Dictionary<string, ReflectedClass> classes = new Dictionary<string, ReflectedClass>();
             List<string> tokens = new List<string>();
 
             var lines = File.ReadAllLines(Path);
@@ -217,11 +251,11 @@ namespace KEReflector
             ReflectedClass currentClass = null;
             foreach (var token in reflectedTokens)
             {
-                if(token.Type == "class" || token.Type == "struct")
+                if (token.Type == "class" || token.Type == "struct")
                 {
                     if (currentClass != null)
                     {
-                        classes.Add(currentClass);
+                        classes.Add(currentClass.Name, currentClass);
                     }
                     currentClass = new ReflectedClass(token.Name, token.Parent);
                     currentClass.bIsSpecial = token.bIsSpecial;
@@ -230,7 +264,7 @@ namespace KEReflector
                 }
                 else
                 {
-                    if(currentClass != null)
+                    if (currentClass != null)
                     {
                         currentClass.Fields.Add(new ReflectedField
                         {
@@ -243,7 +277,7 @@ namespace KEReflector
 
             if (currentClass != null)
             {
-                classes.Add(currentClass);
+                classes.Add(currentClass.Name, currentClass);
             }
 
             return classes;

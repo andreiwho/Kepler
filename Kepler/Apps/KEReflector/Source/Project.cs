@@ -72,7 +72,7 @@ namespace KEReflector
                 fileWriter.WriteLine("namespace ke");
                 fileWriter.WriteLine("{");
 
-                foreach (var entry in header.Classes)
+                foreach (var entry in header.Classes.Values)
                 {
                     if (entry.bIsSpecial)
                     {
@@ -118,7 +118,7 @@ namespace KEReflector
             if (fileWriter != null)
             {
                 fileWriter.WriteLine($"#include \"{header.Path}\"");
-                foreach (var entry in header.Classes)
+                foreach (var entry in header.Classes.Values)
                 {
                     if (entry.bIsSpecial)
                     {
@@ -168,7 +168,7 @@ namespace ke
     {{");
             foreach (var projectHeader in Headers)
             {
-                foreach (var headerClass in projectHeader.Classes)
+                foreach (var headerClass in projectHeader.Classes.Values)
                 {
                     if (headerClass.bIsSpecial)
                     {
@@ -182,7 +182,7 @@ namespace ke
 
             foreach (var projectHeader in Headers)
             {
-                foreach (var headerClass in projectHeader.Classes)
+                foreach (var headerClass in projectHeader.Classes.Values)
                 {
                     if (headerClass.bIsSpecial)
                     {

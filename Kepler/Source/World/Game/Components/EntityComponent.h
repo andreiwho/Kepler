@@ -25,7 +25,7 @@ namespace ke
 	reflected class TestComponent : public EntityComponent
 	{
 	public:
-		reflected float SomeValue;
+		reflected metadata(readonly) float SomeValue;
 		reflected bool SomeOtherValue;
 	};
 }
