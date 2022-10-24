@@ -4,11 +4,10 @@
 #include "../Elements/ParamBuffer.h"
 #include "WorldTransform.h"
 #include "Camera.h"
-#include "Material.gen.h"
 
 namespace ke
 {
-	reflected class TMaterial : public EnableRefPtrFromThis<TMaterial>
+	class TMaterial : public EnableRefPtrFromThis<TMaterial>
 	{
 	public:
 		TMaterial() = default;

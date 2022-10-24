@@ -50,7 +50,7 @@ namespace KECacheChecker
                 process.Close();
 
                 File.Delete(markFilePath);
-                Environment.Exit(1);
+                // Environment.Exit(1);
             }
         }
     }
