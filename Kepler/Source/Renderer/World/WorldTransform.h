@@ -1,17 +1,18 @@
 #pragma once
 #include "Core/Core.h"
+#include "WorldTransform.gen.h"
 
 namespace ke
 {
-	class WorldTransform
+	reflected class WorldTransform
 	{
 	public:
 		WorldTransform() = default;
 		WorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));
 
-		inline float3 GetLocation() const { return m_Location; }
-		inline float3 GetRotation() const { return m_Rotation; }
-		inline float3 GetScale() const { return m_Scale; }
+		inline float3 GetLocation() const { return Location; }
+		inline float3 GetRotation() const { return Rotation; }
+		inline float3 GetScale() const { return Scale; }
 
 		void SetLocation(float3 location);
 		void SetRotation(float3 rotation);
@@ -22,8 +23,8 @@ namespace ke
 		float3 RotationToEuler() const;
 
 	public:
-		float3 m_Location = float3();
-		float3 m_Rotation = float3();
-		float3 m_Scale = float3(1.0f);
+		reflected float3 Location = float3();
+		reflected float3 Rotation = float3();
+		reflected float3 Scale = float3(1.0f);
 	};
 }

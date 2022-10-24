@@ -6,6 +6,10 @@ namespace ke
 	StaticMeshComponent::StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh)
 		:	m_StaticMesh(InStaticMesh)
 	{
+		if (m_StaticMesh->IsLoadedFromAsset())
+		{
+			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
+		}
 	}
 
 	StaticMeshComponent::StaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer)
@@ -27,5 +31,10 @@ namespace ke
 	void StaticMeshComponent::SetStaticMesh(RefPtr<StaticMesh> NewMesh)
 	{
 		m_StaticMesh = NewMesh;
+
+		if (m_StaticMesh->IsLoadedFromAsset())
+		{
+			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
+		}
 	}
 }

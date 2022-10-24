@@ -30,7 +30,7 @@ namespace ke
 		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
-		AddComponent<TTransformComponent>(EntityId);
+		AddComponent<TransformComponent>(EntityId);
 		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 		return EntityId;
 	}
@@ -41,7 +41,7 @@ namespace ke
 		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
-		AddComponent<TTransformComponent>(EntityId);
+		AddComponent<TransformComponent>(EntityId);
 		AddComponent<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
 		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
 
@@ -97,8 +97,8 @@ namespace ke
 		}
 
 		// Update components for entities
-		m_EntityRegistry.view<MaterialComponent, TTransformComponent>().each(
-			[this](auto Id, MaterialComponent& MC, TTransformComponent& TC) 
+		m_EntityRegistry.view<MaterialComponent, TransformComponent>().each(
+			[this](auto Id, MaterialComponent& MC, TransformComponent& TC) 
 			{
 				RefPtr<TMaterial> Material = MC.GetMaterial();
 				Material->WriteTransform(TC.GetTransform());

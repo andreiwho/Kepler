@@ -352,20 +352,31 @@ namespace ke
                     }
                 }
 
-                bool bHasSpecialClass = false;
-                foreach(var headerClass in header.Classes)
-                {
-                    if(headerClass.Value.bIsSpecial)
-                    {
-                        bHasSpecialClass = true;
-                        break;
-                    }
-                }
-
                 bAnyFilesChanged |= _sourceDb.HasFileChanged(header.Path);
-                if (bAnyFilesChanged || bHasSpecialClass)
+                if (bAnyFilesChanged)
                 {
                     GenerateHeaderFiles(header);
+                }
+            }
+
+            if (bAnyFilesChanged)
+            {
+                foreach (var header in Headers)
+                {
+                    bool bHasSpecialClass = false;
+                    foreach (var headerClass in header.Classes)
+                    {
+                        if (headerClass.Value.bIsSpecial)
+                        {
+                            bHasSpecialClass = true;
+                            break;
+                        }
+                    }
+
+                    if (bHasSpecialClass)
+                    {
+                        GenerateHeaderFiles(header);
+                    }
                 }
             }
         }

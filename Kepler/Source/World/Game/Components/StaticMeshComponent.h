@@ -2,10 +2,11 @@
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
 #include "EntityComponent.h"
+#include "StaticMeshComponent.gen.h"
 
 namespace ke
 {
-	class StaticMeshComponent : public EntityComponent
+	reflected class StaticMeshComponent : public EntityComponent
 	{
 	public:
 		StaticMeshComponent() = default;
@@ -20,6 +21,8 @@ namespace ke
 		}
 
 		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
+
+		reflected String StaticMeshPath{};
 
 	private:
 		RefPtr<StaticMesh> m_StaticMesh{};

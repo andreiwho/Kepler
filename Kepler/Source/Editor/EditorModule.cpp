@@ -602,7 +602,7 @@ namespace ke
 			matrix4x4 viewMatrix = camera.GenerateViewMatrix();
 			matrix4x4 projMatrix = camera.GenerateProjectionMatrix();
 
-			TTransformComponent& transformComp = m_pEditedWorld->GetComponent<TTransformComponent>(m_SelectedEntity);
+			TransformComponent& transformComp = m_pEditedWorld->GetComponent<TransformComponent>(m_SelectedEntity);
 			matrix4x4 transform = transformComp.GetTransform().GenerateWorldMatrix();
 
 			ImGuizmo::SetDrawlist();

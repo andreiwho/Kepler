@@ -60,57 +60,57 @@ namespace ke
 
 	float3 TGameEntity::GetLocation() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetLocation();
+		return World->GetComponent<TransformComponent>(Entity).GetLocation();
 	}
 
 	float3 TGameEntity::GetRotation() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetRotation();
+		return World->GetComponent<TransformComponent>(Entity).GetRotation();
 	}
 
 	float3 TGameEntity::GetScale() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetScale();
+		return World->GetComponent<TransformComponent>(Entity).GetScale();
 	}
 
 	void TGameEntity::SetLocation(float3 NewLocation)
 	{
-		World->GetComponent<TTransformComponent>(Entity).SetLocation(NewLocation);
+		World->GetComponent<TransformComponent>(Entity).SetLocation(NewLocation);
 	}
 
 	void TGameEntity::SetRotation(float3 NewRotation)
 	{
-		World->GetComponent<TTransformComponent>(Entity).SetRotation(NewRotation);
+		World->GetComponent<TransformComponent>(Entity).SetRotation(NewRotation);
 	}
 
 	void TGameEntity::SetScale(float3 NewScale)
 	{
-		World->GetComponent<TTransformComponent>(Entity).SetScale(NewScale);
+		World->GetComponent<TransformComponent>(Entity).SetScale(NewScale);
 	}
 
 	WorldTransform TGameEntity::GetTransform() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetTransform();
+		return World->GetComponent<TransformComponent>(Entity).GetTransform();
 	}
 
 	void TGameEntity::SetTransform(WorldTransform NewTransform)
 	{
-		World->GetComponent<TTransformComponent>(Entity).SetTransform(NewTransform);
+		World->GetComponent<TransformComponent>(Entity).SetTransform(NewTransform);
 	}
 
 	float3 TGameEntity::GetForwardVector() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetForwardVector();
+		return World->GetComponent<TransformComponent>(Entity).GetForwardVector();
 	}
 
 	float3 TGameEntity::GetRightVector() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetRightVector();
+		return World->GetComponent<TransformComponent>(Entity).GetRightVector();
 	}
 
 	float3 TGameEntity::GetUpVector() const
 	{
-		return World->GetComponent<TTransformComponent>(Entity).GetUpVector();
+		return World->GetComponent<TransformComponent>(Entity).GetUpVector();
 	}
 
 }

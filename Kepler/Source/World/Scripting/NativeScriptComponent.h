@@ -10,11 +10,11 @@ namespace ke
 		typedef u8 True;
 		struct False { u8 _[2]; };
 
-		template <typename C> static True test(decltype(&C::Update));
-		template <typename C> static False test(...);
+		template <typename C> static True Test(decltype(&C::Update));
+		template <typename C> static False Test(...);
 
 	public:
-		enum { value = sizeof(test<T>(nullptr)) == sizeof(char) };
+		enum { value = sizeof(Test<T>(nullptr)) == sizeof(char) };
 	};
 
 	template<typename T>
@@ -23,11 +23,11 @@ namespace ke
 		typedef u8 True;
 		struct False { u8 _[2]; };
 
-		template <typename C> static True test(decltype(&C::Init));
-		template <typename C> static False test(...);
+		template <typename C> static True Test(decltype(&C::Init));
+		template <typename C> static False Test(...);
 
 	public:
-		enum { value = sizeof(test<T>(nullptr)) == sizeof(True) };
+		enum { value = sizeof(Test<T>(nullptr)) == sizeof(True) };
 	};
 
 	template<typename T>
@@ -36,11 +36,11 @@ namespace ke
 		typedef u8 True;
 		struct False { u8 _[2]; };
 
-		template <typename C> static True test(decltype(&C::Destroying));
-		template <typename C> static False test(...);
+		template <typename C> static True Test(decltype(&C::Destroying));
+		template <typename C> static False Test(...);
 
 	public:
-		enum { value = sizeof(test<T>(nullptr)) == sizeof(char) };
+		enum { value = sizeof(Test<T>(nullptr)) == sizeof(char) };
 	};
 
 	reflected class NativeScriptComponent : public EntityComponent

@@ -151,8 +151,8 @@ namespace ke
 
 		RS_LightBuffer->Write("Ambient", &Ambient);
 
-		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TTransformComponent>().each(
-			[&, this](auto, DirectionalLightComponent& DLC, TTransformComponent& TC)
+		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TransformComponent>().each(
+			[&, this](auto, DirectionalLightComponent& DLC, TransformComponent& TC)
 			{
 				auto dir = TC.GetTransform().RotationToEuler();
 				auto color = DLC.GetColor();

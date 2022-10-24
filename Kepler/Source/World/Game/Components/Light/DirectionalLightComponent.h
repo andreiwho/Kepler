@@ -1,19 +1,19 @@
 #pragma once
 #include "Core/Core.h"
 #include "../EntityComponent.h"
+#include "DirectionalLightComponent.gen.h"
 
 namespace ke
 {
-	class DirectionalLightComponent : public EntityComponent
+	reflected class DirectionalLightComponent : public EntityComponent
 	{
 	public:
-		inline float3 GetColor() const { return m_Color; }
-		inline float GetIntensity() const { return m_Intensity; }
-		inline void SetColor(float3 color) { m_Color = color; }
-		inline void SetIntensity(float intensity) { m_Intensity = intensity; }
+		inline float3 GetColor() const { return Color; }
+		inline float GetIntensity() const { return Intensity; }
+		inline void SetColor(float3 color) { Color = color; }
+		inline void SetIntensity(float intensity) { Intensity = intensity; }
 
-	private:
-		float3 m_Color{};
-		float m_Intensity{};
+		reflected float3 Color{};
+		reflected float Intensity{};
 	};
 }

@@ -63,9 +63,10 @@ namespace ke
 		inline const String& GetParentAssetPath() const& { return m_ParentAssetName; }
 		inline bool IsLoadedFromAsset() const { return !m_ParentAssetName.empty(); }
 
+
 	private:
 		Array<TInternalSection> m_Sections;
-		String m_ParentAssetName{};
 		bool m_bForcedSingleSection = false;
+		String m_ParentAssetName{};
 	};
 }

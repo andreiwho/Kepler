@@ -21,8 +21,9 @@ namespace ke
 
 		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
 
-	public:
-		RefPtr<TMaterial> Material;
 		reflected String MaterialAssetPath;
+
+	private:
+		RefPtr<TMaterial> Material;
 	};
 }

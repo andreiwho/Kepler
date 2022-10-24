@@ -6,10 +6,10 @@
 
 namespace ke
 {
-	reflected class TTransformComponent : public EntityComponent
+	reflected class TransformComponent : public EntityComponent
 	{
 	public:
-		TTransformComponent(float3 Location = float3(), float3 Rotation = float3(), float3 Scale = float3(1.0f));
+		TransformComponent(float3 Location = float3(), float3 Rotation = float3(), float3 Scale = float3(1.0f));
 
 		WorldTransform GetTransform() const { return Transform; }
 		void SetTransform(WorldTransform NewTransform);
@@ -26,7 +26,7 @@ namespace ke
 		float3 GetRightVector() const;
 		float3 GetUpVector() const;
 
-	private:
-		WorldTransform Transform;
+	public:
+		reflected WorldTransform Transform;
 	};
 }
