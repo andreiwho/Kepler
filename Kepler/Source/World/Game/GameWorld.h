@@ -6,7 +6,7 @@
 
 #include <entt/entt.hpp>
 #include <functional>
-#include "../Scripting/NativeScriptContainer.h"
+#include "../Scripting/NativeComponentContainer.h"
 
 namespace ke
 {
@@ -20,7 +20,7 @@ namespace ke
 		std::function<void()> OnInit;
 		std::function<void(float)> OnUpdate;
 		std::function<void()> OnDestroy;
-		std::function<NativeScriptComponent* (GameEntityId id)> GetComponent;
+		std::function<EntityComponent* (GameEntityId id)> GetComponent;
 		std::function<void(class GameWorld*)> OnCopy;
 	};
 
@@ -31,7 +31,7 @@ namespace ke
 
 	class GameWorld : public TWorld
 	{
-		friend class NativeScriptContainerComponent;
+		friend class NativeComponentContainer;
 	public:
 		GameWorld(const String& InName);
 
@@ -56,7 +56,7 @@ namespace ke
 			CHECKMSG(pComponentClass, "Native component classes must have 'reflected' specifier.");
 
 			NativeComponentAccessors accessors;
-			if (m_NativeComponentInfos.Contains(pComponentClass->GetClassId()))
+			if (m_ComponentInfos.Contains(pComponentClass->GetClassId()))
 			{
 				return;
 			}
@@ -72,10 +72,6 @@ namespace ke
 						});
 				};
 			}
-			else
-			{
-				accessors.OnInit = []() {};
-			}
 
 			if constexpr (HasUpdateFunction<T>::value)
 			{
@@ -88,10 +84,6 @@ namespace ke
 						});
 				};
 			}
-			else
-			{
-				accessors.OnUpdate = [](float deltaTime) {};
-			}
 
 			if constexpr (HasDestroyingFunction<T>::value)
 			{
@@ -103,10 +95,6 @@ namespace ke
 							comp.Destroying();
 						});
 				};
-			}
-			else
-			{
-				accessors.OnDestroy = []() {};
 			}
 
 			accessors.GetComponent = [world = this](GameEntityId gameEntityId)
@@ -123,28 +111,27 @@ namespace ke
 			NativeComponentInfo info;
 			info.AccessorId = accessorId;
 
-			m_NativeComponentInfos.Insert(pComponentClass->GetClassId(), info);
+			m_ComponentInfos.Insert(pComponentClass->GetClassId(), info);
 		}
 
 		template<entity_component_typename T, typename ... ARGS>
 		T& AddComponent(GameEntityId entity, ARGS&&... InArgs)
 		{
-			if constexpr (std::is_base_of_v<NativeScriptComponent, T>)
+			if constexpr (std::is_same_v<NativeComponentContainer, T>)
 			{
-				NativeScriptContainerComponent& container = GetOrAddComponent<NativeScriptContainerComponent>(entity);
+				return m_EntityRegistry.emplace<NativeComponentContainer>(entity.Entity);
+			}
+			else
+			{
+				NativeComponentContainer& container = GetOrAddComponent<NativeComponentContainer>(entity);
 				container.AddComponent<T>();
 
-				T& component = m_EntityRegistry.emplace<T>(entity);
+				T& component = m_EntityRegistry.emplace<T>(entity.Entity, std::forward<ARGS>(InArgs)...);
 				SetupNativeComponent<T>();
 				component.SetOwner(entity);
 				component.SetWorld(this);
 				return component;
 			}
-
-			T& component = m_EntityRegistry.emplace<T>(entity.Entity, std::forward<ARGS>(InArgs)...);
-			component.SetOwner(entity);
-			component.SetWorld(this);
-			return component;
 		}
 
 		template<entity_component_typename T>
@@ -211,19 +198,19 @@ namespace ke
 		{
 			m_EntityRegistry.each(func);
 		}
- 		
+
 		// Check functons
 		bool IsCamera(GameEntityId Entity) const;
 		bool IsLight(GameEntityId Entity) const;
 
-		NativeScriptComponent* GetNativeComponentById(id64 componentId, GameEntityId entityId)
+		EntityComponent* GetComponentById(id64 componentId, GameEntityId entityId)
 		{
-			if (!m_NativeComponentInfos.Contains(componentId))
+			if (!m_ComponentInfos.Contains(componentId))
 			{
 				return nullptr;
 			}
 
-			auto accessorId = m_NativeComponentInfos[componentId].AccessorId;
+			auto accessorId = m_ComponentInfos[componentId].AccessorId;
 			return m_NativeAccessors[accessorId].GetComponent(entityId);
 		}
 
@@ -234,7 +221,7 @@ namespace ke
 
 		Array<entt::entity> m_PendingDestroyEntities;
 		Array<NativeComponentAccessors> m_NativeAccessors;
-		Map<id64, NativeComponentInfo> m_NativeComponentInfos;
+		Map<id64, NativeComponentInfo> m_ComponentInfos;
 
 		GameEntityId m_MainCamera{};
 	};

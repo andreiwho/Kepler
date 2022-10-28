@@ -18,9 +18,11 @@ namespace ke
 		void DrawLightInfo();
 		void DrawEntityInfo();
 		void DrawNativeComponentInfo();
+		const String& SplitAndCapitalizeComponentName(const String& originalName);
 
 	private:
 		RefPtr<GameWorld> m_pWorld;
 		GameEntityId m_SelectedEntity;
+		Map<String, String> m_FilteredComponentNames;
 	};
 }

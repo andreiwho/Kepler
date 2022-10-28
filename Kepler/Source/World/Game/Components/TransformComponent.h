@@ -6,7 +6,8 @@
 
 namespace ke
 {
-	reflected class TransformComponent : public EntityComponent
+	reflected kmeta(hideindetails)
+	class TransformComponent : public EntityComponent
 	{
 	public:
 		TransformComponent(float3 Location = float3(), float3 Rotation = float3(), float3 Scale = float3(1.0f));

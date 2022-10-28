@@ -175,7 +175,7 @@ namespace KEReflector
 
                         if (currentToken != null)
                         {
-                            currentToken.MetaSpecifiers.Add(token);
+                            currentToken.MetaSpecifiers.Add(token.ToLower());
                         }
                         break;
                     case EParseStage.ParseType:

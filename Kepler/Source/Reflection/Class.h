@@ -9,6 +9,12 @@ namespace ke
 		bool bIsPointer : 1 = false;
 		bool bIsRefPtr : 1 = false;
 		bool bIsEnum : 1 = false;
+		bool bHideInDetails : 1 = false;
+	};
+
+	struct ClassMetadata
+	{
+		bool bHideInDetails : 1 = false;
 	};
 
 	class ReflectedField
@@ -82,9 +88,12 @@ namespace ke
 
 		inline id64 GetClassId() const { return m_ClassId; }
 
+		inline const ClassMetadata& GetMetadata() const { return m_Metadata; }
+
 	protected:
 		id64 m_ClassId;
 		void PushField(const String& name, ReflectedField&& field);
+		ClassMetadata m_Metadata{};
 
 	private:
 		Map<String, ReflectedField> m_Fields;

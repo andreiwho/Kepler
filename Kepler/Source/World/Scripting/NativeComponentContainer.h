@@ -5,7 +5,7 @@
 
 namespace ke
 {
-	class NativeScriptContainerComponent : public EntityComponent
+	class NativeComponentContainer : public EntityComponent
 	{
 	public:
 		template<typename T>

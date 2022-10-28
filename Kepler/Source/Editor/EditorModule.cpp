@@ -347,7 +347,7 @@ namespace ke
 				if (ImGui::MenuItem("Save", "Ctrl + S"))
 				{
 					GameWorldSerializer serializer{ m_pEditedWorld };
-					const auto& data = serializer.GetSerializedEntityData();
+					//const auto& data = serializer.GetSerializedEntityData();
 				}
 
 				ImGui::EndMenu();

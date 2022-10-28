@@ -117,7 +117,10 @@ namespace ke
 		{
 			for (auto& accessor : m_NativeAccessors)
 			{
-				accessor.OnUpdate(DeltaTime);
+				if (accessor.OnUpdate)
+				{
+					accessor.OnUpdate(DeltaTime);
+				}
 			}
 		}
 

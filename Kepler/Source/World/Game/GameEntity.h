@@ -3,16 +3,19 @@
 #include "GameEntityId.h"
 #include "Renderer/World/WorldTransform.h"
 #include "World/Game/Components/EntityComponent.h"
+#include "GameEntity.gen.h"
 
 namespace ke
 {
 	class GameWorld;
 
+	reflected kmeta(HideInDetails)
 	struct TIdComponent : public EntityComponent
 	{
 		id64 Id;
 	};
 
+	reflected kmeta(HideInDetails)
 	struct TNameComponent : public EntityComponent
 	{
 		String Name;

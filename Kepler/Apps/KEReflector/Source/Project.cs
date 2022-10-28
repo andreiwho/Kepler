@@ -159,6 +159,8 @@ namespace KEReflector
 
                         // Recursive parent fields
                         fileWriter.WriteLine($"\t\tm_ClassId = id64(\"{entry.Name}\");");
+                        FillClassMetadata(fileWriter, entry);
+                        fileWriter.WriteLine($"\t\tm_Metadata = {entry.Name}Metadata;");
 
                         if (entry.bIsEnum)
                         {
@@ -179,6 +181,34 @@ namespace KEReflector
             }
         }
 
+        private void FillClassMetadata(StreamWriter fileWriter, ReflectedClass reflectedClass)
+        {
+            fileWriter.WriteLine($@"
+        ClassMetadata {reflectedClass.Name}Metadata{{}};");
+            foreach (var specifier in reflectedClass.MetadataSpecifiers)
+            {
+                if (specifier == "hideindetails")
+                {
+                    fileWriter.WriteLine($"\t\t{reflectedClass.Name}Metadata.bHideInDetails = true;");
+                }
+            }
+            /*
+            if (field.bIsPointer)
+            {
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
+            }
+
+            if (field.bIsRefPtr)
+            {
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
+            }
+
+            if (ProjectClasses.ContainsKey(field.Type) && ProjectClasses[field.Type].bIsEnum)
+            {
+                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
+            }*/
+        }
+
         private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field)
         {
             fileWriter.WriteLine($@"
@@ -188,6 +218,11 @@ namespace KEReflector
                 if (specifier.ToLower() == "readonly")
                 {
                     fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bReadOnly = true;");
+                }
+
+                if (specifier == "hideindetails")
+                {
+                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bHideInDetails = true;");
                 }
             }
 

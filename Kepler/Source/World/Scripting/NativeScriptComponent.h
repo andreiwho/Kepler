@@ -43,8 +43,8 @@ namespace ke
 		enum { value = sizeof(Test<T>(nullptr)) == sizeof(char) };
 	};
 
-	reflected class NativeScriptComponent : public EntityComponent
+	reflected kmeta(hideindetails)
+	class NativeScriptComponent : public EntityComponent
 	{
-	public:
 	};
 }

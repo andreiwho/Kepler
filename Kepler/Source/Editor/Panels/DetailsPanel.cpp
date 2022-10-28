@@ -9,7 +9,7 @@
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
-#include "World/Scripting/NativeScriptContainer.h"
+#include "World/Scripting/NativeComponentContainer.h"
 
 namespace ke
 {
@@ -20,6 +20,11 @@ namespace ke
 			bool bNotBaseType = false;
 
 			// Check metadata
+			if (field.GetMetadata().bHideInDetails)
+			{
+				return;
+			}
+			
 			if (field.GetMetadata().bReadOnly)
 			{
 				ImGui::BeginDisabled(true);
@@ -177,11 +182,11 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 
 		EntityHandle entity = { m_pWorld, m_SelectedEntity };
-		if (auto pNativeComp = entity.GetComponent<NativeScriptContainerComponent>())
+		if (auto pNativeComp = entity.GetComponent<NativeComponentContainer>())
 		{
 			for (const id64& id : pNativeComp->GetComponentIds())
 			{
-				auto pNativeComponent = m_pWorld->GetNativeComponentById(id, m_SelectedEntity);
+				auto pNativeComponent = m_pWorld->GetComponentById(id, m_SelectedEntity);
 				if (!pNativeComponent)
 				{
 					return;
@@ -193,7 +198,13 @@ namespace ke
 					return;
 				}
 
-				if (TEditorElements::Container(pClass->GetName().c_str()))
+				if (pClass->GetMetadata().bHideInDetails)
+				{
+					continue;
+				}
+
+				const String& filteredName = SplitAndCapitalizeComponentName(pClass->GetName());
+				if (TEditorElements::Container(filteredName.c_str()))
 				{
 					if (TEditorElements::BeginFieldTable("details", 2))
 					{
@@ -209,9 +220,43 @@ namespace ke
 		}
 	}
 
+	const ke::String& TEditorDetailsPanel::SplitAndCapitalizeComponentName(const String& originalName)
+	{
+		KEPLER_PROFILE_SCOPE();
+		if (m_FilteredComponentNames.Contains(originalName))
+		{
+			return m_FilteredComponentNames[originalName];
+		}
+
+		String outString;
+		String token;
+		for (const char symbol : originalName)
+		{
+			if (isupper(symbol))
+			{
+				if (!token.empty())
+				{
+					outString += fmt::format("{} ", token);
+					token.clear();
+				}
+			}
+			
+			token += toupper(symbol);
+		}
+
+		if (!token.empty())
+		{
+			outString += fmt::format("{} ", token);
+		}
+
+		m_FilteredComponentNames[originalName] = outString;
+		return m_FilteredComponentNames[originalName];
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawTransformComponentInfo()
 	{
+		KEPLER_PROFILE_SCOPE();
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("TRANSFORM"))
 		{
@@ -245,6 +290,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawCameraComponentInfo()
 	{
+		KEPLER_PROFILE_SCOPE();
 		EntityHandle handle{ m_pWorld, m_SelectedEntity };
 		// MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
 		if (TEditorElements::Container("CAMERA"))
@@ -267,6 +313,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawMaterialComponentInfo()
 	{
+		KEPLER_PROFILE_SCOPE();
 		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };
 		if (!entity)
 		{
