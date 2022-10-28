@@ -42,19 +42,52 @@ namespace ke
 	String ConvertToAnsiString(const TWideString& wide);
 	TWideString ConvertToWideString(const String& ansi);
 
+	// FNV-1a constexpr hashing functions 
+	constexpr u64 Hash32(const char* str, usize n, uint32_t basis = UINT32_C(2166136261)) {
+		if (n == 0)
+		{
+			return basis;
+		}
+		return Hash32(str + 1, n - 1, (basis ^ str[0]) * UINT32_C(16777619));
+	}
+
+	constexpr u64 Hash64(const char* str, usize n, uint64_t basis = UINT64_C(14695981039346656037)) {
+		if (n == 0)
+		{
+			return basis;
+		}
+		return Hash64(str + 1, n - 1, (basis ^ str[0]) * UINT64_C(1099511628211));
+	}
+
+	template< usize N >
+	constexpr u64 Hash32(const char(&s)[N]) {
+		return Hash32(s, N - 1);
+	}
+
+	template< usize N >
+	constexpr u64 Hash64(const char(&s)[N]) {
+		return Hash64(s, N - 1);
+	}
+	
 	// a 64 bit identifier, which claims to be unique
 	struct id64
 	{
 		id64();
-		id64(u64 InValue) : Value(InValue) {}
-		id64(const String& str);
+		constexpr id64(u64 InValue) : Value(InValue) {}
+		constexpr id64(const String& str)
+			:	Value(Hash64(str.c_str(), str.length()))
+		{
 
-		id64(const id64& Other) noexcept { Value = Other.Value; }
-		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
+		}
+
+		constexpr id64(const id64& Other) noexcept { Value = Other.Value; }
+		constexpr id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
 
 		u64 Value;
-		inline operator u64() const { return Value; }
+		inline constexpr operator u64() const { return Value; }
 	};
+
+	using typehash64 = id64;
 
 	// Math types
 	using float2 = glm::vec2;

@@ -16,96 +16,75 @@ namespace ke
 	namespace
 	{
 		void DrawReflectedField(const String& name, ReflectedField& field, void* pHandler)
-		{	
+		{
 			bool bNotBaseType = false;
 
 			// Check metadata
-			if (field.GetMetadata().bHideInDetails)
+			const auto& md = field.GetMetadata();
+			if (md.bHideInDetails)
 			{
 				return;
 			}
 
-			float editSpeed = field.GetMetadata().EditSpeed;
-			
-			if (field.GetMetadata().bReadOnly)
+			if (md.bReadOnly)
 			{
 				ImGui::BeginDisabled(true);
 			}
-			
-			if (field.GetTypeId() == id64("float"))
+
+			switch (field.GetTypeId())
+			{
+			case typehash64("float"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float>(pHandler);
-				TEditorElements::DragFloat1(name.c_str(), *value, editSpeed);
+				TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed);
 			}
-			else if (field.GetTypeId() == id64("float2"))
+			break;
+			case typehash64("float2"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float2>(pHandler);
-				TEditorElements::DragFloat2(name.c_str(), *value, editSpeed);
+				TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed);
 			}
-			else if (field.GetTypeId() == id64("float3"))
+			break;
+			case typehash64("float3"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float3>(pHandler);
-				TEditorElements::DragFloat3(name.c_str(), *value, editSpeed);
+				TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed);
 			}
-			else if (field.GetTypeId() == id64("float4"))
+			break;
+			case typehash64("float4"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float4>(pHandler);
-				TEditorElements::DragFloat4(name.c_str(), *value, editSpeed);
+				TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed);
 			}
-
-			else if (field.GetTypeId() == id64("bool"))
+			break;
+			case typehash64("bool"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<bool>(pHandler);
 				ImGui::Checkbox(name.c_str(), value);
 			}
-			else if (field.GetTypeId() == id64("String"))
+			break;
+			case typehash64("String"):
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<String>(pHandler);
 				char outBuffer[TEditorElements::GMaxTextEditSymbols];
 				memset(outBuffer, 0, sizeof(outBuffer));
-				if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer, field.GetMetadata().bReadOnly))
+				if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer, md.bReadOnly))
 				{
 					outBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
 					String newValue = outBuffer;
 					field.SetValueFor(pHandler, &newValue);
 				}
 			}
-			else if (field.GetMetadata().bIsEnum)
-			{
-				auto pEnumClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId());
-				if (!pEnumClass)
-				{
-					return;
-				}
-
-				if (auto pMyEnum = RefCast<ReflectedEnum>(pEnumClass))
-				{
-					TEditorElements::NextFieldRow(name.c_str());
-					auto& values = pMyEnum->GetEnumValues();
-					u32* value = field.GetValueFor<u32>(pHandler);
-					auto& selectedValue = values[*value].first;
-					if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
-					{
-						for (auto& [title, index] : values)
-						{
-							if (ImGui::Selectable(title.c_str()))
-							{
-								*value = index;
-							}
-						}
-						ImGui::EndCombo();
-					}
-				}
-			}
-			else
-			{
+			break;
+			default:
 				bNotBaseType = true;
+				break;
 			}
 
 			// End metadata
@@ -116,12 +95,42 @@ namespace ke
 
 			if (bNotBaseType)
 			{
-				ImGui::TableHeader(name.c_str());
-				if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId()))
+				if (md.bIsEnum)
 				{
-					for (auto& [fieldName, classField] : pClass->GetFields())
+					auto pEnumClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId());
+					if (!pEnumClass)
 					{
-						DrawReflectedField(fieldName, classField, field.GetValueFor<void*>(pHandler));
+						return;
+					}
+
+					if (auto pMyEnum = RefCast<ReflectedEnum>(pEnumClass))
+					{
+						TEditorElements::NextFieldRow(name.c_str());
+						auto& values = pMyEnum->GetEnumValues();
+						u32* value = field.GetValueFor<u32>(pHandler);
+						auto& selectedValue = values[*value].first;
+						if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
+						{
+							for (auto& [title, index] : values)
+							{
+								if (ImGui::Selectable(title.c_str()))
+								{
+									*value = index;
+								}
+							}
+							ImGui::EndCombo();
+						}
+					}
+				}
+				else
+				{
+					ImGui::TableHeader(name.c_str());
+					if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId()))
+					{
+						for (auto& [fieldName, classField] : pClass->GetFields())
+						{
+							DrawReflectedField(fieldName, classField, field.GetValueFor<void*>(pHandler));
+						}
 					}
 				}
 			}
@@ -178,7 +187,7 @@ namespace ke
 		EntityHandle entity = { m_pWorld, m_SelectedEntity };
 		if (auto pNativeComp = entity.GetComponent<NativeComponentContainer>())
 		{
-			for (const id64& id : pNativeComp->GetComponentIds())
+			for (const typehash64& id : pNativeComp->GetComponentIds())
 			{
 				auto pNativeComponent = m_pWorld->GetComponentById(id, m_SelectedEntity);
 				if (!pNativeComponent)
@@ -234,7 +243,7 @@ namespace ke
 					token.clear();
 				}
 			}
-			
+
 			token += toupper(symbol);
 		}
 

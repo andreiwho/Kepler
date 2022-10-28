@@ -158,7 +158,7 @@ namespace KEReflector
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
 
                         // Recursive parent fields
-                        fileWriter.WriteLine($"\t\tm_ClassId = id64(\"{entry.Name}\");");
+                        fileWriter.WriteLine($"\t\tm_ClassId = typehash64(\"{entry.Name}\");");
                         FillClassMetadata(fileWriter, entry);
                         fileWriter.WriteLine($"\t\tm_Metadata = {entry.Name}Metadata;");
 
@@ -262,7 +262,7 @@ namespace KEReflector
                 if (field.bIsRefPtr)
                 {
                     fileWriter.WriteLine($@"
-        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+        PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}.Raw(); }},
             [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
@@ -270,7 +270,7 @@ namespace KEReflector
                 else if (field.bIsPointer)
                 {
                     fileWriter.WriteLine($@"
-        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+        PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}; }},
             [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
@@ -278,7 +278,7 @@ namespace KEReflector
                 else
                 {
                     fileWriter.WriteLine($@"
-        PushField(""{field.DisplayName}"", ReflectedField{{ id64(""{field.Type}""), 
+        PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
             [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
@@ -356,8 +356,8 @@ namespace ke
                     fileWriter.WriteLine($@"
     template<> RefPtr<ReflectedClass> {entry.Name}::GetClass<{headerClass.Name}>() 
     {{ 
-        CHECK(m_Classes.Contains(id64(""{headerClass.Name}""))); 
-        return m_Classes[id64(""{headerClass.Name}"")]; 
+        CHECK(m_Classes.Contains(typehash64(""{headerClass.Name}""))); 
+        return m_Classes[typehash64(""{headerClass.Name}"")]; 
     }}");
                 }
             }

@@ -41,11 +41,4 @@ namespace ke
 		:	Value(Types_RandomU64())
 	{
 	}
-
-	id64::id64(const String& str) 
-		: Value(std::hash<String>{}(str))
-	{
-
-	}
-
 }

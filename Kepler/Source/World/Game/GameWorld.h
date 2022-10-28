@@ -221,7 +221,7 @@ namespace ke
 
 		Array<entt::entity> m_PendingDestroyEntities;
 		Array<NativeComponentAccessors> m_NativeAccessors;
-		Map<id64, NativeComponentInfo> m_ComponentInfos;
+		Map<typehash64, NativeComponentInfo> m_ComponentInfos;
 
 		GameEntityId m_MainCamera{};
 	};

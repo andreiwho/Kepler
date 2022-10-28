@@ -24,7 +24,7 @@ namespace ke
 	public:
 		using GetAccessorType = void* (*)(void*);
 		using SetAccessorType = void (*)(void*, void*);
-		ReflectedField(id64 id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
+		ReflectedField(typehash64 id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
 		ReflectedField() = default;
 
 		template<typename GetType, typename HandlerType>
@@ -44,7 +44,7 @@ namespace ke
 			m_SetAccessor(pHandler, pValue);
 		}
 
-		inline id64 GetTypeId() const
+		inline typehash64 GetTypeId() const
 		{
 			return m_TypeId;
 		}
@@ -52,7 +52,7 @@ namespace ke
 		const FieldMetadata& GetMetadata() const { return m_Metadata; }
 
 	private:
-		id64 m_TypeId{0};
+		typehash64 m_TypeId{0};
 		FieldMetadata m_Metadata;
 		GetAccessorType m_GetAccessor{};
 		SetAccessorType m_SetAccessor{};
@@ -88,12 +88,12 @@ namespace ke
 			return m_Fields[name];
 		}
 
-		inline id64 GetClassId() const { return m_ClassId; }
+		inline typehash64 GetClassId() const { return m_ClassId; }
 
 		inline const ClassMetadata& GetMetadata() const { return m_Metadata; }
 
 	protected:
-		id64 m_ClassId;
+		typehash64 m_ClassId;
 		void PushField(const String& name, ReflectedField&& field);
 		ClassMetadata m_Metadata{};
 
