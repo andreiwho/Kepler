@@ -9,16 +9,16 @@ namespace ke
 {
 	class GameWorld;
 
-	reflected kmeta(HideInDetails)
+	reflected kmeta(hideindetails)
 	struct TIdComponent : public EntityComponent
 	{
-		id64 Id;
+		reflected id64 Id;
 	};
 
-	reflected kmeta(HideInDetails)
+	reflected kmeta(hideindetails)
 	struct TNameComponent : public EntityComponent
 	{
-		String Name;
+		reflected String Name;
 	};
 
 	class TGameEntity

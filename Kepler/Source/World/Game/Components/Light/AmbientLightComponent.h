@@ -11,6 +11,7 @@ namespace ke
 		inline float3 GetColor() const { return Color; }
 		inline void SetColor(float3 newColor) { Color = newColor; }
 
-		reflected float3 Color{};
+		reflected kmeta(editspeed=0.01f)
+		float3 Color{};
 	};
 }

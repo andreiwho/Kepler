@@ -42,7 +42,8 @@ namespace ke
 		reflected kmeta(readonly)
 		float m_MovementValue = 0.0f;
 
-		reflected float m_Speed = 1.0f;
+		reflected kmeta(editspeed=0.01f)
+		float m_Speed = 1.0f;
 
 		void Update(float deltaTime);
 

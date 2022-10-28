@@ -5,7 +5,8 @@
 
 namespace ke
 {
-	reflected class MaterialComponent : public EntityComponent
+	reflected kmeta(hideindetails)
+	class MaterialComponent : public EntityComponent
 	{
 	public:
 		MaterialComponent() = default;

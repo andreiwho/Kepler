@@ -24,34 +24,37 @@ namespace ke
 			{
 				return;
 			}
+
+			float editSpeed = field.GetMetadata().EditSpeed;
 			
 			if (field.GetMetadata().bReadOnly)
 			{
 				ImGui::BeginDisabled(true);
 			}
-			else if (field.GetTypeId() == id64("float"))
+			
+			if (field.GetTypeId() == id64("float"))
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float>(pHandler);
-				TEditorElements::DragFloat1(name.c_str(), *value);
+				TEditorElements::DragFloat1(name.c_str(), *value, editSpeed);
 			}
 			else if (field.GetTypeId() == id64("float2"))
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float2>(pHandler);
-				TEditorElements::DragFloat2(name.c_str(), *value);
+				TEditorElements::DragFloat2(name.c_str(), *value, editSpeed);
 			}
 			else if (field.GetTypeId() == id64("float3"))
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float3>(pHandler);
-				TEditorElements::DragFloat3(name.c_str(), *value);
+				TEditorElements::DragFloat3(name.c_str(), *value, editSpeed);
 			}
 			else if (field.GetTypeId() == id64("float4"))
 			{
 				TEditorElements::NextFieldRow(name.c_str());
 				auto value = field.GetValueFor<float4>(pHandler);
-				TEditorElements::DragFloat4(name.c_str(), *value);
+				TEditorElements::DragFloat4(name.c_str(), *value, editSpeed);
 			}
 
 			else if (field.GetTypeId() == id64("bool"))
@@ -142,15 +145,6 @@ namespace ke
 				DrawTransformComponentInfo();
 				DrawMaterialComponentInfo();
 				DrawNativeComponentInfo();
-				if (m_pWorld->IsCamera(m_SelectedEntity))
-				{
-					DrawCameraComponentInfo();
-				}
-
-				if (m_pWorld->IsLight(m_SelectedEntity))
-				{
-					DrawLightInfo();
-				}
 			}
 		}
 		ImGui::End();
@@ -288,29 +282,6 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawCameraComponentInfo()
-	{
-		KEPLER_PROFILE_SCOPE();
-		EntityHandle handle{ m_pWorld, m_SelectedEntity };
-		// MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
-		if (TEditorElements::Container("CAMERA"))
-		{
-			if (TEditorElements::BeginFieldTable("details", 2))
-			{
-				auto pClass = ReflectionDatabase::Get()->GetClass<CameraComponent>();
-				if (pClass)
-				{
-					for (auto& [name, field] : pClass->GetFields())
-					{
-						DrawReflectedField(name, field, handle.GetComponent<CameraComponent>());
-					}
-				}
-				TEditorElements::EndFieldTable();
-			}
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
 	void TEditorDetailsPanel::DrawMaterialComponentInfo()
 	{
 		KEPLER_PROFILE_SCOPE();
@@ -349,61 +320,4 @@ namespace ke
 			}
 		}
 	}
-
-	void TEditorDetailsPanel::DrawLightInfo()
-	{
-		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };
-		if (!entity)
-		{
-			return;
-		}
-
-		if (auto pAmbientLight = entity.GetComponent<AmbientLightComponent>())
-		{
-			if (TEditorElements::Container("AMBIENT LIGHT"))
-			{
-				if (TEditorElements::BeginFieldTable("details", 2))
-				{
-					TEditorElements::NextFieldRow("Color");
-
-					float3 color = pAmbientLight->GetColor();
-					if (TEditorElements::DragFloat3("Ambient Color", color, 0.01f, 0.0f, 100.0f))
-					{
-						pAmbientLight->SetColor(color);
-					}
-
-					TEditorElements::EndFieldTable();
-				}
-			}
-		}
-
-		if (auto pDirLight = entity.GetComponent<DirectionalLightComponent>())
-		{
-			if (TEditorElements::Container("DIRECTIONAL LIGHT"))
-			{
-				if (TEditorElements::BeginFieldTable("details", 2))
-				{
-					TEditorElements::NextFieldRow("Color");
-					float3 color = pDirLight->GetColor();
-					if (TEditorElements::DragFloat3("Color", color, 0.01f, 0.0f, 100.0f))
-					{
-						pDirLight->SetColor(color);
-					}
-
-
-					TEditorElements::NextFieldRow("Intensity");
-					float intensity = pDirLight->GetIntensity();
-					if (TEditorElements::DragFloat1("Intensity", intensity, 0.01f, 0.0f, 100.0f))
-					{
-						pDirLight->SetIntensity(intensity);
-					}
-
-
-
-					TEditorElements::EndFieldTable();
-				}
-			}
-		}
-	}
-
 }

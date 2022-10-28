@@ -814,6 +814,11 @@ namespace ke
 		}
 		else
 		{
+			if (!m_bIsCursorInViewport)
+			{
+				return false;
+			}
+
 			if (EntityHandle handle{ m_pEditedWorld, m_EditorCameraEntity })
 			{
 				auto pCameraComponent = handle.GetComponent<CameraComponent>();

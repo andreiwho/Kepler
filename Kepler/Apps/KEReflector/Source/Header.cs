@@ -15,7 +15,8 @@ namespace KEReflector
         public bool bIsRefPtr { get; set; } = false;
         public bool bIsEnum { get; set; } = false;
         public bool bIsEnumClass { get; set; } = false;
-        public List<string> MetaSpecifiers { get; set; } = new List<string>();
+        // Change to Dictionary, to be able to pass values after '='
+        public Dictionary<string, string> MetaSpecifiers { get; set; } = new();
         public List<string> EnumEntries { get; set; } = new List<string>();
     }
 
@@ -48,6 +49,8 @@ namespace KEReflector
             '/',
             '(',
             ')',
+            '=',
+            '"'
         };
 
         void TokenizeLine(string line, ref List<string> tokens)
@@ -105,6 +108,7 @@ namespace KEReflector
             None,
             ParseMeta,
             ParseMetaArgs,
+            ParseMetaValue,
             ParseTemplateWrapper,
             ParseType,
             ParsePointer,
@@ -120,6 +124,7 @@ namespace KEReflector
             List<ParsedToken> result = new List<ParsedToken>();
             EParseStage currentStage = EParseStage.None;
             ParsedToken currentToken = null;
+            KeyValuePair<string, string> currentMetaSpecifier = new();
 
             foreach (var token in tokens)
             {
@@ -173,13 +178,35 @@ namespace KEReflector
                             continue;
                         }
 
+                        if (token == "=")
+                        {
+                            currentStage = EParseStage.ParseMetaValue;
+                            continue;
+                        }
+
                         if (currentToken != null)
                         {
-                            currentToken.MetaSpecifiers.Add(token.ToLower());
+                            currentMetaSpecifier = new(token.ToLower(), "");
+                            currentToken.MetaSpecifiers.Add(token.ToLower(), "");
                         }
                         break;
+                    case EParseStage.ParseMetaValue:
+                        if(currentMetaSpecifier.Key.Length > 0)
+                        {
+                            currentMetaSpecifier = new(currentMetaSpecifier.Key, token);
+                            if(currentToken.MetaSpecifiers.ContainsKey(currentMetaSpecifier.Key))
+                            {
+                                currentToken.MetaSpecifiers[currentMetaSpecifier.Key] = currentMetaSpecifier.Value;
+                            }
+                            else
+                            {
+                                currentToken.MetaSpecifiers.Add(currentMetaSpecifier.Key, currentMetaSpecifier.Value);
+                            }
+                        }
+                        currentStage = EParseStage.ParseMetaArgs;
+                        break;
                     case EParseStage.ParseType:
-                        if(token == "RefPtr")
+                        if (token == "RefPtr")
                         {
                             currentToken.bIsRefPtr = true;
                             currentToken.bIsPointer = true;
@@ -187,13 +214,13 @@ namespace KEReflector
                             continue;
                         }
 
-                        if(token == "enum")
+                        if (token == "enum")
                         {
                             currentToken.bIsEnum = true;
                             continue;
                         }
 
-                        if(currentToken.bIsEnum && token == "class")
+                        if (currentToken.bIsEnum && token == "class")
                         {
                             currentStage = EParseStage.ParseName;
                             continue;
@@ -203,7 +230,7 @@ namespace KEReflector
                         currentStage = EParseStage.ParseName;
                         break;
                     case EParseStage.ParseTemplateWrapper:
-                        if(token == "<")
+                        if (token == "<")
                         {
                             continue;
                         }
@@ -224,7 +251,7 @@ namespace KEReflector
                         }
                         currentToken.Name = token;
 
-                        if(currentToken.bIsEnum)
+                        if (currentToken.bIsEnum)
                         {
                             currentStage = EParseStage.ParseEnumValues;
                             continue;
@@ -269,17 +296,17 @@ namespace KEReflector
                         }
                         break;
                     case EParseStage.ParseEnumValues:
-                        if(token == "{")
+                        if (token == "{")
                         {
                             continue;
                         }
 
-                        if(token == ",")
+                        if (token == ",")
                         {
                             continue;
                         }
 
-                        if(token == "}")
+                        if (token == "}")
                         {
                             currentStage = EParseStage.None;
                             result.Add(currentToken);
@@ -340,7 +367,7 @@ namespace KEReflector
                     if (currentClass != null)
                     {
                         string DisplayName = "";
-                        if(token.Name.StartsWith("m_"))
+                        if (token.Name.StartsWith("m_"))
                         {
                             DisplayName = token.Name.Substring(2);
                         }

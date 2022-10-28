@@ -181,15 +181,21 @@ namespace KEReflector
             }
         }
 
+        private void WriteMetadataSpecifier(StreamWriter fileWriter, string objName, string specifier, string value)
+        {
+            fileWriter.WriteLine($"\t\t{objName}Metadata.{specifier} = {value};");
+
+        }
+
         private void FillClassMetadata(StreamWriter fileWriter, ReflectedClass reflectedClass)
         {
             fileWriter.WriteLine($@"
         ClassMetadata {reflectedClass.Name}Metadata{{}};");
             foreach (var specifier in reflectedClass.MetadataSpecifiers)
             {
-                if (specifier == "hideindetails")
+                if (specifier.Key == "hideindetails")
                 {
-                    fileWriter.WriteLine($"\t\t{reflectedClass.Name}Metadata.bHideInDetails = true;");
+                    WriteMetadataSpecifier(fileWriter, reflectedClass.Name, "bHideInDetails", "true");
                 }
             }
             /*
@@ -215,30 +221,35 @@ namespace KEReflector
         FieldMetadata {field.DisplayName}Metadata{{}};");
             foreach (var specifier in field.MetadataSpecifiers)
             {
-                if (specifier.ToLower() == "readonly")
+                if (specifier.Key == "readonly")
                 {
-                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bReadOnly = true;");
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bReadOnly", "true");
                 }
 
-                if (specifier == "hideindetails")
+                if (specifier.Key == "hideindetails")
                 {
-                    fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bHideInDetails = true;");
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bHideInDetails", "true");
+                }
+
+                if (specifier.Key == "editspeed")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "EditSpeed", $"{specifier.Value}");
                 }
             }
 
             if (field.bIsPointer)
             {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
+                WriteMetadataSpecifier(fileWriter, field.DisplayName, "bIsPointer", "true");
             }
 
             if (field.bIsRefPtr)
             {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
+                WriteMetadataSpecifier(fileWriter, field.DisplayName, "bIsRefPtr", "true");
             }
 
             if (ProjectClasses.ContainsKey(field.Type) && ProjectClasses[field.Type].bIsEnum)
             {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
+                WriteMetadataSpecifier(fileWriter, field.DisplayName, "bIsEnum", "true");
             }
         }
 

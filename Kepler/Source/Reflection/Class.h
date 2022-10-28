@@ -10,6 +10,8 @@ namespace ke
 		bool bIsRefPtr : 1 = false;
 		bool bIsEnum : 1 = false;
 		bool bHideInDetails : 1 = false;
+
+		float EditSpeed = 1.0f;
 	};
 
 	struct ClassMetadata

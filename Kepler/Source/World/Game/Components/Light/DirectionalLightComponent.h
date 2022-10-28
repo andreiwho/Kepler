@@ -13,7 +13,10 @@ namespace ke
 		inline void SetColor(float3 color) { Color = color; }
 		inline void SetIntensity(float intensity) { Intensity = intensity; }
 
-		reflected float3 Color{};
-		reflected float Intensity{};
+		reflected kmeta(editspeed=0.01f) 
+		float3 Color{};
+		
+		reflected kmeta(editspeed=0.01f) 
+		float Intensity{};
 	};
 }

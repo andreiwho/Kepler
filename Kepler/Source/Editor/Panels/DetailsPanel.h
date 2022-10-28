@@ -13,9 +13,7 @@ namespace ke
 
 	private:
 		void DrawTransformComponentInfo();
-		void DrawCameraComponentInfo();
 		void DrawMaterialComponentInfo();
-		void DrawLightInfo();
 		void DrawEntityInfo();
 		void DrawNativeComponentInfo();
 		const String& SplitAndCapitalizeComponentName(const String& originalName);
