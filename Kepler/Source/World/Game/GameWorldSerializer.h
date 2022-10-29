@@ -39,13 +39,7 @@ namespace ke
 	class GameWorldDeserializer
 	{
 	public:
-		GameWorldDeserializer(const Map<String, Array<SerializedComponentInfo>>& objects);
-		GameWorldDeserializer(RefPtr<JsonObject> pJsonData);
-
-		inline RefPtr<GameWorld> GetWorld() const { return m_World; }
-
-	private:
-		RefPtr<GameWorld> m_World;
-		String m_Name;
+		RefPtr<GameWorld> Deserialize(RefPtr<JsonObject> pJsonData);
+		RefPtr<GameWorld> Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects);
 	};
 }

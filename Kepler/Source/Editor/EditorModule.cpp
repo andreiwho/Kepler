@@ -357,9 +357,8 @@ namespace ke
 				if (ImGui::MenuItem("Load", "Ctrl + O"))
 				{
 					JsonDeserializer deserializer{Await(TFileUtils::ReadTextFileAsync("Game://Maps/TestMap.kmap"))};
-					GameWorldDeserializer worldCreator(deserializer.GetRootNode());
-
-					Engine::Get()->SetMainWorld(worldCreator.GetWorld());
+					GameWorldDeserializer worldCreator;
+					Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
 				}
 
 				ImGui::EndMenu();

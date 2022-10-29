@@ -150,12 +150,6 @@ namespace ke
 		return Async([Serializer = std::move(serializer)] { return Serializer.ToString(); });
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	GameWorldDeserializer::GameWorldDeserializer(const Map<String, Array<SerializedComponentInfo>>& objects)
-	{
-		// Unimplemented
-	}
-
 	namespace
 	{
 		SerializedFieldInfo DeserializeFieldRecursive(RefPtr<JsonObject> pField)
@@ -279,10 +273,10 @@ namespace ke
 		}
 	}
 
-	GameWorldDeserializer::GameWorldDeserializer(RefPtr<JsonObject> pJsonData)
+	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(RefPtr<JsonObject> pJsonData)
 	{
 		CHECK(pJsonData->IsRoot());
-		m_Name = pJsonData->GetKey();
+		String name = pJsonData->GetKey();
 
 		// Read all entities
 		Map<String, Array<SerializedComponentInfo>> componentInfos;
@@ -303,14 +297,18 @@ namespace ke
 				currentEntity.AppendBack(componentInfo);
 			}
 		}
+		return Deserialize(name, componentInfos);
+	}
 
-		m_World = WorldRegistry::Get()->CreateWorldAtIndex<GameWorld>(0, m_Name);
-		for (auto& [name, components] : componentInfos)
+	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects)
+	{
+		auto pWorld = WorldRegistry::Get()->CreateWorldAtIndex<GameWorld>(0, worldName);
+		for (auto& [name, components] : objects)
 		{
-			GameEntityId entity = m_World->CreateEntityDeferred();
+			GameEntityId entity = pWorld->CreateEntityDeferred();
 			for (auto& component : components)
 			{
-				EntityComponent* pNewComponent = m_World->AddComponentByTypeHash(entity, component.TypeHash);
+				EntityComponent* pNewComponent = pWorld->AddComponentByTypeHash(entity, component.TypeHash);
 				CHECK(pNewComponent);
 
 				RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(component.TypeHash);
@@ -320,7 +318,8 @@ namespace ke
 					WriteDeserializedField(pNewComponent, reflectedField, field);
 				}
 			}
-			m_World->FinishCreatingEntity(entity);
+			pWorld->FinishCreatingEntity(entity);
 		}
+		return pWorld;
 	}
 }
