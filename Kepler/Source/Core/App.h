@@ -71,11 +71,15 @@ namespace ke
 	// --------------------------------------------
 	class Engine : public IPlatformEventListener
 	{
+		static Engine* Instance;
 	public:
 		Engine(const TApplicationLaunchParams& launchParams);
 		virtual ~Engine();
 
 		virtual void Run();
+		static Engine* Get() { return Instance; }
+
+		void SetMainWorld(RefPtr<GameWorld> newWorld);
 
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
@@ -89,6 +93,7 @@ namespace ke
 		bool OnWindowClosed(const TWindowClosedEvent& event);
 		bool OnWindowResized(const TWindowSizeEvent& event);
 		bool OnKeyDown(const TKeyDownEvent& evemt);
+		void CheckWorldUpdated();
 
 	private:
 		ReflectionDatabase m_ReflectionDatabase{};
@@ -110,6 +115,8 @@ namespace ke
 #endif
 
 		TModuleStack m_ModuleStack{};
+
+		bool m_bWorldUpdated = false;
 	};
 
 	extern SharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);

@@ -2,7 +2,6 @@
 #include "Core/Core.h"
 #include "Reflection/Class.h"
 
-
 namespace ke
 {
 	holding_reflection_data class ReflectionDatabase
@@ -21,7 +20,7 @@ namespace ke
 		template<typename T>
 		RefPtr<ReflectedClass> GetClass();
 
-		RefPtr<ReflectedClass> FindClassById(id64 id)
+		RefPtr<ReflectedClass> FindClassByTypeHash(typehash64 id)
 		{
 			if (m_Classes.Contains(id))
 			{
@@ -31,7 +30,7 @@ namespace ke
 		}
 
 	private:
-		Map<id64, RefPtr<ReflectedClass>> m_Classes;
+		Map<typehash64, RefPtr<ReflectedClass>> m_Classes;
 	};
 
 	template<typename T>

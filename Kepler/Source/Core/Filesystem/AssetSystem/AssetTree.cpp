@@ -3,7 +3,7 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogAssetTree, All);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogAssetTree, Info);
 
 	AssetTreeNode::AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const String& path)
 		: m_Parent(pParent)
@@ -40,7 +40,7 @@ namespace ke
 			m_bHasDirectories = true;
 		}
 
-		KEPLER_INFO(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
+		KEPLER_TRACE(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
 	}
 
 	void AssetTreeNode::RemoveChild(RefPtr<AssetTreeNode> child)
@@ -61,7 +61,7 @@ namespace ke
 
 	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const String& path)
 	{
-		return FindNodeById(path);
+		return FindNodeById(id64(path));
 	}
 
 	RefPtr<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)

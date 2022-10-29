@@ -31,7 +31,7 @@ namespace ke
 				ImGui::BeginDisabled(true);
 			}
 
-			switch (field.GetTypeId())
+			switch (field.GetTypeHash())
 			{
 			case typehash64("float"):
 			{
@@ -97,7 +97,7 @@ namespace ke
 			{
 				if (md.bIsEnum)
 				{
-					auto pEnumClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId());
+					auto pEnumClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash());
 					if (!pEnumClass)
 					{
 						return;
@@ -125,7 +125,7 @@ namespace ke
 				else
 				{
 					ImGui::TableHeader(name.c_str());
-					if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(field.GetTypeId()))
+					if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash()))
 					{
 						for (auto& [fieldName, classField] : pClass->GetFields())
 						{
@@ -195,7 +195,7 @@ namespace ke
 					return;
 				}
 
-				RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassById(id);
+				RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(id);
 				if (!pClass)
 				{
 					return;

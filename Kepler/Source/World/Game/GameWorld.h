@@ -17,10 +17,11 @@ namespace ke
 
 	struct NativeComponentAccessors
 	{
-		std::function<void()> OnInit;
-		std::function<void(float)> OnUpdate;
-		std::function<void()> OnDestroy;
-		std::function<EntityComponent* (GameEntityId id)> GetComponent;
+		std::function<void(GameWorld*)> OnInit;
+		std::function<void(GameWorld*, float)> OnUpdate;
+		std::function<void(GameWorld*)> OnDestroy;
+		std::function<EntityComponent* (GameWorld*,GameEntityId id)> GetComponent;
+		std::function<EntityComponent* (GameWorld*,GameEntityId id)> ConstructComponent;
 		std::function<void(class GameWorld*)> OnCopy;
 	};
 
@@ -39,6 +40,8 @@ namespace ke
 
 		GameEntityId CreateEntity(const String& Name);
 		GameEntityId CreateCamera(const String& Name, float Fov = 45.0f, float Width = 0, float Height = 0, float Near = 0.1f, float Far = 100.0f);
+		GameEntityId CreateEntityDeferred();
+		void FinishCreatingEntity(GameEntityId entity);
 		TGameEntity& GetEntityFromId(GameEntityId Id);
 
 		void DestroyEntity(GameEntityId Entity);
@@ -50,20 +53,20 @@ namespace ke
 		bool IsValidEntity(GameEntityId Id) const;
 
 		template<typename T>
-		void SetupNativeComponent()
+		static void SetupNativeComponent()
 		{
 			RefPtr<ReflectedClass> pComponentClass = ReflectionDatabase::Get()->GetClass<T>();
 			CHECKMSG(pComponentClass, "Native component classes must have 'reflected' specifier.");
 
 			NativeComponentAccessors accessors;
-			if (m_ComponentInfos.Contains(pComponentClass->GetClassId()))
+			if (m_StaticState->m_ComponentInfos.Contains(pComponentClass->GetClassId()))
 			{
 				return;
 			}
 
 			if constexpr (HasInitFunction<T>::value)
 			{
-				accessors.OnInit = [world = this]()
+				accessors.OnInit = [](GameWorld* world)
 				{
 					world->GetComponentView<T>().each(
 						[](auto, T& comp)
@@ -75,7 +78,7 @@ namespace ke
 
 			if constexpr (HasUpdateFunction<T>::value)
 			{
-				accessors.OnUpdate = [world = this](float deltaTime)
+				accessors.OnUpdate = [](GameWorld* world, float deltaTime)
 				{
 					world->GetComponentView<T>().each(
 						[deltaTime](auto, T& comp)
@@ -87,7 +90,7 @@ namespace ke
 
 			if constexpr (HasDestroyingFunction<T>::value)
 			{
-				accessors.OnDestroy = [world = this]()
+				accessors.OnDestroy = [](GameWorld* world)
 				{
 					world->GetComponentView<T>().each(
 						[](auto, T& comp)
@@ -97,7 +100,12 @@ namespace ke
 				};
 			}
 
-			accessors.GetComponent = [world = this](GameEntityId gameEntityId)
+			accessors.ConstructComponent = [](GameWorld* world, GameEntityId gameEntityId)
+			{
+				return &world->AddComponent<T>(gameEntityId);
+			};
+
+			accessors.GetComponent = [](GameWorld* world, GameEntityId gameEntityId)
 			{
 				if (world->HasComponent<T>(gameEntityId))
 				{
@@ -107,11 +115,11 @@ namespace ke
 			};
 
 
-			usize accessorId = m_NativeAccessors.AppendBack(accessors);
+			usize accessorId = m_StaticState->m_NativeAccessors.AppendBack(accessors);
 			NativeComponentInfo info;
 			info.AccessorId = accessorId;
 
-			m_ComponentInfos.Insert(pComponentClass->GetClassId(), info);
+			m_StaticState->m_ComponentInfos.Insert(pComponentClass->GetClassId(), info);
 		}
 
 		template<entity_component_typename T, typename ... ARGS>
@@ -133,6 +141,8 @@ namespace ke
 				return component;
 			}
 		}
+
+		EntityComponent* AddComponentByTypeHash(GameEntityId id, typehash64 typeHash);
 
 		template<entity_component_typename T>
 		T& GetOrAddComponent(GameEntityId entity)
@@ -203,16 +213,18 @@ namespace ke
 		bool IsCamera(GameEntityId Entity) const;
 		bool IsLight(GameEntityId Entity) const;
 
-		EntityComponent* GetComponentById(id64 componentId, GameEntityId entityId)
+		EntityComponent* GetComponentById(typehash64 componentId, GameEntityId entityId)
 		{
-			if (!m_ComponentInfos.Contains(componentId))
+			if (!m_StaticState->m_ComponentInfos.Contains(componentId))
 			{
 				return nullptr;
 			}
 
-			auto accessorId = m_ComponentInfos[componentId].AccessorId;
-			return m_NativeAccessors[accessorId].GetComponent(entityId);
+			auto accessorId = m_StaticState->m_ComponentInfos[componentId].AccessorId;
+			return m_StaticState->m_NativeAccessors[accessorId].GetComponent(this, entityId);
 		}
+
+		static void ClearStaticState();
 
 	private:
 		void FlushPendingDestroys();
@@ -220,8 +232,13 @@ namespace ke
 		entt::registry m_EntityRegistry;
 
 		Array<entt::entity> m_PendingDestroyEntities;
-		Array<NativeComponentAccessors> m_NativeAccessors;
-		Map<typehash64, NativeComponentInfo> m_ComponentInfos;
+		struct StaticState
+		{
+			Array<NativeComponentAccessors> m_NativeAccessors;
+			Map<typehash64, NativeComponentInfo> m_ComponentInfos;
+		};
+
+		static StaticState* m_StaticState;
 
 		GameEntityId m_MainCamera{};
 	};

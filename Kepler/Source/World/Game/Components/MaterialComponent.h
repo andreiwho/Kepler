@@ -22,7 +22,9 @@ namespace ke
 
 		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
 
-		reflected String MaterialAssetPath;
+		reflected kmeta(onchange=OnMaterialPathChanged)
+		String MaterialAssetPath;
+		void OnMaterialPathChanged(const String& newPath);
 
 	private:
 		RefPtr<TMaterial> Material;

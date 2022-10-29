@@ -1,4 +1,5 @@
 #include "StaticMeshComponent.h"
+#include "Tools/MeshLoader.h"
 
 namespace ke
 {
@@ -37,4 +38,13 @@ namespace ke
 			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
 		}
 	}
+
+	void StaticMeshComponent::StaticMeshPathChanged(const String& newPath)
+	{
+		if (auto mesh = MeshLoader::Get()->LoadStaticMesh(newPath, true))
+		{
+			m_StaticMesh = mesh;
+		}
+	}
+
 }

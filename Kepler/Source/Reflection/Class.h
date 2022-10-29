@@ -1,5 +1,7 @@
 #pragma once
 #include "Core/Core.h"
+#include <entt/entity/entity.hpp>
+#include <entt/entity/registry.hpp>
 
 namespace ke
 {
@@ -44,7 +46,7 @@ namespace ke
 			m_SetAccessor(pHandler, pValue);
 		}
 
-		inline typehash64 GetTypeId() const
+		inline typehash64 GetTypeHash() const
 		{
 			return m_TypeId;
 		}
@@ -88,9 +90,13 @@ namespace ke
 			return m_Fields[name];
 		}
 
+		virtual void* Construct(void* pAddress) const = 0;
+
 		inline typehash64 GetClassId() const { return m_ClassId; }
 
 		inline const ClassMetadata& GetMetadata() const { return m_Metadata; }
+
+		virtual void* RegistryConstruct(entt::entity id, entt::registry& registry) const = 0;
 
 	protected:
 		typehash64 m_ClassId;

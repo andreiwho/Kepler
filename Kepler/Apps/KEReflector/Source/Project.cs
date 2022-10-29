@@ -118,7 +118,8 @@ namespace KEReflector
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
         virtual bool IsEnum() const override {{ return {isEnum}; }}
-");
+        virtual void* Construct(void* pAddress) const override;
+        virtual void* RegistryConstruct(entt::entity entity, entt::registry& registry) const override;");
                     fileWriter.WriteLine(@"
     };");
                 }
@@ -127,6 +128,26 @@ namespace KEReflector
                 fileWriter.Flush();
                 fileWriter.Close();
             }
+        }
+
+        bool IsClassComponent(ReflectedClass inClass)
+        {
+            if(inClass == null)
+            {
+                return false;
+            }
+
+            if(inClass.Parent == null)
+            {
+                return false;
+            }
+
+            if(inClass.Parent == "EntityComponent")
+            {
+                return true;
+            }
+
+            return IsClassComponent(ProjectClasses[inClass.Parent]);
         }
 
         void WriteHeaderFileImpl(ParsedHeader header)
@@ -146,6 +167,8 @@ namespace KEReflector
             if (fileWriter != null)
             {
                 fileWriter.WriteLine($"#include \"{header.Path}\"");
+                fileWriter.WriteLine("#include \"World/Game/GameWorld.h\"\n");
+
                 foreach (var entry in header.Classes.Values)
                 {
                     if (entry.bIsSpecial)
@@ -159,6 +182,7 @@ namespace KEReflector
 
                         // Recursive parent fields
                         fileWriter.WriteLine($"\t\tm_ClassId = typehash64(\"{entry.Name}\");");
+
                         FillClassMetadata(fileWriter, entry);
                         fileWriter.WriteLine($"\t\tm_Metadata = {entry.Name}Metadata;");
 
@@ -172,6 +196,24 @@ namespace KEReflector
                         }
 
                         fileWriter.WriteLine("\t}");
+
+                        string setupComponent = IsClassComponent(entry) ? $"GameWorld::SetupNativeComponent<{entry.Name}();" : "";
+
+                        // Construct
+                        fileWriter.WriteLine($@"
+        void* R{entry.Name}::Construct(void* pAddress) const
+        {{
+            return new(pAddress) {entry.Name}();
+        }}
+
+        void* R{entry.Name}::RegistryConstruct(entt::entity entity, entt::registry& registry) const
+        {{
+            {setupComponent};
+            return &registry.emplace<{entry.Name}>(entity);
+        }}
+");
+
+
                         fileWriter.WriteLine("}");
                     }
                 }
@@ -198,21 +240,6 @@ namespace KEReflector
                     WriteMetadataSpecifier(fileWriter, reflectedClass.Name, "bHideInDetails", "true");
                 }
             }
-            /*
-            if (field.bIsPointer)
-            {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsPointer = true;");
-            }
-
-            if (field.bIsRefPtr)
-            {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsRefPtr = true;");
-            }
-
-            if (ProjectClasses.ContainsKey(field.Type) && ProjectClasses[field.Type].bIsEnum)
-            {
-                fileWriter.WriteLine($"\t\t{field.DisplayName}Metadata.bIsEnum = true;");
-            }*/
         }
 
         private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field)
@@ -259,6 +286,12 @@ namespace KEReflector
             {
                 FillFieldMetadata(fileWriter, field);
 
+                string onChangeHandler = "";
+                if(field.MetadataSpecifiers.ContainsKey("onchange"))
+                {
+                    onChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["onchange"]}(*({field.Type}*)pValue);";
+                }
+
                 if (field.bIsRefPtr)
                 {
                     fileWriter.WriteLine($@"
@@ -281,7 +314,8 @@ namespace KEReflector
         PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; }}}});");
+            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue;
+                {onChangeHandler}}}}});");
                 }
             }
 
@@ -399,7 +433,7 @@ namespace ke
                 }
 
                 bAnyFilesChanged |= _sourceDb.HasFileChanged(header.Path);
-                if (bAnyFilesChanged)
+                if (_sourceDb.HasFileChanged(header.Path))
                 {
                     GenerateHeaderFiles(header);
                 }

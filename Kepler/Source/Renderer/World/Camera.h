@@ -8,6 +8,7 @@ namespace ke
 	reflected class MathCamera
 	{
 	public:
+		MathCamera() = default;
 		MathCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());
 
 		matrix4x4 GenerateViewProjectionMatrix() const;
@@ -33,12 +34,19 @@ namespace ke
 		static float3 ToEuler(float3 Vector);
 
 	public:
-		reflected float FieldOfView{};
-		reflected float Width{};
-		reflected float Height{};
-		reflected float NearClip{};
-		reflected float FarClip{};
-		reflected float3 Location{};
-		reflected float3 Target{};
+		reflected kmeta(editspeed=0.01f)
+		float FieldOfView{};
+		reflected kmeta(editspeed=0.01f)
+		float Width{};
+		reflected kmeta(editspeed=0.01f)
+		float Height{};
+		reflected kmeta(editspeed=0.01f)
+		float NearClip{};
+		reflected kmeta(editspeed=0.01f)
+		float FarClip{};
+		reflected kmeta(hideindetails)
+		float3 Location{};
+		reflected kmeta(hideindetails)
+		float3 Target{};
 	};
 }

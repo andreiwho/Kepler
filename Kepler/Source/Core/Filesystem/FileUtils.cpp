@@ -31,11 +31,26 @@ namespace ke
 	{
 		return Async([CopiedPath = VFSResolvePath(path), CopiedText = text]
 			{
-				std::ofstream stream{ CopiedPath, std::ios::ate | std::ios::binary };
+				std::ofstream stream{ CopiedPath };
 				if (!stream.is_open())
 				{
-					CRASHMSG(fmt::format("Failed to read text file: {}", CopiedPath));
+					auto parentPath = std::filesystem::path(CopiedPath).parent_path();
+					if (!std::filesystem::exists(parentPath))
+					{
+						std::filesystem::create_directory(parentPath);
+						stream.open(CopiedPath);
+						if (!stream.is_open())
+						{
+							CRASHMSG(fmt::format("Failed to open text file for writing: {}", CopiedPath));
+						}
+						else
+						{
+							goto writeLabel;
+						}
+					}
+					CRASHMSG(fmt::format("Failed to open text file for writing: {}", CopiedPath));
 				}
+				writeLabel:
 				stream.write(CopiedText.c_str(), CopiedText.size());
 			});
 	}

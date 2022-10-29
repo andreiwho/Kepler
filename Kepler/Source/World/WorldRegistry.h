@@ -19,6 +19,14 @@ namespace ke
 			return OutWorld;
 		}
 
+		template<typename T, typename... ARGS>
+		RefPtr<T> CreateWorldAtIndex(usize index, const String& Name, ARGS&&... InArgs)
+		{
+			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
+			LoadedWorlds[index] = OutWorld;
+			return OutWorld;
+		}
+
 		void DestroyWorld(RefPtr<TWorld> World);
 
 		static WorldRegistry* Get() { return Instance; }

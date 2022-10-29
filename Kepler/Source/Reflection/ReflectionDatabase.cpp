@@ -11,7 +11,7 @@ namespace ke
 
 	void ReflectionDatabase::PushClass(RefPtr<ReflectedClass> cls)
 	{
-		m_Classes[cls->GetName()] = cls;
+		m_Classes[typehash64(cls->GetName())] = cls;
 	}
 
 }

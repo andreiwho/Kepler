@@ -18,6 +18,11 @@ namespace ke
 			}
 		}
 
+		void AddComponent(typehash64 hash)
+		{
+			m_NativeClassIds.AppendBack(hash);
+		}
+
 		template<typename T>
 		void RemoveComponent()
 		{

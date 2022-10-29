@@ -9,6 +9,7 @@ namespace ke
 	reflected class CameraComponent : public EntityComponent
 	{
 	public:
+		CameraComponent() = default;
 		CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);
 		~CameraComponent();
 

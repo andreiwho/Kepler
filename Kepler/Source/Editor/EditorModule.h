@@ -3,6 +3,7 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 #include "Panels/AssetBrowserPanel.h"
+#include "Renderer/World/WorldTransform.h"
 
 namespace ke
 {
@@ -104,6 +105,7 @@ namespace ke
 
 		float m_EditorCameraSensitivity = 32;
 		float m_EditorCameraSpeed = 2.0f;
+		WorldTransform m_CameraTransform{};
 
 		SharedPtr<TLogPanel> m_LogPanel;
 		SharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;

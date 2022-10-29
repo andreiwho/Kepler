@@ -14,6 +14,11 @@ namespace ke
 	GameWorld::GameWorld(const String& InName)
 		: TWorld(InName)
 	{
+		if (!m_StaticState)
+		{
+			m_StaticState = New<StaticState>();
+		}
+
 		KEPLER_INFO(LogGameWorld, "Created GameWorld with name {}", InName);
 		bNeedsUpdate = true;
 	}
@@ -27,7 +32,7 @@ namespace ke
 	GameEntityId GameWorld::CreateEntity(const String& Name)
 	{
 		const GameEntityId EntityId = m_EntityRegistry.create();
-		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
+		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
 		AddComponent<TransformComponent>(EntityId);
@@ -38,7 +43,7 @@ namespace ke
 	GameEntityId GameWorld::CreateCamera(const String& Name, float Fov, float Width, float Height, float Near, float Far)
 	{
 		const entt::entity EntityId = m_EntityRegistry.create();
-		TNameComponent& NameComp = m_EntityRegistry.emplace<TNameComponent>(EntityId);
+		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
 		AddComponent<TIdComponent>(EntityId);
 		AddComponent<TransformComponent>(EntityId);
@@ -51,6 +56,23 @@ namespace ke
 		}
 
 		return EntityId;
+	}
+
+	GameEntityId GameWorld::CreateEntityDeferred()
+	{
+		return m_EntityRegistry.create();
+	}
+
+	void GameWorld::FinishCreatingEntity(GameEntityId entity)
+	{
+		m_EntityRegistry.emplace<TGameEntity>(entity, this, entity);
+		if (HasComponent<CameraComponent>(entity))
+		{
+			if (!IsValidEntity(m_MainCamera))
+			{
+				SetMainCamera(entity);
+			}
+		}
 	}
 
 	TGameEntity& GameWorld::GetEntityFromId(GameEntityId Id)
@@ -115,11 +137,11 @@ namespace ke
 
 		if (UpdateKind == EWorldUpdateKind::Play)
 		{
-			for (auto& accessor : m_NativeAccessors)
+			for (auto& accessor : m_StaticState->m_NativeAccessors)
 			{
 				if (accessor.OnUpdate)
 				{
-					accessor.OnUpdate(DeltaTime);
+					accessor.OnUpdate(this, DeltaTime);
 				}
 			}
 		}
@@ -158,4 +180,34 @@ namespace ke
 		m_PendingDestroyEntities.Clear();
 	}
 
+	EntityComponent* GameWorld::AddComponentByTypeHash(GameEntityId id, typehash64 typeHash)
+	{
+		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
+		if (pClass)
+		{
+			auto pComponent = (EntityComponent*)pClass->RegistryConstruct(id, m_EntityRegistry);
+			
+			NativeComponentContainer& container = GetOrAddComponent<NativeComponentContainer>(id);
+			container.AddComponent(typeHash);
+
+			if (pComponent)
+			{
+				pComponent->SetOwner(id);
+				pComponent->SetWorld(this);
+				return pComponent;
+			}
+		}
+		return nullptr;
+	}
+
+	void GameWorld::ClearStaticState()
+	{
+		if (m_StaticState)
+		{
+			m_StaticState->~StaticState();
+			TMalloc::Get()->Free(m_StaticState);
+		}
+	}
+
+	ke::GameWorld::StaticState* GameWorld::m_StaticState;
 }

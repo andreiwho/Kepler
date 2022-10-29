@@ -72,9 +72,11 @@ namespace ke
 	// a 64 bit identifier, which claims to be unique
 	struct id64
 	{
+		static constexpr u64 none = 0;
+
 		id64();
 		constexpr id64(u64 InValue) : Value(InValue) {}
-		constexpr id64(const String& str)
+		explicit constexpr id64(const String& str)
 			:	Value(Hash64(str.c_str(), str.length()))
 		{
 
@@ -82,11 +84,13 @@ namespace ke
 
 		constexpr id64(const id64& Other) noexcept { Value = Other.Value; }
 		constexpr id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
+		String ToString() const { return std::to_string(Value); }
 
 		u64 Value;
 		inline constexpr operator u64() const { return Value; }
 	};
 
+	using uuid64 = id64;
 	using typehash64 = id64;
 
 	// Math types

@@ -37,6 +37,8 @@
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
 #include "Renderer/Subrenderer/Subrenderer2D.h"
 #include "World/Game/GameWorldSerializer.h"
+#include "Core/Filesystem/FileUtils.h"
+#include "Core/App.h"
 
 namespace ke
 {
@@ -347,7 +349,17 @@ namespace ke
 				if (ImGui::MenuItem("Save", "Ctrl + S"))
 				{
 					GameWorldSerializer serializer{ m_pEditedWorld };
-					//const auto& data = serializer.GetSerializedEntityData();
+					TFuture<String> json = serializer.SerializeToJson();
+					TFileUtils::WriteTextFileAsync("Game://Maps/TestMap.kmap", Await(json));
+					//KEPLER_INFO(LogEditor, "Serialized world: {}", json);
+				}
+
+				if (ImGui::MenuItem("Load", "Ctrl + O"))
+				{
+					JsonDeserializer deserializer{Await(TFileUtils::ReadTextFileAsync("Game://Maps/TestMap.kmap"))};
+					GameWorldDeserializer worldCreator(deserializer.GetRootNode());
+
+					Engine::Get()->SetMainWorld(worldCreator.GetWorld());
 				}
 
 				ImGui::EndMenu();
@@ -641,7 +653,7 @@ namespace ke
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 
-			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
+			camera->SetTransform(m_CameraTransform);
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
@@ -690,6 +702,8 @@ namespace ke
 				}
 			}
 			camera->SetLocation(location);
+
+			m_CameraTransform = camera->GetTransform();
 		}
 	}
 

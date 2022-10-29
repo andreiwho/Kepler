@@ -60,9 +60,13 @@ namespace ke
 		}
 	}
 
+	Engine* Engine::Instance = nullptr;
+
 	Engine::Engine(const TApplicationLaunchParams& launchParams)
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
+		Instance = this;
+		
 		InitVFSAliases(launchParams);
 		m_ReflectionDatabase.FillReflectionDatabaseEntries();
 
@@ -93,6 +97,7 @@ namespace ke
 
 	Engine::~Engine()
 	{
+		GameWorld::ClearStaticState();
 		m_WorldRenderer.Release();
 		m_MeshLoader.ClearCache();
 		m_ImageLoader.ClearCache();
@@ -229,6 +234,7 @@ namespace ke
 					std::this_thread::sleep_for(10ms);
 				}
 
+				CheckWorldUpdated();
 				mainTimer.End();
 
 #ifdef ENABLE_DEBUG
@@ -245,6 +251,12 @@ namespace ke
 			}
 		}
 		TerminateModuleStack();
+	}
+
+	void Engine::SetMainWorld(RefPtr<GameWorld> newWorld)
+	{
+		m_CurrentWorld = newWorld;
+		m_bWorldUpdated = true;
 	}
 
 	void Engine::OnPlatformEvent(const TPlatformEventBase& event)
@@ -308,6 +320,17 @@ namespace ke
 	bool Engine::OnKeyDown(const TKeyDownEvent& event)
 	{
 		return false;
+	}
+
+	void Engine::CheckWorldUpdated()
+	{
+		if (m_bWorldUpdated)
+		{
+			m_bWorldUpdated = false;
+			m_Editor->SetEditedWorld(m_CurrentWorld);
+
+			m_ModuleStack.OnPostWorldInit();
+		}
 	}
 
 	TestMovementComponent::TestMovementComponent()
