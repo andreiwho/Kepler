@@ -67,6 +67,7 @@ namespace ke
 		virtual bool HasParent() const = 0;
 		virtual String GetParentName() const = 0;
 		virtual bool IsEnum() const = 0;
+		virtual bool IsComponentClass() const = 0;
 
 		inline const Map<String, ReflectedField>& GetFields() const&
 		{

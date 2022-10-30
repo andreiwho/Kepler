@@ -16,6 +16,7 @@ namespace ke
 		void DrawMaterialComponentInfo();
 		void DrawEntityInfo();
 		void DrawNativeComponentInfo();
+		void DrawAddComponentPopup();
 		const String& SplitAndCapitalizeComponentName(const String& originalName);
 
 	private:

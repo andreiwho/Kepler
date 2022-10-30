@@ -228,6 +228,11 @@ namespace ke
 	void EditorModule::SetEditedWorld(RefPtr<GameWorld> pWorld)
 	{
 		KEPLER_PROFILE_SCOPE();
+		if (m_pEditedWorld && m_pEditedWorld->IsValidEntity(m_EditorCameraEntity))
+		{
+			m_pEditedWorld->DestroyEntity(m_EditorCameraEntity);
+			m_EditorCameraEntity = GameEntityId();
+		}
 		m_pEditedWorld = pWorld;
 	}
 
@@ -383,6 +388,17 @@ namespace ke
 
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("World", true))
+			{
+				if (ImGui::MenuItem("Create Entity"))
+				{
+					auto entity = m_pEditedWorld->CreateEntity("NewEntity");
+					m_SelectedEntity = entity;
+				}
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 	}
@@ -791,6 +807,15 @@ namespace ke
 			case EKeyCode::F:
 			{
 				EditorCamera_FocusSelectedObject();
+			}
+			break;
+			case EKeyCode::Delete:
+			{
+				if (m_pEditedWorld && m_pEditedWorld->IsValidEntity(m_SelectedEntity))
+				{
+					m_pEditedWorld->DestroyEntity(m_SelectedEntity);
+					m_SelectedEntity = GameEntityId();
+				}
 			}
 			break;
 			default:

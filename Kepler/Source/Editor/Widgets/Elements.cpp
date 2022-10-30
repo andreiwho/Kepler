@@ -262,7 +262,7 @@ namespace ke
 			}
 			else
 			{
-				ImGui::TableHeader(name.c_str());
+				TEditorElements::NextFieldRow(name.c_str());
 				if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash()))
 				{
 					for (auto& [fieldName, classField] : pClass->GetFields())

@@ -11,6 +11,10 @@ namespace ke
 
 	void ReflectionDatabase::PushClass(RefPtr<ReflectedClass> cls)
 	{
+		if (cls->IsComponentClass())
+		{
+			m_ComponentClasses.AppendBack(cls->GetClassId());
+		}
 		m_Classes[typehash64(cls->GetName())] = cls;
 	}
 

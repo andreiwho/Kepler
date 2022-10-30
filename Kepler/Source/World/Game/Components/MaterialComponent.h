@@ -20,7 +20,7 @@ namespace ke
 			return Material->GetParentAssetPath();
 		}
 
-		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
+		inline bool UsesPrepass() const { return Material ? Material->UsesPrepass() : false; }
 
 		reflected kmeta(postchange=OnMaterialPathChanged)
 		String MaterialAssetPath;

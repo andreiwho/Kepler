@@ -107,6 +107,7 @@ namespace KEReflector
                     string hasParent = entry.Parent != null ? "true" : "false";
                     string isEnum = entry.bIsEnum ? "true" : "false";
                     string reflectedParent = entry.bIsEnum ? "ReflectedEnum" : "ReflectedClass";
+                    string isComponent = IsClassComponent(entry) ? "true" : "false";
 
                     fileWriter.Write($@"
     // class {entry.Name};
@@ -119,7 +120,8 @@ namespace KEReflector
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
         virtual bool IsEnum() const override {{ return {isEnum}; }}
         virtual void* Construct(void* pAddress) const override;
-        virtual void* RegistryConstruct(entt::entity entity, entt::registry& registry) const override;");
+        virtual void* RegistryConstruct(entt::entity entity, entt::registry& registry) const override;
+        virtual bool IsComponentClass() const override {{ return {isComponent}; }}");
                     fileWriter.WriteLine(@"
     };");
                 }
@@ -206,16 +208,16 @@ namespace KEReflector
 
                         // Construct
                         fileWriter.WriteLine($@"
-        void* R{entry.Name}::Construct(void* pAddress) const
-        {{
-            return new(pAddress) {entry.Name}();
-        }}
+    void* R{entry.Name}::Construct(void* pAddress) const
+    {{
+        return new(pAddress) {entry.Name}();
+    }}
 
-        void* R{entry.Name}::RegistryConstruct(entt::entity entity, entt::registry& registry) const
-        {{
-            {setupComponent};
-            return &registry.emplace<{entry.Name}>(entity);
-        }}
+    void* R{entry.Name}::RegistryConstruct(entt::entity entity, entt::registry& registry) const
+    {{
+        {setupComponent};
+        return &registry.emplace<{entry.Name}>(entity);
+    }}
 ");
 
 

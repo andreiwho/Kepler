@@ -130,12 +130,15 @@ namespace ke
 
 		// Update components for entities
 		m_EntityRegistry.view<MaterialComponent, TransformComponent>().each(
-			[this](auto Id, MaterialComponent& MC, TransformComponent& TC) 
+			[this](auto Id, MaterialComponent& MC, TransformComponent& TC)
 			{
 				RefPtr<TMaterial> Material = MC.GetMaterial();
-				Material->WriteTransform(TC.GetTransform());
-				// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
-				Material->WriteId((i32)Id);
+				if (Material)
+				{
+					Material->WriteTransform(TC.GetTransform());
+					// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
+					Material->WriteId((i32)Id);
+				}
 			});
 
 		m_EntityRegistry.view<TGameEntity>().each(
@@ -196,7 +199,7 @@ namespace ke
 		if (pClass)
 		{
 			auto pComponent = (EntityComponent*)pClass->RegistryConstruct(id, m_EntityRegistry);
-			
+
 			NativeComponentContainer& container = GetOrAddComponent<NativeComponentContainer>(id);
 			container.AddComponent(typeHash);
 

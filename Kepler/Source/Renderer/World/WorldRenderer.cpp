@@ -179,7 +179,10 @@ namespace ke
 		m_CurrentWorld->GetComponentView<MaterialComponent>().each(
 			[this, pImmCtx](auto, MaterialComponent& component)
 			{
-				component.GetMaterial()->RT_Update(pImmCtx);
+				if (auto pMaterial = component.GetMaterial())
+				{
+					pMaterial->RT_Update(pImmCtx);
+				}
 			});
 		pImmCtx->EndDebugEvent();
 	}
@@ -208,6 +211,11 @@ namespace ke
 		m_CurrentWorld->GetComponentView<MaterialComponent, StaticMeshComponent>().each(
 			[pImmCtx](auto, MaterialComponent& MT, StaticMeshComponent& SM)
 			{
+				if (!SM.GetStaticMesh())
+				{
+					return;
+				}
+
 				if (MT.UsesPrepass())
 				{
 					pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
@@ -272,6 +280,16 @@ namespace ke
 		m_CurrentWorld->GetComponentView<MaterialComponent, StaticMeshComponent>().each(
 			[pImmCtx](auto, MaterialComponent& MT, StaticMeshComponent& SM)
 			{
+				if (!MT.GetMaterial())
+				{
+					return;
+				}
+
+				if (!SM.GetStaticMesh())
+				{
+					return;
+				}
+
 				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
 				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline());
 				pImmCtx->BindSamplers(MT.GetMaterial()->GetSamplers());

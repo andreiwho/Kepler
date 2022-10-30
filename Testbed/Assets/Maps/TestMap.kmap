@@ -1,13 +1,13 @@
 {
     "MainWorld": {
-        "Entity9": {
+        "Entity0": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
-                "Name": "Entity9"
+                "Name": "Entity0"
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 15493043201323947791
+                "Id": 5124747404128489261
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -15,20 +15,20 @@
                     "TypeHash": 7594633040358423045,
                     "Location": {
                         "TypeHash": 11792389323166860578,
-                        "x": 1.0,
-                        "y": 2.0,
-                        "z": 0.0
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.003218330442905426
                     },
                     "Rotation": {
                         "TypeHash": 11792389323166860578,
                         "x": 0.0,
-                        "y": 0.0,
-                        "z": 36.0
+                        "y": -0.0,
+                        "z": 106.99996185302734
                     },
                     "Scale": {
                         "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
+                        "x": 0.30000004172325134,
+                        "y": 0.30000004172325134,
                         "z": 0.30000001192092896
                     }
                 }
@@ -51,116 +51,14 @@
                 "TypeHash": 4565818791574528444
             }
         },
-        "Entity8": {
+        "Camera": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
-                "Name": "Entity8"
+                "Name": "Camera"
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 292041009771284470
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 62.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity7": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity7"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 15834536817334036081
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 3.0,
-                        "y": 1.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 131.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity6": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity6"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 13458347714679865017
+                "Id": 11459875720946328098
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -169,210 +67,64 @@
                     "Location": {
                         "TypeHash": 11792389323166860578,
                         "x": 2.0,
-                        "y": 1.0,
-                        "z": 0.0
+                        "y": -3.0,
+                        "z": 1.0
                     },
                     "Rotation": {
                         "TypeHash": 11792389323166860578,
-                        "x": 0.0,
+                        "x": -20.0,
                         "y": 0.0,
-                        "z": 267.0
+                        "z": 0.0
                     },
                     "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity5": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity5"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 338601373744713418
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
                         "TypeHash": 11792389323166860578,
                         "x": 1.0,
                         "y": 1.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 65.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
+                        "z": 1.0
                     }
                 }
             },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity4": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity4"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 17469281669422271724
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
+            "CameraComponent": {
+                "TypeHash": 13209209574413295037,
+                "Camera": {
+                    "TypeHash": 846271567112447840,
+                    "FieldOfView": 45.0,
+                    "Width": 1552.0,
+                    "Height": 787.0,
+                    "NearClip": 0.10000000149011612,
+                    "FarClip": 100.0,
+                    "Target": {
                         "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 1.0,
-                        "z": 0.0
+                        "x": 2.0,
+                        "y": -2.060307264328003,
+                        "z": 0.6579798460006714
                     },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 344.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity3": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity3"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 7598124547547784489
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 3.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 198.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
-            }
-        },
-        "Entity2": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Entity2"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 5628209836658502996
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
                     "Location": {
                         "TypeHash": 11792389323166860578,
                         "x": 2.0,
+                        "y": -3.0,
+                        "z": 1.0
+                    }
+                },
+                "RenderTargetName": "MeshPassTarget"
+            }
+        },
+        "AmbientLight": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "AmbientLight"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 16896502079108280026
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -2.0,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -380,32 +132,68 @@
                         "TypeHash": 11792389323166860578,
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 244.0
+                        "z": 0.0
                     },
                     "Scale": {
                         "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     }
                 }
             },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "StaticMeshPath": "Game://LP.fbx"
+            "AmbientLightComponent": {
+                "TypeHash": 15337705873589087728,
+                "Color": {
+                    "TypeHash": 11792389323166860578,
+                    "x": 0.30000001192092896,
+                    "y": 0.30000001192092896,
+                    "z": 0.30000001192092896
+                }
+            }
+        },
+        "Directional Light": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Directional Light"
             },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 3381074037787442467
             },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -3.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -135.0,
+                        "y": 0.0,
+                        "z": 90.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
             },
-            "NativeScriptComponent": {
-                "TypeHash": 4565818791574528444
+            "DirectionalLightComponent": {
+                "TypeHash": 8741610470154774588,
+                "Color": {
+                    "TypeHash": 11792389323166860578,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Intensity": 1.0
             }
         },
         "Entity1": {
@@ -415,7 +203,7 @@
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 11106690128795387003
+                "Id": 5119839604616739186
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -459,14 +247,14 @@
                 "TypeHash": 4565818791574528444
             }
         },
-        "Entity0": {
+        "Entity2": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
-                "Name": "Entity0"
+                "Name": "Entity2"
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 5350392094324837180
+                "Id": 5975074526705789964
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -474,7 +262,7 @@
                     "TypeHash": 7594633040358423045,
                     "Location": {
                         "TypeHash": 11792389323166860578,
-                        "x": 0.0,
+                        "x": 2.0,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -482,7 +270,7 @@
                         "TypeHash": 11792389323166860578,
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 107.0
+                        "z": 244.0
                     },
                     "Scale": {
                         "TypeHash": 11792389323166860578,
@@ -510,14 +298,14 @@
                 "TypeHash": 4565818791574528444
             }
         },
-        "Directional Light": {
+        "Entity3": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
-                "Name": "Directional Light"
+                "Name": "Entity3"
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 12496783855996890010
+                "Id": 11806021355798515553
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -525,51 +313,7 @@
                     "TypeHash": 7594633040358423045,
                     "Location": {
                         "TypeHash": 11792389323166860578,
-                        "x": -3.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": -135.0,
-                        "y": 0.0,
-                        "z": 90.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            "DirectionalLightComponent": {
-                "TypeHash": 8741610470154774588,
-                "Color": {
-                    "TypeHash": 11792389323166860578,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "Intensity": 1.0
-            }
-        },
-        "AmbientLight": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "AmbientLight"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 6336599136727471272
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": -2.0,
+                        "x": 3.0,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -577,34 +321,144 @@
                         "TypeHash": 11792389323166860578,
                         "x": 0.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": 198.0
                     },
                     "Scale": {
                         "TypeHash": 11792389323166860578,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
                     }
                 }
             },
-            "AmbientLightComponent": {
-                "TypeHash": 15337705873589087728,
-                "Color": {
-                    "TypeHash": 11792389323166860578,
-                    "x": 0.30000001192092896,
-                    "y": 0.30000001192092896,
-                    "z": 0.30000001192092896
-                }
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
             }
         },
-        "Camera": {
+        "Entity4": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
-                "Name": "Camera"
+                "Name": "Entity4"
             },
             "TIdComponent": {
                 "TypeHash": 5465164197660407293,
-                "Id": 18060404264358049094
+                "Id": 3814171390357372622
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 344.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
+            }
+        },
+        "Entity5": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Entity5"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 2045916566955870675
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 65.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
+            }
+        },
+        "Entity6": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Entity6"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 10112767271449635559
             },
             "TransformComponent": {
                 "TypeHash": 9797664509068339094,
@@ -613,46 +467,141 @@
                     "Location": {
                         "TypeHash": 11792389323166860578,
                         "x": 2.0,
-                        "y": -3.0,
-                        "z": 1.0
+                        "y": 1.0,
+                        "z": 0.0
                     },
                     "Rotation": {
                         "TypeHash": 11792389323166860578,
-                        "x": -20.0,
+                        "x": 0.0,
                         "y": 0.0,
-                        "z": 0.0
+                        "z": 267.0
                     },
                     "Scale": {
                         "TypeHash": 11792389323166860578,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
                     }
                 }
             },
-            "CameraComponent": {
-                "TypeHash": 13209209574413295037,
-                "Camera": {
-                    "TypeHash": 846271567112447840,
-                    "FieldOfView": 45.0,
-                    "Width": 1.0,
-                    "Height": 1.0,
-                    "NearClip": 0.10000000149011612,
-                    "FarClip": 100.0,
-                    "Target": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 2.0,
-                        "y": -2.060307264328003,
-                        "z": 0.6579798460006714
-                    },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
+            }
+        },
+        "Entity7": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Entity7"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 16713711350913139555
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
                     "Location": {
                         "TypeHash": 11792389323166860578,
-                        "x": 2.0,
-                        "y": -3.0,
-                        "z": 1.0
+                        "x": 3.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 131.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
                     }
-                },
-                "RenderTargetName": "MeshPassTarget"
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
+            }
+        },
+        "Entity9": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Entity9"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 5090023316300406933
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -1.5338748693466187,
+                        "z": 35.999996185302734
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "StaticMeshPath": "Game://LP.fbx"
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "MaterialAssetPath": "Engine://Materials/Mat_DefaultLit.kmat"
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
+            },
+            "NativeScriptComponent": {
+                "TypeHash": 4565818791574528444
             }
         }
     }

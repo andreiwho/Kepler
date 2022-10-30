@@ -154,6 +154,12 @@ namespace ke
 				DrawTransformComponentInfo();
 				DrawMaterialComponentInfo();
 				DrawNativeComponentInfo();
+
+				if (ImGui::Button("Add Component"))
+				{
+					ImGui::OpenPopup("addcomponent");
+				}
+				DrawAddComponentPopup();
 			}
 			ImGui::End();
 		}
@@ -209,6 +215,25 @@ namespace ke
 				const String& filteredName = SplitAndCapitalizeComponentName(pClass->GetName());
 				TEditorElements::DrawReflectedObjectFields(filteredName, id, pNativeComponent);
 			}
+		}
+	}
+
+	void EntityDetailsPanel::DrawAddComponentPopup()
+	{
+		if (ImGui::BeginPopup("addcomponent"))
+		{
+			for (typehash64 componentHash : ReflectionDatabase::Get()->GetComponentClasses())
+			{
+				if (RefPtr<ReflectedClass> pClass = GetReflectedClass(componentHash))
+				{
+					if (ImGui::Selectable(pClass->GetName().c_str()))
+					{
+						m_pWorld->AddComponentByTypeHash(m_SelectedEntity, componentHash);
+					}
+				}
+			}
+
+			ImGui::EndPopup();
 		}
 	}
 

@@ -40,6 +40,11 @@ namespace ke
 
 	void TMaterial::WriteTransform(WorldTransform transform)
 	{
+		if (!m_Pipeline)
+		{
+			return;
+		}
+
 		switch (m_Pipeline->GetDomain().Value)
 		{
 		case EPipelineDomain::Lit:

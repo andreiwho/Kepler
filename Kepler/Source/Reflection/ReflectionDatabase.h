@@ -29,8 +29,11 @@ namespace ke
 			return nullptr;
 		}
 
+		inline const Array<typehash64>& GetComponentClasses() const { return m_ComponentClasses; }
+
 	private:
 		Map<typehash64, RefPtr<ReflectedClass>> m_Classes;
+		Array<typehash64> m_ComponentClasses;
 	};
 
 	template<typename T>
