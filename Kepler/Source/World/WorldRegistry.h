@@ -23,6 +23,10 @@ namespace ke
 		RefPtr<T> CreateWorldAtIndex(usize index, const String& Name, ARGS&&... InArgs)
 		{
 			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
+			if (LoadedWorlds.GetLength() <= index)
+			{
+				LoadedWorlds.Resize(index + 1);
+			}
 			LoadedWorlds[index] = OutWorld;
 			return OutWorld;
 		}
@@ -30,6 +34,15 @@ namespace ke
 		void DestroyWorld(RefPtr<TWorld> World);
 
 		static WorldRegistry* Get() { return Instance; }
+
+		RefPtr<TWorld> GetWorldAt(u32 index)
+		{
+			if (LoadedWorlds.GetLength() <= index)
+			{
+				return nullptr;
+			}
+			return LoadedWorlds[index];
+		}
 
 	private:
 		Array<RefPtr<TWorld>> LoadedWorlds;

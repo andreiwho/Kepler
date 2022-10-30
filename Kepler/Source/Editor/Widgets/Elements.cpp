@@ -148,6 +148,154 @@ namespace ke
 		return bBegan;
 	}
 
+	void TEditorElements::DrawReflectedField(const String& name, ReflectedField& field, void* pHandler)
+	{
+
+		bool bNotBaseType = false;
+
+		// Check metadata
+		const auto& md = field.GetMetadata();
+		if (md.bHideInDetails)
+		{
+			return;
+		}
+
+		if (md.bReadOnly)
+		{
+			ImGui::BeginDisabled(true);
+		}
+
+		switch (field.GetTypeHash())
+		{
+		case typehash64("float"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float>(pHandler);
+			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case typehash64("float2"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float2>(pHandler);
+			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case typehash64("float3"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float3>(pHandler);
+			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case typehash64("float4"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float4>(pHandler);
+			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case typehash64("bool"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<bool>(pHandler);
+			ImGui::Checkbox(name.c_str(), value);
+		}
+		break;
+		case typehash64("String"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<String>(pHandler);
+			char outBuffer[TEditorElements::GMaxTextEditSymbols];
+			memset(outBuffer, 0, sizeof(outBuffer));
+			if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer, md.bReadOnly))
+			{
+				outBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+				String newValue = outBuffer;
+				field.SetValueFor(pHandler, &newValue);
+			}
+		}
+		break;
+		default:
+			bNotBaseType = true;
+			break;
+		}
+
+		// End metadata
+		if (field.GetMetadata().bReadOnly)
+		{
+			ImGui::EndDisabled();
+		}
+
+		if (bNotBaseType)
+		{
+			if (md.bIsEnum)
+			{
+				auto pEnumClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash());
+				if (!pEnumClass)
+				{
+					return;
+				}
+
+				if (auto pMyEnum = RefCast<ReflectedEnum>(pEnumClass))
+				{
+					TEditorElements::NextFieldRow(name.c_str());
+					auto& values = pMyEnum->GetEnumValues();
+					u32* value = field.GetValueFor<u32>(pHandler);
+					if (*value > values.GetLength())
+					{
+						return;
+					}
+					auto& selectedValue = values[*value].first;
+					if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
+					{
+						for (auto& [title, index] : values)
+						{
+							if (ImGui::Selectable(title.c_str()))
+							{
+								field.SetValueFor(pHandler, &index);
+							}
+						}
+						ImGui::EndCombo();
+					}
+				}
+			}
+			else
+			{
+				ImGui::TableHeader(name.c_str());
+				if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash()))
+				{
+					for (auto& [fieldName, classField] : pClass->GetFields())
+					{
+						DrawReflectedField(fieldName, classField, field.GetValueFor<void*>(pHandler));
+					}
+				}
+			}
+		}
+	}
+
+	void TEditorElements::DrawReflectedObjectFields(const String& label, typehash64 typeHash, void* pHandler)
+	{
+		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
+		if (!pClass)
+		{
+			return;
+		}
+
+		if (TEditorElements::Container(label.c_str()))
+		{
+			if (TEditorElements::BeginFieldTable("details", 2))
+			{
+				for (auto& [name, field] : pClass->GetFields())
+				{
+					DrawReflectedField(name, field, pHandler);
+				}
+
+				TEditorElements::EndFieldTable();
+			}
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////////
 	void TEditorElements::EndFieldTable()
 	{

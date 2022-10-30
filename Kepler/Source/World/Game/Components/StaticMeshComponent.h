@@ -22,7 +22,7 @@ namespace ke
 
 		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
 
-		reflected kmeta(onchange=StaticMeshPathChanged)
+		reflected kmeta(postchange=StaticMeshPathChanged)
 		String StaticMeshPath{};
 
 		void StaticMeshPathChanged(const String& newPath);

@@ -137,16 +137,16 @@ namespace ke
 		}
 	}
 
-	TEditorDetailsPanel::TEditorDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId selectedEntity)
+	EntityDetailsPanel::EntityDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId selectedEntity)
 		: m_pWorld(pWorld)
 		, m_SelectedEntity(selectedEntity)
 	{
 	}
 
-	void TEditorDetailsPanel::Draw()
+	void EntityDetailsPanel::Draw()
 	{
 		// TEMP
-		ImGui::Begin("Details");
+		if(ImGui::Begin("Details"))
 		{
 			if (m_pWorld && m_pWorld->IsValidEntity(m_SelectedEntity))
 			{
@@ -155,12 +155,12 @@ namespace ke
 				DrawMaterialComponentInfo();
 				DrawNativeComponentInfo();
 			}
+			ImGui::End();
 		}
-		ImGui::End();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawEntityInfo()
+	void EntityDetailsPanel::DrawEntityInfo()
 	{
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("ENTITY"))
@@ -180,7 +180,7 @@ namespace ke
 		}
 	}
 
-	void TEditorDetailsPanel::DrawNativeComponentInfo()
+	void EntityDetailsPanel::DrawNativeComponentInfo()
 	{
 		KEPLER_PROFILE_SCOPE();
 
@@ -207,23 +207,12 @@ namespace ke
 				}
 
 				const String& filteredName = SplitAndCapitalizeComponentName(pClass->GetName());
-				if (TEditorElements::Container(filteredName.c_str()))
-				{
-					if (TEditorElements::BeginFieldTable("details", 2))
-					{
-						for (auto& [name, field] : pClass->GetFields())
-						{
-							DrawReflectedField(name, field, pNativeComponent);
-						}
-
-						TEditorElements::EndFieldTable();
-					}
-				}
+				TEditorElements::DrawReflectedObjectFields(filteredName, id, pNativeComponent);
 			}
 		}
 	}
 
-	const ke::String& TEditorDetailsPanel::SplitAndCapitalizeComponentName(const String& originalName)
+	const ke::String& EntityDetailsPanel::SplitAndCapitalizeComponentName(const String& originalName)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (m_FilteredComponentNames.Contains(originalName))
@@ -257,7 +246,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawTransformComponentInfo()
+	void EntityDetailsPanel::DrawTransformComponentInfo()
 	{
 		KEPLER_PROFILE_SCOPE();
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
@@ -291,7 +280,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawMaterialComponentInfo()
+	void EntityDetailsPanel::DrawMaterialComponentInfo()
 	{
 		KEPLER_PROFILE_SCOPE();
 		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };

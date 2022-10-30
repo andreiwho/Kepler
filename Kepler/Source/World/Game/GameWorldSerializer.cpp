@@ -300,9 +300,9 @@ namespace ke
 		return Deserialize(name, componentInfos);
 	}
 
-	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects)
+	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects, u32 worldIndex)
 	{
-		auto pWorld = WorldRegistry::Get()->CreateWorldAtIndex<GameWorld>(0, worldName);
+		auto pWorld = WorldRegistry::Get()->CreateWorldAtIndex<GameWorld>(worldIndex, worldName);
 		for (auto& [name, components] : objects)
 		{
 			GameEntityId entity = pWorld->CreateEntityDeferred();

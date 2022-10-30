@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Core.h"
+#include "Reflection/ReflectionDatabase.h"
 
 namespace ke
 {
@@ -19,6 +20,8 @@ namespace ke
 		static bool EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols], bool bDisabled = false);
 
 		static bool BeginFieldTable(CStr pLabel, i32 ColumnCount);
+		static void DrawReflectedField(const String& name, ReflectedField& field, void* pHandler);
+		static void DrawReflectedObjectFields(const String& label, typehash64 typeHash, void* pHandler);
 		static void EndFieldTable();
 		static void NextFieldRow(CStr pLabel);
 		static void SetColumn(i32 column);

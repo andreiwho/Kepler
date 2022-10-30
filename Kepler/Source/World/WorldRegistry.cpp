@@ -21,6 +21,7 @@ namespace ke
 		if (LoadedWorlds.IsValidIterator(Iter))
 		{
 			LoadedWorlds.Remove(Iter);
+			LoadedWorlds.Shrink();
 		}
 	}
 

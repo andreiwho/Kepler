@@ -31,6 +31,7 @@
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
 #include "Renderer/Subrenderer/Subrenderer2D.h"
 #include "World/Camera/CameraComponent.h"
+#include "World/Game/GameWorldSerializer.h"
 
 namespace ke
 {
@@ -66,7 +67,13 @@ namespace ke
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
 		Instance = this;
-		
+
+#ifndef ENABLE_EDITOR
+		CurrentWorldState = EWorldUpdateKind::Play;
+#else
+		CurrentWorldState = EWorldUpdateKind::Edit;
+#endif
+
 		InitVFSAliases(launchParams);
 		m_ReflectionDatabase.FillReflectionDatabaseEntries();
 
@@ -102,7 +109,7 @@ namespace ke
 		m_MeshLoader.ClearCache();
 		m_ImageLoader.ClearCache();
 		m_MaterialLoader.ClearLoadedMaterialCache();
-		m_CurrentWorld.Release();
+		CurrentWorld.Release();
 
 		m_WorldRegistry.reset();
 		m_AudioEngine.reset();
@@ -118,14 +125,14 @@ namespace ke
 		InitApplicationModules();
 
 		// Create the world
-		m_CurrentWorld = m_WorldRegistry->CreateWorld<GameWorld>("MainWorld");
+		CurrentWorld = m_WorldRegistry->CreateWorld<GameWorld>("MainWorld");
 
 		// Begin main loop
 		TTimer mainTimer{};
 		GGlobalTimer = &mainTimer;
 		float displayInfoTime = 0.0f;
 
-		auto mainCamera = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
+		auto mainCamera = EntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
 		mainCamera->SetLocation(float3(2.0f, -3.0f, 1));
 		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
 		RefPtr<ReflectedClass> refClass = GetReflectedClass<CameraComponent>();
@@ -137,12 +144,12 @@ namespace ke
 			KEPLER_INFO(LogApp, "Render target name for main camera is: {}", *value);
 		}
 
-		auto ambientLight = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
+		auto ambientLight = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("AmbientLight") };
 		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
 		pALC->SetColor(float3(0.3f, 0.3f, 0.3f));
 		ambientLight->SetLocation(float3(-2.0f, 0.0f, 0.0f));
-		
-		auto dirLight = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("Directional Light") };
+
+		auto dirLight = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Directional Light") };
 		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
 		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
 		pDLC->SetIntensity(1.0f);
@@ -160,7 +167,7 @@ namespace ke
 				y++;
 			}
 
-			auto entity = EntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
+			auto entity = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
 			entity.AddComponent<StaticMeshComponent>(mesh);
 			entity.AddComponent<MaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
 			entity.AddComponent<TestMovementComponent>();
@@ -177,7 +184,7 @@ namespace ke
 			pPlatform->RegisterPlatformEventListener(this);
 			float posX = 0.0f;
 #ifdef ENABLE_EDITOR
-			m_Editor->SetEditedWorld(m_CurrentWorld);
+			m_Editor->SetEditedWorld(CurrentWorld);
 #endif
 
 			m_ModuleStack.OnPostWorldInit();
@@ -196,13 +203,10 @@ namespace ke
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
 					// Initialize the renderer
-					m_WorldRenderer->InitFrame(m_CurrentWorld);
+					m_WorldRenderer->InitFrame(CurrentWorld);
 					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
-#if ENABLE_EDITOR
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Edit);
-#else
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Play);
-#endif
+
+					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), CurrentWorldState);
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
@@ -255,8 +259,44 @@ namespace ke
 
 	void Engine::SetMainWorld(RefPtr<GameWorld> newWorld)
 	{
-		m_CurrentWorld = newWorld;
+		CurrentWorld = newWorld;
 		m_bWorldUpdated = true;
+	}
+
+	void Engine::OnCurrentWorldStateChange(EWorldUpdateKind newUpdateKind)
+	{
+		// World state changed
+		if (newUpdateKind == CurrentWorldState)
+		{
+			return;
+		}
+
+		switch (newUpdateKind)
+		{
+		case ke::EWorldUpdateKind::Play:
+		{
+			GameWorldSerializer serializer{ CurrentWorld };
+			auto serializedData = serializer.Serialize();
+			GameWorldDeserializer deserializer;
+			auto pPlayWorld = deserializer.Deserialize("PlayWorld", serializedData, PLAY_INDEX);
+			SetMainWorld(pPlayWorld);
+		}
+		break;
+		case ke::EWorldUpdateKind::Edit:
+		{
+			if (CurrentWorld)
+			{
+				WorldRegistry::Get()->DestroyWorld(CurrentWorld);
+				if (auto pWorld = WorldRegistry::Get()->GetWorldAt(EDIT_INDEX))
+				{
+					SetMainWorld(RefCast<GameWorld>(pWorld));
+				}
+			}
+		}
+		break;
+		default:
+			break;
+		}
 	}
 
 	void Engine::OnPlatformEvent(const TPlatformEventBase& event)
@@ -319,15 +359,26 @@ namespace ke
 
 	bool Engine::OnKeyDown(const TKeyDownEvent& event)
 	{
+		if (event.Key == EKeyCode::Escape && CurrentWorldState == EWorldUpdateKind::Play)
+		{
+			m_bExitPlayRequested = true;
+		}
 		return false;
 	}
 
 	void Engine::CheckWorldUpdated()
 	{
+		if (m_bExitPlayRequested)
+		{
+			OnCurrentWorldStateChange(EWorldUpdateKind::Edit);
+			CurrentWorldState = EWorldUpdateKind::Edit;
+			m_bExitPlayRequested = false;
+		}
+
 		if (m_bWorldUpdated)
 		{
 			m_bWorldUpdated = false;
-			m_Editor->SetEditedWorld(m_CurrentWorld);
+			m_Editor->SetEditedWorld(CurrentWorld);
 
 			m_ModuleStack.OnPostWorldInit();
 		}

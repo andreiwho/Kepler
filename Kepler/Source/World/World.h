@@ -1,9 +1,10 @@
 #pragma once
 #include "Core/Core.h"
+#include "World.gen.h"
 
 namespace ke
 {
-	enum class EWorldUpdateKind
+	reflected enum class EWorldUpdateKind
 	{
 		Play,
 		Edit
@@ -18,13 +19,16 @@ namespace ke
 	// The main reason of this being a distinct parent class is that worlds can 
 	// each-other handle different kinds of entities, thus, having different kinds of registries and components
 	// This is a subject to change
-	class TWorld : public EnableRefPtrFromThis<TWorld>
+	reflected class TWorld : public EnableRefPtrFromThis<TWorld>
 	{
 	public:
+		TWorld() = default;
+
 		~TWorld();
 
 		const String& GetName() const { return Name; }
 
+		reflected String Name{"NoName"};
 	protected:
 		// The constructor
 		TWorld(const String& Name);
@@ -33,7 +37,6 @@ namespace ke
 		virtual void UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind);
 
 		// The name of the world
-		String Name{"NoName"};
 
 		// The UUID of the world (will be used mostly for parent-child behaviour)
 		id64 UUID{};

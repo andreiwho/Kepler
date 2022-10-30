@@ -26,6 +26,9 @@
 
 namespace ke
 {
+#define EDIT_INDEX 0
+#define PLAY_INDEX 1
+
 	reflected enum class EMovementType
 	{
 		Static,
@@ -69,10 +72,16 @@ namespace ke
 	// This is an important class.
 	// - All of the internal initialization and application logic will happen inside the Engine::Run function
 	// --------------------------------------------
-	class Engine : public IPlatformEventListener
+	reflected class Engine : public IPlatformEventListener
 	{
 		static Engine* Instance;
 	public:
+		Engine()
+		{
+			// Disallow default construction
+			CRASH();
+		}
+
 		Engine(const TApplicationLaunchParams& launchParams);
 		virtual ~Engine();
 
@@ -80,6 +89,12 @@ namespace ke
 		static Engine* Get() { return Instance; }
 
 		void SetMainWorld(RefPtr<GameWorld> newWorld);
+
+		reflected kmeta(prechange = OnCurrentWorldStateChange)
+		EWorldUpdateKind CurrentWorldState{};
+		void OnCurrentWorldStateChange(EWorldUpdateKind newUpdateKind);
+
+		reflected RefPtr<GameWorld> CurrentWorld;
 
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
@@ -107,8 +122,8 @@ namespace ke
 		TImageLoader m_ImageLoader;
 		MeshLoader m_MeshLoader;
 
-		RefPtr<GameWorld> m_CurrentWorld;
 		RefPtr<WorldRenderer> m_WorldRenderer;
+
 		
 #ifdef ENABLE_EDITOR
 		RefPtr<class EditorModule> m_Editor;
@@ -117,6 +132,7 @@ namespace ke
 		TModuleStack m_ModuleStack{};
 
 		bool m_bWorldUpdated = false;
+		bool m_bExitPlayRequested = false;
 	};
 
 	extern SharedPtr<Engine> MakeRuntimeApplication(TApplicationLaunchParams const& launchParams);

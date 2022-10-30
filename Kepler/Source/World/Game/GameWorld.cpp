@@ -34,9 +34,10 @@ namespace ke
 		const GameEntityId EntityId = m_EntityRegistry.create();
 		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		AddComponent<TIdComponent>(EntityId);
+		TIdComponent& idComponent = AddComponent<TIdComponent>(EntityId);
 		AddComponent<TransformComponent>(EntityId);
 		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_UUIDToEntityMap[idComponent.Id] = EntityId;
 		return EntityId;
 	}
 
@@ -45,10 +46,11 @@ namespace ke
 		const entt::entity EntityId = m_EntityRegistry.create();
 		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		AddComponent<TIdComponent>(EntityId);
+		auto& idComponent = AddComponent<TIdComponent>(EntityId);
 		AddComponent<TransformComponent>(EntityId);
 		AddComponent<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
 		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_UUIDToEntityMap[idComponent.Id] = EntityId;
 
 		if (!IsValidEntity(m_MainCamera))
 		{
@@ -73,11 +75,19 @@ namespace ke
 				SetMainCamera(entity);
 			}
 		}
+		auto& idComponent = GetOrAddComponent<TIdComponent>(entity);
+		m_UUIDToEntityMap[idComponent.Id] = entity;
 	}
 
 	TGameEntity& GameWorld::GetEntityFromId(GameEntityId Id)
 	{
 		return m_EntityRegistry.get<TGameEntity>(Id.Entity);
+	}
+
+	GameEntityId GameWorld::GetEntityByUUID(uuid64 id)
+	{
+		CHECK(m_UUIDToEntityMap.Contains(id));
+		return m_UUIDToEntityMap[id];
 	}
 
 	void GameWorld::DestroyEntity(GameEntityId Entity)

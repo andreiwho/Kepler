@@ -38,4 +38,45 @@ namespace ke
 	{
 		return ReflectionDatabase::Get()->GetClass<T>();
 	}
+
+	static RefPtr<ReflectedClass> GetReflectedClass(typehash64 typeHash)
+	{
+		return ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
+	}
+
+	template<typename T>
+	static RefPtr<ReflectedEnum> GetReflectedEnum()
+	{
+		auto pEnum = GetReflectedClass<T>();
+		if (pEnum->IsEnum())
+		{
+			return RefCast<ReflectedEnum>(pEnum);
+		}
+		return nullptr;
+	}
+
+	static RefPtr<ReflectedEnum> GetReflectedEnum(typehash64 typeHash)
+	{
+		auto pEnum = GetReflectedClass(typeHash);
+		if (pEnum->IsEnum())
+		{
+			return RefCast<ReflectedEnum>(pEnum);
+		}
+		return nullptr;
+	}
+
+	template<typename EnumType>
+	static String EnumValueToString(EnumType value)
+	{
+		auto pEnum = GetReflectedEnum<EnumType>();
+		CHECK(pEnum);
+		return pEnum->ValueToString((i32)value);
+	}
+
+	static String EnumValueToString(typehash64 typeHash, i32 value)
+	{
+		auto pEnum = GetReflectedEnum(typeHash);
+		CHECK(pEnum);
+		return pEnum->ValueToString(value);
+	}
 }

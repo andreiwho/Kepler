@@ -164,6 +164,7 @@ namespace ke
 		DrawSceneGraph();
 		m_AssetBrowserPanel->Draw();
 		DrawDebugTools();
+		DrawEngineInfo();
 		ImGui::ShowDemoWindow();
 	}
 
@@ -172,6 +173,22 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		ControlEditorCamera(deltaTime);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void EditorModule::DrawEngineInfo()
+	{
+		bool bOpen = ImGui::Begin("Engine Info");
+		if (bOpen)
+		{
+			auto pClass = GetReflectedClass<Engine>();
+			if (pClass)
+			{
+				TEditorElements::DrawReflectedObjectFields("ENGINE", pClass->GetClassId(), Engine::Get());
+			}
+			ImGui::End();
+		}
+
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -246,7 +263,10 @@ namespace ke
 
 	void EditorModule::PostWorldInit()
 	{
-		CreateEditorGrid();
+		if (Engine::Get()->CurrentWorldState == EWorldUpdateKind::Edit)
+		{
+			CreateEditorGrid();
+		}
 
 		LoadEditorViewportIcons();
 	}
@@ -356,7 +376,7 @@ namespace ke
 
 				if (ImGui::MenuItem("Load", "Ctrl + O"))
 				{
-					JsonDeserializer deserializer{Await(TFileUtils::ReadTextFileAsync("Game://Maps/TestMap.kmap"))};
+					JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync("Game://Maps/TestMap.kmap")) };
 					GameWorldDeserializer worldCreator;
 					Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
 				}
@@ -403,10 +423,13 @@ namespace ke
 				(ImTextureID)pViewportSampler->GetNativeHandle(),
 				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
-			DrawGizmo();
-			DrawViewportEntityIcons();
-			DrawViewportGizmoControls();
-			DrawViewportCameraControls();
+			if (Engine::Get()->CurrentWorldState == EWorldUpdateKind::Edit)
+			{
+				DrawGizmo();
+				DrawViewportEntityIcons();
+				DrawViewportGizmoControls();
+				DrawViewportCameraControls();
+			}
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -530,7 +553,7 @@ namespace ke
 			return;
 		}
 
-		TEditorDetailsPanel widget(m_pEditedWorld, m_SelectedEntity);
+		EntityDetailsPanel widget(m_pEditedWorld, m_SelectedEntity);
 		widget.Draw();
 	}
 
@@ -538,40 +561,42 @@ namespace ke
 	void EditorModule::DrawSceneGraph()
 	{
 		KEPLER_PROFILE_SCOPE();
-		ImGui::Begin("Scene Graph");
-		i32 idx = 0;
-		if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
+		if (ImGui::Begin("Scene Graph"))
 		{
-			m_pEditedWorld->GetComponentView<TNameComponent>().each(
-				[&, this](auto id, TNameComponent& NC)
-				{
-					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-					auto handle = EntityHandle{ m_pEditedWorld, id };
-					if (!handle->ShouldHideInSceneGraph())
+			i32 idx = 0;
+			if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
+			{
+				m_pEditedWorld->GetComponentView<TNameComponent>().each(
+					[&, this](auto id, TNameComponent& NC)
 					{
-						bool bNodeOpen = false;
-						if (m_SelectedEntity == GameEntityId{ id })
+						ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+						auto handle = EntityHandle{ m_pEditedWorld, id };
+						if (!handle->ShouldHideInSceneGraph())
 						{
-							flags |= ImGuiTreeNodeFlags_Selected;
-						}
+							bool bNodeOpen = false;
+							if (m_SelectedEntity == GameEntityId{ id })
+							{
+								flags |= ImGuiTreeNodeFlags_Selected;
+							}
 
-						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
-						if (ImGui::IsItemClicked())
-						{
-							m_SelectedEntity = GameEntityId{ id };
-						}
+							bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
+							if (ImGui::IsItemClicked())
+							{
+								m_SelectedEntity = GameEntityId{ id };
+							}
 
-						if (bNodeOpen)
-						{
-							ImGui::TreePop();
-						}
+							if (bNodeOpen)
+							{
+								ImGui::TreePop();
+							}
 
-						idx++;
-					}
-				});
-			ImGui::TreePop();
+							idx++;
+						}
+					});
+				ImGui::TreePop();
+			}
+			ImGui::End();
 		}
-		ImGui::End();
 	}
 
 	void EditorModule::DrawDebugTools()
@@ -589,6 +614,11 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
+		{
+			return;
+		}
+
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
 		{
 			return;
 		}
@@ -643,6 +673,11 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
+		{
+			return;
+		}
+
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
 		{
 			return;
 		}
@@ -820,6 +855,11 @@ namespace ke
 	{
 		if (m_bIsControllingCamera)
 		{
+			if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+			{
+				return false;
+			}
+
 			m_EditorCameraSpeed += event.Amount * GGlobalTimer->Delta() * 10.0f;
 			m_EditorCameraSpeed = glm::clamp(m_EditorCameraSpeed, 0.0f, 100.0f);
 
@@ -914,6 +954,11 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::TrySelectEntity()
 	{
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+		{
+			return;
+		}
+
 		// Read render target
 		if (RenderTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
 		{
@@ -929,10 +974,15 @@ namespace ke
 
 						float x, y;
 						TInput::GetMousePosition(x, y);
+
+
 						const auto ViewportPos = m_ViewportPositions[(u32)EViewportIndex::Viewport1];
 						x -= ViewportPos.x;
 						y -= ViewportPos.y;
-
+						if (x < 0 || y < 0)
+						{
+							return -1;
+						}
 						const auto width = align / sizeof(i32);
 						const auto outIndex = (u32)width * (u32)y + (u32)x;
 						const i32 retVal = pData[outIndex];
@@ -996,6 +1046,12 @@ namespace ke
 	void EditorModule::DrawViewportEntityIcons()
 	{
 		KEPLER_PROFILE_SCOPE();
+
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+		{
+			return;
+		}
+
 		EntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
 		auto view = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateViewMatrix();
 		auto proj = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateProjectionMatrix();

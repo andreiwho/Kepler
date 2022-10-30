@@ -40,6 +40,6 @@ namespace ke
 	{
 	public:
 		RefPtr<GameWorld> Deserialize(RefPtr<JsonObject> pJsonData);
-		RefPtr<GameWorld> Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects);
+		RefPtr<GameWorld> Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects, u32 worldIndex = 0);
 	};
 }

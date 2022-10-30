@@ -7,6 +7,7 @@
 #include <entt/entt.hpp>
 #include <functional>
 #include "../Scripting/NativeComponentContainer.h"
+#include "GameWorld.gen.h"
 
 namespace ke
 {
@@ -30,10 +31,11 @@ namespace ke
 		u64 AccessorId = 0;
 	};
 
-	class GameWorld : public TWorld
+	reflected class GameWorld : public TWorld
 	{
 		friend class NativeComponentContainer;
 	public:
+		GameWorld() = default;
 		GameWorld(const String& InName);
 
 		~GameWorld();
@@ -43,6 +45,7 @@ namespace ke
 		GameEntityId CreateEntityDeferred();
 		void FinishCreatingEntity(GameEntityId entity);
 		TGameEntity& GetEntityFromId(GameEntityId Id);
+		GameEntityId GetEntityByUUID(uuid64 id);
 
 		void DestroyEntity(GameEntityId Entity);
 
@@ -237,9 +240,9 @@ namespace ke
 			Array<NativeComponentAccessors> m_NativeAccessors;
 			Map<typehash64, NativeComponentInfo> m_ComponentInfos;
 		};
-
 		static StaticState* m_StaticState;
 
+		Map<uuid64, GameEntityId> m_UUIDToEntityMap;
 		GameEntityId m_MainCamera{};
 	};
 }

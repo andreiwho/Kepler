@@ -4,10 +4,10 @@
 
 namespace ke
 {
-	class TEditorDetailsPanel
+	class EntityDetailsPanel
 	{
 	public:
-		TEditorDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId entity);
+		EntityDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId entity);
 		
 		void Draw();
 

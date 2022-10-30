@@ -147,6 +147,11 @@ namespace KEReflector
                 return true;
             }
 
+            if (!ProjectClasses.ContainsKey(inClass.Parent))
+            {
+                return false;
+            }
+
             return IsClassComponent(ProjectClasses[inClass.Parent]);
         }
 
@@ -197,7 +202,7 @@ namespace KEReflector
 
                         fileWriter.WriteLine("\t}");
 
-                        string setupComponent = IsClassComponent(entry) ? $"GameWorld::SetupNativeComponent<{entry.Name}();" : "";
+                        string setupComponent = IsClassComponent(entry) ? $"GameWorld::SetupNativeComponent<{entry.Name}>()" : "";
 
                         // Construct
                         fileWriter.WriteLine($@"
@@ -286,10 +291,16 @@ namespace KEReflector
             {
                 FillFieldMetadata(fileWriter, field);
 
-                string onChangeHandler = "";
-                if(field.MetadataSpecifiers.ContainsKey("onchange"))
+                string preChangeHandler = "";
+                if(field.MetadataSpecifiers.ContainsKey("prechange"))
                 {
-                    onChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["onchange"]}(*({field.Type}*)pValue);";
+                    preChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["prechange"]}(*({field.Type}*)pValue);";
+                }
+
+                string postChangeHandler = "";
+                if(field.MetadataSpecifiers.ContainsKey("postchange"))
+                {
+                    postChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["postchange"]}(*({field.Type}*)pValue);";
                 }
 
                 if (field.bIsRefPtr)
@@ -314,8 +325,7 @@ namespace KEReflector
         PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue;
-                {onChangeHandler}}}}});");
+            [](void* pHandler, void* pValue) {{ {preChangeHandler} (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; {postChangeHandler} }}}});");
                 }
             }
 
