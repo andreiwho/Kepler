@@ -31,6 +31,21 @@ namespace ke
 			});
 	}
 
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(id64 assetId) const
+	{
+		return Async([this, assetId]() -> RefPtr<AssetTreeNode>
+			{
+				for (auto& [name, pRoot] : m_Roots)
+				{
+					if (auto pNode = pRoot->FindNodeById(assetId))
+					{
+						return pNode;
+					}
+				}
+				return nullptr;
+			});
+	}
+
 	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNode(const String& rootPath) const
 	{
 		if (m_Roots.Contains(rootPath))

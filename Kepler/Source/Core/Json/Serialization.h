@@ -21,6 +21,7 @@ namespace ke
 		uint3,
 		uint4,
 		id64,
+		u64,
 		std::monostate
 	>;
 

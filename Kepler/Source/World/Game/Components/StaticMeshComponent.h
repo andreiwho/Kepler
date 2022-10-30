@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
 #include "EntityComponent.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
 #include "StaticMeshComponent.gen.h"
 
 namespace ke
@@ -22,10 +23,12 @@ namespace ke
 
 		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
 
-		reflected kmeta(postchange=StaticMeshPathChanged)
 		String StaticMeshPath{};
-
 		void StaticMeshPathChanged(const String& newPath);
+
+		reflected kmeta(postchange = OnMeshAssetChanged, assettype=StaticMesh)
+		AssetTreeNode* Asset {nullptr};
+		void OnMeshAssetChanged(AssetTreeNode* pAsset);
 
 	private:
 		RefPtr<StaticMesh> m_StaticMesh{};

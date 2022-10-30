@@ -132,53 +132,6 @@ namespace ke
 		GGlobalTimer = &mainTimer;
 		float displayInfoTime = 0.0f;
 
-		auto mainCamera = EntityHandle{ CurrentWorld, CurrentWorld->CreateCamera("Camera") };
-		mainCamera->SetLocation(float3(2.0f, -3.0f, 1));
-		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
-		RefPtr<ReflectedClass> refClass = GetReflectedClass<CameraComponent>();
-		if (refClass)
-		{
-			KEPLER_INFO(LogApp, "Found reflected class {}", refClass->GetName());
-			auto& field = refClass->GetFieldByName("RenderTargetName");
-			String* value = field.GetValueFor<String>(mainCamera.GetComponent<CameraComponent>());
-			KEPLER_INFO(LogApp, "Render target name for main camera is: {}", *value);
-		}
-
-		auto ambientLight = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("AmbientLight") };
-		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
-		pALC->SetColor(float3(0.3f, 0.3f, 0.3f));
-		ambientLight->SetLocation(float3(-2.0f, 0.0f, 0.0f));
-
-		auto dirLight = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity("Directional Light") };
-		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
-		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
-		pDLC->SetIntensity(1.0f);
-		dirLight->SetRotation(float3(-135, 0, 90.0f));
-		dirLight->SetLocation(float3(-3, 0.0f, 0.0f));
-
-		auto mesh = m_MeshLoader.LoadStaticMesh("Game://LP.fbx", true);
-		i32 x = 0;
-		i32 y = 0;
-		for (i32 idx = 0; idx < 10; ++idx)
-		{
-			if (x > 3)
-			{
-				x = 0;
-				y++;
-			}
-
-			auto entity = EntityHandle{ CurrentWorld, CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
-			entity.AddComponent<StaticMeshComponent>(mesh);
-			entity.AddComponent<MaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
-			entity.AddComponent<TestMovementComponent>();
-			entity->SetScale(float3(0.3f));
-			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
-			entity->SetLocation(float3(x, y, 0.0f));
-			entity.AddComponent<NativeScriptComponent>();
-
-			x++;
-		}
-
 		if (TPlatform* pPlatform = TPlatform::Get())
 		{
 			pPlatform->RegisterPlatformEventListener(this);

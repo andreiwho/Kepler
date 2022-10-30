@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "imgui_internal.h"
 #include "Platform/Window.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
 
 namespace ImGui
 {
@@ -88,7 +89,7 @@ namespace ke
 	bool TEditorElements::DragFloat3(CStr pLabel, float3& OutFloat, float Speed, float Min, float Max)
 	{
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 3, Speed, Min, Max, "%.3f", 1.0f);
-		
+
 		if (bValueChanged)
 		{
 			CheckWrappingCursor();
@@ -165,8 +166,59 @@ namespace ke
 			ImGui::BeginDisabled(true);
 		}
 
+		bool bBeganDragDropTarget = false;
 		switch (field.GetTypeHash())
 		{
+		case typehash64("AssetTreeNode"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			AssetTreeNode* pAsset = field.GetValueFor<AssetTreeNode>(pHandler);
+
+			const ImGuiPayload* pPayload = nullptr;
+
+			if (pAsset)
+			{
+				char outBuffer[TEditorElements::GMaxTextEditSymbols]{};
+				TEditorElements::EditText("asset", pAsset->GetPath().c_str(), outBuffer, false);
+			}
+			else
+			{
+				char outBuffer[TEditorElements::GMaxTextEditSymbols]{};
+				TEditorElements::EditText("asset", "No Asset Defined", outBuffer, false);
+			}
+
+			if (md.bEnableDragDrop)
+			{
+				bBeganDragDropTarget = ImGui::BeginDragDropTarget();
+			}
+
+			if (bBeganDragDropTarget)
+			{
+				String assetType{};
+				switch (md.FieldAssetType)
+				{
+				case EFieldAssetType::None:
+					ImGui::EndDragDropTarget();
+				case EFieldAssetType::Material:
+					assetType = "MATERIAL";
+					break;
+				case EFieldAssetType::StaticMesh:
+					assetType = "STATICMESH";
+					break;
+				default:
+					break;
+				}
+
+				if (pPayload = ImGui::AcceptDragDropPayload(assetType.c_str()))
+				{
+					if (AssetTreeNode** ppData = (AssetTreeNode**)pPayload->Data)
+					{
+						field.SetValueFor(pHandler, *ppData);
+					}
+				}
+			}
+		}
+		break;
 		case typehash64("float"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
@@ -225,6 +277,11 @@ namespace ke
 		if (field.GetMetadata().bReadOnly)
 		{
 			ImGui::EndDisabled();
+		}
+
+		if (bBeganDragDropTarget)
+		{
+			ImGui::EndDragDropTarget();
 		}
 
 		if (bNotBaseType)

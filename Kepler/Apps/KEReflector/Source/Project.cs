@@ -269,6 +269,17 @@ namespace KEReflector
                 {
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "EditSpeed", $"{specifier.Value}");
                 }
+
+                if(specifier.Key == "dragdrop")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bEnableDragDrop", "true");
+                }
+
+                if(specifier.Key == "assettype")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bEnableDragDrop", "true");
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "FieldAssetType", $"EFieldAssetType::{specifier.Value}");
+                }
             }
 
             if (field.bIsPointer)
@@ -294,15 +305,19 @@ namespace KEReflector
                 FillFieldMetadata(fileWriter, field);
 
                 string preChangeHandler = "";
+                string preChangeHandlerPtr = "";
                 if(field.MetadataSpecifiers.ContainsKey("prechange"))
                 {
                     preChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["prechange"]}(*({field.Type}*)pValue);";
+                    preChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["prechange"]}(({field.Type}*)pValue);";
                 }
 
                 string postChangeHandler = "";
+                string postChangeHandlerPtr = "";
                 if(field.MetadataSpecifiers.ContainsKey("postchange"))
                 {
                     postChangeHandler = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["postchange"]}(*({field.Type}*)pValue);";
+                    postChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["postchange"]}(({field.Type}*)pValue);";
                 }
 
                 if (field.bIsRefPtr)
@@ -319,7 +334,7 @@ namespace KEReflector
         PushField(""{field.DisplayName}"", ReflectedField{{ typehash64(""{field.Type}""), 
             {field.DisplayName}Metadata,
             [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
+            [](void* pHandler, void* pValue) {{ {preChangeHandlerPtr} (({entry.Name}*)pHandler)->{field.Name} = ({field.Type}*)pValue; {postChangeHandlerPtr} }}}});");
                 }
                 else
                 {

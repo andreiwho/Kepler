@@ -5,13 +5,24 @@
 
 namespace ke
 {
+	enum class EFieldAssetType
+	{
+		None,
+		All,
+		Material,
+		StaticMesh
+	};
+
 	struct FieldMetadata
 	{
+		EFieldAssetType FieldAssetType{ EFieldAssetType::None };
+
 		bool bReadOnly : 1 = false;
 		bool bIsPointer : 1 = false;
 		bool bIsRefPtr : 1 = false;
 		bool bIsEnum : 1 = false;
 		bool bHideInDetails : 1 = false;
+		bool bEnableDragDrop : 1 = false;
 
 		float EditSpeed = 1.0f;
 	};

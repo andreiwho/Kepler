@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer/World/Material.h"
 #include "EntityComponent.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
 #include "MaterialComponent.gen.h"
 
 namespace ke
@@ -22,9 +23,12 @@ namespace ke
 
 		inline bool UsesPrepass() const { return Material ? Material->UsesPrepass() : false; }
 
-		reflected kmeta(postchange=OnMaterialPathChanged)
 		String MaterialAssetPath;
 		void OnMaterialPathChanged(const String& newPath);
+		
+		reflected kmeta(postchange = OnMaterialAssetChanged, assettype=Material)
+		AssetTreeNode* Asset {nullptr};
+		void OnMaterialAssetChanged(AssetTreeNode* newAsset);
 
 	private:
 		RefPtr<TMaterial> Material;

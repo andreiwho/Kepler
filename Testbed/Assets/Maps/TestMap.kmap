@@ -1,0 +1,99 @@
+{
+    "MainWorld": {
+        "Light": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Light"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 4228608813631198927
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 4.462392330169678,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -45.769622802734375,
+                        "y": -0.0,
+                        "z": 0.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.9999997019767761,
+                        "y": 0.9999999403953552,
+                        "z": 0.9999999403953552
+                    }
+                }
+            },
+            "DirectionalLightComponent": {
+                "TypeHash": 8741610470154774588,
+                "Color": {
+                    "TypeHash": 11792389323166860578,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Intensity": 1.0
+            },
+            "AmbientLightComponent": {
+                "TypeHash": 15337705873589087728,
+                "Color": {
+                    "TypeHash": 11792389323166860578,
+                    "x": 0.30000001192092896,
+                    "y": 0.30000001192092896,
+                    "z": 0.30000001192092896
+                }
+            }
+        },
+        "NewEntity": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "NewEntity"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 2508954615898958301
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "Asset": 8457576023565458371
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "Asset": 9877952500696371162
+            }
+        }
+    }
+}

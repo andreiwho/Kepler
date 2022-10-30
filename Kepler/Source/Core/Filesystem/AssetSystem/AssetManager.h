@@ -12,6 +12,7 @@ namespace ke
         AssetManager();
 
         TFuture<RefPtr<AssetTreeNode>> FindAssetNode(const String& path) const;
+        TFuture<RefPtr<AssetTreeNode>> FindAssetNode(id64 assetId) const;
         static AssetManager* Get() { return Instance; }
 
         RefPtr<AssetTreeNode_Directory> GetRootNode(const String& rootPath) const;

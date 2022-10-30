@@ -133,6 +133,8 @@ namespace ke
 		bool m_bHasDirectories = false;
 	};
 
+	using Asset = AssetTreeNode;
+
 	class AssetTreeNode_Directory : public AssetTreeNode
 	{
 	public:
@@ -204,13 +206,16 @@ namespace ke
 	class AssetTreeNode_PlainAsset: public AssetTreeNode
 	{
 	public:
-		AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath)
-			: AssetTreeNode(type, pParent, unresolvedPath)
-		{}
+		const String& GetExtension() const;
+
+		AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath);
 
 		static RefPtr<AssetTreeNode_PlainAsset> New(AssetTreeNode* pParent, const String& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_PlainAsset>(EAssetNodeType::PlainAsset, pParent, unresolvedPath);
 		}
+
+	private:
+		String m_Extension{};
 	};
 }

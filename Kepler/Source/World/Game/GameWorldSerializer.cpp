@@ -9,6 +9,7 @@
 #include "Core/Json/Serialization.h"
 #include "Async/Async.h"
 #include "../WorldRegistry.h"
+#include "Core/Filesystem/AssetSystem/AssetManager.h"
 
 
 namespace ke
@@ -48,6 +49,14 @@ namespace ke
 				GET_FIELD_VALUE(id64);
 				GET_FIELD_VALUE(typehash64);
 				GET_FIELD_VALUE(uuid64);
+			case typehash64("AssetTreeNode"):
+			{
+				AssetTreeNode* pNode = field.GetValueFor<AssetTreeNode>(pObject);
+				id64 id = pNode->GetUUID();
+				outInfo.Data = id;
+				outInfo.TypeHash = typehash64("id64");
+			}
+			break;
 			default:
 			{
 				// Get subfields
@@ -163,6 +172,12 @@ namespace ke
 			case typehash64("String"):
 				outInfo.Data = pField->GetValueAs<String>();
 				break;
+			case typehash64("u64"):
+				outInfo.Data = pField->GetValueAs<u64>();
+				break;
+			case typehash64("id64"):
+				outInfo.Data = pField->GetValueAs<id64>();
+				break;
 			case typehash64("i32"):
 				outInfo.Data = pField->GetValueAs<i32>();
 				break;
@@ -245,6 +260,34 @@ namespace ke
 				SET_FIELD_VALUE(id64);
 				SET_FIELD_VALUE(typehash64);
 				SET_FIELD_VALUE(uuid64);
+			case typehash64("u64"):
+			{
+				switch (field.GetTypeHash())
+				{
+				case typehash64("u64"):
+					field.SetValueFor(pHandler, &std::get<u64>(fieldInfo.Data));
+					break;
+				case typehash64("id64"):
+				{
+					id64 id = std::get<u64>(fieldInfo.Data);
+					field.SetValueFor(pHandler, &id);
+				}
+				break;
+				case typehash64("AssetTreeNode"):
+				{
+					id64 assetUUID = std::get<u64>(fieldInfo.Data);
+					auto pNode = Await(AssetManager::Get()->FindAssetNode(assetUUID));
+					if (pNode)
+					{
+						field.SetValueFor(pHandler, pNode.Raw());
+					}
+				}
+				break;
+				default:
+					break;
+				}
+			}
+			break;
 			default:
 				bIsOfBaseType = false;
 				break;

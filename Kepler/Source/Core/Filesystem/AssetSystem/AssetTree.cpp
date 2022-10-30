@@ -128,6 +128,22 @@ namespace ke
 		}
 	}
 
+
+	const String& AssetTreeNode_PlainAsset::GetExtension() const
+	{
+		return m_Extension;
+	}
+
+	AssetTreeNode_PlainAsset::AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath) 
+		: AssetTreeNode(type, pParent, unresolvedPath)
+	{
+		std::filesystem::path path{ GetPath_Resolved() };
+		if (path.has_extension())
+		{
+			m_Extension = path.extension().string();
+		}
+	}
+
 	void AssetTreeNode::SortChildren(EAssetSortFilter filter)
 	{
 		switch (filter.Value)

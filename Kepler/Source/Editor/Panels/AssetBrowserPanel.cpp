@@ -116,6 +116,7 @@ namespace ke
 		String visibleLabel = fmt::format("##{}", label.data());
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, m_ItemRounding * 3);
+
 		if (ImGui::Selectable(visibleLabel.c_str(), m_SelectionIndexCache[itemIndex], ImGuiSelectableFlags_AllowDoubleClick, ImVec2(m_IconSize + m_IconPadding * 2, m_IconSize)))
 		{
 			ZeroSelectionCache();
@@ -130,7 +131,6 @@ namespace ke
 
 		ImGui::SetCursorPos(ImVec2(cursorPos.x + m_IconPadding * 0.5f, cursorPos.y));
 		ImGui::Image((ImTextureID)icon->GetNativeHandle(), ImVec2(m_IconSize, m_IconSize));
-
 
 		const i32 textSize = (i32)ImGui::CalcTextSize(label.data()).x;
 		i32 itemSize = m_IconSize + m_IconPadding;
@@ -372,6 +372,9 @@ namespace ke
 				{
 					std::string_view view(entry->GetName());
 					ImGui::TableSetColumnIndex(colIndex);
+
+					bool bAllowDragSource = false;
+
 					switch (entry->GetNodeType())
 					{
 					case EAssetNodeType::Directory:
@@ -389,6 +392,37 @@ namespace ke
 						DrawAsset(view, itemIndex, m_UnknownIcon);
 					}
 					break;
+					}
+					bAllowDragSource = ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID);
+
+					if (bAllowDragSource)
+					{							
+						const AssetTreeNode* pHandle = entry.Raw();
+						
+						std::string_view payloadType = "";
+						if (pHandle->IsPlainAsset())
+						{
+							auto pAsset = RefCast<AssetTreeNode_PlainAsset>(entry);
+							std::string_view extension = pAsset->GetExtension();
+							if (extension == ".kmat")
+							{
+								payloadType = "MATERIAL";
+							}
+							if (extension == ".fbx")
+							{
+								payloadType = "STATICMESH";
+							}
+						}
+						else if (pHandle->IsDirectory())
+						{
+							payloadType = "DIRECTORY";
+						}
+						
+						if (ImGui::SetDragDropPayload(payloadType.data(), &pHandle, sizeof(pHandle), ImGuiCond_Once))
+						{
+							ImGui::Text(entry->GetPath().c_str());
+						}
+						ImGui::EndDragDropSource();
 					}
 
 					if (++colIndex > (widgetsPerRow - 1))

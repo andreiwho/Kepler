@@ -1,5 +1,6 @@
 #include "StaticMeshComponent.h"
 #include "Tools/MeshLoader.h"
+#include "Core/Filesystem/AssetSystem/AssetManager.h"
 
 namespace ke
 {
@@ -7,10 +8,7 @@ namespace ke
 	StaticMeshComponent::StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh)
 		:	m_StaticMesh(InStaticMesh)
 	{
-		if (m_StaticMesh->IsLoadedFromAsset())
-		{
-			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
-		}
+		SetStaticMesh(InStaticMesh);
 	}
 
 	StaticMeshComponent::StaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer)
@@ -36,7 +34,13 @@ namespace ke
 		if (m_StaticMesh->IsLoadedFromAsset())
 		{
 			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
+
+			if (!Asset)
+			{
+				Asset = Await(AssetManager::Get()->FindAssetNode(StaticMeshPath));
+			}
 		}
+
 	}
 
 	void StaticMeshComponent::StaticMeshPathChanged(const String& newPath)
@@ -47,4 +51,12 @@ namespace ke
 		}
 	}
 
+	void StaticMeshComponent::OnMeshAssetChanged(AssetTreeNode* pAsset)
+	{
+		if (pAsset)
+		{
+			StaticMeshPath = pAsset->GetPath();
+			StaticMeshPathChanged(StaticMeshPath);
+		}
+	}
 }
