@@ -412,6 +412,10 @@ namespace ke
 							{
 								payloadType = "STATICMESH";
 							}
+							if (extension == ".kmap")
+							{
+								payloadType = "MAP";
+							}
 						}
 						else if (pHandle->IsDirectory())
 						{

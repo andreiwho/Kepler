@@ -96,6 +96,9 @@ namespace ke
 
 		reflected RefPtr<GameWorld> CurrentWorld;
 
+		reflected kmeta(readonly, assettype = Map)
+		AssetTreeNode* WorldAsset{};
+
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;

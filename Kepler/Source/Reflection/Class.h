@@ -9,6 +9,7 @@ namespace ke
 	{
 		None,
 		All,
+		Map,
 		Material,
 		StaticMesh
 	};

@@ -194,10 +194,9 @@ namespace ke
 
 			if (bBeganDragDropTarget)
 			{
-				String assetType{};
+				StringView assetType{};
 				switch (md.FieldAssetType)
 				{
-				case EFieldAssetType::None:
 					ImGui::EndDragDropTarget();
 				case EFieldAssetType::Material:
 					assetType = "MATERIAL";
@@ -205,11 +204,16 @@ namespace ke
 				case EFieldAssetType::StaticMesh:
 					assetType = "STATICMESH";
 					break;
+				case EFieldAssetType::Map:
+					assetType = "MAP";
+					break;
+				case EFieldAssetType::None:
 				default:
+					ImGui::EndDragDropTarget();
 					break;
 				}
 
-				if (pPayload = ImGui::AcceptDragDropPayload(assetType.c_str()))
+				if (pPayload = ImGui::AcceptDragDropPayload(assetType.data()))
 				{
 					if (AssetTreeNode** ppData = (AssetTreeNode**)pPayload->Data)
 					{

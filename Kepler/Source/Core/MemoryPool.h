@@ -12,6 +12,7 @@ namespace ke
 		class TMemoryPool* Pool;
 	};
 
+#ifndef USE_PMR_ALLOCATORS
 	// Pool resource manages single contiguous block of memory which exists and can be resized and is not thread safe.
 	// Though this class doesn't handle free lists, so should be used as a backing resource for the PoolAllocator
 	class PoolResource
@@ -74,6 +75,10 @@ namespace ke
 		FreeList m_FreeList{};
 		std::mutex m_Mutex{};
 	};
+#else
+	using PoolResource = std::pmr::monotonic_buffer_resource;
+	using PoolAllocator = std::pmr::synchronized_pool_resource;
+#endif
 
 	class TMemoryPool
 	{

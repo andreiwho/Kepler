@@ -53,6 +53,64 @@
                 }
             }
         },
+        "Camera": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Camera"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 15147437831191177888
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -4.446695327758789,
+                        "z": 0.31387972831726074
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -0.0,
+                        "z": 0.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "CameraComponent": {
+                "TypeHash": 13209209574413295037,
+                "Camera": {
+                    "TypeHash": 846271567112447840,
+                    "FieldOfView": 45.0,
+                    "Width": 1552.0,
+                    "Height": 687.0,
+                    "NearClip": 0.10000000149011612,
+                    "FarClip": 100.0,
+                    "Target": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -4.371138828673793e-8,
+                        "y": -3.446695327758789,
+                        "z": 0.31387972831726074
+                    },
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -4.446695327758789,
+                        "z": 0.31387972831726074
+                    }
+                },
+                "RenderTargetName": "MeshPassTarget"
+            }
+        },
         "NewEntity": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
@@ -93,6 +151,12 @@
             "MaterialComponent": {
                 "TypeHash": 15459567697303271471,
                 "Asset": 9877952500696371162
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
             }
         }
     }

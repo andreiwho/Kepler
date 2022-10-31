@@ -23,6 +23,7 @@ target_compile_definitions("Kepler"
 #  FORCE_REPORT_LIVE_OBJECTS      # Uncomment if you want to see live DXGI objects on shutdown   
   $<$<CONFIG:Debug>:ENABLE_PROFILING>
   $<$<CONFIG:RelWithDebInfo>:ENABLE_PROFILING>
+  USE_PMR_ALLOCATORS
 
   # This is for release builds only, disables windows console window
   $<$<CONFIG:Release>:RELEASE_BUILD>

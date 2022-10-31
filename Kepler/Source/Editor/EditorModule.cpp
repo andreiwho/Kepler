@@ -439,6 +439,24 @@ namespace ke
 				(ImTextureID)pViewportSampler->GetNativeHandle(),
 				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("MAP"))
+				{
+					if (AssetTreeNode** ppWorldData = (AssetTreeNode**)pPayload->Data)
+					{
+						GameWorldDeserializer deserializer;
+						RefPtr<GameWorld> pWorld = deserializer.Deserialize(JsonDeserializer{
+							Await(TFileUtils::ReadTextFileAsync((*ppWorldData)->GetPath()))
+							}.GetRootNode()
+						);
+						Engine::Get()->WorldAsset = *ppWorldData;
+						Engine::Get()->SetMainWorld(pWorld);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			if (Engine::Get()->CurrentWorldState == EWorldUpdateKind::Edit)
 			{
 				DrawGizmo();
@@ -448,6 +466,9 @@ namespace ke
 			}
 		}
 		ImGui::End();
+
+		
+
 		ImGui::PopStyleVar();
 	}
 

@@ -7,6 +7,7 @@
 #include <atomic>
 #include <stdexcept>
 #include <xhash>
+#include <string_view>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,6 +36,7 @@ namespace ke
 	using String = std::string;
 	using TWideString = std::wstring;
 	using TPath = std::filesystem::path;
+	using StringView = std::string_view;
 
 	using CStr = const char*;
 	using WStr = const wchar_t*;

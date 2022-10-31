@@ -257,9 +257,33 @@ namespace ke
 				SET_FIELD_VALUE(uint2);
 				SET_FIELD_VALUE(uint3);
 				SET_FIELD_VALUE(uint4);
-				SET_FIELD_VALUE(id64);
 				SET_FIELD_VALUE(typehash64);
 				SET_FIELD_VALUE(uuid64);
+			case typehash64("id64"):
+			{
+				switch (field.GetTypeHash())
+				{
+				case typehash64("id64"):
+				{
+					id64 id = std::get<id64>(fieldInfo.Data);
+					field.SetValueFor(pHandler, &id);
+				}
+				break;
+				case typehash64("AssetTreeNode"):
+				{
+					id64 assetUUID = std::get<id64>(fieldInfo.Data);
+					auto pNode = Await(AssetManager::Get()->FindAssetNode(assetUUID));
+					if (pNode)
+					{
+						field.SetValueFor(pHandler, pNode.Raw());
+					}
+				}
+				break;
+				default:
+					break;
+				}
+			}
+			break;
 			case typehash64("u64"):
 			{
 				switch (field.GetTypeHash())
