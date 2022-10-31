@@ -32,6 +32,7 @@
 #include "Renderer/Subrenderer/Subrenderer2D.h"
 #include "World/Camera/CameraComponent.h"
 #include "World/Game/GameWorldSerializer.h"
+#include "Platform/Input.h"
 
 namespace ke
 {
@@ -226,7 +227,7 @@ namespace ke
 
 		switch (newUpdateKind)
 		{
-		case ke::EWorldUpdateKind::Play:
+		case EWorldUpdateKind::Play:
 		{
 			GameWorldSerializer serializer{ CurrentWorld };
 			auto serializedData = serializer.Serialize();
@@ -235,7 +236,7 @@ namespace ke
 			SetMainWorld(pPlayWorld);
 		}
 		break;
-		case ke::EWorldUpdateKind::Edit:
+		case EWorldUpdateKind::Edit:
 		{
 			if (CurrentWorld)
 			{
@@ -315,6 +316,15 @@ namespace ke
 		if (event.Key == EKeyCode::Escape && CurrentWorldState == EWorldUpdateKind::Play)
 		{
 			m_bExitPlayRequested = true;
+		}
+
+		if (TInput::GetKey(EKeyCode::LeftAlt))
+		{
+			if (event.Key == EKeyCode::P)
+			{
+				OnCurrentWorldStateChange(EWorldUpdateKind::Play);
+				CurrentWorldState = EWorldUpdateKind::Play;
+			}
 		}
 		return false;
 	}
