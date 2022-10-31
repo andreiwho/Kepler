@@ -5,6 +5,7 @@
 #include "World/Game/GameWorld.h"
 #include "../LowLevelRenderer.h"
 #include "../Subrenderer/Subrenderer.h"
+#include "WorldRenderer.gen.h"
 
 namespace ke
 {
@@ -20,15 +21,21 @@ namespace ke
 		Overlay
 	};
 
-	class WorldRenderer : public IntrusiveRefCounted
+	reflected class WorldRenderer : public IntrusiveRefCounted
 	{
+		static WorldRenderer* Instance;
 	public:
+		static WorldRenderer* Get() { return Instance; }
+
 		enum EReservedSlots
 		{
 			RS_Camera = 0,
 			RS_Light = 1,
 			RS_User,
 		};
+
+		reflected EFormat MeshPassBufferFormat = EFormat::R11G11B10_FLOAT;
+		reflected EFormat PrePassDepthBufferFormat = EFormat::D24_UNORM_S8_UINT;
 
 		WorldRenderer();
 		~WorldRenderer();
@@ -98,7 +105,7 @@ namespace ke
 		void CollectRenderableViews();
 		void PrePass(RefPtr<ICommandListImmediate> pImmCtx);
 		void MeshPass(RefPtr<ICommandListImmediate> pImmCtx);
-		void FlushPass(RefPtr<ICommandListImmediate> pImmCtx);
+		void TonemappingAndFlushPass(RefPtr<ICommandListImmediate> pImmCtx);
 
 	private:
 		TViewport2D m_CurrentViewport{};

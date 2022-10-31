@@ -5,6 +5,12 @@
 
 namespace ke
 {
+	reflected enum class ECameraProjectionMode
+	{
+		Perspective,
+		Orthographic,
+	};
+
 	reflected class MathCamera
 	{
 	public:
@@ -34,16 +40,18 @@ namespace ke
 		static float3 ToEuler(float3 Vector);
 
 	public:
+		reflected ECameraProjectionMode Projection{ECameraProjectionMode::Perspective};
+
 		reflected kmeta(editspeed=0.01f)
-		float FieldOfView{};
+		float FieldOfView{45.0f};
 		reflected kmeta(editspeed=0.01f)
-		float Width{};
+		float Width{1024};
 		reflected kmeta(editspeed=0.01f)
-		float Height{};
+		float Height{1024};
 		reflected kmeta(editspeed=0.01f)
-		float NearClip{};
+		float NearClip{0.1f};
 		reflected kmeta(editspeed=0.01f)
-		float FarClip{};
+		float FarClip{100.0f};
 		reflected kmeta(hideindetails)
 		float3 Location{};
 		reflected kmeta(hideindetails)

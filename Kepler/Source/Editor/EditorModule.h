@@ -62,6 +62,8 @@ namespace ke
 		virtual void PostWorldInit() override;
 
 	private:
+		void LoadEditorSettings();
+		void DumpEditorSettings();
 		void LoadEditorViewportIcons();
 		void SetupStyle();
 		void DrawMenuBar();
@@ -106,10 +108,6 @@ namespace ke
 		bool m_bIsGizmoHovered = false;
 		bool m_bIsGizmoUsed = false;
 
-		float m_EditorCameraSensitivity = 32;
-		float m_EditorCameraSpeed = 2.0f;
-		WorldTransform m_CameraTransform{};
-
 		SharedPtr<TLogPanel> m_LogPanel;
 		SharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
 
@@ -131,5 +129,10 @@ namespace ke
 		RefPtr<ITextureSampler2D> m_AmbientLightIcon;
 		RefPtr<ITextureSampler2D> m_DirectionalLightIcon;
 		float m_MaxViewportIconScreenCoord = 0.9f;
+
+	public:
+		WorldTransform EditorCameraTransform{};
+		float EditorCameraSensitivity = 32;
+		float EditorCameraSpeed = 2.0f;
 	};
 }

@@ -41,7 +41,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void TRenderTargetGroup::Resize(u32 width, u32 height, EFormat format, bool bAllowCPURead)
 	{
-		if (m_Width != width || m_Height != height || m_Format.Value != format)
+		if (m_Width != width || m_Height != height || m_Format != format)
 		{
 			m_Width = width > 0 ? width : 1;
 			m_Height = height > 0 ? height : 1;
@@ -91,7 +91,7 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 		if (!m_RenderTargets.Contains(name))
 		{
-			CHECK(width != UINT32_MAX && height != UINT32_MAX && format.Value != EFormat::Unknown && layers > 0);
+			CHECK(width != UINT32_MAX && height != UINT32_MAX && format != EFormat::Unknown && layers > 0);
 			m_RenderTargets[name] = TRenderTargetGroup::New(width, height, format, layers);
 		}
 
@@ -118,7 +118,7 @@ namespace ke
 		auto newHeight = height > 0 ? height : 1;
 		if (!m_DepthTargets.Contains(name))
 		{
-			CHECK(width != UINT32_MAX && height != UINT32_MAX && format.Value != EFormat::Unknown);
+			CHECK(width != UINT32_MAX && height != UINT32_MAX && format != EFormat::Unknown);
 			EImageUsage Flags = EImageUsage::DepthTarget;
 			if (bSampled)
 			{

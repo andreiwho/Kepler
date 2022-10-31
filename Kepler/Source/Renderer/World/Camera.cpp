@@ -49,7 +49,14 @@ namespace ke
 
 	matrix4x4 MathCamera::GenerateProjectionMatrix() const
 	{
-		return glm::perspectiveFovRH_ZO(glm::radians(FieldOfView), (float)Width, (float)Height, NearClip, FarClip);
+		switch (Projection)
+		{
+		case ke::ECameraProjectionMode::Perspective:
+			return glm::perspectiveFovRH_ZO(glm::radians(FieldOfView), (float)Width, (float)Height, NearClip, FarClip);
+		case ke::ECameraProjectionMode::Orthographic:
+			return glm::orthoRH_ZO(-Width * 0.5f, Width * 0.5f, Height * 0.5f, -Height * 0.5f, NearClip, FarClip);
+		}
+		return {};
 	}
 
 }

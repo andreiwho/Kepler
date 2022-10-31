@@ -4,6 +4,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/prettywriter.h>
+#include "Reflection/ReflectionDatabase.h"
 
 #ifdef GetObject
 #undef GetObject
@@ -190,6 +191,13 @@ namespace ke
 	{
 		JsonObject& object = CreateObject(key, typeHash);
 		object.m_Value = value;
+		return object;
+	}
+
+	JsonObject& JsonObject::SerializeReflectedObject(const String& key, typehash64 typeHash, const void* pObject)
+	{
+		JsonObject& object = CreateObject(key, typeHash);
+		// todo...
 		return object;
 	}
 

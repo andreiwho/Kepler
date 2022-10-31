@@ -17,7 +17,7 @@ namespace KEReflector
         public bool bIsEnumClass { get; set; } = false;
         // Change to Dictionary, to be able to pass values after '='
         public Dictionary<string, string> MetaSpecifiers { get; set; } = new();
-        public List<string> EnumEntries { get; set; } = new List<string>();
+        public Dictionary<string, int> EnumEntries { get; set; } = new();
     }
 
     public class ParsedHeader
@@ -114,6 +114,7 @@ namespace KEReflector
             ParsePointer,
             ParseName,
             ParseEnumValues,
+            ParseEnumValueNumber,
             CheckHasParent,
             ParseParent,
             Finished,
@@ -125,6 +126,7 @@ namespace KEReflector
             EParseStage currentStage = EParseStage.None;
             ParsedToken currentToken = null;
             KeyValuePair<string, string> currentMetaSpecifier = new();
+            KeyValuePair<string, int> currentEnumValue = new();
 
             foreach (var token in tokens)
             {
@@ -303,19 +305,47 @@ namespace KEReflector
 
                         if (token == ",")
                         {
+                            if(currentEnumValue.Key != null)
+                            {
+                                currentToken.EnumEntries.Add(currentEnumValue.Key, currentEnumValue.Value);
+                                currentEnumValue = new();
+                            }
+                            continue;
+                        }
+
+                        if(token == "=")
+                        {
+                            currentStage = EParseStage.ParseEnumValueNumber;
                             continue;
                         }
 
                         if (token == "}")
                         {
+                            if (currentEnumValue.Key != null)
+                            {
+                                currentToken.EnumEntries.Add(currentEnumValue.Key, currentEnumValue.Value);
+                                currentEnumValue = new();
+                            }
                             currentStage = EParseStage.None;
                             result.Add(currentToken);
                             currentToken = null;
                             continue;
                         }
 
-                        currentToken.EnumEntries.Add(token);
+                        currentEnumValue = new(token, -1);
 
+                        break;
+                    case EParseStage.ParseEnumValueNumber:
+                        int value;
+                        if(int.TryParse(token, out value))
+                        {
+                            if(currentEnumValue.Key != null)
+                            {
+                                currentEnumValue = new(currentEnumValue.Key, value);
+                                currentStage = EParseStage.ParseEnumValues;
+                                continue;
+                            }
+                        }
                         break;
                 }
             end:

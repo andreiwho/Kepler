@@ -362,11 +362,15 @@ namespace KEReflector
                 return;
             }
 
-            int index = 0;
+            int lastEnumValue = 0;
             foreach (var enumValue in entry.EnumValues)
             {
-                fileWriter.WriteLine($"\t\tPushEnumValue(\"{enumValue}\", {index});");
-                index++;
+                if(enumValue.Value != -1)
+                {
+                    lastEnumValue = enumValue.Value;
+                }
+                fileWriter.WriteLine($"\t\tPushEnumValue(\"{enumValue.Key}\", {lastEnumValue});");
+                lastEnumValue++;
             }
         }
 

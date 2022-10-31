@@ -16,7 +16,7 @@ namespace ke
 			CD3D11_SHADER_RESOURCE_VIEW_DESC Desc(
 				MyImage->GetImage(),
 				D3D11_SRV_DIMENSION_TEXTURE2D,
-				(DXGI_FORMAT)MyImage->GetFormat().Value,
+				(DXGI_FORMAT)MyImage->GetFormat(),
 				MipLevel,
 				1,
 				ArrayLayer,

@@ -17,7 +17,7 @@ namespace ke
 		Desc.MipLevels = InMipLevels;
 		Desc.ArraySize = InArraySize;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
-		Desc.Format = static_cast<DXGI_FORMAT>(InFormat.Value);
+		Desc.Format = static_cast<DXGI_FORMAT>(InFormat);
 		Desc.BindFlags = 0;
 		Desc.SampleDesc = { 1, 0 };
 

@@ -57,6 +57,7 @@ namespace ke
 		JsonObject& CreateObject(const String& key, typehash64 typeHash);
 		void Write(JsonSerializableType&& value);
 		JsonObject& SerializeSubObject(const String& key, typehash64 typeHash, const JsonSerializableType& value);
+		JsonObject& SerializeReflectedObject(const String& key, typehash64 typeHash, const void* pObject);
 
 		inline bool IsRoot() const
 		{

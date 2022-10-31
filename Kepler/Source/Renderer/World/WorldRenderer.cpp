@@ -15,10 +15,14 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogWorldRenderer, All);
 
+	WorldRenderer* WorldRenderer::Instance;
+
 	//////////////////////////////////////////////////////////////////////////
 	WorldRenderer::WorldRenderer()
 		: m_LLR(LowLevelRenderer::Get())
 	{
+		Instance = this;
+		
 		if (!bInitialized)
 		{
 			CHECK(IsRenderThread());
@@ -106,7 +110,7 @@ namespace ke
 		RenderSubrenderers<ESubrendererOrder::Overlay>(pImmCtx);
 
 		// Tonemapping
-		FlushPass(pImmCtx);
+		TonemappingAndFlushPass(pImmCtx);
 	}
 
 	void WorldRenderer::UpdateRendererMainThread(float deltaTime)
@@ -201,7 +205,7 @@ namespace ke
 		auto pDepthTarget = RenderTargetRegistry::Get()->GetDepthTarget("PrePassDepth",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
-			EFormat::D24_UNORM_S8_UINT,
+			PrePassDepthBufferFormat,
 			false);
 
 		pImmCtx->StartDrawingToRenderTargets(nullptr, pDepthTarget);
@@ -255,7 +259,7 @@ namespace ke
 			"MeshPassTarget",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
-			EFormat::R8G8B8A8_UNORM,
+			MeshPassBufferFormat,
 			LowLevelRenderer::m_SwapChainFrameCount);
 		RefPtr<IRenderTarget2D> pCurTarget = renderTargetGroup->GetRenderTargetAtArrayLayer(frameIdx);
 
@@ -305,7 +309,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void WorldRenderer::FlushPass(RefPtr<ICommandListImmediate> pImmCtx)
+	void WorldRenderer::TonemappingAndFlushPass(RefPtr<ICommandListImmediate> pImmCtx)
 	{
 		KEPLER_PROFILE_SCOPE();
 		// For now just flush the mesh pass image
@@ -316,7 +320,7 @@ namespace ke
 			"EditorViewport",
 			m_CurrentViewport.Width,
 			m_CurrentViewport.Height,
-			EFormat::R8G8B8A8_UNORM,
+			/*EFormat::R8G8B8A8_UNORM*/ MeshPassBufferFormat,
 			LowLevelRenderer::m_SwapChainFrameCount);
 
 		const u32 frameIndex = m_LLR->GetFrameIndex();

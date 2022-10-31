@@ -39,6 +39,8 @@
 #include "World/Game/GameWorldSerializer.h"
 #include "Core/Filesystem/FileUtils.h"
 #include "Core/App.h"
+#include "Core/Json/Serialization.h"
+#include "Renderer/World/WorldRenderer.h"
 
 namespace ke
 {
@@ -181,10 +183,16 @@ namespace ke
 		bool bOpen = ImGui::Begin("Engine Info");
 		if (bOpen)
 		{
-			auto pClass = GetReflectedClass<Engine>();
-			if (pClass)
+			auto pEngineClass = GetReflectedClass<Engine>();
+			if (pEngineClass)
 			{
-				TEditorElements::DrawReflectedObjectFields("ENGINE", pClass->GetClassId(), Engine::Get());
+				TEditorElements::DrawReflectedObjectFields("ENGINE", pEngineClass->GetClassId(), Engine::Get());
+			}
+
+			auto pRendererClass = GetReflectedClass<WorldRenderer>();
+			if (pRendererClass)
+			{
+				TEditorElements::DrawReflectedObjectFields("RENDERER", pRendererClass->GetClassId(), WorldRenderer::Get());
 			}
 			ImGui::End();
 		}
@@ -274,6 +282,32 @@ namespace ke
 		}
 
 		LoadEditorViewportIcons();
+	}
+
+	void EditorModule::LoadEditorSettings()
+	{
+		/*JsonSerializer serializer{};
+		JsonObject& rootNode = serializer.CreateRootObject("Editor");
+
+		if (auto pClass = GetReflectedClass<EditorModule>())
+		{
+			for (const auto& [name, field] : pClass->GetFields())
+			{
+				switch (field.GetTypeHash())
+				{
+					switch (field.GetTypeHash())
+					{
+					default:
+						break;
+					}
+				}
+			}
+		}*/
+	}
+
+	void EditorModule::DumpEditorSettings()
+	{
+
 	}
 
 	void EditorModule::LoadEditorViewportIcons()
@@ -573,12 +607,12 @@ namespace ke
 		ImGui::Text("Sensitivity");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##Sensitivity", &m_EditorCameraSensitivity, 0.1f, 128.0f);
+		ImGui::DragFloat("##Sensitivity", &EditorCameraSensitivity, 0.1f, 128.0f);
 		ImGui::SameLine(0.0f, 32.0f);
 		ImGui::Text("Movement Speed");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##MovementSpeed", &m_EditorCameraSpeed, 0.1f, 128.0f);
+		ImGui::DragFloat("##MovementSpeed", &EditorCameraSpeed, 0.1f, 128.0f);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -724,7 +758,7 @@ namespace ke
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
 			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 
-			camera->SetTransform(m_CameraTransform);
+			camera->SetTransform(EditorCameraTransform);
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
@@ -735,8 +769,8 @@ namespace ke
 			ImGuiIO& IO = ImGui::GetIO();
 			auto mouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
 			float3 rotation = camera->GetRotation();
-			rotation.z -= mouseDelta.X * deltaTime * m_EditorCameraSensitivity;
-			rotation.x -= mouseDelta.Y * deltaTime * m_EditorCameraSensitivity;
+			rotation.z -= mouseDelta.X * deltaTime * EditorCameraSensitivity;
+			rotation.x -= mouseDelta.Y * deltaTime * EditorCameraSensitivity;
 			camera->SetRotation(rotation);
 
 			auto location = camera->GetLocation();
@@ -749,32 +783,32 @@ namespace ke
 				// First person camera
 				if (TInput::GetKey(EKeyCode::W))
 				{
-					location += camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetForwardVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::S))
 				{
-					location -= camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetForwardVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::A))
 				{
-					location -= camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetRightVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::D))
 				{
-					location += camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetRightVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::E))
 				{
-					location += camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetUpVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::Q))
 				{
-					location -= camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetUpVector() * deltaTime * EditorCameraSpeed;
 				}
 			}
 			camera->SetLocation(location);
 
-			m_CameraTransform = camera->GetTransform();
+			EditorCameraTransform = camera->GetTransform();
 		}
 	}
 
@@ -906,8 +940,8 @@ namespace ke
 				return false;
 			}
 
-			m_EditorCameraSpeed += event.Amount * GGlobalTimer->Delta() * 10.0f;
-			m_EditorCameraSpeed = glm::clamp(m_EditorCameraSpeed, 0.0f, 100.0f);
+			EditorCameraSpeed += event.Amount * GGlobalTimer->Delta() * 10.0f;
+			EditorCameraSpeed = glm::clamp(EditorCameraSpeed, 0.0f, 100.0f);
 
 			return true;
 		}

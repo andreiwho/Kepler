@@ -194,7 +194,7 @@ namespace ke
 
 				CheckWorldUpdated();
 				mainTimer.End();
-				FrameTime =  1.0f / mainTimer.Delta();
+				FrameTime = 1.0f / mainTimer.Delta();
 			}
 		}
 		TerminateModuleStack();
@@ -307,14 +307,12 @@ namespace ke
 			m_bExitPlayRequested = true;
 		}
 
-		if (TInput::GetKey(EKeyCode::LeftAlt))
+		if (event.Key == EKeyCode::F5)
 		{
-			if (event.Key == EKeyCode::P)
-			{
-				OnCurrentWorldStateChange(EWorldUpdateKind::Play);
-				CurrentWorldState = EWorldUpdateKind::Play;
-			}
+			OnCurrentWorldStateChange(EWorldUpdateKind::Play);
+			CurrentWorldState = EWorldUpdateKind::Play;
 		}
+
 		return false;
 	}
 
