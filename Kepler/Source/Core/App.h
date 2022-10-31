@@ -99,6 +99,9 @@ namespace ke
 		reflected kmeta(readonly, assettype = Map)
 		AssetTreeNode* WorldAsset{};
 
+		reflected kmeta(readonly)
+		float FrameTime = 0.0f;
+
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;

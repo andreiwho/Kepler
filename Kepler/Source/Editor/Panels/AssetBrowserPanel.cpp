@@ -19,6 +19,9 @@ namespace ke
 		// Assets
 		m_FolderIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Folder.png");
 		m_FileIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_File.png");
+		m_MapIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Map.png");
+		m_MaterialIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Material.png");
+		m_StaticMeshIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_StaticMesh.png");
 		m_UnknownIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Unknown.png");
 
 		// Navigation
@@ -384,7 +387,31 @@ namespace ke
 					break;
 					case EAssetNodeType::PlainAsset:
 					{
-						DrawAsset(view, itemIndex, m_FileIcon);
+						auto pAsset = RefCast<AssetTreeNode_PlainAsset>(entry);
+						switch (pAsset->GetAssetType())
+						{
+						case EFieldAssetType::Map:
+							DrawAsset(view, itemIndex, m_MapIcon);
+							break;
+						case EFieldAssetType::Material:
+							DrawAsset(view, itemIndex, m_MaterialIcon);
+							break;
+						case EFieldAssetType::StaticMesh:
+							DrawAsset(view, itemIndex, m_StaticMeshIcon);
+							break;
+						case EFieldAssetType::All:
+						case EFieldAssetType::None:
+						default:
+							if (m_bDrawUnknownIcons)
+							{
+								DrawAsset(view, itemIndex, m_UnknownIcon);
+							}
+							else
+							{
+								continue;
+							}
+							break;
+						}
 					}
 					break;
 					default:
@@ -398,23 +425,23 @@ namespace ke
 					if (bAllowDragSource)
 					{							
 						const AssetTreeNode* pHandle = entry.Raw();
-						
 						std::string_view payloadType = "";
 						if (pHandle->IsPlainAsset())
 						{
 							auto pAsset = RefCast<AssetTreeNode_PlainAsset>(entry);
-							std::string_view extension = pAsset->GetExtension();
-							if (extension == ".kmat")
+							switch (pAsset->GetAssetType())
 							{
-								payloadType = "MATERIAL";
-							}
-							if (extension == ".fbx")
-							{
-								payloadType = "STATICMESH";
-							}
-							if (extension == ".kmap")
-							{
+							case EFieldAssetType::Map:
 								payloadType = "MAP";
+								break;
+							case EFieldAssetType::Material:
+								payloadType = "MATERIAL";
+								break;
+							case EFieldAssetType::StaticMesh:
+								payloadType = "STATICMESH";
+								break;
+							default:
+								break;
 							}
 						}
 						else if (pHandle->IsDirectory())

@@ -1,101 +1,5 @@
 {
     "MainWorld": {
-        "Cube": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Cube"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 2508954615898958301
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "Asset": 8457576023565458371
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "Asset": 9877952500696371162
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 1.0,
-                "MovementValue": 0.0
-            }
-        },
-        "Monkey": {
-            "TNameComponent": {
-                "TypeHash": 1623501485754165431,
-                "Name": "Monkey"
-            },
-            "TIdComponent": {
-                "TypeHash": 5465164197660407293,
-                "Id": 6505149303905581089
-            },
-            "TransformComponent": {
-                "TypeHash": 9797664509068339094,
-                "Transform": {
-                    "TypeHash": 7594633040358423045,
-                    "Location": {
-                        "TypeHash": 11792389323166860578,
-                        "x": -1.4042162895202637,
-                        "y": -0.2347339689731598,
-                        "z": 0.0
-                    },
-                    "Rotation": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.0,
-                        "y": -0.0,
-                        "z": 40.47367858886719
-                    },
-                    "Scale": {
-                        "TypeHash": 11792389323166860578,
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                }
-            },
-            "StaticMeshComponent": {
-                "TypeHash": 10744309669644097517,
-                "Asset": 11642096419750233824
-            },
-            "MaterialComponent": {
-                "TypeHash": 15459567697303271471,
-                "Asset": 16041219136819323693
-            },
-            "TestMovementComponent": {
-                "TypeHash": 7268471294642250695,
-                "MovementType": 1,
-                "Speed": 0.10000000149011612,
-                "MovementValue": 0.0
-            }
-        },
         "Camera": {
             "TNameComponent": {
                 "TypeHash": 1623501485754165431,
@@ -134,8 +38,8 @@
                 "Camera": {
                     "TypeHash": 846271567112447840,
                     "FieldOfView": 45.0,
-                    "Width": 1552.0,
-                    "Height": 746.0,
+                    "Width": 2192.0,
+                    "Height": 1035.0,
                     "NearClip": 0.10000000149011612,
                     "FarClip": 100.0,
                     "Target": {
@@ -152,6 +56,48 @@
                     }
                 },
                 "RenderTargetName": "MeshPassTarget"
+            }
+        },
+        "NewEntity": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "NewEntity"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 11815582231559230814
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 1.220690131187439,
+                        "y": -0.6985762119293213,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -0.0,
+                        "z": 0.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "Asset": 8457576023565458371
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "Asset": 9877952500696371162
             }
         },
         "Light": {
@@ -205,6 +151,102 @@
                     "y": 0.30000001192092896,
                     "z": 0.30000001192092896
                 }
+            }
+        },
+        "Monkey": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Monkey"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 6505149303905581089
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": -1.4042162895202637,
+                        "y": -0.2347339689731598,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": -0.0,
+                        "z": 40.47367858886719
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "Asset": 11642096419750233824
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "Asset": 16041219136819323693
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 0.10000000149011612,
+                "MovementValue": 0.0
+            }
+        },
+        "Cube": {
+            "TNameComponent": {
+                "TypeHash": 1623501485754165431,
+                "Name": "Cube"
+            },
+            "TIdComponent": {
+                "TypeHash": 5465164197660407293,
+                "Id": 2508954615898958301
+            },
+            "TransformComponent": {
+                "TypeHash": 9797664509068339094,
+                "Transform": {
+                    "TypeHash": 7594633040358423045,
+                    "Location": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Rotation": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "Scale": {
+                        "TypeHash": 11792389323166860578,
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                }
+            },
+            "StaticMeshComponent": {
+                "TypeHash": 10744309669644097517,
+                "Asset": 8457576023565458371
+            },
+            "MaterialComponent": {
+                "TypeHash": 15459567697303271471,
+                "Asset": 9877952500696371162
+            },
+            "TestMovementComponent": {
+                "TypeHash": 7268471294642250695,
+                "MovementType": 1,
+                "Speed": 1.0,
+                "MovementValue": 0.0
             }
         }
     }

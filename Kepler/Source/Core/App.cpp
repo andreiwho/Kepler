@@ -194,18 +194,7 @@ namespace ke
 
 				CheckWorldUpdated();
 				mainTimer.End();
-
-#ifdef ENABLE_DEBUG
-				if (pPlatform->HasActiveMainWindow())
-				{
-					displayInfoTime += mainTimer.Delta();
-					if (displayInfoTime >= 1.0f)
-					{
-						displayInfoTime = 0;
-						m_MainWindow->SetTitle(fmt::format("{} <{}>", m_MainWindow->GetName(), 1.0f / mainTimer.Delta()));
-					}
-				}
-#endif
+				FrameTime =  1.0f / mainTimer.Delta();
 			}
 		}
 		TerminateModuleStack();

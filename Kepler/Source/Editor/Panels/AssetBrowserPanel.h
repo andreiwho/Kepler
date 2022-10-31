@@ -42,6 +42,9 @@ namespace ke
 		// Icons
 		RefPtr<ITextureSampler2D> m_FolderIcon;
 		RefPtr<ITextureSampler2D> m_FileIcon;
+		RefPtr<ITextureSampler2D> m_MapIcon;
+		RefPtr<ITextureSampler2D> m_MaterialIcon;
+		RefPtr<ITextureSampler2D> m_StaticMeshIcon;
 		RefPtr<ITextureSampler2D> m_UnknownIcon;
 
 		// Nav
@@ -69,5 +72,6 @@ namespace ke
 		bool m_bIsHovered = false;
 		bool m_bIsAssetTreeHovered = false;
 		bool m_bIsAssetGridHovered = false;
+		bool m_bDrawUnknownIcons = false;
 	};
 }

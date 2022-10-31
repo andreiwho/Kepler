@@ -142,6 +142,19 @@ namespace ke
 		{
 			m_Extension = path.extension().string();
 		}
+
+		if (m_Extension == ".fbx")
+		{
+			m_AssetType = EFieldAssetType::StaticMesh;
+		} 
+		else if (m_Extension == ".kmap")
+		{
+			m_AssetType = EFieldAssetType::Map;
+		}
+		else if (m_Extension == ".kmat")
+		{
+			m_AssetType = EFieldAssetType::Material;
+		}
 	}
 
 	void AssetTreeNode::SortChildren(EAssetSortFilter filter)

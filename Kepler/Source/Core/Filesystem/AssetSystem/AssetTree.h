@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Core.h"
+#include "Reflection/Class.h"
 
 namespace ke
 {
@@ -164,45 +165,6 @@ namespace ke
 	/************************************************************************/
 	/* Assets                                                               */
 	/************************************************************************/
-	struct EPlainAssetType
-	{
-		enum EValue
-		{
-			Unknown,
-			StaticMesh,
-			Image,
-			Font,
-			Sound,
-			Material,
-		} Value{};
-
-		EPlainAssetType() = default;
-		EPlainAssetType(EValue value) : Value(value) {}
-		inline operator EValue() const { return Value; }
-
-		inline String ToString() const
-		{
-			switch (Value)
-			{
-			case EPlainAssetType::Unknown:
-				return "Unknown";
-			case EPlainAssetType::StaticMesh:
-				return "Static Mesh";
-			case EPlainAssetType::Image:
-				return "Image";
-			case EPlainAssetType::Font:
-				return "Font";
-			case EPlainAssetType::Sound:
-				return "Sound";
-			case EPlainAssetType::Material:
-				return "Material";
-			}
-			CRASH();
-		}
-
-		static Array<EPlainAssetType> GetEntries() { return { Unknown, StaticMesh, Image, Font, Sound, Material}; }
-	};
-
 	class AssetTreeNode_PlainAsset: public AssetTreeNode
 	{
 	public:
@@ -215,7 +177,10 @@ namespace ke
 			return AssetTreeNode::New<AssetTreeNode_PlainAsset>(EAssetNodeType::PlainAsset, pParent, unresolvedPath);
 		}
 
+		inline EFieldAssetType GetAssetType() const { return m_AssetType; }
+
 	private:
 		String m_Extension{};
+		EFieldAssetType m_AssetType{EFieldAssetType::None};
 	};
 }
