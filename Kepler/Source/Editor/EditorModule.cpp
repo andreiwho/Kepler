@@ -285,6 +285,38 @@ namespace ke
 		LoadEditorViewportIcons();
 	}
 
+	void EditorModule::SaveCurrentWorld()
+	{
+		if (auto pWorldAsset = Engine::Get()->WorldAsset)
+		{
+			GameWorldSerializer serializer{ m_pEditedWorld };
+			TFuture<String> json = serializer.SerializeToJson();
+			TFileUtils::WriteTextFileAsync(pWorldAsset->GetPath(), Await(json));
+		}
+		else
+		{
+			SaveFileWithPicker();
+		}
+	}
+
+	void EditorModule::SaveCurrentWorldAs()
+	{
+		SaveFileWithPicker();
+	}
+
+	void EditorModule::OpenWorld()
+	{
+		String assetPath;
+		if (FilePickers::OpenAssetPicker(assetPath, EFieldAssetType::Map))
+		{
+			JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync(assetPath)) };
+			GameWorldDeserializer worldCreator;
+
+			Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
+			Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(assetPath));
+		}
+	}
+
 	void EditorModule::LoadEditorSettings()
 	{
 		/*JsonSerializer serializer{};
@@ -408,36 +440,18 @@ namespace ke
 			{
 				if (ImGui::MenuItem("Save", "Ctrl + S"))
 				{
-					if (auto pWorldAsset = Engine::Get()->WorldAsset)
-					{
-						GameWorldSerializer serializer{ m_pEditedWorld };
-						TFuture<String> json = serializer.SerializeToJson();
-						TFileUtils::WriteTextFileAsync(pWorldAsset->GetPath(), Await(json));
-					}
-					else
-					{
-						SaveFileWithPicker();
-					}
+					SaveCurrentWorld();
 					//KEPLER_INFO(LogEditor, "Serialized world: {}", json);	
 				}
 
 				if (ImGui::MenuItem("Save as", "Ctrl + Shift + S"))
 				{
-					SaveFileWithPicker();
+					SaveCurrentWorldAs();
 				}
 
 				if (ImGui::MenuItem("Load", "Ctrl + O"))
 				{
-					String assetPath;
-					if (FilePickers::OpenAssetPicker(assetPath, EFieldAssetType::Map))
-					{
-						JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync(assetPath)) };
-						GameWorldDeserializer worldCreator;
-
-						Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
-						Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(assetPath));
-					}
-
+					OpenWorld();
 				}
 
 				ImGui::EndMenu();
@@ -912,6 +926,30 @@ namespace ke
 				{
 					m_pEditedWorld->DestroyEntity(m_SelectedEntity);
 					m_SelectedEntity = GameEntityId();
+				}
+			}
+			break;
+			case EKeyCode::S:
+			{
+				if (TInput::GetKey(EKeyCode::LeftControl))
+				{
+					if (TInput::GetKey(EKeyCode::LeftShift))
+					{
+						SaveCurrentWorldAs();
+					}
+					else
+					{
+						SaveCurrentWorld();
+					}
+				}
+
+			}
+			break;
+			case EKeyCode::O:
+			{
+				if (TInput::GetKey(EKeyCode::LeftControl))
+				{
+					OpenWorld();
 				}
 			}
 			break;

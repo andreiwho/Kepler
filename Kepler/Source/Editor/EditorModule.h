@@ -60,6 +60,9 @@ namespace ke
 
 	protected:
 		virtual void PostWorldInit() override;
+		void SaveCurrentWorld();
+		void SaveCurrentWorldAs();
+		void OpenWorld();
 
 	private:
 		void LoadEditorSettings();

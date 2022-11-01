@@ -5,6 +5,7 @@
 #include "Tools/ImageLoader.h"
 #include "Core/Filesystem/FileUtils.h"
 #include <filesystem>
+#include "Core/App.h"
 
 namespace ke
 {
@@ -531,8 +532,11 @@ namespace ke
 				if (value)
 				{
 					RefPtr<AssetTreeNode> pAsset = m_CurrentDirectory->GetChildren()[index];
-					std::filesystem::remove(pAsset->GetPath_Resolved());
-					bAnyFilesRemoved = true;
+					if (pAsset->GetName() != Engine::Get()->WorldAsset->GetName())
+					{
+						std::filesystem::remove(pAsset->GetPath_Resolved());
+						bAnyFilesRemoved = true;
+					}
 				}
 				index++;
 			}
