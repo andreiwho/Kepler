@@ -72,6 +72,12 @@ namespace ke
 		return nullptr;
 	}
 
+	void AssetManager::RescanAssets()
+	{
+		FindGameAssets();
+		OnRootsUpdated.Invoke();
+	}
+
 	void AssetManager::FindGameAssets()
 	{
 		KEPLER_INFO(AssetManager, " ====== Finding asset files... ======");

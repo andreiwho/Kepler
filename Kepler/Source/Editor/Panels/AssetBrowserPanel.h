@@ -3,9 +3,16 @@
 #include "Core/Filesystem/AssetSystem/AssetTree.h"
 #include "Renderer/Elements/Texture.h"
 #include "Platform/Mouse.h"
+#include "Platform/Keyboard.h"
 
 namespace ke
 {
+	enum class EAssetBrowserMode
+	{
+		Explore,
+		Save,
+	};
+
 	class TAssetBrowserPanel
 	{
 	public:
@@ -15,8 +22,13 @@ namespace ke
 
 		inline bool IsHovered() const { return m_bIsHovered || m_bIsAssetTreeHovered || m_bIsAssetGridHovered; }
 		void OnMouseButton(EMouseButton button);
+		void OnKey(EKeyCode key);
 
 	private:
+		void OnAssetManagerRootsUpdated();
+
+		void DrawContents();
+
 		void DrawAddressBar();
 		void ZeroSelectionCache();
 		void DrawAsset(std::string_view label, i32 itemIndex, RefPtr<ITextureSampler2D> icon);
@@ -32,6 +44,7 @@ namespace ke
 		void DrawAssetTree();
 		void DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory);
 		void DrawAddressBarAddressNode(AssetTreeNode_Directory* pDirectory);
+		void UpdateCurrentDirectory(AssetTreeNode_Directory* pDirectory);
 
 	private:
 		// Serialization functions
@@ -56,6 +69,7 @@ namespace ke
 		AssetTreeNode_Directory* m_CurrentDirectory{nullptr};
 		AssetTreeNode_Directory* m_GameRootNode{ nullptr };
 		AssetTreeNode_Directory* m_EngineRootNode{ nullptr };
+		String m_LastPath{};
 		bool m_bShowEngineContent = true;
 
 		float m_IconSize = 80;

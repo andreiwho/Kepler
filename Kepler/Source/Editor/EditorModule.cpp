@@ -165,6 +165,7 @@ namespace ke
 		DrawDetailsPanel();
 		DrawSceneGraph();
 		m_AssetBrowserPanel->Draw();
+		// m_AssetBrowserPanel->DrawInSaveMode(EFieldAssetType::All);
 		DrawDebugTools();
 		DrawEngineInfo();
 		// ImGui::ShowDemoWindow();
@@ -407,19 +408,43 @@ namespace ke
 			{
 				if (ImGui::MenuItem("Save", "Ctrl + S"))
 				{
-					GameWorldSerializer serializer{ m_pEditedWorld };
-					TFuture<String> json = serializer.SerializeToJson();
-					TFileUtils::WriteTextFileAsync("Game://Maps/TestMap.kmap", Await(json));
-					//KEPLER_INFO(LogEditor, "Serialized world: {}", json);
+					if (auto pWorldAsset = Engine::Get()->WorldAsset)
+					{
+						GameWorldSerializer serializer{ m_pEditedWorld };
+						TFuture<String> json = serializer.SerializeToJson();
+						TFileUtils::WriteTextFileAsync(pWorldAsset->GetPath(), Await(json));
+					}
+					else
+					{
+						SaveFileWithPicker();
+					}
+					//KEPLER_INFO(LogEditor, "Serialized world: {}", json);	
+				}
+
+				if (ImGui::MenuItem("Save as", "Ctrl + Shift + S"))
+				{
+					SaveFileWithPicker();
 				}
 
 				if (ImGui::MenuItem("Load", "Ctrl + O"))
 				{
-					JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync("Game://Maps/TestMap.kmap")) };
-					GameWorldDeserializer worldCreator;
-					Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
+					String assetPath;
+					if (FilePickers::OpenAssetPicker(assetPath, EFieldAssetType::Map))
+					{
+						JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync(assetPath)) };
+						GameWorldDeserializer worldCreator;
+
+						Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
+						Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(assetPath));
+					}
+
 				}
 
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Edit", false))
+			{
 				ImGui::EndMenu();
 			}
 
@@ -434,6 +459,20 @@ namespace ke
 			}
 
 			ImGui::EndMainMenuBar();
+		}
+	}
+
+	void EditorModule::SaveFileWithPicker()
+	{
+		String outPath;
+		if (FilePickers::SaveAssetPicker(outPath, EFieldAssetType::Map))
+		{
+			GameWorldSerializer serializer{ m_pEditedWorld };
+			TFuture<String> json = serializer.SerializeToJson();
+			TFileUtils::WriteTextFileAsync(outPath, Await(json));
+
+			AssetManager::Get()->RescanAssets();
+			Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(outPath));
 		}
 	}
 
@@ -500,9 +539,6 @@ namespace ke
 			}
 		}
 		ImGui::End();
-
-		
-
 		ImGui::PopStyleVar();
 	}
 
@@ -815,6 +851,12 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	bool EditorModule::OnKeyDown(const TKeyDownEvent& event)
 	{
+		if (m_AssetBrowserPanel->IsHovered())
+		{
+			m_AssetBrowserPanel->OnKey(event.Key);
+			return true;
+		}
+
 		if (m_bIsControllingCamera)
 		{
 
@@ -877,6 +919,7 @@ namespace ke
 				break;
 			}
 		}
+
 		return false;
 	}
 

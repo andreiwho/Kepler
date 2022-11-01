@@ -28,3 +28,6 @@
 [submodule "Kepler/ThirdParty/ImGuizmo"]
 	path = Kepler/ThirdParty/ImGuizmo
 	url = https://github.com/andreiwho/ImGuizmo
+[submodule "Kepler/ThirdParty/nativefiledialog-extended"]
+	path = Kepler/ThirdParty/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git

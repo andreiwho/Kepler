@@ -67,6 +67,9 @@ namespace ke
 		void LoadEditorViewportIcons();
 		void SetupStyle();
 		void DrawMenuBar();
+
+		void SaveFileWithPicker();
+
 		void DrawViewports();
 		void DrawViewportGizmoControls();
 		void DrawViewportCameraControls();

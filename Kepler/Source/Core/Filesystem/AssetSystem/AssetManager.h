@@ -5,6 +5,8 @@
 
 namespace ke
 {
+    DEFINE_MULTICAST_DELEGATE(RootUpdatedDelegate);
+
     class AssetManager
     {
         static AssetManager* Instance;
@@ -18,6 +20,10 @@ namespace ke
         RefPtr<AssetTreeNode_Directory> GetRootNode(const String& rootPath) const;
         RefPtr<AssetTreeNode_Directory> GetRootNodeFor(const String& rootPath) const;
         const auto& GetRoots() const& { return m_Roots; }
+
+        void RescanAssets();
+
+        RootUpdatedDelegate OnRootsUpdated;
 
     private:
         void FindGameAssets();

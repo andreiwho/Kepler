@@ -14,6 +14,29 @@ namespace ke
 		StaticMesh
 	};
 
+	static StringView GetFieldAssetTypePayloadName(EFieldAssetType assetType)
+	{
+		switch (assetType)
+		{
+		case ke::EFieldAssetType::None:
+			break;
+		case ke::EFieldAssetType::All:
+			break;
+		case ke::EFieldAssetType::Map:
+			return "MAP";
+			break;
+		case ke::EFieldAssetType::Material:
+			return "MATERIAL";
+			break;
+		case ke::EFieldAssetType::StaticMesh:
+			return "STATICMESH";
+			break;
+		default:
+			break;
+		}
+		return "";
+	}
+
 	struct FieldMetadata
 	{
 		EFieldAssetType FieldAssetType{ EFieldAssetType::None };

@@ -1,12 +1,15 @@
 #include "FileUtils.h"
 #include "Core/Filesystem/VFS.h"
 #include <fstream>
+#include <filesystem>
 
 namespace ke
 {
-	std::future<String> TFileUtils::ReadTextFileAsync(const String& path)
+	DEFINE_UNIQUE_LOG_CHANNEL(LogFileUtils, All);
+
+	std::future<String> TFileUtils::ReadTextFileAsync(const String& path, bool bResolved)
 	{
-		return Async([CopiedPath = VFSResolvePath(path)]
+		return Async([CopiedPath = bResolved ? path : VFSResolvePath(path)]
 			{
 				String outStr;
 #ifdef WIN32
@@ -83,5 +86,84 @@ namespace ke
 	{
 		return std::filesystem::exists(VFSResolvePath(path));
 	}
+}
 
+#include <nfd.hpp>
+namespace ke
+{
+	bool FilePickers::OpenAssetPicker(String& outResult, EFieldAssetType assetType)
+	{
+		NFD::UniquePathU8 outPath{};
+		Array<nfdu8filteritem_t> filterItems{};
+		switch (assetType)
+		{
+		case ke::EFieldAssetType::None:
+			return false;
+			break;
+		case ke::EFieldAssetType::All:
+			KEPLER_WARNING(LogFileUtils, "OpenAssetPicker does not support EFieldAssetType::All for now and may never support it. Consider using other formats.");
+			return false;
+			break;
+		case ke::EFieldAssetType::Map:
+			filterItems.AppendBack({ "Map file", "kmap" });
+			break;
+		case ke::EFieldAssetType::Material:
+			filterItems.AppendBack({ "Material file", "kmat" });
+			break;
+		case ke::EFieldAssetType::StaticMesh:
+			filterItems.AppendBack({ "Static mesh file", "fbx" });
+			break;
+		default:
+			break;
+		}
+
+		String gamePath = std::filesystem::absolute(VFSResolvePath("Game://")).string();
+		nfdresult_t result = NFD::OpenDialog(outPath, filterItems.GetData(), filterItems.GetLength(), gamePath.c_str());
+		if (result == NFD_OKAY)
+		{
+			outResult = std::filesystem::relative(outPath.get(), VFSResolvePath("Game://")).string();
+			std::replace(outResult.begin(), outResult.end(), '\\', '/');
+			outResult = fmt::format("Game://{}", outResult);
+			return true;
+		}
+		return false;
+	}
+
+	bool FilePickers::SaveAssetPicker(String& outResult, EFieldAssetType assetType)
+	{
+		NFD::UniquePathU8 outPath{};
+		Array<nfdu8filteritem_t> filterItems{};
+		switch (assetType)
+		{
+		case ke::EFieldAssetType::None:
+			return false;
+			break;
+		case ke::EFieldAssetType::All:
+			KEPLER_WARNING(LogFileUtils, "OpenAssetPicker does not support EFieldAssetType::All for now and may never support it. Consider using other formats.");
+			return false;
+			break;
+		case ke::EFieldAssetType::Map:
+			filterItems.AppendBack({ "Map file", "kmap" });
+			break;
+		case ke::EFieldAssetType::Material:
+			filterItems.AppendBack({ "Material file", "kmat" });
+			break;
+		case ke::EFieldAssetType::StaticMesh:
+			filterItems.AppendBack({ "Static mesh file", "fbx" });
+			break;
+		default:
+			break;
+		}
+
+		String gamePath = std::filesystem::absolute(VFSResolvePath("Game://")).string();
+		nfdresult_t result = NFD::SaveDialog(outPath, filterItems.GetData(), filterItems.GetLength(), gamePath.c_str(), "NewFile");
+		if (result == NFD_OKAY)
+		{
+			outResult = std::filesystem::relative(outPath.get(), VFSResolvePath("Game://")).string();
+			std::replace(outResult.begin(), outResult.end(), '\\', '/');
+			outResult = fmt::format("Game://{}", outResult);
+			return true;
+		}
+		return false;
+	}
 }

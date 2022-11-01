@@ -15,6 +15,7 @@ target_link_libraries("Kepler"
  PRIVATE 
   "glfw" 
   "stb_image" 
+  "nfd"
   "miniaudio")
 
 option(ENABLE_EDITOR "Enables editor layer" ON)

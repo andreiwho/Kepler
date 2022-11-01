@@ -4,6 +4,7 @@
 #include <string_view>
 #include "Tools/ImageLoader.h"
 #include "Core/Filesystem/FileUtils.h"
+#include <filesystem>
 
 namespace ke
 {
@@ -29,6 +30,8 @@ namespace ke
 		m_NavUpIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavUp.png");
 		m_NavBackIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavBack.png");
 		m_NavFwdIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_NavForward.png");
+
+		AssetManager::Get()->OnRootsUpdated.Bind(this, &TAssetBrowserPanel::OnAssetManagerRootsUpdated);
 	}
 
 	void TAssetBrowserPanel::DrawAddressBar()
@@ -95,6 +98,12 @@ namespace ke
 	}
 
 
+	void TAssetBrowserPanel::UpdateCurrentDirectory(AssetTreeNode_Directory* pDirectory)
+	{
+		m_CurrentDirectory = pDirectory;
+		m_LastPath = m_CurrentDirectory->GetPath();
+	}
+
 	void TAssetBrowserPanel::SerializeConfig()
 	{
 		// TODO
@@ -124,7 +133,6 @@ namespace ke
 		{
 			ZeroSelectionCache();
 			m_SelectionIndexCache[itemIndex] = true;
-
 			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				OnDoubleClick(itemIndex);
@@ -153,7 +161,7 @@ namespace ke
 		if (item->IsDirectory())
 		{
 			m_BackStack.AppendBack(m_CurrentDirectory);
-			m_CurrentDirectory = RefCast<AssetTreeNode_Directory>(item).Raw();
+			UpdateCurrentDirectory(RefCast<AssetTreeNode_Directory>(item).Raw());
 			m_ForwardStack.Clear();
 		}
 	}
@@ -168,7 +176,7 @@ namespace ke
 		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
 		m_BackStack.AppendBack(pLastDir);
 		m_ForwardStack.Clear();
-		m_CurrentDirectory = (AssetTreeNode_Directory*)m_CurrentDirectory->GetParent();
+		UpdateCurrentDirectory((AssetTreeNode_Directory*)m_CurrentDirectory->GetParent());
 	}
 
 	void TAssetBrowserPanel::OnTreeNavigateBack()
@@ -180,7 +188,7 @@ namespace ke
 
 		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
 		AssetTreeNode_Directory* pNextDir = m_BackStack.GetBack();
-		m_CurrentDirectory = pNextDir;
+		UpdateCurrentDirectory(pNextDir);
 		m_ForwardStack.AppendBack(pLastDir);
 		m_BackStack.PopBack();
 	}
@@ -194,7 +202,7 @@ namespace ke
 
 		AssetTreeNode_Directory* pLastDir = m_CurrentDirectory;
 		AssetTreeNode_Directory* pNextDir = m_ForwardStack.GetBack();
-		m_CurrentDirectory = pNextDir;
+		UpdateCurrentDirectory(pNextDir);
 		m_BackStack.AppendBack(pLastDir);
 		m_ForwardStack.PopBack();
 	}
@@ -337,11 +345,37 @@ namespace ke
 		}
 	}
 
-	void TAssetBrowserPanel::Draw()
+	void TAssetBrowserPanel::OnAssetManagerRootsUpdated()
 	{
-		ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(-1.0f, -1.0f));
-		ImGui::Begin("Asset Browser");
+		m_SelectionIndexCache.Clear();
+		m_BackStack.Clear();
+		m_ForwardStack.Clear();
 
+		if (auto path = AssetManager::Get()->GetRootNode("Game://"))
+		{
+			m_GameRootNode = path.Raw();
+			if (!m_LastPath.empty())
+			{
+				auto pLastPath = Await(AssetManager::Get()->FindAssetNode(m_LastPath));
+				if (pLastPath)
+				{
+					m_CurrentDirectory = RefCast<AssetTreeNode_Directory>(pLastPath).Raw();
+				}
+				else
+				{
+					m_CurrentDirectory = path.Raw();
+				}
+			}
+			else
+			{
+				m_CurrentDirectory = path.Raw();
+			}
+		}
+		m_EngineRootNode = nullptr;
+	}
+
+	void TAssetBrowserPanel::DrawContents()
+	{
 		m_bIsHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		DrawAddressBar();
@@ -423,32 +457,19 @@ namespace ke
 					bAllowDragSource = ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID);
 
 					if (bAllowDragSource)
-					{							
+					{
 						const AssetTreeNode* pHandle = entry.Raw();
 						std::string_view payloadType = "";
 						if (pHandle->IsPlainAsset())
 						{
 							auto pAsset = RefCast<AssetTreeNode_PlainAsset>(entry);
-							switch (pAsset->GetAssetType())
-							{
-							case EFieldAssetType::Map:
-								payloadType = "MAP";
-								break;
-							case EFieldAssetType::Material:
-								payloadType = "MATERIAL";
-								break;
-							case EFieldAssetType::StaticMesh:
-								payloadType = "STATICMESH";
-								break;
-							default:
-								break;
-							}
+							payloadType = GetFieldAssetTypePayloadName(pAsset->GetAssetType());
 						}
 						else if (pHandle->IsDirectory())
 						{
 							payloadType = "DIRECTORY";
 						}
-						
+
 						if (ImGui::SetDragDropPayload(payloadType.data(), &pHandle, sizeof(pHandle), ImGuiCond_Once))
 						{
 							ImGui::Text(entry->GetPath().c_str());
@@ -468,7 +489,15 @@ namespace ke
 			}
 			ImGui::EndChild();
 		}
-		ImGui::End();
+	}
+
+	void TAssetBrowserPanel::Draw()
+	{
+		if (ImGui::Begin("Asset Browser"))
+		{
+			DrawContents();
+			ImGui::End();
+		}
 	}
 
 	void TAssetBrowserPanel::OnMouseButton(EMouseButton button)
@@ -485,4 +514,34 @@ namespace ke
 			break;
 		}
 	}
+
+	void TAssetBrowserPanel::OnKey(EKeyCode key)
+	{
+		if (!m_CurrentDirectory)
+		{
+			return;
+		}
+
+		if (key == EKeyCode::Delete)
+		{
+			bool bAnyFilesRemoved = false;
+			i32 index = 0;
+			for (const auto& value : m_SelectionIndexCache)
+			{
+				if (value)
+				{
+					RefPtr<AssetTreeNode> pAsset = m_CurrentDirectory->GetChildren()[index];
+					std::filesystem::remove(pAsset->GetPath_Resolved());
+					bAnyFilesRemoved = true;
+				}
+				index++;
+			}
+
+			if (bAnyFilesRemoved)
+			{
+				AssetManager::Get()->RescanAssets();
+			}
+		}
+	}
+
 }
