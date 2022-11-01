@@ -31,17 +31,15 @@ For fields ***kmeta*** keyword supports following specifiers:
 reflected class StaticMeshComponent : public EntityComponent
 {
 public:
-	// ...
-
     // We specify that the OnMeshAssetChanged function will be called after the reflection system sets a new asset.
     // To handle this change.
     // And the assettype=StaticMesh specifies that this asset is indeed a static mesh, and we should disallow dropping 
     // e.g. materials into the field
     reflected kmeta(postchange = OnMeshAssetChanged, assettype=StaticMesh)
-	AssetTreeNode* Asset {nullptr};
+    AssetTreeNode* Asset {nullptr};
 
     // Use mesh loader to reload the mesh from the asset
-	void OnMeshAssetChanged(AssetTreeNode* pAsset);
+    void OnMeshAssetChanged(AssetTreeNode* pAsset);
 private:
 	RefPtr<StaticMesh> m_StaticMesh{};
 };
