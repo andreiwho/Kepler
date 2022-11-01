@@ -167,7 +167,7 @@ namespace ke
 		m_AssetBrowserPanel->Draw();
 		DrawDebugTools();
 		DrawEngineInfo();
-		ImGui::ShowDemoWindow();
+		// ImGui::ShowDemoWindow();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
