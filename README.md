@@ -31,17 +31,15 @@ For fields ***kmeta*** keyword supports following specifiers:
 reflected class StaticMeshComponent : public EntityComponent
 {
 public:
-	// ...
-
     // We specify that the OnMeshAssetChanged function will be called after the reflection system sets a new asset.
     // To handle this change.
     // And the assettype=StaticMesh specifies that this asset is indeed a static mesh, and we should disallow dropping 
     // e.g. materials into the field
     reflected kmeta(postchange = OnMeshAssetChanged, assettype=StaticMesh)
-	AssetTreeNode* Asset {nullptr};
+    AssetTreeNode* Asset {nullptr};
 
     // Use mesh loader to reload the mesh from the asset
-	void OnMeshAssetChanged(AssetTreeNode* pAsset);
+    void OnMeshAssetChanged(AssetTreeNode* pAsset);
 private:
 	RefPtr<StaticMesh> m_StaticMesh{};
 };
@@ -91,3 +89,6 @@ Components can be added via ```GameWorld::AddComponent<T>``` or ```EntityHandle:
 
 ## Editor
 It is not as big as it needs to be for now, but the roadmap has all the good stuff ahead.
+
+![image](https://user-images.githubusercontent.com/58666222/199279586-1ccc9ca5-f9e7-4211-ac21-8f158533c3c7.png)
+
