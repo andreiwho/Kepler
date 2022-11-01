@@ -18,9 +18,9 @@ namespace ke
 		m_Fields[name] = field;
 	}
 
-	void ReflectedEnum::PushEnumValue(const String& name, u32 value)
+	void ReflectedEnum::PushEnumValue(const String& name, i32 value)
 	{
-		m_EnumValues.AppendBack({ name, value });
+		m_EnumValues.Insert(value, name);
 	}
 
 }

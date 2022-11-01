@@ -302,19 +302,20 @@ namespace ke
 				{
 					TEditorElements::NextFieldRow(name.c_str());
 					auto& values = pMyEnum->GetEnumValues();
-					u32* value = field.GetValueFor<u32>(pHandler);
-					if (*value > values.GetLength())
+					i32* pair = field.GetValueFor<i32>(pHandler);
+					if (*pair > values.GetLength())
 					{
 						return;
 					}
-					auto& selectedValue = values[*value].first;
+					auto& selectedValue = values[*pair];
 					if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
 					{
-						for (auto& [title, index] : values)
+						for (auto& [index, string] : values)
 						{
-							if (ImGui::Selectable(title.c_str()))
+							i32 newValue = index;
+							if (ImGui::Selectable(string.c_str()))
 							{
-								field.SetValueFor(pHandler, &index);
+								field.SetValueFor(pHandler, &newValue);
 							}
 						}
 						ImGui::EndCombo();

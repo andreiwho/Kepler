@@ -126,19 +126,19 @@ namespace ke
 		inline const auto& GetEnumValues() const& { return m_EnumValues; }
 		inline auto& GetEnumValues() & { return m_EnumValues; }
 
-		inline String ValueToString(u32 enumValue) const
+		inline String ValueToString(i32 enumValue) const
 		{
 			if (m_EnumValues.GetLength() > enumValue)
 			{
-				return m_EnumValues[enumValue].first;
+				return m_EnumValues[enumValue];
 			}
 			return "No Name";
 		}
 
 	protected:
-		void PushEnumValue(const String& name, u32 value);
+		void PushEnumValue(const String& name, i32 value);
 
 	private:
-		Array<std::pair<String, u32>> m_EnumValues;
+		Map<i32, String> m_EnumValues;
 	};
 }
