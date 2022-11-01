@@ -91,3 +91,6 @@ Components can be added via ```GameWorld::AddComponent<T>``` or ```EntityHandle:
 
 ## Editor
 It is not as big as it needs to be for now, but the roadmap has all the good stuff ahead.
+
+![image](https://user-images.githubusercontent.com/58666222/199279586-1ccc9ca5-f9e7-4211-ac21-8f158533c3c7.png)
+
