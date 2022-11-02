@@ -13,12 +13,12 @@ namespace ke
 		{
 			if (auto pClass = ReflectionDatabase::Get()->GetClass<T>())
 			{
-				id64 classId = pClass->GetClassId();
+				UUID classId = pClass->GetClassId();
 				m_NativeClassIds.AppendBack(classId);
 			}
 		}
 
-		void AddComponent(typehash64 hash)
+		void AddComponent(ClassId hash)
 		{
 			m_NativeClassIds.AppendBack(hash);
 		}
@@ -28,16 +28,16 @@ namespace ke
 		{
 			if (auto pClass = ReflectionDatabase::Get()->GetClass<T>())
 			{
-				id64 classId = pClass->GetClassId();
-				auto iter = m_NativeClassIds.FindIterator([&](const id64& id) { return id == classId; });
+				UUID classId = pClass->GetClassId();
+				auto iter = m_NativeClassIds.FindIterator([&](const UUID& id) { return id == classId; });
 				m_NativeClassIds.Remove(iter);
 				m_NativeClassIds.Shrink();
 			}
 		}
 
-		const Array<id64>& GetComponentIds() const& { return m_NativeClassIds; }
+		const Array<UUID>& GetComponentIds() const& { return m_NativeClassIds; }
 
 	private:
-		Array<id64> m_NativeClassIds;
+		Array<UUID> m_NativeClassIds;
 	};
 }

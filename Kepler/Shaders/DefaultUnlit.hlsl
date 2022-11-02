@@ -33,6 +33,7 @@ TPixel VSMain(in TVertex Vertex)
 	Output.Color = Vertex.Color;
 	Output.UV0 = Vertex.UV0;
 	Output.Id = EntityId;
+	Output.Normal = float3(0.0f, 0.0f, 0.0f);
 	return Output;
 }
 

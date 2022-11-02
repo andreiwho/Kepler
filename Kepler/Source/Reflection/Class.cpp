@@ -2,7 +2,7 @@
 
 namespace ke
 {
-	ReflectedField::ReflectedField(typehash64 id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor)
+	ReflectedField::ReflectedField(ClassId id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor)
 		: m_TypeId(id)
 		, m_Metadata(fieldMetadata)
 		, m_GetAccessor(getAccessor)

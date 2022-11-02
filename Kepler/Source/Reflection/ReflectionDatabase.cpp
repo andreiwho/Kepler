@@ -15,7 +15,7 @@ namespace ke
 		{
 			m_ComponentClasses.AppendBack(cls->GetClassId());
 		}
-		m_Classes[typehash64(cls->GetName())] = cls;
+		m_Classes[ClassId(cls->GetName())] = cls;
 	}
 
 }

@@ -39,7 +39,7 @@ namespace ke
 		// The name of the world
 
 		// The UUID of the world (will be used mostly for parent-child behaviour)
-		id64 UUID{};
+		UUID m_UUID{};
 
 		// Does this world need an delta update
 		bool bNeedsUpdate = false;

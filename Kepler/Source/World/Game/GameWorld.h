@@ -45,13 +45,13 @@ namespace ke
 		GameEntityId CreateEntityDeferred();
 		void FinishCreatingEntity(GameEntityId entity);
 		TGameEntity& GetEntityFromId(GameEntityId Id);
-		GameEntityId GetEntityByUUID(uuid64 id);
+		GameEntityId GetEntityByUUID(UUID id);
 
 		void DestroyEntity(GameEntityId Entity);
 
 		String GetEntityName(GameEntityId Entity);
 
-		id64 GetEntityUUID(GameEntityId Entity) const;
+		UUID GetEntityUUID(GameEntityId Entity) const;
 
 		bool IsValidEntity(GameEntityId Id) const;
 
@@ -145,7 +145,7 @@ namespace ke
 			}
 		}
 
-		EntityComponent* AddComponentByTypeHash(GameEntityId id, typehash64 typeHash);
+		EntityComponent* AddComponentByTypeHash(GameEntityId id, ClassId typeHash);
 
 		template<entity_component_typename T>
 		T& GetOrAddComponent(GameEntityId entity)
@@ -216,7 +216,7 @@ namespace ke
 		bool IsCamera(GameEntityId Entity) const;
 		bool IsLight(GameEntityId Entity) const;
 
-		EntityComponent* GetComponentById(typehash64 componentId, GameEntityId entityId)
+		EntityComponent* GetComponentById(ClassId componentId, GameEntityId entityId)
 		{
 			if (!m_StaticState->m_ComponentInfos.Contains(componentId))
 			{
@@ -238,11 +238,11 @@ namespace ke
 		struct StaticState
 		{
 			Array<NativeComponentAccessors> m_NativeAccessors;
-			Map<typehash64, NativeComponentInfo> m_ComponentInfos;
+			Map<ClassId, NativeComponentInfo> m_ComponentInfos;
 		};
 		static StaticState* m_StaticState;
 
-		Map<uuid64, GameEntityId> m_UUIDToEntityMap;
+		Map<UUID, GameEntityId> m_UUIDToEntityMap;
 		GameEntityId m_MainCamera{};
 	};
 }

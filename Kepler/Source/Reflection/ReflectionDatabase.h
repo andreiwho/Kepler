@@ -20,7 +20,7 @@ namespace ke
 		template<typename T>
 		RefPtr<ReflectedClass> GetClass();
 
-		RefPtr<ReflectedClass> FindClassByTypeHash(typehash64 id)
+		RefPtr<ReflectedClass> FindClassByTypeHash(ClassId id)
 		{
 			if (m_Classes.Contains(id))
 			{
@@ -29,11 +29,11 @@ namespace ke
 			return nullptr;
 		}
 
-		inline const Array<typehash64>& GetComponentClasses() const { return m_ComponentClasses; }
+		inline const Array<ClassId>& GetComponentClasses() const { return m_ComponentClasses; }
 
 	private:
-		Map<typehash64, RefPtr<ReflectedClass>> m_Classes;
-		Array<typehash64> m_ComponentClasses;
+		Map<ClassId, RefPtr<ReflectedClass>> m_Classes;
+		Array<ClassId> m_ComponentClasses;
 	};
 
 	template<typename T>
@@ -42,7 +42,7 @@ namespace ke
 		return ReflectionDatabase::Get()->GetClass<T>();
 	}
 
-	static RefPtr<ReflectedClass> GetReflectedClass(typehash64 typeHash)
+	static RefPtr<ReflectedClass> GetReflectedClass(ClassId typeHash)
 	{
 		return ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
 	}
@@ -58,7 +58,7 @@ namespace ke
 		return nullptr;
 	}
 
-	static RefPtr<ReflectedEnum> GetReflectedEnum(typehash64 typeHash)
+	static RefPtr<ReflectedEnum> GetReflectedEnum(ClassId typeHash)
 	{
 		auto pEnum = GetReflectedClass(typeHash);
 		if (pEnum->IsEnum())
@@ -76,7 +76,7 @@ namespace ke
 		return pEnum->ValueToString((i32)value);
 	}
 
-	static String EnumValueToString(typehash64 typeHash, i32 value)
+	static String EnumValueToString(ClassId typeHash, i32 value)
 	{
 		auto pEnum = GetReflectedEnum(typeHash);
 		CHECK(pEnum);

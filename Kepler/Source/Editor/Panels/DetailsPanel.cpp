@@ -69,7 +69,7 @@ namespace ke
 		EntityHandle entity = { m_pWorld, m_SelectedEntity };
 		if (auto pNativeComp = entity.GetComponent<NativeComponentContainer>())
 		{
-			for (const typehash64& id : pNativeComp->GetComponentIds())
+			for (const ClassId& id : pNativeComp->GetComponentIds())
 			{
 				auto pNativeComponent = m_pWorld->GetComponentById(id, m_SelectedEntity);
 				if (!pNativeComponent)
@@ -98,7 +98,7 @@ namespace ke
 	{
 		if (ImGui::BeginPopup("addcomponent"))
 		{
-			for (typehash64 componentHash : ReflectionDatabase::Get()->GetComponentClasses())
+			for (ClassId componentHash : ReflectionDatabase::Get()->GetComponentClasses())
 			{
 				if (RefPtr<ReflectedClass> pClass = GetReflectedClass(componentHash))
 				{

@@ -24,7 +24,7 @@ namespace ke
 		World->GetComponent<TNameComponent>(Entity).Name = Name;
 	}
 
-	id64 TGameEntity::GetGUID() const
+	UUID TGameEntity::GetGUID() const
 	{
 		return World->GetEntityUUID(Entity);
 	}

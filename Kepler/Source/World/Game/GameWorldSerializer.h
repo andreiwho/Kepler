@@ -8,14 +8,14 @@ namespace ke
 	struct SerializedFieldInfo
 	{
 		JsonSerializableType Data;
-		typehash64 TypeHash;
+		ClassId TypeHash;
 		Map<String, SerializedFieldInfo> SubFields;
 	};
 
-	struct SerializedComponentInfo
+	struct SerializedObjectInfo
 	{
 		String Name;
-		typehash64 TypeHash;
+		ClassId TypeHash;
 		Map<String, SerializedFieldInfo> Fields;
 	};
 
@@ -27,7 +27,7 @@ namespace ke
 
 		inline const String& GetWorldName() const& { return m_Name; }
 
-		Map<String, Array<SerializedComponentInfo>> Serialize() const;
+		Map<String, Array<SerializedObjectInfo>> Serialize() const;
 		TFuture<String> SerializeToJson() const;
 
 	private:
@@ -35,11 +35,24 @@ namespace ke
 		String m_Name;
 	};
 
+	class ReflectedObjectSerializer
+	{
+	public:
+		template<typename T>
+		static SerializedObjectInfo SerializeObject(T* pObject)
+		{
+			RefPtr<ReflectedClass> pClass = GetReflectedClass<T>();
+			return SerializeObject(pClass->GetClassId());
+		}
+
+		static SerializedObjectInfo SerializeObject(ClassId typeHash, void* pObject);
+	};
+
 	//////////////////////////////////////////////////////////////////////////
 	class GameWorldDeserializer
 	{
 	public:
 		RefPtr<GameWorld> Deserialize(RefPtr<JsonObject> pJsonData);
-		RefPtr<GameWorld> Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects, u32 worldIndex = 0);
+		RefPtr<GameWorld> Deserialize(const String& worldName, Map<String, Array<SerializedObjectInfo>>& objects, u32 worldIndex = 0);
 	};
 }

@@ -31,7 +31,7 @@ namespace ke
 			});
 	}
 
-	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(id64 assetId) const
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(UUID assetId) const
 	{
 		return Async([this, assetId]() -> RefPtr<AssetTreeNode>
 			{

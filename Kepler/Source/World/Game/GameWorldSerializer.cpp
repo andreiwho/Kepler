@@ -29,7 +29,7 @@ namespace ke
 			SerializedFieldInfo outInfo;
 			outInfo.TypeHash = field.GetTypeHash();
 
-#define		GET_FIELD_VALUE(Type) case typehash64(#Type): outInfo.Data = *field.GetValueFor<Type>(pObject); break
+#define		GET_FIELD_VALUE(Type) case ClassId(#Type): outInfo.Data = *field.GetValueFor<Type>(pObject); break
 			switch (field.GetTypeHash())
 			{
 				GET_FIELD_VALUE(String);
@@ -46,15 +46,14 @@ namespace ke
 				GET_FIELD_VALUE(uint2);
 				GET_FIELD_VALUE(uint3);
 				GET_FIELD_VALUE(uint4);
-				GET_FIELD_VALUE(id64);
-				GET_FIELD_VALUE(typehash64);
-				GET_FIELD_VALUE(uuid64);
-			case typehash64("AssetTreeNode"):
+				GET_FIELD_VALUE(UUID);
+				GET_FIELD_VALUE(ClassId);
+			case ClassId("AssetTreeNode"):
 			{
 				AssetTreeNode* pNode = field.GetValueFor<AssetTreeNode>(pObject);
-				id64 id = pNode->GetUUID();
+				UUID id = pNode->GetUUID();
 				outInfo.Data = id;
-				outInfo.TypeHash = typehash64("id64");
+				outInfo.TypeHash = ClassId("id64");
 			}
 			break;
 			default:
@@ -85,9 +84,31 @@ namespace ke
 		}
 	}
 
-	Map<String, Array<SerializedComponentInfo>> GameWorldSerializer::Serialize() const
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	SerializedObjectInfo ReflectedObjectSerializer::SerializeObject(ClassId typeHash, void* pObject)
 	{
-		Map<String, Array<SerializedComponentInfo>> outComponentInfos;
+		auto pClass = GetReflectedClass(typeHash);
+		CHECKMSG(pClass, "Reflected class not found");
+
+		SerializedObjectInfo objectInfo{};
+		objectInfo.Name = pClass->GetName();
+		objectInfo.TypeHash = typeHash;
+		for (auto& [name, field] : pClass->GetFields())
+		{
+			objectInfo.Fields[name] = GetFieldInfoFor(field, pObject);
+		}
+		return objectInfo;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+
+	Map<String, Array<SerializedObjectInfo>> GameWorldSerializer::Serialize() const
+	{
+		Map<String, Array<SerializedObjectInfo>> outComponentInfos;
 
 		m_World->GetComponentView<NativeComponentContainer>().each(
 			[&, this](entt::entity e, NativeComponentContainer& NCC)
@@ -100,7 +121,7 @@ namespace ke
 					return;
 				}
 
-				for (const typehash64& type : NCC.GetComponentIds())
+				for (const ClassId& type : NCC.GetComponentIds())
 				{
 					RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(type);
 					if (!pClass)
@@ -108,18 +129,12 @@ namespace ke
 						return;
 					}
 
-					SerializedComponentInfo info{};
-					info.Name = pClass->GetName();
-					info.TypeHash = type;
-
 					auto pComponent = m_World->GetComponentById(type, e);
-					for (auto& [name, field] : pClass->GetFields())
+					if (pComponent)
 					{
-						SerializedFieldInfo fieldInfo = GetFieldInfoFor(field, pComponent);
-						info.Fields[name] = std::move(fieldInfo);
+						SerializedObjectInfo info = ReflectedObjectSerializer::SerializeObject(type, pComponent);
+						outComponentInfos[entityName].AppendBack(std::move(info));
 					}
-
-					outComponentInfos[entityName].AppendBack(std::move(info));
 				}
 			});
 		return outComponentInfos;
@@ -127,7 +142,7 @@ namespace ke
 
 	namespace
 	{
-		JsonObject& JsonSerializeFieldRecursive(JsonObject& parent, typehash64 typeHash, const String& name, SerializedFieldInfo& info)
+		JsonObject& JsonSerializeFieldRecursive(JsonObject& parent, ClassId typeHash, const String& name, SerializedFieldInfo& info)
 		{
 			JsonObject& fieldContainer = parent.SerializeSubObject(name, typeHash, info.Data);
 			for (auto& [subName, subField] : info.SubFields)
@@ -140,14 +155,14 @@ namespace ke
 
 	TFuture<String> GameWorldSerializer::SerializeToJson() const
 	{
-		Map<String, Array<SerializedComponentInfo>> componentInfos = Serialize();
+		Map<String, Array<SerializedObjectInfo>> componentInfos = Serialize();
 		JsonSerializer serializer{};
 		JsonObject& root = serializer.CreateRootObject(GetWorldName());
 
 		for (auto& [entityName, components] : componentInfos)
 		{
-			JsonObject& entity = root.CreateObject(entityName, typehash64::none);
-			for (SerializedComponentInfo& component : components)
+			JsonObject& entity = root.CreateObject(entityName, ClassId::none);
+			for (SerializedObjectInfo& component : components)
 			{
 				JsonObject& serializedComponent = entity.CreateObject(component.Name, component.TypeHash);
 				for (auto& [name, field] : component.Fields)
@@ -169,52 +184,52 @@ namespace ke
 			bool bIsBaseType = true;
 			switch (pField->GetTypeHash())
 			{
-			case typehash64("String"):
+			case ClassId("String"):
 				outInfo.Data = pField->GetValueAs<String>();
 				break;
-			case typehash64("u64"):
+			case ClassId("u64"):
 				outInfo.Data = pField->GetValueAs<u64>();
 				break;
-			case typehash64("id64"):
-				outInfo.Data = pField->GetValueAs<id64>();
+			case ClassId("id64"):
+				outInfo.Data = pField->GetValueAs<UUID>();
 				break;
-			case typehash64("i32"):
+			case ClassId("i32"):
 				outInfo.Data = pField->GetValueAs<i32>();
 				break;
-			case typehash64("u32"):
+			case ClassId("u32"):
 				outInfo.Data = pField->GetValueAs<u32>();
 				break;
-			case typehash64("float"):
+			case ClassId("float"):
 				outInfo.Data = pField->GetValueAs<float>();
 				break;
-			case typehash64("bool"):
+			case ClassId("bool"):
 				outInfo.Data = pField->GetValueAs<bool>();
 				break;
-			case typehash64("float2"):
+			case ClassId("float2"):
 				outInfo.Data = pField->GetValueAs<float2>();
 				break;
-			case typehash64("float3"):
+			case ClassId("float3"):
 				outInfo.Data = pField->GetValueAs<float3>();
 				break;
-			case typehash64("float4"):
+			case ClassId("float4"):
 				outInfo.Data = pField->GetValueAs<float4>();
 				break;
-			case typehash64("int2"):
+			case ClassId("int2"):
 				outInfo.Data = pField->GetValueAs<int2>();
 				break;
-			case typehash64("int3"):
+			case ClassId("int3"):
 				outInfo.Data = pField->GetValueAs<int3>();
 				break;
-			case typehash64("int4"):
+			case ClassId("int4"):
 				outInfo.Data = pField->GetValueAs<int4>();
 				break;
-			case typehash64("uint2"):
+			case ClassId("uint2"):
 				outInfo.Data = pField->GetValueAs<uint2>();
 				break;
-			case typehash64("uint3"):
+			case ClassId("uint3"):
 				outInfo.Data = pField->GetValueAs<uint3>();
 				break;
-			case typehash64("uint4"):
+			case ClassId("uint4"):
 				outInfo.Data = pField->GetValueAs<uint4>();
 				break;
 			default:
@@ -240,7 +255,7 @@ namespace ke
 		{
 			bool bIsOfBaseType = true;
 
-#define		SET_FIELD_VALUE(Type) case typehash64(#Type): field.SetValueFor(pHandler, &std::get<Type>(fieldInfo.Data)); break
+#define		SET_FIELD_VALUE(Type) case ClassId(#Type): field.SetValueFor(pHandler, &std::get<Type>(fieldInfo.Data)); break
 			switch (fieldInfo.TypeHash)
 			{
 				SET_FIELD_VALUE(String);
@@ -257,21 +272,20 @@ namespace ke
 				SET_FIELD_VALUE(uint2);
 				SET_FIELD_VALUE(uint3);
 				SET_FIELD_VALUE(uint4);
-				SET_FIELD_VALUE(typehash64);
-				SET_FIELD_VALUE(uuid64);
-			case typehash64("id64"):
+				SET_FIELD_VALUE(ClassId);
+			case ClassId("id64"):
 			{
 				switch (field.GetTypeHash())
 				{
-				case typehash64("id64"):
+				case ClassId("id64"):
 				{
-					id64 id = std::get<id64>(fieldInfo.Data);
+					UUID id = std::get<UUID>(fieldInfo.Data);
 					field.SetValueFor(pHandler, &id);
 				}
 				break;
-				case typehash64("AssetTreeNode"):
+				case ClassId("AssetTreeNode"):
 				{
-					id64 assetUUID = std::get<id64>(fieldInfo.Data);
+					UUID assetUUID = std::get<UUID>(fieldInfo.Data);
 					auto pNode = Await(AssetManager::Get()->FindAssetNode(assetUUID));
 					if (pNode)
 					{
@@ -284,22 +298,22 @@ namespace ke
 				}
 			}
 			break;
-			case typehash64("u64"):
+			case ClassId("u64"):
 			{
 				switch (field.GetTypeHash())
 				{
-				case typehash64("u64"):
+				case ClassId("u64"):
 					field.SetValueFor(pHandler, &std::get<u64>(fieldInfo.Data));
 					break;
-				case typehash64("id64"):
+				case ClassId("id64"):
 				{
-					id64 id = std::get<u64>(fieldInfo.Data);
+					UUID id = std::get<u64>(fieldInfo.Data);
 					field.SetValueFor(pHandler, &id);
 				}
 				break;
-				case typehash64("AssetTreeNode"):
+				case ClassId("AssetTreeNode"):
 				{
-					id64 assetUUID = std::get<u64>(fieldInfo.Data);
+					UUID assetUUID = std::get<u64>(fieldInfo.Data);
 					auto pNode = Await(AssetManager::Get()->FindAssetNode(assetUUID));
 					if (pNode)
 					{
@@ -346,13 +360,13 @@ namespace ke
 		String name = pJsonData->GetKey();
 
 		// Read all entities
-		Map<String, Array<SerializedComponentInfo>> componentInfos;
+		Map<String, Array<SerializedObjectInfo>> componentInfos;
 		for (RefPtr<JsonObject> pChild : pJsonData->GetChildren())
 		{
-			Array<SerializedComponentInfo>& currentEntity = componentInfos[pChild->GetKey()];
+			Array<SerializedObjectInfo>& currentEntity = componentInfos[pChild->GetKey()];
 			for (RefPtr<JsonObject> pComponent : pChild->GetChildren())
 			{
-				SerializedComponentInfo componentInfo{};
+				SerializedObjectInfo componentInfo{};
 				componentInfo.Name = pComponent->GetKey();
 				componentInfo.TypeHash = pComponent->GetTypeHash();
 
@@ -367,7 +381,7 @@ namespace ke
 		return Deserialize(name, componentInfos);
 	}
 
-	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(const String& worldName, Map<String, Array<SerializedComponentInfo>>& objects, u32 worldIndex)
+	RefPtr<GameWorld> GameWorldDeserializer::Deserialize(const String& worldName, Map<String, Array<SerializedObjectInfo>>& objects, u32 worldIndex)
 	{
 		auto pWorld = WorldRegistry::Get()->CreateWorldAtIndex<GameWorld>(worldIndex, worldName);
 		for (auto& [name, components] : objects)

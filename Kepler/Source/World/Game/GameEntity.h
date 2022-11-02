@@ -12,7 +12,7 @@ namespace ke
 	reflected kmeta(hideindetails)
 	struct TIdComponent : public EntityComponent
 	{
-		reflected id64 Id;
+		reflected UUID Id;
 	};
 
 	reflected kmeta(hideindetails)
@@ -30,7 +30,7 @@ namespace ke
 
 		void SetName(const String& Name);
 
-		id64 GetGUID() const;
+		UUID GetGUID() const;
 
 		inline RefPtr<GameWorld> GetWorld() const { return World; }
 

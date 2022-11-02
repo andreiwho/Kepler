@@ -61,7 +61,7 @@ namespace ke
 	public:
 		using GetAccessorType = void* (*)(void*);
 		using SetAccessorType = void (*)(void*, void*);
-		ReflectedField(typehash64 id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
+		ReflectedField(ClassId id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
 		ReflectedField() = default;
 
 		template<typename GetType, typename HandlerType>
@@ -81,7 +81,7 @@ namespace ke
 			m_SetAccessor(pHandler, pValue);
 		}
 
-		inline typehash64 GetTypeHash() const
+		inline ClassId GetTypeHash() const
 		{
 			return m_TypeId;
 		}
@@ -89,7 +89,7 @@ namespace ke
 		const FieldMetadata& GetMetadata() const { return m_Metadata; }
 
 	private:
-		typehash64 m_TypeId{0};
+		ClassId m_TypeId{0};
 		FieldMetadata m_Metadata;
 		GetAccessorType m_GetAccessor{};
 		SetAccessorType m_SetAccessor{};
@@ -128,14 +128,14 @@ namespace ke
 
 		virtual void* Construct(void* pAddress) const = 0;
 
-		inline typehash64 GetClassId() const { return m_ClassId; }
+		inline ClassId GetClassId() const { return m_ClassId; }
 
 		inline const ClassMetadata& GetMetadata() const { return m_Metadata; }
 
 		virtual void* RegistryConstruct(entt::entity id, entt::registry& registry) const = 0;
 
 	protected:
-		typehash64 m_ClassId;
+		ClassId m_ClassId;
 		void PushField(const String& name, ReflectedField&& field);
 		ClassMetadata m_Metadata{};
 

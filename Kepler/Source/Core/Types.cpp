@@ -37,7 +37,7 @@ namespace ke
 		}
 	}
 
-	id64::id64()
+	UUID::UUID()
 		:	Value(Types_RandomU64())
 	{
 	}

@@ -20,7 +20,7 @@ namespace ke
 		uint2,
 		uint3,
 		uint4,
-		id64,
+		UUID,
 		u64,
 		std::monostate
 	>;
@@ -30,7 +30,7 @@ namespace ke
 		friend class JsonSerializer;
 
 	public:
-		JsonObject(String key, typehash64 typeHash) : m_Key(key), m_TypeHash(typeHash) {}
+		JsonObject(String key, ClassId typeHash) : m_Key(key), m_TypeHash(typeHash) {}
 
 		template<typename T>
 		inline decltype(auto) GetValueAs() const
@@ -54,10 +54,10 @@ namespace ke
 			return m_Key;
 		}
 
-		JsonObject& CreateObject(const String& key, typehash64 typeHash);
+		JsonObject& CreateObject(const String& key, ClassId typeHash);
 		void Write(JsonSerializableType&& value);
-		JsonObject& SerializeSubObject(const String& key, typehash64 typeHash, const JsonSerializableType& value);
-		JsonObject& SerializeReflectedObject(const String& key, typehash64 typeHash, const void* pObject);
+		JsonObject& SerializeSubObject(const String& key, ClassId typeHash, const JsonSerializableType& value);
+		JsonObject& SerializeReflectedObject(const String& key, ClassId typeHash, const void* pObject);
 
 		inline bool IsRoot() const
 		{
@@ -69,12 +69,12 @@ namespace ke
 			return m_Children;
 		}
 
-		inline typehash64 GetTypeHash() const { return m_TypeHash; }
-		inline void SetTypeHash(typehash64 newTypeHash) { m_TypeHash = newTypeHash; }
+		inline ClassId GetTypeHash() const { return m_TypeHash; }
+		inline void SetTypeHash(ClassId newTypeHash) { m_TypeHash = newTypeHash; }
 
 	private:
 		String m_Key{};
-		typehash64 m_TypeHash{};
+		ClassId m_TypeHash{};
 		JsonSerializableType m_Value{ std::monostate{} };
 		JsonObject* m_Parent{};
 		Array<RefPtr<JsonObject>> m_Children{};

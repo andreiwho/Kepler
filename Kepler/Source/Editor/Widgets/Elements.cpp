@@ -169,7 +169,7 @@ namespace ke
 		bool bBeganDragDropTarget = false;
 		switch (field.GetTypeHash())
 		{
-		case typehash64("AssetTreeNode"):
+		case ClassId("AssetTreeNode"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			AssetTreeNode* pAsset = field.GetValueFor<AssetTreeNode>(pHandler);
@@ -223,42 +223,42 @@ namespace ke
 			}
 		}
 		break;
-		case typehash64("float"):
+		case ClassId("float"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float>(pHandler);
 			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed);
 		}
 		break;
-		case typehash64("float2"):
+		case ClassId("float2"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float2>(pHandler);
 			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed);
 		}
 		break;
-		case typehash64("float3"):
+		case ClassId("float3"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float3>(pHandler);
 			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed);
 		}
 		break;
-		case typehash64("float4"):
+		case ClassId("float4"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float4>(pHandler);
 			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed);
 		}
 		break;
-		case typehash64("bool"):
+		case ClassId("bool"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<bool>(pHandler);
 			ImGui::Checkbox(name.c_str(), value);
 		}
 		break;
-		case typehash64("String"):
+		case ClassId("String"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<String>(pHandler);
@@ -336,7 +336,7 @@ namespace ke
 		}
 	}
 
-	void TEditorElements::DrawReflectedObjectFields(const String& label, typehash64 typeHash, void* pHandler)
+	void TEditorElements::DrawReflectedObjectFields(const String& label, ClassId typeHash, void* pHandler)
 	{
 		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
 		if (!pClass)

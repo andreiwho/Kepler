@@ -92,7 +92,7 @@ namespace ke
 		void ClearChildren();
 		void AssignParent(AssetTreeNode* pParent);
 		RefPtr<AssetTreeNode> FindNode(const String& path);
-		RefPtr<AssetTreeNode> FindNodeById(id64 id);
+		RefPtr<AssetTreeNode> FindNodeById(UUID id);
 
 		inline String GetPath() const { return m_UnresolvedPath; }
 		inline String GetPath_Resolved() const { return m_ResolvedPath; }
@@ -102,7 +102,7 @@ namespace ke
 		inline bool IsDirectory() const { return m_Type == EAssetNodeType::Directory; }
 		inline bool IsAssetMetadata() const { return m_Type == EAssetNodeType::AssetMetadata; }
 		inline bool IsPlainAsset() const { return m_Type == EAssetNodeType::PlainAsset; }
-		inline id64 GetUUID() const { return m_UUID; }
+		inline UUID GetUUID() const { return m_UUID; }
 		inline const Array<RefPtr<AssetTreeNode>>& GetChildren() const
 		{
 			return m_Children;
@@ -127,7 +127,7 @@ namespace ke
 		// An unresolved asset path
 		String m_UnresolvedPath;
 
-		id64 m_UUID{};
+		UUID m_UUID{};
 		EAssetNodeType m_Type{};
 		String m_Name{};
 

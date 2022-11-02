@@ -84,7 +84,7 @@ namespace ke
 		return m_EntityRegistry.get<TGameEntity>(Id.Entity);
 	}
 
-	GameEntityId GameWorld::GetEntityByUUID(uuid64 id)
+	GameEntityId GameWorld::GetEntityByUUID(UUID id)
 	{
 		CHECK(m_UUIDToEntityMap.Contains(id));
 		return m_UUIDToEntityMap[id];
@@ -104,7 +104,7 @@ namespace ke
 		return "";
 	}
 
-	id64 GameWorld::GetEntityUUID(GameEntityId Entity) const
+	UUID GameWorld::GetEntityUUID(GameEntityId Entity) const
 	{
 		if (m_EntityRegistry.valid(Entity.Entity))
 		{
@@ -193,7 +193,7 @@ namespace ke
 		m_PendingDestroyEntities.Clear();
 	}
 
-	EntityComponent* GameWorld::AddComponentByTypeHash(GameEntityId id, typehash64 typeHash)
+	EntityComponent* GameWorld::AddComponentByTypeHash(GameEntityId id, ClassId typeHash)
 	{
 		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
 		if (pClass)

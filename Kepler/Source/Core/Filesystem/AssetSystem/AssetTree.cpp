@@ -61,10 +61,10 @@ namespace ke
 
 	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const String& path)
 	{
-		return FindNodeById(id64(path));
+		return FindNodeById(UUID(path));
 	}
 
-	RefPtr<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNodeById(UUID id)
 	{
 		if (id == m_UUID)
 		{

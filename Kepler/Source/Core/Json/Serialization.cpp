@@ -15,7 +15,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	JsonObject& JsonSerializer::CreateRootObject(const String& key)
 	{
-		m_RootNode = MakeRef(New<JsonObject>(key, typehash64::none));
+		m_RootNode = MakeRef(New<JsonObject>(key, ClassId::none));
 		CHECK(m_RootNode);
 		return *m_RootNode;
 	}
@@ -23,24 +23,24 @@ namespace ke
 	namespace
 	{
 		template<glm::length_t Len, typename T, glm::qualifier Q>
-		constexpr typehash64 GetVectorTypeHash(glm::vec<Len, T, Q>)
+		constexpr ClassId GetVectorTypeHash(glm::vec<Len, T, Q>)
 		{
 			switch (Len)
 			{
 			case 2:
-				if constexpr (std::is_same_v<float, T>) return typehash64("float2");
-				if constexpr (std::is_same_v<u32, T>) return typehash64("uint2");
-				if constexpr (std::is_same_v<i32, T>) return typehash64("int2");
+				if constexpr (std::is_same_v<float, T>) return ClassId("float2");
+				if constexpr (std::is_same_v<u32, T>) return ClassId("uint2");
+				if constexpr (std::is_same_v<i32, T>) return ClassId("int2");
 				break;
 			case 3:
-				if constexpr (std::is_same_v<float, T>) return typehash64("float3");
-				if constexpr (std::is_same_v<u32, T>) return typehash64("uint3");
-				if constexpr (std::is_same_v<i32, T>) return typehash64("int3");
+				if constexpr (std::is_same_v<float, T>) return ClassId("float3");
+				if constexpr (std::is_same_v<u32, T>) return ClassId("uint3");
+				if constexpr (std::is_same_v<i32, T>) return ClassId("int3");
 				break;
 			case 4:
-				if constexpr (std::is_same_v<float, T>) return typehash64("float4");
-				if constexpr (std::is_same_v<u32, T>) return typehash64("uint4");
-				if constexpr (std::is_same_v<i32, T>) return typehash64("int4");
+				if constexpr (std::is_same_v<float, T>) return ClassId("float4");
+				if constexpr (std::is_same_v<u32, T>) return ClassId("uint4");
+				if constexpr (std::is_same_v<i32, T>) return ClassId("int4");
 				break;
 			default:
 				break;
@@ -55,7 +55,7 @@ namespace ke
 
 			value.SetObject();
 			
-			typehash64 typeHash = GetVectorTypeHash(vector);
+			ClassId typeHash = GetVectorTypeHash(vector);
 			rapidjson::Value typeHashValue{ typeHash.Value };
 			value.AddMember("TypeHash", typeHashValue, allocator);
 
@@ -85,9 +85,9 @@ namespace ke
 			{
 				value.SetString(object.GetValueAs<String>().c_str(), allocator);
 			}
-			else if (object.IsA<id64>())
+			else if (object.IsA<UUID>())
 			{
-				value.SetUint64(object.GetValueAs<id64>().Value);
+				value.SetUint64(object.GetValueAs<UUID>().Value);
 			}
 			else if (object.IsA<float>())
 			{
@@ -108,7 +108,7 @@ namespace ke
 			else if (object.IsStructuredType())
 			{
 				value.SetObject();
-				const typehash64 typeHash = object.GetTypeHash().Value;
+				const ClassId typeHash = object.GetTypeHash().Value;
 				if (typeHash.Value > 0)
 				{
 					rapidjson::Value typeHashValue{ object.GetTypeHash().Value };
@@ -172,7 +172,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	JsonObject& JsonObject::CreateObject(const String& key, typehash64 typeHash)
+	JsonObject& JsonObject::CreateObject(const String& key, ClassId typeHash)
 	{
 		RefPtr<JsonObject> pObject = MakeRef(New<JsonObject>(key, typeHash));
 		pObject->m_Parent = this;
@@ -187,14 +187,14 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	JsonObject& JsonObject::SerializeSubObject(const String& key, typehash64 typeHash, const JsonSerializableType& value)
+	JsonObject& JsonObject::SerializeSubObject(const String& key, ClassId typeHash, const JsonSerializableType& value)
 	{
 		JsonObject& object = CreateObject(key, typeHash);
 		object.m_Value = value;
 		return object;
 	}
 
-	JsonObject& JsonObject::SerializeReflectedObject(const String& key, typehash64 typeHash, const void* pObject)
+	JsonObject& JsonObject::SerializeReflectedObject(const String& key, ClassId typeHash, const void* pObject)
 	{
 		JsonObject& object = CreateObject(key, typeHash);
 		// todo...
@@ -204,9 +204,9 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	namespace
 	{
-		constexpr bool IsVectorType(typehash64 hash)
+		constexpr bool IsVectorType(ClassId hash)
 		{
-#define ISVEC(type) hash == typehash64(#type)
+#define ISVEC(type) hash == classid(type)
 			return ISVEC(float2)
 				|| ISVEC(float3)
 				|| ISVEC(float4)
@@ -222,31 +222,31 @@ namespace ke
 		{
 			switch (readInto.GetTypeHash())
 			{
-			case typehash64("float2"):
+			case ClassId("float2"):
 				readInto.Write(float2(value["x"].GetFloat(), value["y"].GetFloat()));
 				break;
-			case typehash64("float3"):
+			case ClassId("float3"):
 				readInto.Write(float3(value["x"].GetFloat(), value["y"].GetFloat(), value["z"].GetFloat()));
 				break;
-			case typehash64("float4"):
+			case ClassId("float4"):
 				readInto.Write(float4(value["x"].GetFloat(), value["y"].GetFloat(), value["z"].GetFloat(), value["w"].GetFloat()));
 				break;
-			case typehash64("int2"):
+			case ClassId("int2"):
 				readInto.Write(int2(value["x"].GetInt(), value["y"].GetInt()));
 				break;
-			case typehash64("int3"):
+			case ClassId("int3"):
 				readInto.Write(int3(value["x"].GetInt(), value["y"].GetInt(), value["z"].GetInt()));
 				break;
-			case typehash64("int4"):
+			case ClassId("int4"):
 				readInto.Write(int4(value["x"].GetInt(), value["y"].GetInt(), value["z"].GetInt(), value["w"].GetInt()));
 				break;
-			case typehash64("uint2"):
+			case ClassId("uint2"):
 				readInto.Write(uint2(value["x"].GetUint(), value["y"].GetUint()));
 				break;
-			case typehash64("uint3"):
+			case ClassId("uint3"):
 				readInto.Write(uint3(value["x"].GetUint(), value["y"].GetUint(), value["z"].GetUint()));
 				break;
-			case typehash64("uint4"):
+			case ClassId("uint4"):
 				readInto.Write(uint4(value["x"].GetUint(), value["y"].GetUint(), value["z"].GetUint(), value["w"].GetUint()));
 				break;
 			default:
@@ -258,7 +258,7 @@ namespace ke
 		{
 			if (value.IsObject())
 			{
-				JsonObject& newObject = parent.CreateObject(name, typehash64::none);
+				JsonObject& newObject = parent.CreateObject(name, ClassId::none);
 				if (value.HasMember("TypeHash"))
 				{
 					newObject.SetTypeHash(value["TypeHash"].GetUint64());
@@ -281,23 +281,23 @@ namespace ke
 			}
 			else if (value.IsString())
 			{
-				parent.SerializeSubObject(name, typehash64("String"), value.GetString());
+				parent.SerializeSubObject(name, ClassId("String"), value.GetString());
 			}
 			else if (value.IsFloat())
 			{
-				parent.SerializeSubObject(name, typehash64("float"), value.GetFloat());
+				parent.SerializeSubObject(name, ClassId("float"), value.GetFloat());
 			}
 			else if (value.IsUint64())
 			{
-				parent.SerializeSubObject(name, typehash64("u64"), value.GetUint64());
+				parent.SerializeSubObject(name, ClassId("u64"), value.GetUint64());
 			}
 			else if (value.IsInt())
 			{
-				parent.SerializeSubObject(name, typehash64("i32"), value.GetInt());
+				parent.SerializeSubObject(name, ClassId("i32"), value.GetInt());
 			}
 			else if (value.IsBool())
 			{
-				parent.SerializeSubObject(name, typehash64("bool"), value.GetBool());
+				parent.SerializeSubObject(name, ClassId("bool"), value.GetBool());
 			}			
 		}
 	}
@@ -316,7 +316,7 @@ namespace ke
 			CHECK(value.IsObject());
 			CHECK(name.IsString());
 
-			m_RootNode = MakeRef(New<JsonObject>(name.GetString(), typehash64::none));
+			m_RootNode = MakeRef(New<JsonObject>(name.GetString(), ClassId::none));
 
 			auto object = value.GetObject();
 			for (auto& [subName, subValue] : object)
