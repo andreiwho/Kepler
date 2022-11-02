@@ -28,10 +28,24 @@ namespace ke
 	};
 
 	template<typename T, typename ... Args>
-	T* New(Args&&... args);
+	T* New(Args&&... args)
+	{
+		TMalloc* allocator = TMalloc::Get();
+		void* addr = allocator->Allocate(sizeof(T));
+		assert(addr && "Failed to allocate object");
+		return new(addr) T(std::forward<Args>(args)...);
+	}
 
 	template<typename T>
-	void Delete(T* object);
+	void Delete(const T* pObj)
+	{
+		if (pObj)
+		{
+			pObj->~T();
+			TMalloc* pAlloc = TMalloc::Get();
+			pAlloc->Free(pObj);
+		}
+	}
 
 	usize MemorySize(void* data);
 

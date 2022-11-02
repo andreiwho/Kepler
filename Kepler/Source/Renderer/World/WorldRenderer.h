@@ -36,6 +36,7 @@ namespace ke
 
 		reflected EFormat MeshPassBufferFormat = EFormat::R11G11B10_FLOAT;
 		reflected EFormat PrePassDepthBufferFormat = EFormat::D24_UNORM_S8_UINT;
+		reflected float Gamma = 2.2f;
 
 		WorldRenderer();
 		~WorldRenderer();

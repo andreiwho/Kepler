@@ -10,6 +10,81 @@
 
 namespace ke
 {
+	//////////////////////////////////////////////////////////////////////////
+	namespace fs = std::filesystem;
+	class IncludeInterface : public ID3DInclude
+	{
+	public:
+		IncludeInterface(const String& shaderPath)
+			: m_ShaderPath(shaderPath)
+		{}
+
+		STDOVERRIDEMETHODIMP Open(THIS_ D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
+		{
+			using namespace std::string_literals;
+
+			String shaderPath = VFSResolvePath(m_ShaderPath);
+
+			switch (IncludeType)
+			{
+			case D3D_INCLUDE_LOCAL:
+			{
+				fs::path parentPath = fs::path(shaderPath).parent_path();
+				fs::path incPath = parentPath / pFileName;
+				if (fs::exists(incPath))
+				{
+					String includedPath = incPath.string();
+					if (m_LoadedShaders.Contains(includedPath))
+					{
+						GetBufferPointer(includedPath, ppData, pBytes);
+						return S_OK;
+					}
+
+					m_LoadedShaders[includedPath] = Await(TFileUtils::ReadTextFileAsync(includedPath, true));
+					GetBufferPointer(includedPath, ppData, pBytes);
+					return S_OK;
+				}
+			}
+			break;
+			case D3D_INCLUDE_SYSTEM:
+			{
+				String includedPath = VFSResolvePath("EngineShaders://"s + pFileName);
+				if (fs::exists(includedPath))
+				{
+					if (m_LoadedShaders.Contains(includedPath))
+					{
+						GetBufferPointer(includedPath, ppData, pBytes);
+						return S_OK;
+					}
+
+					m_LoadedShaders[includedPath] = Await(TFileUtils::ReadTextFileAsync(includedPath, true));
+					GetBufferPointer(includedPath, ppData, pBytes);
+					return S_OK;
+				}
+			}
+			break;
+			};
+			return E_INVALIDARG;
+		}
+
+		void GetBufferPointer(const String& key, LPCVOID* ppData, UINT* pBytes)
+		{
+			*ppData = m_LoadedShaders[key].c_str();
+			*pBytes = (UINT)m_LoadedShaders[key].length() - 1;
+		}
+
+		STDOVERRIDEMETHODIMP Close(THIS_ LPCVOID pData)
+		{
+			return S_OK;
+		}
+
+	private:
+		Map<String, String> m_LoadedShaders;
+		String m_ShaderPath{};
+		std::mutex m_Mutex{};
+	};
+
+	//////////////////////////////////////////////////////////////////////////
 	RefPtr<IShader> THLSLShaderCompilerD3D11::CompileShader(const String& Path, EShaderStageFlags TypeMask)
 	{
 		if (TShaderCache::Get()->Exists(Path))
@@ -30,12 +105,13 @@ namespace ke
 
 		const auto Stages = TypeMask.Separate();
 		Array<std::future<ShaderModule>> ModuleFutures;
+		IncludeInterface* pInclude = New<IncludeInterface>(Path);
 		for (const EShaderStageFlags::Type Stage : Stages)
 		{
 			ModuleFutures.EmplaceBack(Async(
-				[PathRef = VFSResolvePath(Path), SourceRef = std::ref(Source), Stage]()
+				[PathRef = VFSResolvePath(Path), SourceRef = std::ref(Source), Stage, pInclude]()
 				{
-					return CreateShaderModule(PathRef, Stage, SourceRef);
+					return CreateShaderModule(PathRef, Stage, SourceRef, pInclude);
 				})
 			);
 		}
@@ -46,41 +122,43 @@ namespace ke
 		{
 			Modules.EmplaceBack(Await(Future));
 		}
+		Delete(pInclude);
 
 		auto OutShader = New<THLSLShaderD3D11>(Path, Modules);
 		TShaderCache::Get()->Add(Path, OutShader);
 		return OutShader;
 	}
 
-	ShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const String& SourceName, EShaderStageFlags::Type Flag, const String& Source)
+	ShaderModule THLSLShaderCompilerD3D11::CreateShaderModule(const String& SourceName, EShaderStageFlags::Type Flag, const String& Source, ID3DInclude* pInclude)
 	{
 		ShaderModule OutShaderModule{};
 		OutShaderModule.StageFlags = Flag;
 
 		const String EntryPoint = std::invoke([Flag]
-		{
-			switch (Flag)
 			{
-			case ke::EShaderStageFlags::Vertex:
-				return "VSMain";
-			case ke::EShaderStageFlags::Pixel:
-				return "PSMain";
-			case ke::EShaderStageFlags::Compute:
-				return "CSMain";
-			default:
-				break;
-			}
-			CRASHMSG("Unknown shader type");
-		});
+				switch (Flag)
+				{
+				case ke::EShaderStageFlags::Vertex:
+					return "VSMain";
+				case ke::EShaderStageFlags::Pixel:
+					return "PSMain";
+				case ke::EShaderStageFlags::Compute:
+					return "CSMain";
+				default:
+					break;
+				}
+				CRASHMSG("Unknown shader type");
+			});
 
-		OutShaderModule.ByteCode = CompileHLSLCode(SourceName, EntryPoint, Flag, Source);
+		OutShaderModule.ByteCode = CompileHLSLCode(SourceName, EntryPoint, Flag, Source, pInclude);
 		return OutShaderModule;
 	}
 
 	RefPtr<IAsyncDataBlob> THLSLShaderCompilerD3D11::CompileHLSLCode(const String& SourceName,
 		const String& EntryPoint,
 		EShaderStageFlags::Type Type,
-		const String& Code)
+		const String& Code,
+		ID3DInclude* pInclude)
 	{
 		KEPLER_TRACE(LogShaderCompiler, "Compiling shader '{}' as {}", SourceName, EShaderStageFlags::ToString(Type));
 
@@ -109,17 +187,17 @@ namespace ke
 		String LightSlot = MakeBufferSlotString(WorldRenderer::RS_Light);
 		String UserSlot = MakeBufferSlotString(WorldRenderer::RS_User);
 
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Camera", CameraSlot.c_str()});
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_Light", LightSlot.c_str()});
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{"RS_User", UserSlot.c_str()});
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{nullptr, nullptr});
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_Camera", CameraSlot.c_str() });
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_Light", LightSlot.c_str() });
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_User", UserSlot.c_str() });
+		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ nullptr, nullptr });
 
 		if (FAILED(D3DCompile(
 			Code.data(),
 			Code.size(),
 			SourceName.c_str(),
-			shaderMacros.GetData(), 
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			shaderMacros.GetData(),
+			pInclude,
 			EntryPoint.c_str(),
 			ShaderType.c_str(),
 			0, 0,

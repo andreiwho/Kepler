@@ -1,3 +1,5 @@
+#include "Core/ShaderCore.hlsl"
+
 struct TVertex
 {
 	float3 Position : POSITION0;
@@ -13,18 +15,6 @@ struct TPixel
 	float2 UV0 : TEXCOORD0;
 	float3 Normal : NORMAL0;
 	int Id : ENTITY_ID0;
-};
-
-cbuffer TCamera : register(RS_Camera)
-{
-	float4x4 ViewProjection;
-};
-
-//////////////////////////////////////////////////////////////////
-cbuffer TConstants : register(RS_User)
-{
-	float4x4 Transform;
-	int EntityId;
 };
 
 
