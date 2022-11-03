@@ -31,3 +31,6 @@
 [submodule "Kepler/ThirdParty/nativefiledialog-extended"]
 	path = Kepler/ThirdParty/nativefiledialog-extended
 	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "Kepler/ThirdParty/volk"]
+	path = Kepler/ThirdParty/volk
+	url = https://github.com/zeux/volk
