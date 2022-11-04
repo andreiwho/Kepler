@@ -18,7 +18,7 @@ namespace ke
 		Instance = this;
 	}
 
-	TSharedPtr<AudioEngine> AudioEngine::CreateAudioEngine(EAudioEngineAPI api)
+	SharedPtr<AudioEngine> AudioEngine::CreateAudioEngine(EAudioEngineAPI api)
 	{
 		switch (api)
 		{

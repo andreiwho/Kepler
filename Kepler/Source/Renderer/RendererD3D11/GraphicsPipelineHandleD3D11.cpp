@@ -7,7 +7,7 @@
 namespace ke
 {
 
-	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	TGraphicsPipelineHandleD3D11::TGraphicsPipelineHandleD3D11(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config)
 	{
 		SetupRasterizer(Config);
 		SetupDepthStencil(Config);
@@ -38,7 +38,7 @@ namespace ke
 		}
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupRasterizer(const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupRasterizer(const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		CD3D11_RASTERIZER_DESC Desc(D3D11_DEFAULT);
@@ -80,7 +80,7 @@ namespace ke
 		HRCHECK(Device->CreateRasterizerState(&Desc, &RasterState));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupDepthStencil(const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupDepthStencil(const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		CD3D11_DEPTH_STENCIL_DESC Desc(D3D11_DEFAULT);
@@ -151,7 +151,7 @@ namespace ke
 		HRCHECK(Device->CreateDepthStencilState(&Desc, &DepthStencil));
 	}
 
-	void TGraphicsPipelineHandleD3D11::SetupInputLayout(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config)
+	void TGraphicsPipelineHandleD3D11::SetupInputLayout(RefPtr<IShader> Shader, const GraphicsPipelineConfig& Config)
 	{
 		CHECK(IsRenderThread());
 		PrimitiveTopology = std::invoke([&Config]
@@ -171,7 +171,7 @@ namespace ke
 		Array<D3D11_INPUT_ELEMENT_DESC> Elements;
 		Elements.Reserve(Config.VertexInput.VertexLayout.GetAttributes().GetLength());
 		
-		for (const TVertexAttribute& Element : Config.VertexInput.VertexLayout.GetAttributes())
+		for (const VertexAttribute& Element : Config.VertexInput.VertexLayout.GetAttributes())
 		{
 			D3D11_INPUT_ELEMENT_DESC Desc{};
 			ZeroMemory(&Desc, sizeof(Desc));
@@ -222,7 +222,7 @@ namespace ke
 		}
 		auto Device = CHECKED(TRenderDeviceD3D11::Get())->GetDevice();
 		CHECK(Device);
-		TRef<AsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
+		RefPtr<IAsyncDataBlob> VertexShaderBytecode = Shader->GetVertexShaderBytecode();
 		HRCHECK(Device->CreateInputLayout(Elements.GetData(), (UINT)Elements.GetLength(), VertexShaderBytecode->GetData(), VertexShaderBytecode->GetSize(), &InputLayout));
 	}
 

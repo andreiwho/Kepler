@@ -28,14 +28,28 @@ namespace ke
 	};
 
 	template<typename T, typename ... Args>
-	T* New(Args&&... args);
+	T* New(Args&&... args)
+	{
+		TMalloc* allocator = TMalloc::Get();
+		void* addr = allocator->Allocate(sizeof(T));
+		assert(addr && "Failed to allocate object");
+		return new(addr) T(std::forward<Args>(args)...);
+	}
 
 	template<typename T>
-	void Delete(T* object);
+	void Delete(const T* pObj)
+	{
+		if (pObj)
+		{
+			pObj->~T();
+			TMalloc* pAlloc = TMalloc::Get();
+			pAlloc->Free(pObj);
+		}
+	}
 
 	usize MemorySize(void* data);
 
-	template<typename T> using TSharedPtr = std::shared_ptr<T>;
+	template<typename T> using SharedPtr = std::shared_ptr<T>;
 
 	class IntrusiveRefCounted
 	{
@@ -55,11 +69,11 @@ namespace ke
 	usize DoGetRefCount(void* pRefCounted);
 
 	template<typename T>
-	class TRef
+	class RefPtr
 	{
 	public:
-		TRef() : m_pMemory(nullptr) {}
-		TRef(T* pNewMem)
+		RefPtr() : m_pMemory(nullptr) {}
+		RefPtr(T* pNewMem)
 			: m_pMemory(pNewMem)
 		{
 			if (m_pMemory && !DoGetRefCount(m_pMemory))
@@ -68,9 +82,9 @@ namespace ke
 			}
 		}
 
-		~TRef() { Release(); }
+		~RefPtr() { Release(); }
 
-		TRef(const TRef& other) noexcept
+		RefPtr(const RefPtr& other) noexcept
 		{
 			if (m_pMemory)
 			{
@@ -84,7 +98,7 @@ namespace ke
 		}
 
 		template<typename U>
-		TRef<T>(const TRef<U>& other) noexcept
+		RefPtr<T>(const RefPtr<U>& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
 			if (m_pMemory)
@@ -98,7 +112,7 @@ namespace ke
 			}
 		}
 
-		TRef& operator=(const TRef& other) noexcept
+		RefPtr& operator=(const RefPtr& other) noexcept
 		{
 			if (m_pMemory)
 			{
@@ -113,7 +127,7 @@ namespace ke
 		}
 
 		template<typename U>
-		TRef<T>& operator=(const TRef<U>& other) noexcept
+		RefPtr<T>& operator=(const RefPtr<U>& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
 			if (m_pMemory)
@@ -128,7 +142,7 @@ namespace ke
 			return *this;
 		}
 
-		TRef(TRef&& other) noexcept
+		RefPtr(RefPtr&& other) noexcept
 		{
 			if (m_pMemory)
 			{
@@ -139,7 +153,7 @@ namespace ke
 		}
 
 		template<typename U>
-		TRef<T>(TRef<U>&& other) noexcept
+		RefPtr<T>(RefPtr<U>&& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
 			if (m_pMemory)
@@ -150,7 +164,7 @@ namespace ke
 			other.ResetMemoryUnsafe();
 		}
 
-		TRef& operator=(TRef&& other) noexcept
+		RefPtr& operator=(RefPtr&& other) noexcept
 		{
 			if (m_pMemory)
 			{
@@ -162,7 +176,7 @@ namespace ke
 		}
 
 		template<typename U>
-		TRef<T>& operator=(TRef<U>&& other) noexcept
+		RefPtr<T>& operator=(RefPtr<U>&& other) noexcept
 		{
 			static_assert(std::is_base_of_v<T, U>);
 			if (m_pMemory)
@@ -180,7 +194,8 @@ namespace ke
 		T& operator*() { return *m_pMemory; }
 		const T& operator*() const { return *m_pMemory; }
 		inline operator bool() const { return !!Raw(); }
-
+		inline operator T* () { return Raw(); }
+		inline operator const T* () const { return Raw(); }
 		T* Raw() { return m_pMemory; }
 		const T* Raw() const { return m_pMemory; }
 
@@ -200,23 +215,23 @@ namespace ke
 	};
 
 	template<typename T>
-	TRef<T> MakeRef(T* pMem)
+	RefPtr<T> MakeRef(T* pMem)
 	{
 		//static_assert(std::is_base_of_v<TRefCounted, T>);
-		return TRef<T>(pMem);
+		return RefPtr<T>(pMem);
 	}
 
 	template<typename T>
-	struct TEnableRefFromThis : public IntrusiveRefCounted
+	struct EnableRefPtrFromThis : public IntrusiveRefCounted
 	{
-		inline TRef<T> RefFromThis()
+		inline RefPtr<T> RefFromThis()
 		{
 			AddRef();
 			return MakeRef(static_cast<T*>(this));
 		}
 
 		template<typename U>
-		inline TRef<U> RefFromThis()
+		inline RefPtr<U> RefFromThis()
 		{
 			return RefCast<U>(RefFromThis());
 		}
@@ -259,21 +274,21 @@ namespace ke
 	};
 
 	template<typename T, typename U>
-	TRef<T> RefCast(TRef<U> ref)
+	RefPtr<T> RefCast(RefPtr<U> ref)
 	{
 		if constexpr (std::is_base_of_v<T, U> || std::is_base_of_v<U, T>)
 		{
 			if (ref)
 			{
 				ref.AddRef();
-				return TRef<T>(static_cast<T*>(ref.Raw()));
+				return RefPtr<T>(static_cast<T*>(ref.Raw()));
 			}
 		}
 		return nullptr;
 	}
 
 	template<typename T, typename ... ARGS>
-	inline TSharedPtr<T> MakeShared(ARGS&& ... Args)
+	inline SharedPtr<T> MakeShared(ARGS&& ... Args)
 	{
 		return std::allocate_shared<T>(TMallocator<T>{}, std::forward<ARGS>(Args)...);
 	}

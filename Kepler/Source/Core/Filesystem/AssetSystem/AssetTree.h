@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Core.h"
+#include "Reflection/Class.h"
 
 namespace ke
 {
@@ -24,7 +25,7 @@ namespace ke
 		EAssetNodeType(EValue value) : Value(value) {}
 		inline operator EValue() const { return Value; }
 
-		inline TString ToString() const
+		inline String ToString() const
 		{
 			switch (Value)
 			{
@@ -60,7 +61,7 @@ namespace ke
 		constexpr EAssetSortFilter(EValue value) : Value(value) {}
 		inline constexpr operator EValue() const { return Value; }
 
-		inline TString ToString() const
+		inline String ToString() const
 		{
 			switch (Value)
 			{
@@ -80,67 +81,69 @@ namespace ke
 		static Array<EAssetSortFilter> GetEntries() { return { None, DirectoriesFirst, AssetsFirst }; }
 	};
 
-	class AssetTreeNode : public TEnableRefFromThis<AssetTreeNode>
+	class AssetTreeNode : public EnableRefPtrFromThis<AssetTreeNode>
 	{
 	public:
-		AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath);
+		AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath);
 		virtual ~AssetTreeNode() = default;
 		inline EAssetNodeType GetNodeType() const { return m_Type; }
-		void AddChild(TRef<AssetTreeNode> newChild);
-		void RemoveChild(TRef<AssetTreeNode> child);
+		void AddChild(RefPtr<AssetTreeNode> newChild);
+		void RemoveChild(RefPtr<AssetTreeNode> child);
 		void ClearChildren();
 		void AssignParent(AssetTreeNode* pParent);
-		TRef<AssetTreeNode> FindNode(const TString& path);
-		TRef<AssetTreeNode> FindNodeById(id64 id);
+		RefPtr<AssetTreeNode> FindNode(const String& path);
+		RefPtr<AssetTreeNode> FindNodeById(UUID id);
 
-		inline TString GetPath() const { return m_UnresolvedPath; }
-		inline TString GetPath_Resolved() const { return m_ResolvedPath; }
+		inline String GetPath() const { return m_UnresolvedPath; }
+		inline String GetPath_Resolved() const { return m_ResolvedPath; }
 
 		inline void SetRoot() { CHECK(IsDirectory() || IsRoot()); m_Type = EAssetNodeType::Root; }
 		inline bool IsRoot() const { return m_Type == EAssetNodeType::Root; }
 		inline bool IsDirectory() const { return m_Type == EAssetNodeType::Directory; }
 		inline bool IsAssetMetadata() const { return m_Type == EAssetNodeType::AssetMetadata; }
 		inline bool IsPlainAsset() const { return m_Type == EAssetNodeType::PlainAsset; }
-		inline id64 GetUUID() const { return m_UUID; }
-		inline const Array<TRef<AssetTreeNode>>& GetChildren() const
+		inline UUID GetUUID() const { return m_UUID; }
+		inline const Array<RefPtr<AssetTreeNode>>& GetChildren() const
 		{
 			return m_Children;
 		}
-		inline const TString& GetName() const { return m_Name; }
+		inline const String& GetName() const { return m_Name; }
 		inline bool HasDirectories() const { return m_bHasDirectories; }
 		inline AssetTreeNode* GetParent() const { return m_Parent; }
 		void SortChildren(EAssetSortFilter filter = EAssetSortFilter::None);
 
 	protected:
 		template<typename T>
-		static TRef<T> New(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<T> New(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath)
 		{
 			return MakeRef(ke::New<T>(type, pParent, unresolvedPath));
 		}
 
 	private:
 		AssetTreeNode* m_Parent{};
-		Array<TRef<AssetTreeNode>> m_Children{};
+		Array<RefPtr<AssetTreeNode>> m_Children{};
 		// A resolved asset path
-		TString m_ResolvedPath;
+		String m_ResolvedPath;
 		// An unresolved asset path
-		TString m_UnresolvedPath;
+		String m_UnresolvedPath;
 
-		id64 m_UUID{};
+		UUID m_UUID{};
 		EAssetNodeType m_Type{};
-		TString m_Name{};
+		String m_Name{};
 
 		bool m_bHasDirectories = false;
 	};
 
+	using Asset = AssetTreeNode;
+
 	class AssetTreeNode_Directory : public AssetTreeNode
 	{
 	public:
-		AssetTreeNode_Directory(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
+		AssetTreeNode_Directory(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath)
 			:	AssetTreeNode(type, pParent, unresolvedPath)
 		{}
 
-		static TRef<AssetTreeNode_Directory> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<AssetTreeNode_Directory> New(AssetTreeNode* pParent, const String& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_Directory>(EAssetNodeType::Directory, pParent, unresolvedPath);
 		}
@@ -149,11 +152,11 @@ namespace ke
 	class AssetTreeNode_AssetMetadata : public AssetTreeNode
 	{
 	public:
-		AssetTreeNode_AssetMetadata(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
+		AssetTreeNode_AssetMetadata(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath)
 			: AssetTreeNode(type, pParent, unresolvedPath)
 		{}
 
-		static TRef<AssetTreeNode_AssetMetadata> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		static RefPtr<AssetTreeNode_AssetMetadata> New(AssetTreeNode* pParent, const String& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_AssetMetadata>(EAssetNodeType::AssetMetadata, pParent, unresolvedPath);
 		}
@@ -162,55 +165,22 @@ namespace ke
 	/************************************************************************/
 	/* Assets                                                               */
 	/************************************************************************/
-	struct EPlainAssetType
-	{
-		enum EValue
-		{
-			Unknown,
-			StaticMesh,
-			Image,
-			Font,
-			Sound,
-			Material,
-		} Value{};
-
-		EPlainAssetType() = default;
-		EPlainAssetType(EValue value) : Value(value) {}
-		inline operator EValue() const { return Value; }
-
-		inline TString ToString() const
-		{
-			switch (Value)
-			{
-			case EPlainAssetType::Unknown:
-				return "Unknown";
-			case EPlainAssetType::StaticMesh:
-				return "Static Mesh";
-			case EPlainAssetType::Image:
-				return "Image";
-			case EPlainAssetType::Font:
-				return "Font";
-			case EPlainAssetType::Sound:
-				return "Sound";
-			case EPlainAssetType::Material:
-				return "Material";
-			}
-			CRASH();
-		}
-
-		static Array<EPlainAssetType> GetEntries() { return { Unknown, StaticMesh, Image, Font, Sound, Material}; }
-	};
-
 	class AssetTreeNode_PlainAsset: public AssetTreeNode
 	{
 	public:
-		AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const TString& unresolvedPath)
-			: AssetTreeNode(type, pParent, unresolvedPath)
-		{}
+		const String& GetExtension() const;
 
-		static TRef<AssetTreeNode_PlainAsset> New(AssetTreeNode* pParent, const TString& unresolvedPath)
+		AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath);
+
+		static RefPtr<AssetTreeNode_PlainAsset> New(AssetTreeNode* pParent, const String& unresolvedPath)
 		{
 			return AssetTreeNode::New<AssetTreeNode_PlainAsset>(EAssetNodeType::PlainAsset, pParent, unresolvedPath);
 		}
+
+		inline EFieldAssetType GetAssetType() const { return m_AssetType; }
+
+	private:
+		String m_Extension{};
+		EFieldAssetType m_AssetType{EFieldAssetType::None};
 	};
 }

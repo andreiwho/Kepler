@@ -9,7 +9,7 @@ namespace ke
 	class TWindowGLFW : public TWindow
 	{
 	public:
-		TWindowGLFW(i32 width, i32 height, const TString& title, const TWindowParams& params = {});
+		TWindowGLFW(i32 width, i32 height, const String& title, const TWindowParams& params = {});
 		~TWindowGLFW();
 
 		virtual void* GetNativeHandle() const override;
@@ -22,7 +22,7 @@ namespace ke
 		void SetupCallbacks();
 
 	protected:
-		virtual void SetTitle_Impl(const TString& newTitle) override;
+		virtual void SetTitle_Impl(const String& newTitle) override;
 
 		virtual void SetMaximized_Impl(bool bNewMaximized) override;
 

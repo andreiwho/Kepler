@@ -77,11 +77,11 @@ namespace ke
 		}
 
 	private:
-		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const TString& name, ELogLevel level);
-		std::shared_ptr<spdlog::logger> CreateLogger(const TString& name, ELogLevel level);
+		std::shared_ptr<spdlog::logger> FindOrCreateLogger(const String& name, ELogLevel level);
+		std::shared_ptr<spdlog::logger> CreateLogger(const String& name, ELogLevel level);
 		static std::shared_ptr<spdlog::logger> ApplyDefaultLoggerConfig(std::shared_ptr<spdlog::logger> logger, ELogLevel level);
 
-		std::unordered_map<TString, std::shared_ptr<spdlog::logger>> m_Loggers;
+		std::unordered_map<String, std::shared_ptr<spdlog::logger>> m_Loggers;
 		std::mutex m_LoggerCreationFence;
 
 #ifdef ENABLE_EDITOR

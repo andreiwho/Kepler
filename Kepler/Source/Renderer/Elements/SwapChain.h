@@ -4,21 +4,21 @@
 
 namespace ke
 {
-	class TSwapChain : public IntrusiveRefCounted
+	class ISwapChain : public IntrusiveRefCounted
 	{
 	public:
-		TSwapChain(class TWindow* Window);
-		virtual ~TSwapChain() = default;
+		ISwapChain(class TWindow* pWindow);
+		virtual ~ISwapChain() = default;
 
 		virtual void Present() = 0;
-		virtual void Resize(i32 Width, i32 Height) = 0;
+		virtual void Resize(i32 width, i32 height) = 0;
 		
-		inline TWindow* GetAssociatedWindow() const { return MyWindow; }
+		inline TWindow* GetAssociatedWindow() const { return m_Window; }
 
 	protected:
-		TWindow* MyWindow{};
+		TWindow* m_Window{};
 
-		i32 Width{}, Height{};
-		i32 ImageCount{3};
+		i32 m_Width{}, m_Height{};
+		i32 m_ImageCount{3};
 	};
 }

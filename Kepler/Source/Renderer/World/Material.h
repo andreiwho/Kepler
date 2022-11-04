@@ -7,16 +7,16 @@
 
 namespace ke
 {
-	class TMaterial : public TEnableRefFromThis<TMaterial>
+	class TMaterial : public EnableRefPtrFromThis<TMaterial>
 	{
 	public:
 		TMaterial() = default;
-		TMaterial(TRef<TGraphicsPipeline> pipeline, const TString& parentAssetPath);
+		TMaterial(RefPtr<IGraphicsPipeline> pipeline, const String& parentAssetPath);
 
-		void RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd);
+		void RT_Update(RefPtr<class ICommandListImmediate> pImmCmd);
 
 		template<typename T>
-		void WriteParamData(const TString& param, const T* pData)
+		void WriteParamData(const String& param, const T* pData)
 		{
 			m_ParamBuffer->Write<T>(param, pData);
 		}
@@ -25,49 +25,49 @@ namespace ke
 		// So calling this function may cause unexpected performance loss.
 		// If you have intended to only read the value, then use ReadParamValue function, which does not invalidate the buffer contents
 		template<typename T>
-		T& GetParamReferenceForWriting(const TString& param)
+		T& GetParamReferenceForWriting(const String& param)
 		{
 			return m_ParamBuffer->GetParamForWriting<T>(param);
 		}
 
 		template<typename T>
-		const T& ReadParamValue(const TString& param) const
+		const T& ReadParamValue(const String& param) const
 		{
 			return m_ParamBuffer->ReadParamValue<T>(param);
 		}
 
-		inline TRef<TParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
+		inline RefPtr<IParamBuffer> GetParamBuffer() const { return m_ParamBuffer; }
 
-		inline TRef<TPipelineSamplerPack> GetSamplers() const { return m_Samplers; }
+		inline RefPtr<PipelineSamplerPack> GetSamplers() const { return m_Samplers; }
 
-		inline TRef<TGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
+		inline RefPtr<IGraphicsPipeline> GetPipeline() const { return m_Pipeline; }
 
-		void WriteSampler(const TString& Name, TRef<TTextureSampler2D> Data);
+		void WriteSampler(const String& Name, RefPtr<ITextureSampler2D> Data);
 
-		static TRef<TMaterial> New()
+		static RefPtr<TMaterial> New()
 		{
 			return MakeRef(ke::New<TMaterial>());
 		}
 
-		static TRef<TMaterial> New(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+		static RefPtr<TMaterial> New(RefPtr<IGraphicsPipeline> pPipeline, const String& parentAssetPath)
 		{
 			return MakeRef(ke::New<TMaterial>(pPipeline, parentAssetPath));
 		}
 
-		inline bool HasParam(const TString& name) const { return m_ParamBuffer->HasParam(name); }
+		inline bool HasParam(const String& name) const { return m_ParamBuffer->HasParam(name); }
 
 		// Helper functions
-		void WriteTransform(TWorldTransform transform);
+		void WriteTransform(WorldTransform transform);
 		void WriteCamera(MathCamera camera);
 		void WriteId(i32 id);
 
-		inline const TString& GetParentAssetPath() const { return m_ParentAssetPath; }
+		inline const String& GetParentAssetPath() const { return m_ParentAssetPath; }
 		inline bool UsesPrepass() const { return m_Pipeline->UsesPrepass(); }
 
 	private:
-		TRef<TGraphicsPipeline> m_Pipeline;
-		TRef<TParamBuffer> m_ParamBuffer;
-		TRef<TPipelineSamplerPack> m_Samplers;
-		TString m_ParentAssetPath{};
+		RefPtr<IGraphicsPipeline> m_Pipeline;
+		RefPtr<IParamBuffer> m_ParamBuffer;
+		RefPtr<PipelineSamplerPack> m_Samplers;
+		String m_ParentAssetPath{};
 	};
 }

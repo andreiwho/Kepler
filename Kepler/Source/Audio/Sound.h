@@ -7,7 +7,7 @@ namespace ke
 	class TSound : public IntrusiveRefCounted
 	{
 	protected:
-		TSound(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
+		TSound(const String& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
 
 	public:
 		virtual bool IsPlaying() const = 0;
@@ -21,10 +21,10 @@ namespace ke
 			m_bIsLooping = bLooping;
 		}
 
-		static TRef<TSound> New(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
+		static RefPtr<TSound> New(const String& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
 	
 	protected:
-		TString m_Path{};
+		String m_Path{};
 		bool m_bIsLooping = false;
 	};
 }

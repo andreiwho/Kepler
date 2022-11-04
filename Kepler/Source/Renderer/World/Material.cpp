@@ -4,7 +4,7 @@
 
 namespace ke
 {
-	TMaterial::TMaterial(TRef<TGraphicsPipeline> pPipeline, const TString& parentAssetPath)
+	TMaterial::TMaterial(RefPtr<IGraphicsPipeline> pPipeline, const String& parentAssetPath)
 		: m_Pipeline(pPipeline), m_ParentAssetPath(parentAssetPath)
 	{
 		CHECK(!IsRenderThread());
@@ -14,25 +14,37 @@ namespace ke
 				auto ParamMapping = This->GetPipeline()->GetParamMapping();
 				if (ParamMapping)
 				{
-					This->m_ParamBuffer = TParamBuffer::New(ParamMapping);
-					This->m_Samplers = ParamMapping->CreateSamplerPack();
+					if (ParamMapping->HasParams())
+					{
+						This->m_ParamBuffer = IParamBuffer::New(ParamMapping);
+					}
+
+					if (ParamMapping->HasSamplers())
+					{
+						This->m_Samplers = ParamMapping->CreateSamplerPack();
+					}
 				}
 			}));
 	}
 
-	void TMaterial::RT_Update(TRef<class GraphicsCommandListImmediate> pImmCmd)
+	void TMaterial::RT_Update(RefPtr<class ICommandListImmediate> pImmCmd)
 	{
 		CHECK(IsRenderThread());
 		m_ParamBuffer->RT_UploadToGPU(pImmCmd);
 	}
 
-	void TMaterial::WriteSampler(const TString& name, TRef<TTextureSampler2D> data)
+	void TMaterial::WriteSampler(const String& name, RefPtr<ITextureSampler2D> data)
 	{
 		m_Samplers->Write(name, data);
 	}
 
-	void TMaterial::WriteTransform(TWorldTransform transform)
+	void TMaterial::WriteTransform(WorldTransform transform)
 	{
+		if (!m_Pipeline)
+		{
+			return;
+		}
+
 		switch (m_Pipeline->GetDomain().Value)
 		{
 		case EPipelineDomain::Lit:

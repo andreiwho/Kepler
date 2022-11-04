@@ -29,10 +29,14 @@
 #include "World/Game/Helpers/EntityHelper.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "Renderer/Subrenderer/Subrenderer2D.h"
+#include "World/Camera/CameraComponent.h"
+#include "World/Game/GameWorldSerializer.h"
+#include "Platform/Input.h"
 
 namespace ke
 {
-	TCommandLineArguments::TCommandLineArguments(Array<TString> const& cmdLine)
+	TCommandLineArguments::TCommandLineArguments(Array<String> const& cmdLine)
 	{
 		// Parse command line args
 		// Game module name must always be the first arg
@@ -58,22 +62,37 @@ namespace ke
 		}
 	}
 
+	Engine* Engine::Instance = nullptr;
+
 	Engine::Engine(const TApplicationLaunchParams& launchParams)
 	{
 		KEPLER_INFO(LogApp, "Starting application initialization");
+		Instance = this;
+
+#ifndef ENABLE_EDITOR
+		CurrentWorldState = EWorldUpdateKind::Play;
+#else
+		CurrentWorldState = EWorldUpdateKind::Edit;
+#endif
+
 		InitVFSAliases(launchParams);
+		m_ReflectionDatabase.FillReflectionDatabaseEntries();
+
 		m_AssetManager = MakeShared<AssetManager>();
 
 		TWindowParams windowParams{};
 		windowParams.bMaximized = false;
 		m_MainWindow = CHECKED(TPlatform::Get()->CreatePlatformWindow(1920, 1080, "Kepler", windowParams));
 
-		m_LowLevelRenderer = MakeShared<TLowLevelRenderer>();
+		m_LowLevelRenderer = MakeShared<LowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
 		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
 		// AudioEngine->Play("Game://Startup.mp3");
 
-		m_WorldRegistry = MakeShared<TWorldRegistry>();
+		m_WorldRegistry = MakeShared<WorldRegistry>();
+
+		m_WorldRenderer = Await(TRenderThread::Submit([this] { return WorldRenderer::New(); }));
+		m_WorldRenderer->PushSubrenderer<Subrenderer2D, ESubrendererOrder::Overlay>();
 	}
 
 	void Engine::InitVFSAliases(const TApplicationLaunchParams& launchParams)
@@ -86,10 +105,12 @@ namespace ke
 
 	Engine::~Engine()
 	{
+		GameWorld::ClearStaticState();
+		m_WorldRenderer.Release();
 		m_MeshLoader.ClearCache();
 		m_ImageLoader.ClearCache();
 		m_MaterialLoader.ClearLoadedMaterialCache();
-		m_CurrentWorld.Release();
+		CurrentWorld.Release();
 
 		m_WorldRegistry.reset();
 		m_AudioEngine.reset();
@@ -105,56 +126,19 @@ namespace ke
 		InitApplicationModules();
 
 		// Create the world
-		m_CurrentWorld = m_WorldRegistry->CreateWorld<TGameWorld>("MainWorld");
+		CurrentWorld = m_WorldRegistry->CreateWorld<GameWorld>("MainWorld");
 
 		// Begin main loop
 		TTimer mainTimer{};
 		GGlobalTimer = &mainTimer;
 		float displayInfoTime = 0.0f;
 
-		auto mainCamera = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateCamera("Camera") };
-		mainCamera->SetLocation(float3(0.0f, -3.0f, 1));
-		mainCamera->SetRotation(float3(-20, 0.0f, 0.0f));
-
-		auto ambientLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("AmbientLight") };
-		AmbientLightComponent* pALC = ambientLight.AddComponent<AmbientLightComponent>();
-		pALC->SetColor(float3(0.3f, 0.3f, 0.3f));
-		ambientLight->SetLocation(float3(-2.0f, 0.0f, 0.0f));
-		
-		auto dirLight = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity("Directional Light") };
-		DirectionalLightComponent* pDLC = dirLight.AddComponent<DirectionalLightComponent>();
-		pDLC->SetColor(float3(1.0f, 1.0f, 1.0f));
-		pDLC->SetIntensity(1.0f);
-		dirLight->SetRotation(float3(-45, 0, 90.0f));
-		dirLight->SetLocation(float3(-3, 0.0f, 0.0f));
-
-		auto mesh = m_MeshLoader.LoadStaticMeshSections("Game://LP.fbx", true);
-		i32 x = 0;
-		i32 y = 0;
-		for (i32 idx = 0; idx < 10; ++idx)
-		{
-			if (x > 3)
-			{
-				x = 0;
-				y++;
-			}
-
-			auto entity = TEntityHandle{ m_CurrentWorld, m_CurrentWorld->CreateEntity(fmt::format("Entity{}", idx)) };
-			entity.AddComponent<TStaticMeshComponent>(mesh);
-			entity.AddComponent<TMaterialComponent>(m_MaterialLoader.LoadMaterial("Engine://Materials/Mat_DefaultLit.kmat"));
-			entity->SetScale(float3(0.3f));
-			entity->SetRotation(float3(0, 0.0f, (float)(rand() % 360)));
-			entity->SetLocation(float3(x, y, 0.0f));
-
-			x++;
-		}
-
 		if (TPlatform* pPlatform = TPlatform::Get())
 		{
 			pPlatform->RegisterPlatformEventListener(this);
 			float posX = 0.0f;
 #ifdef ENABLE_EDITOR
-			m_Editor->SetEditedWorld(m_CurrentWorld);
+			m_Editor->SetEditedWorld(CurrentWorld);
 #endif
 
 			m_ModuleStack.OnPostWorldInit();
@@ -173,19 +157,16 @@ namespace ke
 					const float2 vpSize = float2(m_MainWindow->GetWidth(), m_MainWindow->GetHeight());
 #endif
 					// Initialize the renderer
-					TRef<TWorldRenderer> Renderer = Await(TRenderThread::Submit([this] { return TWorldRenderer::New(m_CurrentWorld); }));
-					Renderer->UpdateRendererMainThread(mainTimer.Delta());
-					m_CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), EWorldUpdateKind::Game);
-					
+					m_WorldRenderer->InitFrame(CurrentWorld);
+					m_WorldRenderer->UpdateRendererMainThread(mainTimer.Delta());
+
+					CurrentWorld->UpdateWorld(GGlobalTimer->Delta(), CurrentWorldState);
 					// Render the world
 					auto renderTask = TRenderThread::Submit([&, this]
 						{
-							Renderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
+							m_WorldRenderer->Render({ 0, 0, (u32)vpSize.x, (u32)vpSize.y });
 						});
 					m_ModuleStack.OnUpdate(GGlobalTimer->Delta());
-
-
-
 #ifdef ENABLE_EDITOR
 					//Await(renderTask);
 
@@ -196,6 +177,7 @@ namespace ke
 #else
 					(void)renderTask;
 #endif
+					m_WorldRenderer->ClearSubrenderersState();
 					m_LowLevelRenderer->PresentAll();
 
 					if (pPlatform->IsMainWindowUnfocused())
@@ -210,23 +192,55 @@ namespace ke
 					std::this_thread::sleep_for(10ms);
 				}
 
+				CheckWorldUpdated();
 				mainTimer.End();
-
-#ifdef ENABLE_DEBUG
-				if (pPlatform->HasActiveMainWindow())
-				{
-					displayInfoTime += mainTimer.Delta();
-					if (displayInfoTime >= 1.0f)
-					{
-						displayInfoTime = 0;
-						m_MainWindow->SetTitle(fmt::format("{} <{}>", m_MainWindow->GetName(), 1.0f / mainTimer.Delta()));
-					}
-				}
-#endif
+				FrameTime = 1.0f / mainTimer.Delta();
+				FramesPerSecond = mainTimer.Delta() * 1000.0f;
 			}
 		}
-		TWorldRenderer::ClearStaticState();
 		TerminateModuleStack();
+	}
+
+	void Engine::SetMainWorld(RefPtr<GameWorld> newWorld)
+	{
+		CurrentWorld = newWorld;
+		m_bWorldUpdated = true;
+	}
+
+	void Engine::OnCurrentWorldStateChange(EWorldUpdateKind newUpdateKind)
+	{
+		// World state changed
+		if (newUpdateKind == CurrentWorldState)
+		{
+			return;
+		}
+
+		switch (newUpdateKind)
+		{
+		case EWorldUpdateKind::Play:
+		{
+			GameWorldSerializer serializer{ CurrentWorld };
+			auto serializedData = serializer.Serialize();
+			GameWorldDeserializer deserializer;
+			auto pPlayWorld = deserializer.Deserialize("PlayWorld", serializedData, PLAY_INDEX);
+			SetMainWorld(pPlayWorld);
+		}
+		break;
+		case EWorldUpdateKind::Edit:
+		{
+			if (CurrentWorld)
+			{
+				WorldRegistry::Get()->DestroyWorld(CurrentWorld);
+				if (auto pWorld = WorldRegistry::Get()->GetWorldAt(EDIT_INDEX))
+				{
+					SetMainWorld(RefCast<GameWorld>(pWorld));
+				}
+			}
+		}
+		break;
+		default:
+			break;
+		}
 	}
 
 	void Engine::OnPlatformEvent(const TPlatformEventBase& event)
@@ -289,6 +303,59 @@ namespace ke
 
 	bool Engine::OnKeyDown(const TKeyDownEvent& event)
 	{
+		if (event.Key == EKeyCode::Escape && CurrentWorldState == EWorldUpdateKind::Play)
+		{
+			m_bExitPlayRequested = true;
+		}
+
+		if (event.Key == EKeyCode::F5)
+		{
+			OnCurrentWorldStateChange(EWorldUpdateKind::Play);
+			CurrentWorldState = EWorldUpdateKind::Play;
+		}
+
 		return false;
 	}
+
+	void Engine::CheckWorldUpdated()
+	{
+		if (m_bExitPlayRequested)
+		{
+			OnCurrentWorldStateChange(EWorldUpdateKind::Edit);
+			CurrentWorldState = EWorldUpdateKind::Edit;
+			m_bExitPlayRequested = false;
+		}
+
+		if (m_bWorldUpdated)
+		{
+			m_bWorldUpdated = false;
+			m_Editor->SetEditedWorld(CurrentWorld);
+
+			m_ModuleStack.OnPostWorldInit();
+		}
+	}
+
+	TestMovementComponent::TestMovementComponent()
+	{
+		m_PerInstanceOffset = (float)(rand() % 256);
+	}
+
+	void TestMovementComponent::Update(float deltaTime)
+	{
+		if (m_MovementType == EMovementType::Dynamic)
+		{
+			EntityHandle handle{ GetWorld(), GetOwner() };
+			m_MovementValue = glm::sin(m_CurrentTime + m_PerInstanceOffset);
+			auto location = handle->GetLocation();
+			location.z = m_MovementValue * m_Speed;
+			handle->SetLocation(location);
+			m_CurrentTime += deltaTime;
+
+			auto rotation = handle->GetRotation();
+			rotation.z += deltaTime * m_PerInstanceOffset;
+			rotation.x = rotation.z;
+			handle->SetRotation(rotation);
+		}
+	}
+
 }

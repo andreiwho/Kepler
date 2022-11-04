@@ -1,31 +1,62 @@
 #include "StaticMeshComponent.h"
+#include "Tools/MeshLoader.h"
+#include "Core/Filesystem/AssetSystem/AssetManager.h"
 
 namespace ke
 {
 
-	TStaticMeshComponent::TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh)
-		:	StaticMesh(InStaticMesh)
+	StaticMeshComponent::StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh)
+		:	m_StaticMesh(InStaticMesh)
+	{
+		SetStaticMesh(InStaticMesh);
+	}
+
+	StaticMeshComponent::StaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer)
+		:	m_StaticMesh(StaticMesh::New(InVertexBuffer, InIndexBuffer))
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer)
-		:	StaticMesh(TStaticMesh::New(InVertexBuffer, InIndexBuffer))
+	StaticMeshComponent::StaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices)
+		:	m_StaticMesh(StaticMesh::New(Vertices, InIndices))
 	{
 	}
 
-	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices)
-		:	StaticMesh(TStaticMesh::New(Vertices, InIndices))
-	{
-	}
-
-	TStaticMeshComponent::TStaticMeshComponent(const Array<TStaticMeshSection>& Sections)
-		: StaticMesh(TStaticMesh::New(Sections))
+	StaticMeshComponent::StaticMeshComponent(const Array<TStaticMeshSection>& Sections)
+		: m_StaticMesh(StaticMesh::New(Sections))
 	{
 
 	}
 
-	void TStaticMeshComponent::SetStaticMesh(TRef<TStaticMesh> NewMesh)
+	void StaticMeshComponent::SetStaticMesh(RefPtr<StaticMesh> NewMesh)
 	{
-		StaticMesh = NewMesh;
+		m_StaticMesh = NewMesh;
+
+		if (m_StaticMesh->IsLoadedFromAsset())
+		{
+			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
+
+			if (!Asset)
+			{
+				Asset = Await(AssetManager::Get()->FindAssetNode(StaticMeshPath));
+			}
+		}
+
+	}
+
+	void StaticMeshComponent::StaticMeshPathChanged(const String& newPath)
+	{
+		if (auto mesh = MeshLoader::Get()->LoadStaticMesh(newPath, true))
+		{
+			m_StaticMesh = mesh;
+		}
+	}
+
+	void StaticMeshComponent::OnMeshAssetChanged(AssetTreeNode* pAsset)
+	{
+		if (pAsset)
+		{
+			StaticMeshPath = pAsset->GetPath();
+			StaticMeshPathChanged(StaticMeshPath);
+		}
 	}
 }

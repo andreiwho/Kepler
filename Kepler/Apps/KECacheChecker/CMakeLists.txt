@@ -1,0 +1,1 @@
+CreateCSharpExecutable(KECacheChecker "Apps")

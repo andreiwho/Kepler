@@ -2,33 +2,37 @@
 #include "Core/Core.h"
 #include "GameEntityId.h"
 #include "Renderer/World/WorldTransform.h"
+#include "World/Game/Components/EntityComponent.h"
+#include "GameEntity.gen.h"
 
 namespace ke
 {
-	class TGameWorld;
+	class GameWorld;
 
-	struct TIdComponent
+	reflected kmeta(hideindetails)
+	struct TIdComponent : public EntityComponent
 	{
-		id64 Id;
+		reflected UUID Id;
 	};
 
-	struct TNameComponent
+	reflected kmeta(hideindetails)
+	struct TNameComponent : public EntityComponent
 	{
-		TString Name;
+		reflected String Name;
 	};
 
 	class TGameEntity
 	{
 	public:
-		TGameEntity(TGameWorld* InWorld, entt::entity Id);
+		TGameEntity(GameWorld* InWorld, entt::entity Id);
 
-		TString GetName() const;
+		String GetName() const;
 
-		void SetName(const TString& Name);
+		void SetName(const String& Name);
 
-		id64 GetGUID() const;
+		UUID GetGUID() const;
 
-		inline TRef<TGameWorld> GetWorld() const { return World; }
+		inline RefPtr<GameWorld> GetWorld() const { return World; }
 
 		void SetNeedsUpdate(bool bInShouldUpdate);
 		
@@ -48,9 +52,9 @@ namespace ke
 
 		void SetScale(float3 NewScale);
 
-		TWorldTransform GetTransform() const;
+		WorldTransform GetTransform() const;
 
-		void SetTransform(TWorldTransform NewTransform);
+		void SetTransform(WorldTransform NewTransform);
 
 		inline bool IsCamera() const { return bIsCamera; }
 
@@ -70,11 +74,11 @@ namespace ke
 	private:
 		bool bHideInSceneGraph = false;
 
-		friend class TGameWorld;
-		TGameEntityId Internal_GetId() const { return Entity; }
+		friend class GameWorld;
+		GameEntityId Internal_GetId() const { return Entity; }
 		
-		TGameWorld* World{};
-		TGameEntityId Entity{};
+		GameWorld* World{};
+		GameEntityId Entity{};
 		
 		float LifeSpan = -1.0f;
 		float LifeTime = 0.0f;

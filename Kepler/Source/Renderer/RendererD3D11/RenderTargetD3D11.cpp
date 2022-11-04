@@ -7,17 +7,17 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	RenderTarget2D_D3D11::RenderTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
-		:	RenderTarget2D(InImage, MipLevel, ArrayLayer)
+	RenderTarget2D_D3D11::RenderTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer)
+		:	IRenderTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
 		CHECKMSG(MyImage, "Attempted to create a render target from null image");
 		ID3D11Texture2D* Texture = MyImage->GetImage();
 		CHECK(Texture);
 
-		CD3D11_RENDER_TARGET_VIEW_DESC Desc(Texture, D3D11_RTV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, MipLevel, ArrayLayer, 1);
+		CD3D11_RENDER_TARGET_VIEW_DESC Desc(Texture, D3D11_RTV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat(), MipLevel, ArrayLayer, 1);
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)
 		{
@@ -41,17 +41,17 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(TRef<TImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
-		:	DepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
+	DepthStencilTarget2D_D3D11::DepthStencilTarget2D_D3D11(RefPtr<IImage2D> InImage, u32 MipLevel, u32 ArrayLayer, bool bReadOnly) 
+		:	IDepthStencilTarget2D(InImage, MipLevel, ArrayLayer)
 	{
 		CHECK(IsRenderThread());
 
-		TRef<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
+		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(InImage);
 		CHECKMSG(MyImage, "Attempted to create a depth stencil target from null image");
 		ID3D11Texture2D* Texture = MyImage->GetImage();
 		CHECK(Texture);
 
-		CD3D11_DEPTH_STENCIL_VIEW_DESC Desc(Texture, D3D11_DSV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat().Value, ArrayLayer, 1);
+		CD3D11_DEPTH_STENCIL_VIEW_DESC Desc(Texture, D3D11_DSV_DIMENSION_TEXTURE2D, (DXGI_FORMAT)MyImage->GetFormat(), ArrayLayer, 1);
 		if (bReadOnly)
 		{
 			Desc.Flags = D3D11_DSV_FLAG::D3D11_DSV_READ_ONLY_DEPTH;

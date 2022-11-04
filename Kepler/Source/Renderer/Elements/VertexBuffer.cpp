@@ -5,16 +5,29 @@
 namespace ke
 {
 
-	TVertexBuffer::TVertexBuffer(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
-		: AccessFlags(InAccessFlags)
-		, Size(Data ? Data->GetSize() : 0)
-		, Stride(Data ? Data->GetStride() : 0)
+	IVertexBuffer::IVertexBuffer(EBufferAccessFlags InAccessFlags, RefPtr<IAsyncDataBlob> Data)
+		: m_AccessFlags(InAccessFlags)
+		, m_Size(Data ? Data->GetSize() : 0)
+		, m_Stride(Data ? Data->GetStride() : 0)
 	{
 	}
 
-	TRef<TVertexBuffer> TVertexBuffer::New(EBufferAccessFlags InAccessFlags, TRef<AsyncDataBlob> Data)
+	RefPtr<IVertexBuffer> IVertexBuffer::New(EBufferAccessFlags InAccessFlags, RefPtr<IAsyncDataBlob> Data)
 	{
 		return GetRenderDevice()->CreateVertexBuffer(InAccessFlags, Data);
+	}
+
+	IVertexBufferDynamic::IVertexBufferDynamic(EBufferAccessFlags accessFlags, usize size, usize stride)
+		:	m_AccessFlags(accessFlags)
+		,	m_Size(size)
+		,	m_Stride(stride)
+
+	{
+	}
+
+	RefPtr<IVertexBufferDynamic> IVertexBufferDynamic::New(EBufferAccessFlags accessFlags, usize size, usize stride)
+	{
+		return GetRenderDevice()->CreateDynamicVertexBuffer(accessFlags, size, stride);
 	}
 
 }

@@ -1,26 +1,36 @@
 #pragma once
 #include "Core/Types.h"
 #include "Renderer/World/StaticMesh.h"
+#include "EntityComponent.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
+#include "StaticMeshComponent.gen.h"
 
 namespace ke
 {
-	class TStaticMeshComponent
+	reflected class StaticMeshComponent : public EntityComponent
 	{
 	public:
-		TStaticMeshComponent() = default;
-		TStaticMeshComponent(TRef<TStaticMesh> InStaticMesh);
-		TStaticMeshComponent(TRef<TVertexBuffer> InVertexBuffer, TRef<TIndexBuffer> InIndexBuffer);
-		TStaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices);
-		TStaticMeshComponent(const Array<TStaticMeshSection>& Sections);
+		StaticMeshComponent() = default;
+		StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh);
+		StaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer);
+		StaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices);
+		StaticMeshComponent(const Array<TStaticMeshSection>& Sections);
 
-		inline TRef<TStaticMesh> GetStaticMesh() const
+		inline RefPtr<StaticMesh> GetStaticMesh() const
 		{
-			return StaticMesh;
+			return m_StaticMesh;
 		}
 
-		void SetStaticMesh(TRef<TStaticMesh> NewMesh);
+		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
+
+		String StaticMeshPath{};
+		void StaticMeshPathChanged(const String& newPath);
+
+		reflected kmeta(postchange = OnMeshAssetChanged, assettype=StaticMesh)
+		AssetTreeNode* Asset {nullptr};
+		void OnMeshAssetChanged(AssetTreeNode* pAsset);
 
 	private:
-		TRef<TStaticMesh> StaticMesh{};
+		RefPtr<StaticMesh> m_StaticMesh{};
 	};
 }

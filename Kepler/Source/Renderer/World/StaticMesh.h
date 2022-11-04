@@ -22,47 +22,51 @@ namespace ke
 		Array<u32> Indices{};
 	};
 
-	class TStaticMesh : public TEnableRefFromThis<TStaticMesh>
+	class StaticMesh : public EnableRefPtrFromThis<StaticMesh>
 	{
 	public:
-		TStaticMesh() = default;
-		TStaticMesh(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer);
-		TStaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices);
-		TStaticMesh(const Array<TStaticMeshSection>& sections);
+		StaticMesh() = default;
+		StaticMesh(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer);
+		StaticMesh(const Array<TStaticMeshVertex>& vertices, const Array<u32>& indices);
+		StaticMesh(const Array<TStaticMeshSection>& sections, const String& assetPath = "", bool bForcedSingleSection = false);
 
 	public:
 		struct TInternalSection
 		{
-			TRef<TVertexBuffer> VertexBuffer{};
-			TRef<TIndexBuffer> IndexBuffer{};
+			RefPtr<IVertexBuffer> VertexBuffer{};
+			RefPtr<IIndexBuffer> IndexBuffer{};
 		};
 
 		void SetSections(const Array<TStaticMeshSection>& sections);
 
-		static TRef<TStaticMesh> New()
+		static RefPtr<StaticMesh> New()
 		{
-			return MakeRef(ke::New<TStaticMesh>());
+			return MakeRef(ke::New<StaticMesh>());
 		}
 
-		static TRef<TStaticMesh> New(TRef<TVertexBuffer> pVertexBuffer, TRef<TIndexBuffer> pIndexBuffer)
+		static RefPtr<StaticMesh> New(RefPtr<IVertexBuffer> pVertexBuffer, RefPtr<IIndexBuffer> pIndexBuffer)
 		{
-			return MakeRef(ke::New<TStaticMesh>(pVertexBuffer, pIndexBuffer));
+			return MakeRef(ke::New<StaticMesh>(pVertexBuffer, pIndexBuffer));
 		}
 
-		static TRef<TStaticMesh> New(const Array<TStaticMeshVertex>& pVertices, const Array<u32>& pIndices)
+		static RefPtr<StaticMesh> New(const Array<TStaticMeshVertex>& pVertices, const Array<u32>& pIndices)
 		{
-			return MakeRef(ke::New<TStaticMesh>(pVertices, pIndices));
+			return MakeRef(ke::New<StaticMesh>(pVertices, pIndices));
 		}
 
-		static TRef<TStaticMesh> New(const Array<TStaticMeshSection>& sections)
+		static RefPtr<StaticMesh> New(const Array<TStaticMeshSection>& sections, const String& assetPath = "", bool bForcedSingleSection = false)
 		{
-			return MakeRef(ke::New<TStaticMesh>(sections));
+			return MakeRef(ke::New<StaticMesh>(sections, assetPath, bForcedSingleSection));
 		}
-
 		const Array<TInternalSection>& GetSections() const { return m_Sections; }
+		inline bool IsForcedSingleSectionOnLoad() const { return m_bForcedSingleSection; }
+		inline const String& GetParentAssetPath() const& { return m_ParentAssetName; }
+		inline bool IsLoadedFromAsset() const { return !m_ParentAssetName.empty(); }
+
 
 	private:
 		Array<TInternalSection> m_Sections;
-	
+		bool m_bForcedSingleSection = false;
+		String m_ParentAssetName{};
 	};
 }

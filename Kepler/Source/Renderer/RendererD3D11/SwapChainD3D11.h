@@ -5,7 +5,7 @@
 
 namespace ke
 {
-	class TSwapChainD3D11 : public TSwapChain
+	class TSwapChainD3D11 : public ISwapChain
 	{
 	public:
 		TSwapChainD3D11(class TWindow* Window);

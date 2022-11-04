@@ -28,11 +28,11 @@ namespace ke
 
 		static TPlatform* Get();
 
-		static TSharedPtr<TPlatform> CreatePlatformInterface();
+		static SharedPtr<TPlatform> CreatePlatformInterface();
 
-		static bool HandleCrashReported(const TString& Message);
+		static bool HandleCrashReported(const String& Message);
 
-		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const TString& title, const TWindowParams& params = {}) = 0;
+		virtual TWindow* CreatePlatformWindow(i32 width, i32 height, const String& title, const TWindowParams& params = {}) = 0;
 		virtual void Update() { m_MouseState.OnUpdate(); };
 		virtual bool HasActiveMainWindow() const = 0;
 		virtual void OnPlatformEvent(const TPlatformEventBase& event);

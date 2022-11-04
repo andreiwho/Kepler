@@ -4,22 +4,24 @@
 
 namespace ke
 {
-	class TEditorDetailsPanel
+	class EntityDetailsPanel
 	{
 	public:
-		TEditorDetailsPanel(TRef<TGameWorld> pWorld, TGameEntityId entity);
+		EntityDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId entity);
 		
 		void Draw();
 
 	private:
 		void DrawTransformComponentInfo();
-		void DrawCameraComponentInfo();
 		void DrawMaterialComponentInfo();
-		void DrawLightInfo();
 		void DrawEntityInfo();
+		void DrawNativeComponentInfo();
+		void DrawAddComponentPopup();
+		const String& SplitAndCapitalizeComponentName(const String& originalName);
 
 	private:
-		TRef<TGameWorld> m_pWorld;
-		TGameEntityId m_SelectedEntity;
+		RefPtr<GameWorld> m_pWorld;
+		GameEntityId m_SelectedEntity;
+		Map<String, String> m_FilteredComponentNames;
 	};
 }

@@ -1,15 +1,17 @@
 #pragma once
 #include "Core/Core.h"
+#include "../EntityComponent.h"
+#include "AmbientLightComponent.gen.h"
 
 namespace ke
 {
-	class AmbientLightComponent
+	reflected class AmbientLightComponent : public EntityComponent
 	{
 	public:
-		inline float3 GetColor() const { return m_Color; }
-		inline void SetColor(float3 newColor) { m_Color = newColor; }
+		inline float3 GetColor() const { return Color; }
+		inline void SetColor(float3 newColor) { Color = newColor; }
 
-	private:
-		float3 m_Color{};
+		reflected kmeta(editspeed=0.01f)
+		float3 Color{};
 	};
 }

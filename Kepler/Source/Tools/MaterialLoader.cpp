@@ -19,9 +19,9 @@ namespace ke
 
 	namespace
 	{
-		TString CaseInsensitive(const TString& string)
+		String CaseInsensitive(const String& string)
 		{
-			TString outString = string;
+			String outString = string;
 			for (auto& ch : outString)
 			{
 				ch = std::tolower(ch);
@@ -33,16 +33,16 @@ namespace ke
 		EPrimitiveTopology ParsePrimitiveTopology(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Triangles") == String)
+			const auto str = Object.GetString();
+			if (String("Triangles") == str)
 			{
 				return EPrimitiveTopology::TriangleList;
 			}
-			if (TString("Lines") == String)
+			if (String("Lines") == str)
 			{
 				return EPrimitiveTopology::LineList;
 			}
-			if (TString("Points") == String)
+			if (String("Points") == str)
 			{
 				return EPrimitiveTopology::PointList;
 			}
@@ -53,12 +53,12 @@ namespace ke
 		EPrimitiveFillMode ParseFillMode(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Solid") == String)
+			const auto str = Object.GetString();
+			if (String("Solid") == str)
 			{
 				return EPrimitiveFillMode::Solid;
 			}
-			if (TString("Wireframe") == String)
+			if (String("Wireframe") == str)
 			{
 				return EPrimitiveFillMode::Wireframe;
 			}
@@ -69,31 +69,31 @@ namespace ke
 		{
 			CHECK(Object.IsString());
 			const auto string = Object.GetString();
-			if (TString("None") == string)
+			if (String("None") == string)
 			{
 				return EDepthComparissonMode::None;
 			}
-			if (TString("Less") == string)
+			if (String("Less") == string)
 			{
 				return EDepthComparissonMode::Less;
 			}
-			if (TString("LEqual") == string)
+			if (String("LEqual") == string)
 			{
 				return EDepthComparissonMode::LEqual;
 			}
-			if (TString("Equal") == string)
+			if (String("Equal") == string)
 			{
 				return EDepthComparissonMode::Equal;
 			}
-			if (TString("Greater") == string)
+			if (String("Greater") == string)
 			{
 				return EDepthComparissonMode::Greater;
 			}
-			if (TString("GEqual") == string)
+			if (String("GEqual") == string)
 			{
 				return EDepthComparissonMode::GEqual;
 			}
-			if (TString("Always") == string)
+			if (String("Always") == string)
 			{
 				return EDepthComparissonMode::Always;
 			}
@@ -104,16 +104,16 @@ namespace ke
 		EPrimitiveCullMode ParseCullMode(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("None") == String)
+			const auto str = Object.GetString();
+			if (String("None") == str)
 			{
 				return EPrimitiveCullMode::None;
 			}
-			if (TString("Front") == String)
+			if (String("Front") == str)
 			{
 				return EPrimitiveCullMode::Front;
 			}
-			if (TString("Back") == String)
+			if (String("Back") == str)
 			{
 				return EPrimitiveCullMode::Back;
 			}
@@ -124,14 +124,18 @@ namespace ke
 		EPipelineDomain ParsePipelineDomain(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("Unlit") == String)
+			const auto str = Object.GetString();
+			if (String("Unlit") == str)
 			{
 				return EPipelineDomain::Unlit;
 			}
-			if (TString("Lit") == String)
+			if (String("Lit") == str)
 			{
 				return EPipelineDomain::Lit;
+			}
+			if (String("Other") == str)
+			{
+				return EPipelineDomain::Other;
 			}
 			// Crash on undefined or other value
 			CRASH();
@@ -142,20 +146,20 @@ namespace ke
 		Enum ParseAccessFlags(const rapidjson::Value& Object)
 		{
 			CHECK(Object.IsString());
-			const auto String = Object.GetString();
-			if (TString("None") == String)
+			const auto str = Object.GetString();
+			if (String("None") == str)
 			{
 				return Enum::None;
 			}
-			if (TString("Read") == String)
+			if (String("Read") == str)
 			{
 				return Enum::Read;
 			}
-			if (TString("Write") == String)
+			if (String("Write") == str)
 			{
 				return Enum::Write;
 			}
-			if (TString("ReadWrite") == String)
+			if (String("ReadWrite") == str)
 			{
 				return Enum::Read | Enum::Write;
 			}
@@ -163,7 +167,7 @@ namespace ke
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		TRef<TGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const TString& MaterialPath, bool bForce = false)
+		RefPtr<IGraphicsPipeline> LoadGraphicsPipeline(const rapidjson::Value& Object, const String& MaterialPath, bool bForce = false)
 		{
 			CHECK(Object.IsObject());
 			CHECK(Object.HasMember("Pipeline"));
@@ -178,7 +182,7 @@ namespace ke
 			CHECK(ShaderRef);
 
 			// Conigure the pipeline
-			TGraphicsPipelineConfiguration PipelineConfig{};
+			GraphicsPipelineConfig PipelineConfig{};
 			// Read shader domain
 			if (Pipeline.HasMember("Domain"))
 			{
@@ -250,10 +254,10 @@ namespace ke
 			}
 
 			PipelineConfig.ParamMapping = ShaderRef->GetReflection()->ParamMapping;
-			return MakeRef(New<TGraphicsPipeline>(ShaderRef, PipelineConfig));
+			return MakeRef(New<IGraphicsPipeline>(ShaderRef, PipelineConfig));
 		}
 
-		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, TRef<TMaterial> Material)
+		bool LoadMaterialSamplers(const rapidjson::Value& MaterialInfo, RefPtr<TMaterial> Material)
 		{
 			if (!MaterialInfo.IsObject() || !MaterialInfo.HasMember("Samplers"))
 			{
@@ -294,7 +298,7 @@ namespace ke
 	{
 	}
 
-	TRef<TMaterial> TMaterialLoader::LoadMaterial(const TString& Path, bool bForce)
+	RefPtr<TMaterial> TMaterialLoader::LoadMaterial(const String& Path, bool bForce)
 	{
 		if (!TFileUtils::PathExists(Path))
 		{
@@ -313,12 +317,12 @@ namespace ke
 		CHECK(Document.IsObject());
 		CHECK(Document.HasMember("Material"));
 
-		TRef<TMaterial> Material;
+		RefPtr<TMaterial> Material;
 		if (!bForce)
 		{
-			if (TGraphicsPipelineCache::Get()->Exists(Path))
+			if (GraphicsPipelineCache::Get()->Exists(Path))
 			{
-				auto Pipeline = TGraphicsPipelineCache::Get()->GetPipeline(Path);
+				auto Pipeline = GraphicsPipelineCache::Get()->GetPipeline(Path);
 				Material = TMaterial::New(Pipeline, Path);
 			}
 		}
@@ -326,7 +330,7 @@ namespace ke
 		if (bForce || !Material)
 		{
 			auto Pipeline = Await(TRenderThread::Submit([&Document, &Path, bForce] { return LoadGraphicsPipeline(Document["Material"], Path, bForce); }));
-			TGraphicsPipelineCache::Get()->Add(Path, Pipeline);
+			GraphicsPipelineCache::Get()->Add(Path, Pipeline);
 			Material = TMaterial::New(Pipeline, Path);
 			LoadMaterialSamplers(Document["Material"], Material);
 		}

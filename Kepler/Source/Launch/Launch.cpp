@@ -14,7 +14,7 @@ namespace ke
 {
 	TCommandLineArguments ReadCommandLineArgs(i32 argc, char** ppArgv)
 	{
-		Array<TString> cmdArgs;
+		Array<String> cmdArgs;
 		for (i32 idx = 1; idx < argc; ++idx)
 		{
 			if (char const* const arg = ppArgv[idx])

@@ -8,15 +8,15 @@
 namespace ke
 {
 
-	TString ConvertToAnsiString(const TWideString& wide)
+	String ConvertToAnsiString(const TWideString& wide)
 	{
-		TString outStr;
+		String outStr;
 		outStr.resize(wide.length());
 		CHECK(std::wcstombs(outStr.data(), wide.data(), outStr.length()));
 		return outStr;
 	}
 
-	TWideString ConvertToWideString(const TString& ansi)
+	TWideString ConvertToWideString(const String& ansi)
 	{
 		TWideString outStr;
 		outStr.resize(ansi.length());
@@ -37,14 +37,8 @@ namespace ke
 		}
 	}
 
-	id64::id64()
+	UUID::UUID()
 		:	Value(Types_RandomU64())
 	{
 	}
-
-	id64::id64(const TString& str)
-		: Value(std::hash<TString>{}(str))
-	{
-	}
-
 }

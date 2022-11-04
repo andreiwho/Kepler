@@ -3,6 +3,7 @@
 #include "Core/Core.h"
 #include "World/Game/GameWorld.h"
 #include "Panels/AssetBrowserPanel.h"
+#include "Renderer/World/WorldTransform.h"
 
 namespace ke
 {
@@ -50,8 +51,8 @@ namespace ke
 		void DrawEditor();
 		virtual void OnUpdate(float deltaTime) override;
 		void EndGUIPass();
-		void SetEditedWorld(TRef<TGameWorld> pWorld);
-		void SelectEntity(TGameEntityId id);
+		void SetEditedWorld(RefPtr<GameWorld> pWorld);
+		void SelectEntity(GameEntityId id);
 		void UnselectEverything();
 		EViewportIndex GetHoveredViewport() const { return m_HoveredViewport; }
 
@@ -59,11 +60,19 @@ namespace ke
 
 	protected:
 		virtual void PostWorldInit() override;
+		void SaveCurrentWorld();
+		void SaveCurrentWorldAs();
+		void OpenWorld();
 
 	private:
+		void LoadEditorSettings();
+		void DumpEditorSettings();
 		void LoadEditorViewportIcons();
 		void SetupStyle();
 		void DrawMenuBar();
+
+		void SaveFileWithPicker();
+
 		void DrawViewports();
 		void DrawViewportGizmoControls();
 		void DrawViewportCameraControls();
@@ -77,6 +86,10 @@ namespace ke
 		bool OnMouseButtonDown(const TMouseButtonDownEvent& event);
 		bool OnMouseButtonUp(const TMouseButtonUpEvent& event);
 		bool OnMouseMove(const TMouseMoveEvent& event);
+		bool OnMouseScroll(const TMouseScrollWheelEvent& event);
+
+		void DrawEngineInfo();
+
 		float3 CalculateSnapVec() const;
 
 		void TrySelectEntity();
@@ -84,28 +97,25 @@ namespace ke
 		void EditorCamera_FocusSelectedObject();
 
 		void DrawViewportEntityIcons();
-		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport);
-		// void DrawDirections(TGameEntityId id);
+		void DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, GameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport);
+		void DrawDirections(GameEntityId id);
 
 	private:
 		TWindow* m_pMainWindow{};
 		float2 m_ViewportSizes[(u32)EViewportIndex::Max]{};
 		float2 m_ViewportPositions[(u32)EViewportIndex::Max]{};
 
-		TRef<TGameWorld> m_pEditedWorld{};
-		TGameEntityId m_SelectedEntity{};
+		RefPtr<GameWorld> m_pEditedWorld{};
+		GameEntityId m_SelectedEntity{};
 		EViewportIndex m_HoveredViewport = EViewportIndex::Max;
-		TGameEntityId m_EditorCameraEntity{};
+		GameEntityId m_EditorCameraEntity{};
 		bool m_bIsControllingCamera = false;
 		bool m_bIsCursorInViewport = false;
 		bool m_bIsGizmoHovered = false;
 		bool m_bIsGizmoUsed = false;
 
-		float m_EditorCameraSensitivity = 32;
-		float m_EditorCameraSpeed = 2.0f;
-
-		TSharedPtr<TLogPanel> m_LogPanel;
-		TSharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
+		SharedPtr<TLogPanel> m_LogPanel;
+		SharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
 
 	private:
 		i32 m_EditOperationIndex = 0x7;	// Translate by default
@@ -116,14 +126,19 @@ namespace ke
 		ETranslationSnap m_TranslationSnap = ETranslationSnap::_1Unit;
 		ERotationSnap m_RotationSnap = ERotationSnap::_1Degree;
 
-		TGameEntityId m_EditorGridEntity{};
+		GameEntityId m_EditorGridEntity{};
 		const i32 m_GridSize = 1000;
 		float m_InViewportIconSize = 50.0;
 
 		// Entity icons
-		TRef<TTextureSampler2D> m_CameraIcon;
-		TRef<TTextureSampler2D> m_AmbientLightIcon;
-		TRef<TTextureSampler2D> m_DirectionalLightIcon;
+		RefPtr<ITextureSampler2D> m_CameraIcon;
+		RefPtr<ITextureSampler2D> m_AmbientLightIcon;
+		RefPtr<ITextureSampler2D> m_DirectionalLightIcon;
 		float m_MaxViewportIconScreenCoord = 0.9f;
+
+	public:
+		WorldTransform EditorCameraTransform{};
+		float EditorCameraSensitivity = 32;
+		float EditorCameraSpeed = 2.0f;
 	};
 }

@@ -4,43 +4,43 @@
 namespace ke
 {
 
-	TTransformComponent::TTransformComponent(float3 Location, float3 Rotation, float3 Scale)
+	TransformComponent::TransformComponent(float3 Location, float3 Rotation, float3 Scale)
 		:Transform(Location, Rotation, Scale)
 	{
 	}
 
-	void TTransformComponent::SetTransform(TWorldTransform NewTransform)
+	void TransformComponent::SetTransform(WorldTransform NewTransform)
 	{
 		Transform = NewTransform;
 	}
 
-	void TTransformComponent::SetLocation(float3 NewLocation)
+	void TransformComponent::SetLocation(float3 NewLocation)
 	{
 		Transform.SetLocation(NewLocation);
 	}
 
-	void TTransformComponent::SetRotation(float3 NewRotation)
+	void TransformComponent::SetRotation(float3 NewRotation)
 	{
 		Transform.SetRotation(NewRotation);
 	}
 
-	void TTransformComponent::SetScale(float3 NewScale)
+	void TransformComponent::SetScale(float3 NewScale)
 	{
 		Transform.SetScale(NewScale);
 	}
 
-	float3 TTransformComponent::GetForwardVector() const
+	float3 TransformComponent::GetForwardVector() const
 	{
 		return MathCamera::ToEuler(Transform.GetRotation());
 	}
 
-	float3 TTransformComponent::GetRightVector() const
+	float3 TransformComponent::GetRightVector() const
 	{
 		float3 WorldUp = float3(0.0f, 0.0f, 1.0f);
 		return glm::normalize(glm::cross(GetForwardVector(), WorldUp));
 	}
 
-	float3 TTransformComponent::GetUpVector() const
+	float3 TransformComponent::GetUpVector() const
 	{
 		return glm::normalize(glm::cross(GetRightVector(), GetForwardVector()));
 	}

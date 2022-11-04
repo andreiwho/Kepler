@@ -10,29 +10,29 @@ namespace ke
 		Instance = this;
 	}
 
-	void TVirtualFileSystem::RegisterVirtualPathAlias(const TString& name, const TString& path)
+	void TVirtualFileSystem::RegisterVirtualPathAlias(const String& name, const String& path)
 	{
 		CHECK(!name.starts_with(' '));
 		CHECK(!path.starts_with(' '));
 		CHECK(!m_Aliases.Contains(name));
 
-		TString newPath = std::filesystem::relative(path, GetCurrentWorkingDirectory()).string();
+		String newPath = std::filesystem::relative(path, GetCurrentWorkingDirectory()).string();
 		std::replace(newPath.begin(), newPath.end(), '\\', '/');
 		m_Aliases.Insert(name, newPath);
 	}
 
-	bool TVirtualFileSystem::ResolvePath(const TString& path, TString& outPath)
+	bool TVirtualFileSystem::ResolvePath(const String& path, String& outPath)
 	{
 		CHECK(!path.starts_with(' '));
 		CHECK(!path.starts_with('/'));
 		CHECK(!TPath{ path }.is_absolute());
-		CHECK(path.find(m_VFSToken) != TString::npos);
+		CHECK(path.find(m_VFSToken) != String::npos);
 
-		TString newPath = path;
+		String newPath = path;
 		usize firstSlashIndex = path.find_first_of(m_VFSToken);
 		if (firstSlashIndex != std::string::npos)
 		{
-			TString alias = path.substr(0, firstSlashIndex);
+			String alias = path.substr(0, firstSlashIndex);
 			if (m_Aliases.Contains(alias))
 			{
 				newPath.replace(0, firstSlashIndex + strlen(m_VFSToken), m_Aliases[alias] + '/');
@@ -43,19 +43,19 @@ namespace ke
 		return false;
 	}
 
-	void VFSRegisterPathAlias(const TString& name, const TString& path)
+	void VFSRegisterPathAlias(const String& name, const String& path)
 	{
 		TVirtualFileSystem::Get()->RegisterVirtualPathAlias(name, path);
 	}
 
-	TString VFSResolvePath(const TString& path)
+	String VFSResolvePath(const String& path)
 	{
-		TString outStr;
+		String outStr;
 		CHECK(TVirtualFileSystem::Get()->ResolvePath(path, outStr));
 		return outStr;
 	}
 
-	TString VFSGetParentPath(const TString& path)
+	String VFSGetParentPath(const String& path)
 	{
 		if (path.empty())
 		{

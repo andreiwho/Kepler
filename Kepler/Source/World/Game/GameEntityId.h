@@ -5,14 +5,14 @@
 
 namespace ke
 {
-	class TGameEntityId
+	class GameEntityId
 	{
-		friend class TGameWorld;
+		friend class GameWorld;
 		friend class TGameEntity;
 
 	public:
-		TGameEntityId() : Entity(entt::null) {}
-		constexpr TGameEntityId(entt::entity InEntity) : Entity(InEntity) {}
+		GameEntityId() : Entity(entt::null) {}
+		constexpr GameEntityId(entt::entity InEntity) : Entity(InEntity) {}
 		inline operator entt::entity() const { return Entity; }
 		entt::entity Entity;
 	};

@@ -6,6 +6,7 @@ struct TVertex
 	float2 UV0 : TEXCOORD0;
 };
 
+//////////////////////////////////////////////////////////////////
 struct TPixel
 {
 	float4 Position : SV_Position;

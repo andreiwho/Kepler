@@ -12,8 +12,8 @@ namespace ke
 	DEFINE_UNIQUE_LOG_CHANNEL(LogShaderReflection, All);
 
 	//////////////////////////////////////////////////////////////////////////
-	THLSLShaderD3D11::THLSLShaderD3D11(const TString& Name, const Array<TShaderModule>& Modules)
-		: THLSLShader(Name, Modules)
+	THLSLShaderD3D11::THLSLShaderD3D11(const String& Name, const Array<ShaderModule>& Modules)
+		: HLSLShader(Name, Modules)
 	{
 		InitHandle();
 		InitShaders(Modules);
@@ -23,12 +23,12 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void THLSLShaderD3D11::InitHandle()
 	{
-		Handle = MakeRef(New<TShaderHandleD3D11>());
-		Handle->StageMask = ShaderStageMask;	// We have this being setup inside the TShader
+		m_Handle = MakeRef(New<TShaderHandleD3D11>());
+		m_Handle->StageMask = m_ShaderStageMask;	// We have this being setup inside the TShader
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void THLSLShaderD3D11::InitShaders(const Array<TShaderModule>& Modules)
+	void THLSLShaderD3D11::InitShaders(const Array<ShaderModule>& Modules)
 	{
 		// CHECK(IsRenderThread());
 		auto Device = TRenderDeviceD3D11::Get();
@@ -75,19 +75,21 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void THLSLShaderD3D11::InitReflection(const Array<TShaderModule>& Modules)
+	void THLSLShaderD3D11::InitReflection(const Array<ShaderModule>& Modules)
 	{
-		ReflectionData = MakeRef(New<TShaderModuleReflection>());
+		m_ReflectionData = MakeRef(New<TShaderModuleReflection>());
 		for (const auto& Module : Modules)
 		{
-			CComPtr<ID3D11ShaderReflection> pReflection;
+			ID3D11ShaderReflection* pReflection;
 			HRCHECK(D3DReflect(Module.ByteCode->GetData(), Module.ByteCode->GetSize(), IID_PPV_ARGS(&pReflection)));
 
-			ReflectionData->ParamMapping = ReflectParams(pReflection, Module.StageFlags, ReflectionData->ParamMapping ? ReflectionData->ParamMapping : nullptr);
+			m_ReflectionData->ParamMapping = ReflectParams(pReflection, Module.StageFlags, m_ReflectionData->ParamMapping ? m_ReflectionData->ParamMapping : nullptr);
 			if (Module.StageFlags & EShaderStageFlags::Vertex)
 			{
-				ReflectionData->VertexLayout = ReflectVertexLayout(pReflection, Module);
+				m_ReflectionData->VertexLayout = ReflectVertexLayout(pReflection, Module);
 			}
+
+			SAFE_RELEASE(pReflection);
 		}
 	}
 
@@ -205,11 +207,12 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TVertexLayout THLSLShaderD3D11::ReflectVertexLayout(CComPtr<ID3D11ShaderReflection> pReflection, const TShaderModule& VertexShaderModule)
+	VertexLayout THLSLShaderD3D11::ReflectVertexLayout(ID3D11ShaderReflection* pReflection, const ShaderModule& VertexShaderModule)
 	{
 		CHECK(VertexShaderModule.StageFlags & EShaderStageFlags::Vertex);
 		CHECK(pReflection);
-		TVertexLayout OutLayout;
+		VertexLayout OutLayout;
+		SAFE_ADD_REF(pReflection);
 
 		D3D11_SHADER_DESC ShaderDesc{};
 		HRCHECK(pReflection->GetDesc(&ShaderDesc));
@@ -222,7 +225,7 @@ namespace ke
 			D3D11_SIGNATURE_PARAMETER_DESC InputParamDesc;
 			HRCHECK(pReflection->GetInputParameterDesc(idx, &InputParamDesc));
 
-			TVertexAttribute Attribute{};
+			VertexAttribute Attribute{};
 			Attribute.AttributeName = InputParamDesc.SemanticName;
 			Attribute.AttributeId = InputParamDesc.SemanticIndex;
 			Attribute.InputType = DeduceInputParameterType(InputParamDesc);
@@ -233,16 +236,18 @@ namespace ke
 			OutLayout.AddAttribute(Attribute);
 		}
 
+		SAFE_RELEASE(pReflection);
 		return OutLayout;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TPipelineParamMapping> THLSLShaderD3D11::ReflectParams(CComPtr<ID3D11ShaderReflection> pReflection, EShaderStageFlags StageFlags, TRef<TPipelineParamMapping> ToMerge)
+	RefPtr<PipelineParamMapping> THLSLShaderD3D11::ReflectParams(ID3D11ShaderReflection* pReflection, EShaderStageFlags StageFlags, RefPtr<PipelineParamMapping> ToMerge)
 	{
 		D3D11_SHADER_DESC Desc;
 		HRCHECK(pReflection->GetDesc(&Desc));
-		
-		TRef<TPipelineParamMapping> ParamMappings = ToMerge ? ToMerge : TPipelineParamMapping::New();
+		SAFE_ADD_REF(pReflection);
+
+		RefPtr<PipelineParamMapping> ParamMappings = ToMerge ? ToMerge : PipelineParamMapping::New();
 		for (UINT idx = 0; idx < Desc.ConstantBuffers; ++idx)
 		{
 			// Reflect constant buffers
@@ -254,7 +259,7 @@ namespace ke
 			{
 				D3D11_SHADER_INPUT_BIND_DESC bindDesc;
 				HRCHECK(pReflection->GetResourceBindingDescByName(BufferDesc.Name, &bindDesc));
-				if (bindDesc.BindPoint < TWorldRenderer::RS_User)
+				if (bindDesc.BindPoint < WorldRenderer::RS_User)
 				{
 					continue;
 				}
@@ -286,6 +291,7 @@ namespace ke
 			}
 		}
 
+		SAFE_RELEASE(pReflection);
 		return ParamMappings;
 	}
 

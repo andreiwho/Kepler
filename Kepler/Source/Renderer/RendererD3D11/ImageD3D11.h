@@ -5,7 +5,7 @@
 namespace ke
 {
 	//////////////////////////////////////////////////////////////////////////
-	class TImage2D_D3D11 : public TImage2D
+	class TImage2D_D3D11 : public IImage2D
 	{
 	public:
 		TImage2D_D3D11(u32 InWidth, u32 InHeight, EFormat InFormat, EImageUsage InUsage, u32 InMipLevels = 1, u32 InArraySize = 1);
@@ -13,7 +13,7 @@ namespace ke
 
 		inline auto GetImage() const { return Image; }
 		inline auto GetReadbackImage() const { return ReadbackImage; }
-		void RequireReadbackCopy(TRef<class GraphicsCommandListImmediate> pImmCtx);
+		void RequireReadbackCopy(RefPtr<class ICommandListImmediate> pImmCtx);
 
 	private:
 		ID3D11Texture2D* Image{};

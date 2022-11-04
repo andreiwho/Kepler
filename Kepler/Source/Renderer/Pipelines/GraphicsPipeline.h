@@ -8,7 +8,7 @@
 
 namespace ke
 {
-	class GraphicsCommandListImmediate;
+	class ICommandListImmediate;
 
 	// What pipeline needs
 	// - Input layout.
@@ -22,6 +22,7 @@ namespace ke
 			Undefined,
 			Unlit,
 			Lit,
+			Other,
 		} Value{};
 
 		EPipelineDomain() = default;
@@ -31,7 +32,7 @@ namespace ke
 		inline bool IsUndefined() const { return Value != Undefined; }
 	};
 
-	struct TGraphicsPipelineConfiguration
+	struct GraphicsPipelineConfig
 	{
 		ERenderPassId RenderPassMask{ ERenderPassId::PrePass | ERenderPassId::Geometry };
 		EPipelineDomain Domain{ EPipelineDomain::Unlit };
@@ -39,7 +40,7 @@ namespace ke
 		struct
 		{
 			EPrimitiveTopology Topology = EPrimitiveTopology::TriangleList;
-			TVertexLayout VertexLayout{};
+			VertexLayout VertexLayout{};
 		} VertexInput;
 
 		struct
@@ -60,54 +61,55 @@ namespace ke
 		} DepthStencil;
 		bool bUsePrepass = true;
 
-		TRef<TPipelineParamMapping> ParamMapping;
+		RefPtr<PipelineParamMapping> ParamMapping;
 	};
 
-	class TGraphicsPipelineHandle : public IntrusiveRefCounted
+	class IGraphicsPipelineHandle : public IntrusiveRefCounted
 	{
 	public:
-		static TRef<TGraphicsPipelineHandle> CreatePipelineHandle(TRef<TShader> Shader, const TGraphicsPipelineConfiguration& Config);
+		static RefPtr<IGraphicsPipelineHandle> CreatePipelineHandle(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config);
 	};
 
-	class TGraphicsPipeline;
-	class TGraphicsPipelineCache
-	{
-		static TGraphicsPipelineCache* Instance;
-	public:
-		static TGraphicsPipelineCache* Get() { return Instance; }
-		TGraphicsPipelineCache() { Instance = this; }
+	class IGraphicsPipeline;
 
-		bool Exists(const TString& Name) const;
-		void Add(const TString& Name, TRef<TGraphicsPipeline> Pipeline);
-		TRef<TGraphicsPipeline> GetPipeline(const TString& Name) const;
+	class GraphicsPipelineCache
+	{
+		static GraphicsPipelineCache* Instance;
+	public:
+		static GraphicsPipelineCache* Get() { return Instance; }
+		GraphicsPipelineCache() { Instance = this; }
+
+		bool Exists(const String& name) const;
+		void Add(const String& name, RefPtr<IGraphicsPipeline> pPipeline);
+		RefPtr<IGraphicsPipeline> GetPipeline(const String& name) const;
 
 	private:
-		Map<TString, TRef<TGraphicsPipeline>> Pipelines;
+		Map<String, RefPtr<IGraphicsPipeline>> m_Pipelines;
 	};
 
-	class TGraphicsPipeline : public IntrusiveRefCounted
+	class IGraphicsPipeline : public IntrusiveRefCounted
 	{
 	public:
-		TGraphicsPipeline() = default;
-		TGraphicsPipeline(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		IGraphicsPipeline() = default;
+		IGraphicsPipeline(RefPtr<IShader> pShader, const GraphicsPipelineConfig& config);
 
-		virtual void UploadParameters(TRef<GraphicsCommandListImmediate> pImmCmdList);
+		virtual void UploadParameters(RefPtr<ICommandListImmediate> pImmCmdList);
 
-		TRef<TShader> GetShader() const { return Shader; }
-		TRef<TGraphicsPipelineHandle> GetHandle() const { return Handle; }
+		RefPtr<IShader> GetShader() const { return m_Shader; }
+		RefPtr<IGraphicsPipelineHandle> GetHandle() const { return m_Handle; }
 
-		TRef<TPipelineParamMapping> GetParamMapping() const { return Configuration.ParamMapping; }
-		inline bool UsesPrepass() const { return Configuration.bUsePrepass; }
-		inline EPipelineDomain GetDomain() const { return Configuration.Domain; }
+		RefPtr<PipelineParamMapping> GetParamMapping() const { return m_Configuration.ParamMapping; }
+		inline bool UsesPrepass() const { return m_Configuration.bUsePrepass; }
+		inline EPipelineDomain GetDomain() const { return m_Configuration.Domain; }
 		void Validate() const;
 
 	protected:
-		static TRef<TShader> LoadHLSLShader(const TString& ShaderPath, EShaderStageFlags Stages);
-		void DeferredInit(TRef<TShader> InShader, const TGraphicsPipelineConfiguration& Configuration);
+		static RefPtr<IShader> LoadHLSLShader(const String& shaderPath, EShaderStageFlags stages);
+		void DeferredInit(RefPtr<IShader> pShader, const GraphicsPipelineConfig& configuration);
 
 	private:
-		TRef<TGraphicsPipelineHandle> Handle{};
-		TRef<TShader> Shader{};
-		TGraphicsPipelineConfiguration Configuration{};
+		RefPtr<IGraphicsPipelineHandle> m_Handle{};
+		RefPtr<IShader> m_Shader{};
+		GraphicsPipelineConfig m_Configuration{};
 	};
 }

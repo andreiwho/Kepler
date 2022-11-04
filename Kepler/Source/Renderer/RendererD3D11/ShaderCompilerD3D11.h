@@ -9,11 +9,11 @@ namespace ke
 	class THLSLShaderCompilerD3D11 : public THLSLShaderCompiler
 	{
 	public:
-		virtual TRef<TShader> CompileShader(const TString& Path, EShaderStageFlags TypeMask) override;
+		virtual RefPtr<IShader> CompileShader(const String& Path, EShaderStageFlags TypeMask) override;
 
 	private:
-		static TShaderModule CreateShaderModule(const TString& SourceName, EShaderStageFlags::Type Flags, const TString& Source);
-		static TRef<AsyncDataBlob> CompileHLSLCode(const TString& SourceName, const TString& EntryPoint, EShaderStageFlags::Type Type, const TString& Code);
-		static TString MakeBufferSlotString(i32 index);
+		static ShaderModule CreateShaderModule(const String& SourceName, EShaderStageFlags::Type Flags, const String& Source, ID3DInclude* pInclude);
+		static RefPtr<IAsyncDataBlob> CompileHLSLCode(const String& SourceName, const String& EntryPoint, EShaderStageFlags::Type Type, const String& Code, ID3DInclude* pInclude);
+		static String MakeBufferSlotString(i32 index);
 	};
 }

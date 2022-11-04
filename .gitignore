@@ -9,4 +9,7 @@ Release
 *.vcxproj
 *.filters
 *.user
-imgui.ini
+
+*.gen.h
+*.gen.cpp
+*.gen.json

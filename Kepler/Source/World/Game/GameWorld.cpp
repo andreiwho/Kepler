@@ -11,41 +11,48 @@ namespace ke
 {
 	DEFINE_UNIQUE_LOG_CHANNEL(LogGameWorld, Info);
 
-	TGameWorld::TGameWorld(const TString& InName)
+	GameWorld::GameWorld(const String& InName)
 		: TWorld(InName)
 	{
+		if (!m_StaticState)
+		{
+			m_StaticState = New<StaticState>();
+		}
+
 		KEPLER_INFO(LogGameWorld, "Created GameWorld with name {}", InName);
 		bNeedsUpdate = true;
 	}
 
-	TGameWorld::~TGameWorld()
+	GameWorld::~GameWorld()
 	{
 		FlushPendingDestroys();
 		KEPLER_INFO(LogGameWorld, "Destroyed GameWorld with name {}", Name);
 	}
 
-	TGameEntityId TGameWorld::CreateEntity(const TString& Name)
+	GameEntityId GameWorld::CreateEntity(const String& Name)
 	{
-		const entt::entity EntityId = EntityRegistry.create();
-		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
+		const GameEntityId EntityId = m_EntityRegistry.create();
+		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		EntityRegistry.emplace<TIdComponent>(EntityId);
-		EntityRegistry.emplace<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		TIdComponent& idComponent = AddComponent<TIdComponent>(EntityId);
+		AddComponent<TransformComponent>(EntityId);
+		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_UUIDToEntityMap[idComponent.Id] = EntityId;
 		return EntityId;
 	}
 
-	TGameEntityId TGameWorld::CreateCamera(const TString& Name, float Fov, float Width, float Height, float Near, float Far)
+	GameEntityId GameWorld::CreateCamera(const String& Name, float Fov, float Width, float Height, float Near, float Far)
 	{
-		const entt::entity EntityId = EntityRegistry.create();
-		TNameComponent& NameComp = EntityRegistry.emplace<TNameComponent>(EntityId);
+		const entt::entity EntityId = m_EntityRegistry.create();
+		TNameComponent& NameComp = AddComponent<TNameComponent>(EntityId);
 		NameComp.Name = Name;
-		EntityRegistry.emplace<TIdComponent>(EntityId);
-		EntityRegistry.emplace<TTransformComponent>(EntityId);
-		EntityRegistry.emplace<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
-		EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		auto& idComponent = AddComponent<TIdComponent>(EntityId);
+		AddComponent<TransformComponent>(EntityId);
+		AddComponent<CameraComponent>(EntityId, Fov, Width, Height, Near, Far);
+		m_EntityRegistry.emplace<TGameEntity>(EntityId, this, EntityId);
+		m_UUIDToEntityMap[idComponent.Id] = EntityId;
 
-		if (!IsValidEntity(MainCamera))
+		if (!IsValidEntity(m_MainCamera))
 		{
 			SetMainCamera(EntityId);
 		}
@@ -53,103 +60,167 @@ namespace ke
 		return EntityId;
 	}
 
-	TGameEntity& TGameWorld::GetEntityFromId(TGameEntityId Id)
+	GameEntityId GameWorld::CreateEntityDeferred()
 	{
-		return EntityRegistry.get<TGameEntity>(Id.Entity);
+		return m_EntityRegistry.create();
 	}
 
-	void TGameWorld::DestroyEntity(TGameEntityId Entity)
+	void GameWorld::FinishCreatingEntity(GameEntityId entity)
 	{
-		PendingDestroyEntities.EmplaceBack(Entity.Entity);
-	}
-
-	TString TGameWorld::GetEntityName(TGameEntityId Entity)
-	{
-		if (EntityRegistry.valid(Entity.Entity))
+		m_EntityRegistry.emplace<TGameEntity>(entity, this, entity);
+		if (HasComponent<CameraComponent>(entity))
 		{
-			return EntityRegistry.get<TNameComponent>(Entity.Entity).Name;
+			if (!IsValidEntity(m_MainCamera))
+			{
+				SetMainCamera(entity);
+			}
+		}
+		auto& idComponent = GetOrAddComponent<TIdComponent>(entity);
+		m_UUIDToEntityMap[idComponent.Id] = entity;
+	}
+
+	TGameEntity& GameWorld::GetEntityFromId(GameEntityId Id)
+	{
+		return m_EntityRegistry.get<TGameEntity>(Id.Entity);
+	}
+
+	GameEntityId GameWorld::GetEntityByUUID(UUID id)
+	{
+		CHECK(m_UUIDToEntityMap.Contains(id));
+		return m_UUIDToEntityMap[id];
+	}
+
+	void GameWorld::DestroyEntity(GameEntityId Entity)
+	{
+		m_PendingDestroyEntities.EmplaceBack(Entity.Entity);
+	}
+
+	String GameWorld::GetEntityName(GameEntityId Entity)
+	{
+		if (m_EntityRegistry.valid(Entity.Entity))
+		{
+			return m_EntityRegistry.get<TNameComponent>(Entity.Entity).Name;
 		}
 		return "";
 	}
 
-	id64 TGameWorld::GetEntityUUID(TGameEntityId Entity) const
+	UUID GameWorld::GetEntityUUID(GameEntityId Entity) const
 	{
-		if (EntityRegistry.valid(Entity.Entity))
+		if (m_EntityRegistry.valid(Entity.Entity))
 		{
-			return EntityRegistry.get<TIdComponent>(Entity.Entity).Id;
+			return m_EntityRegistry.get<TIdComponent>(Entity.Entity).Id;
 		}
 		return {};
 	}
 
-	bool TGameWorld::IsValidEntity(TGameEntityId Id) const
+	bool GameWorld::IsValidEntity(GameEntityId Id) const
 	{
-		return EntityRegistry.valid(Id);
+		return m_EntityRegistry.valid(Id);
 	}
 
-	void TGameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
+	void GameWorld::UpdateWorld(float DeltaTime, EWorldUpdateKind UpdateKind)
 	{
 		KEPLER_PROFILE_SCOPE();
-		if (UpdateKind != EWorldUpdateKind::Game)
+		if (IsValidEntity(m_MainCamera))
 		{
-			return;
-		}
-
-		if (IsValidEntity(MainCamera))
-		{
-			auto& CameraEntity = GetEntityFromId(MainCamera);
-			auto& camera = GetComponent<CameraComponent>(MainCamera).GetCamera();
+			auto& CameraEntity = GetEntityFromId(m_MainCamera);
+			auto& camera = GetComponent<CameraComponent>(m_MainCamera).GetCamera();
 			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
 		// Update components for entities
-		EntityRegistry.view<TMaterialComponent, TTransformComponent>().each(
-			[this](auto Id, TMaterialComponent& MC, TTransformComponent& TC) 
+		m_EntityRegistry.view<MaterialComponent, TransformComponent>().each(
+			[this](auto Id, MaterialComponent& MC, TransformComponent& TC)
 			{
-				TRef<TMaterial> Material = MC.GetMaterial();
-				Material->WriteTransform(TC.GetTransform());
-				// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
-				Material->WriteId((i32)Id);
+				RefPtr<TMaterial> Material = MC.GetMaterial();
+				if (Material)
+				{
+					Material->WriteTransform(TC.GetTransform());
+					// Material->WriteCamera(GetComponent<CameraComponent>(MainCamera).GetCamera());
+					Material->WriteId((i32)Id);
+				}
 			});
 
-		EntityRegistry.view<TGameEntity>().each(
+		m_EntityRegistry.view<TGameEntity>().each(
 			[DeltaTime](TGameEntity& Entity)
 			{
 				Entity.Update(DeltaTime);
 			}
 		);
 
+		if (UpdateKind == EWorldUpdateKind::Play)
+		{
+			for (auto& accessor : m_StaticState->m_NativeAccessors)
+			{
+				if (accessor.OnUpdate)
+				{
+					accessor.OnUpdate(this, DeltaTime);
+				}
+			}
+		}
+
 		FlushPendingDestroys();
 	}
 
-	void TGameWorld::SetMainCamera(TGameEntityId Camera)
+	void GameWorld::SetMainCamera(GameEntityId Camera)
 	{
 		if (IsValidEntity(Camera))
 		{
-			MainCamera = Camera;
+			m_MainCamera = Camera;
 			return;
 		}
 		KEPLER_WARNING(LogGameWorld, "GameWorld::SetMainCamera - passed null as camera.");
 	}
 
-	bool TGameWorld::IsCamera(TGameEntityId Entity) const
+	bool GameWorld::IsCamera(GameEntityId Entity) const
 	{
 		return HasComponent<CameraComponent>(Entity);
 	}
 
-	bool TGameWorld::IsLight(TGameEntityId Entity) const
+	bool GameWorld::IsLight(GameEntityId Entity) const
 	{
 		return HasComponent<AmbientLightComponent>(Entity) || HasComponent<DirectionalLightComponent>(Entity);
 	}
 
-	void TGameWorld::FlushPendingDestroys()
+	void GameWorld::FlushPendingDestroys()
 	{
 		KEPLER_PROFILE_SCOPE();
 		// Flush pending destroys
-		for (auto Id : PendingDestroyEntities)
+		for (auto Id : m_PendingDestroyEntities)
 		{
-			EntityRegistry.destroy(Id);
+			m_EntityRegistry.destroy(Id);
 		}
-		PendingDestroyEntities.Clear();
+		m_PendingDestroyEntities.Clear();
 	}
 
+	EntityComponent* GameWorld::AddComponentByTypeHash(GameEntityId id, ClassId typeHash)
+	{
+		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
+		if (pClass)
+		{
+			auto pComponent = (EntityComponent*)pClass->RegistryConstruct(id, m_EntityRegistry);
+
+			NativeComponentContainer& container = GetOrAddComponent<NativeComponentContainer>(id);
+			container.AddComponent(typeHash);
+
+			if (pComponent)
+			{
+				pComponent->SetOwner(id);
+				pComponent->SetWorld(this);
+				return pComponent;
+			}
+		}
+		return nullptr;
+	}
+
+	void GameWorld::ClearStaticState()
+	{
+		if (m_StaticState)
+		{
+			m_StaticState->~StaticState();
+			TMalloc::Get()->Free(m_StaticState);
+		}
+	}
+
+	ke::GameWorld::StaticState* GameWorld::m_StaticState;
 }

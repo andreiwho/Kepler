@@ -35,6 +35,12 @@
 #include "Tools/ImageLoader.h"
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "Renderer/Subrenderer/Subrenderer2D.h"
+#include "World/Game/GameWorldSerializer.h"
+#include "Core/Filesystem/FileUtils.h"
+#include "Core/App.h"
+#include "Core/Json/Serialization.h"
+#include "Renderer/World/WorldRenderer.h"
 
 namespace ke
 {
@@ -82,7 +88,7 @@ namespace ke
 		{
 			auto initTask = TRenderThread::Submit([]
 				{
-					auto pDevice = RefCast<TRenderDeviceD3D11>(TLowLevelRenderer::Get()->GetRenderDevice());
+					auto pDevice = RefCast<TRenderDeviceD3D11>(LowLevelRenderer::Get()->GetRenderDevice());
 					auto pDeviceHandle = pDevice->GetDevice();
 					auto pContextHandle = pDevice->GetImmediateContext();
 					CHECK(ImGui_ImplDX11_Init(pDeviceHandle, pContextHandle));
@@ -159,8 +165,10 @@ namespace ke
 		DrawDetailsPanel();
 		DrawSceneGraph();
 		m_AssetBrowserPanel->Draw();
+		// m_AssetBrowserPanel->DrawInSaveMode(EFieldAssetType::All);
 		DrawDebugTools();
-		ImGui::ShowDemoWindow();
+		DrawEngineInfo();
+		// ImGui::ShowDemoWindow();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -171,6 +179,28 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	void EditorModule::DrawEngineInfo()
+	{
+		bool bOpen = ImGui::Begin("Engine Info");
+		if (bOpen)
+		{
+			auto pEngineClass = GetReflectedClass<Engine>();
+			if (pEngineClass)
+			{
+				TEditorElements::DrawReflectedObjectFields("ENGINE", pEngineClass->GetClassId(), Engine::Get());
+			}
+
+			auto pRendererClass = GetReflectedClass<WorldRenderer>();
+			if (pRendererClass)
+			{
+				TEditorElements::DrawReflectedObjectFields("RENDERER", pRendererClass->GetClassId(), WorldRenderer::Get());
+			}
+			ImGui::End();
+		}
+
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::EndGUIPass()
 	{
 		KEPLER_PROFILE_SCOPE();
@@ -178,7 +208,7 @@ namespace ke
 		Await(TRenderThread::Submit(
 			[]
 			{
-				auto pLLR = TLowLevelRenderer::Get();
+				auto pLLR = LowLevelRenderer::Get();
 				auto pSwapChain = pLLR->GetSwapChain(0);
 				auto pImmCtx = pLLR->GetRenderDevice()->GetImmediateCommandList();
 				pImmCtx->StartDrawingToSwapChainImage(pSwapChain);
@@ -204,14 +234,19 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void EditorModule::SetEditedWorld(TRef<TGameWorld> pWorld)
+	void EditorModule::SetEditedWorld(RefPtr<GameWorld> pWorld)
 	{
 		KEPLER_PROFILE_SCOPE();
+		if (m_pEditedWorld && m_pEditedWorld->IsValidEntity(m_EditorCameraEntity))
+		{
+			m_pEditedWorld->DestroyEntity(m_EditorCameraEntity);
+			m_EditorCameraEntity = GameEntityId();
+		}
 		m_pEditedWorld = pWorld;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void EditorModule::SelectEntity(TGameEntityId id)
+	void EditorModule::SelectEntity(GameEntityId id)
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld || !m_pEditedWorld->IsValidEntity(id))
@@ -225,7 +260,7 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::UnselectEverything()
 	{
-		m_SelectedEntity = TGameEntityId{};
+		m_SelectedEntity = GameEntityId{};
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -237,13 +272,75 @@ namespace ke
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonDown);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseButtonUp);
 		Dispatcher.Dispatch(this, &EditorModule::OnMouseMove);
+		Dispatcher.Dispatch(this, &EditorModule::OnMouseScroll);
 	}
 
 	void EditorModule::PostWorldInit()
 	{
-		CreateEditorGrid();
+		if (Engine::Get()->CurrentWorldState == EWorldUpdateKind::Edit)
+		{
+			CreateEditorGrid();
+		}
 
 		LoadEditorViewportIcons();
+	}
+
+	void EditorModule::SaveCurrentWorld()
+	{
+		if (auto pWorldAsset = Engine::Get()->WorldAsset)
+		{
+			GameWorldSerializer serializer{ m_pEditedWorld };
+			TFuture<String> json = serializer.SerializeToJson();
+			TFileUtils::WriteTextFileAsync(pWorldAsset->GetPath(), Await(json));
+		}
+		else
+		{
+			SaveFileWithPicker();
+		}
+	}
+
+	void EditorModule::SaveCurrentWorldAs()
+	{
+		SaveFileWithPicker();
+	}
+
+	void EditorModule::OpenWorld()
+	{
+		String assetPath;
+		if (FilePickers::OpenAssetPicker(assetPath, EFieldAssetType::Map))
+		{
+			JsonDeserializer deserializer{ Await(TFileUtils::ReadTextFileAsync(assetPath)) };
+			GameWorldDeserializer worldCreator;
+
+			Engine::Get()->SetMainWorld(worldCreator.Deserialize(deserializer.GetRootNode()));
+			Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(assetPath));
+		}
+	}
+
+	void EditorModule::LoadEditorSettings()
+	{
+		/*JsonSerializer serializer{};
+		JsonObject& rootNode = serializer.CreateRootObject("Editor");
+
+		if (auto pClass = GetReflectedClass<EditorModule>())
+		{
+			for (const auto& [name, field] : pClass->GetFields())
+			{
+				switch (field.GetTypeHash())
+				{
+					switch (field.GetTypeHash())
+					{
+					default:
+						break;
+					}
+				}
+			}
+		}*/
+	}
+
+	void EditorModule::DumpEditorSettings()
+	{
+
 	}
 
 	void EditorModule::LoadEditorViewportIcons()
@@ -257,7 +354,7 @@ namespace ke
 	void EditorModule::SetupStyle()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		const TString font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
+		const String font = VFSResolvePath("Engine://Fonts/Roboto-Regular.ttf");
 		io.Fonts->AddFontFromFileTTF(font.c_str(), 15.0f);
 
 		auto& style = ImGui::GetStyle();
@@ -266,19 +363,19 @@ namespace ke
 		// TEXT
 		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-		
+
 		// WINDOWS
 		colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.1f, 0.94f);
 		colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 		colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
 		colors[ImGuiCol_Border] = ImVec4(0.2f, 0.2f, 0.2f, 0.50f);
 		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-		
+
 		// FRAMES
 		colors[ImGuiCol_FrameBg] = ImVec4(0.24f, 0.24f, 0.24f, 0.54f);
 		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.47f, 0.47f, 0.47f, 0.40f);
 		colors[ImGuiCol_FrameBgActive] = ImVec4(0.7f, 0.7f, 0.7f, 0.67f);
-		
+
 		// TITLES
 		colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
 		colors[ImGuiCol_TitleBgActive] = ImVec4(0.05f, 0.05f, 0.05f, 1.00f);
@@ -313,7 +410,7 @@ namespace ke
 		colors[ImGuiCol_TabUnfocusedActive] = ImLerp(colors[ImGuiCol_TabActive], colors[ImGuiCol_TitleBg], 0.40f);
 		colors[ImGuiCol_DockingPreview] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
 		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-		
+
 		// Other
 		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
@@ -341,10 +438,55 @@ namespace ke
 		{
 			if (ImGui::BeginMenu("File", true))
 			{
-				ImGui::MenuItem("NoOp", "No + Op");
+				if (ImGui::MenuItem("Save", "Ctrl + S"))
+				{
+					SaveCurrentWorld();
+					//KEPLER_INFO(LogEditor, "Serialized world: {}", json);	
+				}
+
+				if (ImGui::MenuItem("Save as", "Ctrl + Shift + S"))
+				{
+					SaveCurrentWorldAs();
+				}
+
+				if (ImGui::MenuItem("Load", "Ctrl + O"))
+				{
+					OpenWorld();
+				}
+
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Edit", false))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("World", true))
+			{
+				if (ImGui::MenuItem("Create Entity"))
+				{
+					auto entity = m_pEditedWorld->CreateEntity("NewEntity");
+					m_SelectedEntity = entity;
+				}
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
+		}
+	}
+
+	void EditorModule::SaveFileWithPicker()
+	{
+		String outPath;
+		if (FilePickers::SaveAssetPicker(outPath, EFieldAssetType::Map))
+		{
+			GameWorldSerializer serializer{ m_pEditedWorld };
+			TFuture<String> json = serializer.SerializeToJson();
+			TFileUtils::WriteTextFileAsync(outPath, Await(json));
+
+			AssetManager::Get()->RescanAssets();
+			Engine::Get()->WorldAsset = Await(AssetManager::Get()->FindAssetNode(outPath));
 		}
 	}
 
@@ -375,19 +517,40 @@ namespace ke
 
 			m_ViewportSizes[(u32)EViewportIndex::Viewport1] = float2(region.x, region.y);
 			m_ViewportPositions[(u32)EViewportIndex::Viewport1] = float2(vMin.x, vMin.y);
-			auto pLLR = TLowLevelRenderer::Get();
+			auto pLLR = LowLevelRenderer::Get();
 
-			auto pRenderTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
+			auto pRenderTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup("EditorViewport");
 			auto pViewportSampler = pRenderTargetGroup->GetTextureSamplerAtArrayLayer(pLLR->GetFrameIndex());
 			auto pImage = pViewportSampler->GetImage();
 			ImGui::Image(
 				(ImTextureID)pViewportSampler->GetNativeHandle(),
 				ImVec2(pImage->GetWidth(), pImage->GetHeight()));
 
-			DrawGizmo();
-			DrawViewportEntityIcons();
-			DrawViewportGizmoControls();
-			DrawViewportCameraControls();
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload("MAP"))
+				{
+					if (AssetTreeNode** ppWorldData = (AssetTreeNode**)pPayload->Data)
+					{
+						GameWorldDeserializer deserializer;
+						RefPtr<GameWorld> pWorld = deserializer.Deserialize(JsonDeserializer{
+							Await(TFileUtils::ReadTextFileAsync((*ppWorldData)->GetPath()))
+							}.GetRootNode()
+						);
+						Engine::Get()->WorldAsset = *ppWorldData;
+						Engine::Get()->SetMainWorld(pWorld);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (Engine::Get()->CurrentWorldState == EWorldUpdateKind::Edit)
+			{
+				DrawGizmo();
+				DrawViewportEntityIcons();
+				DrawViewportGizmoControls();
+				DrawViewportCameraControls();
+			}
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -494,12 +657,12 @@ namespace ke
 		ImGui::Text("Sensitivity");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##Sensitivity", &m_EditorCameraSensitivity, 0.1f, 128.0f);
+		ImGui::DragFloat("##Sensitivity", &EditorCameraSensitivity, 0.1f, 128.0f);
 		ImGui::SameLine(0.0f, 32.0f);
 		ImGui::Text("Movement Speed");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(128);
-		ImGui::DragFloat("##MovementSpeed", &m_EditorCameraSpeed, 0.1f, 128.0f);
+		ImGui::DragFloat("##MovementSpeed", &EditorCameraSpeed, 0.1f, 128.0f);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -511,7 +674,7 @@ namespace ke
 			return;
 		}
 
-		TEditorDetailsPanel widget(m_pEditedWorld, m_SelectedEntity);
+		EntityDetailsPanel widget(m_pEditedWorld, m_SelectedEntity);
 		widget.Draw();
 	}
 
@@ -519,39 +682,42 @@ namespace ke
 	void EditorModule::DrawSceneGraph()
 	{
 		KEPLER_PROFILE_SCOPE();
-		ImGui::Begin("Scene Graph");
-		i32 idx = 0;
-		if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
+		if (ImGui::Begin("Scene Graph"))
 		{
-			m_pEditedWorld->GetComponentView<TNameComponent, TGameEntity>().each(
-				[&, this](auto id, TNameComponent& NC, TGameEntity& GE)
-				{
-					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-					if (!GE.ShouldHideInSceneGraph())
+			i32 idx = 0;
+			if (ImGui::TreeNodeEx((void*)(intptr_t)idx, ImGuiTreeNodeFlags_DefaultOpen, m_pEditedWorld->GetName().c_str()))
+			{
+				m_pEditedWorld->GetComponentView<TNameComponent>().each(
+					[&, this](auto id, TNameComponent& NC)
 					{
-						bool bNodeOpen = false;
-						if (m_SelectedEntity == TGameEntityId{ id })
+						ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+						auto handle = EntityHandle{ m_pEditedWorld, id };
+						if (!handle->ShouldHideInSceneGraph())
 						{
-							flags |= ImGuiTreeNodeFlags_Selected;
-						}
+							bool bNodeOpen = false;
+							if (m_SelectedEntity == GameEntityId{ id })
+							{
+								flags |= ImGuiTreeNodeFlags_Selected;
+							}
 
-						bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
-						if (ImGui::IsItemClicked())
-						{
-							m_SelectedEntity = TGameEntityId{ id };
-						}
+							bNodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)idx, flags, NC.Name.c_str());
+							if (ImGui::IsItemClicked())
+							{
+								m_SelectedEntity = GameEntityId{ id };
+							}
 
-						if (bNodeOpen)
-						{
-							ImGui::TreePop();
-						}
+							if (bNodeOpen)
+							{
+								ImGui::TreePop();
+							}
 
-						idx++;
-					}
-				});
-			ImGui::TreePop();
+							idx++;
+						}
+					});
+				ImGui::TreePop();
+			}
+			ImGui::End();
 		}
-		ImGui::End();
 	}
 
 	void EditorModule::DrawDebugTools()
@@ -569,6 +735,11 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		if (!m_pEditedWorld)
+		{
+			return;
+		}
+
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
 		{
 			return;
 		}
@@ -593,7 +764,7 @@ namespace ke
 			matrix4x4 viewMatrix = camera.GenerateViewMatrix();
 			matrix4x4 projMatrix = camera.GenerateProjectionMatrix();
 
-			TTransformComponent& transformComp = m_pEditedWorld->GetComponent<TTransformComponent>(m_SelectedEntity);
+			TransformComponent& transformComp = m_pEditedWorld->GetComponent<TransformComponent>(m_SelectedEntity);
 			matrix4x4 transform = transformComp.GetTransform().GenerateWorldMatrix();
 
 			ImGuizmo::SetDrawlist();
@@ -614,7 +785,7 @@ namespace ke
 			{
 				float3 Location, Rotation, Scale;
 				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &Location.x, &Rotation.x, &Scale.x);
-				transformComp.SetTransform(TWorldTransform{ Location, Rotation, Scale });
+				transformComp.SetTransform(WorldTransform{ Location, Rotation, Scale });
 			}
 		}
 	}
@@ -627,24 +798,29 @@ namespace ke
 			return;
 		}
 
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+		{
+			return;
+		}
+
 		if (!m_pEditedWorld->IsValidEntity(m_EditorCameraEntity))
 		{
 			m_EditorCameraEntity = m_pEditedWorld->CreateCamera("_EditorCamera");
-			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
-			
-			camera->SetLocation(float3(0.0f, 0.0f, 1.0f));
+			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
+
+			camera->SetTransform(EditorCameraTransform);
 			camera->SetHideInSceneGraph(true);
 		}
 		m_pEditedWorld->SetMainCamera(m_EditorCameraEntity);
 
 		if (m_bIsControllingCamera)
 		{
-			TEntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
+			EntityHandle camera{ m_pEditedWorld, m_EditorCameraEntity };
 			ImGuiIO& IO = ImGui::GetIO();
 			auto mouseDelta = TPlatform::Get()->GetMouseState().GetOffset();
 			float3 rotation = camera->GetRotation();
-			rotation.z -= mouseDelta.X * deltaTime * m_EditorCameraSensitivity;
-			rotation.x -= mouseDelta.Y * deltaTime * m_EditorCameraSensitivity;
+			rotation.z -= mouseDelta.X * deltaTime * EditorCameraSensitivity;
+			rotation.x -= mouseDelta.Y * deltaTime * EditorCameraSensitivity;
 			camera->SetRotation(rotation);
 
 			auto location = camera->GetLocation();
@@ -657,36 +833,44 @@ namespace ke
 				// First person camera
 				if (TInput::GetKey(EKeyCode::W))
 				{
-					location += camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetForwardVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::S))
 				{
-					location -= camera->GetForwardVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetForwardVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::A))
 				{
-					location -= camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetRightVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::D))
 				{
-					location += camera->GetRightVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetRightVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::E))
 				{
-					location += camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
+					location += camera->GetUpVector() * deltaTime * EditorCameraSpeed;
 				}
 				if (TInput::GetKey(EKeyCode::Q))
 				{
-					location -= camera->GetUpVector() * deltaTime * m_EditorCameraSpeed;
+					location -= camera->GetUpVector() * deltaTime * EditorCameraSpeed;
 				}
 			}
 			camera->SetLocation(location);
+
+			EditorCameraTransform = camera->GetTransform();
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	bool EditorModule::OnKeyDown(const TKeyDownEvent& event)
 	{
+		if (m_AssetBrowserPanel->IsHovered())
+		{
+			m_AssetBrowserPanel->OnKey(event.Key);
+			return true;
+		}
+
 		if (m_bIsControllingCamera)
 		{
 
@@ -736,10 +920,44 @@ namespace ke
 				EditorCamera_FocusSelectedObject();
 			}
 			break;
+			case EKeyCode::Delete:
+			{
+				if (m_pEditedWorld && m_pEditedWorld->IsValidEntity(m_SelectedEntity))
+				{
+					m_pEditedWorld->DestroyEntity(m_SelectedEntity);
+					m_SelectedEntity = GameEntityId();
+				}
+			}
+			break;
+			case EKeyCode::S:
+			{
+				if (TInput::GetKey(EKeyCode::LeftControl))
+				{
+					if (TInput::GetKey(EKeyCode::LeftShift))
+					{
+						SaveCurrentWorldAs();
+					}
+					else
+					{
+						SaveCurrentWorld();
+					}
+				}
+
+			}
+			break;
+			case EKeyCode::O:
+			{
+				if (TInput::GetKey(EKeyCode::LeftControl))
+				{
+					OpenWorld();
+				}
+			}
+			break;
 			default:
 				break;
 			}
 		}
+
 		return false;
 	}
 
@@ -752,6 +970,14 @@ namespace ke
 			if (m_bIsCursorInViewport && !m_bIsControllingCamera && !m_bIsGizmoHovered && !m_bIsGizmoUsed)
 			{
 				TrySelectEntity();
+			}
+		}
+
+		if (event.Button & EMouseButton::Middle)
+		{
+			if (EntityHandle h{ m_pEditedWorld, m_EditorCameraEntity })
+			{
+				h.GetComponent<CameraComponent>()->GetCamera().SetFOV(45.0f);
 			}
 		}
 
@@ -782,6 +1008,42 @@ namespace ke
 			TPlatform::Get()->SetCursorMode(ECursorMode::HiddenLocked);
 			m_bIsControllingCamera = true;
 		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	bool EditorModule::OnMouseScroll(const TMouseScrollWheelEvent& event)
+	{
+		if (m_bIsControllingCamera)
+		{
+			if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+			{
+				return false;
+			}
+
+			EditorCameraSpeed += event.Amount * GGlobalTimer->Delta() * 10.0f;
+			EditorCameraSpeed = glm::clamp(EditorCameraSpeed, 0.0f, 100.0f);
+
+			return true;
+		}
+		else
+		{
+			if (!m_bIsCursorInViewport)
+			{
+				return false;
+			}
+
+			if (EntityHandle handle{ m_pEditedWorld, m_EditorCameraEntity })
+			{
+				auto pCameraComponent = handle.GetComponent<CameraComponent>();
+				auto& mathCam = pCameraComponent->GetCamera();
+				auto fov = mathCam.GetFOV();
+				fov -= event.Amount * GGlobalTimer->Delta() * 300.0f;
+				fov = glm::clamp(fov, 10.0f, 179.0f);
+				mathCam.SetFOV(fov);
+			}
+		}
+
 		return false;
 	}
 
@@ -853,13 +1115,18 @@ namespace ke
 	//////////////////////////////////////////////////////////////////////////
 	void EditorModule::TrySelectEntity()
 	{
-		// Read render target
-		if (TTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
 		{
-			auto pTargetGroup = TTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
-			TRef<RenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
-			TRef<TImage2D> pTargetImage = pTarget->GetImage();
-			if (auto pImmCmd = TLowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
+			return;
+		}
+
+		// Read render target
+		if (RenderTargetRegistry::Get()->RenderTargetGroupExists("IdTarget"))
+		{
+			auto pTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup("IdTarget");
+			RefPtr<IRenderTarget2D> pTarget = pTargetGroup->GetRenderTargetAtArrayLayer(0);
+			RefPtr<IImage2D> pTargetImage = pTarget->GetImage();
+			if (auto pImmCmd = LowLevelRenderer::Get()->GetRenderDevice()->GetImmediateCommandList())
 			{
 				i32 idColor = Await(TRenderThread::Submit([&, this]
 					{
@@ -868,10 +1135,15 @@ namespace ke
 
 						float x, y;
 						TInput::GetMousePosition(x, y);
+
+
 						const auto ViewportPos = m_ViewportPositions[(u32)EViewportIndex::Viewport1];
 						x -= ViewportPos.x;
 						y -= ViewportPos.y;
-
+						if (x < 0 || y < 0)
+						{
+							return -1;
+						}
 						const auto width = align / sizeof(i32);
 						const auto outIndex = (u32)width * (u32)y + (u32)x;
 						const i32 retVal = pData[outIndex];
@@ -881,11 +1153,11 @@ namespace ke
 
 				if (idColor != -1)
 				{
-					m_SelectedEntity = TGameEntityId{ (entt::entity)idColor };
+					m_SelectedEntity = GameEntityId{ (entt::entity)idColor };
 				}
 				else
 				{
-					m_SelectedEntity = TGameEntityId{ (entt::entity)entt::null };
+					m_SelectedEntity = GameEntityId{ (entt::entity)entt::null };
 				}
 			}
 		}
@@ -918,9 +1190,9 @@ namespace ke
 		}
 
 		m_EditorGridEntity = m_pEditedWorld->CreateEntity("_editorgrid");
-		auto gridEntity = TEntityHandle{ m_pEditedWorld, m_EditorGridEntity };
-		gridEntity.AddComponent<TStaticMeshComponent>(vertices, indices);
-		gridEntity.AddComponent<TMaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
+		auto gridEntity = EntityHandle{ m_pEditedWorld, m_EditorGridEntity };
+		gridEntity.AddComponent<StaticMeshComponent>(vertices, indices);
+		gridEntity.AddComponent<MaterialComponent>(TMaterialLoader::Get()->LoadMaterial("Engine://Editor/Materials/Grid.kmat"));
 		gridEntity->SetHideInSceneGraph(true);
 	}
 
@@ -935,7 +1207,13 @@ namespace ke
 	void EditorModule::DrawViewportEntityIcons()
 	{
 		KEPLER_PROFILE_SCOPE();
-		TEntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
+
+		if (Engine::Get()->CurrentWorldState != EWorldUpdateKind::Edit)
+		{
+			return;
+		}
+
+		EntityHandle editorCameraEntity = { m_pEditedWorld, m_EditorCameraEntity };
 		auto view = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateViewMatrix();
 		auto proj = editorCameraEntity.GetComponent<CameraComponent>()->GetCamera().GenerateProjectionMatrix();
 
@@ -947,33 +1225,33 @@ namespace ke
 					return;
 				}
 
-				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, GameEntityId{ e }, m_CameraIcon, EViewportIndex::Viewport1);
 			});
 
 		m_pEditedWorld->GetComponentView<AmbientLightComponent>().each(
 			[&proj, &view, this](auto e, auto&)
 			{
-				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, TGameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
+				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, GameEntityId{ e }, m_AmbientLightIcon, EViewportIndex::Viewport1);
 			});
 
 
 		m_pEditedWorld->GetComponentView<DirectionalLightComponent>().each(
 			[&proj, &view, this](auto e, auto&)
 			{
-				TGameEntityId entity{ e };
+				GameEntityId entity{ e };
 				DrawSelectableViewportImage(fmt::format("##gizmo{}", (u32)e).c_str(), proj, view, entity, m_DirectionalLightIcon, EViewportIndex::Viewport1);
 
 				if (m_SelectedEntity == entity)
 				{
-					// DrawDirections(entity);
+					DrawDirections(entity);
 				}
 			});
 	}
 
-	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, TGameEntityId entity, TRef<TTextureSampler2D> pIcon, EViewportIndex viewport)
+	void EditorModule::DrawSelectableViewportImage(const char* id, const matrix4x4& projection, const matrix4x4& view, GameEntityId entity, RefPtr<ITextureSampler2D> pIcon, EViewportIndex viewport)
 	{
 		KEPLER_PROFILE_SCOPE();
-		TEntityHandle handle{ m_pEditedWorld, TGameEntityId{entity} };
+		EntityHandle handle{ m_pEditedWorld, GameEntityId{entity} };
 
 		auto transform = handle->GetTransform();
 		auto world = transform.GenerateWorldMatrix();
@@ -987,8 +1265,8 @@ namespace ke
 		}
 		float3 screenSpace = v / -v.w;
 
-		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord 
-			|| screenSpace.y < -m_MaxViewportIconScreenCoord|| screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
+		if (screenSpace.x < -m_MaxViewportIconScreenCoord || screenSpace.x > m_MaxViewportIconScreenCoord
+			|| screenSpace.y < -m_MaxViewportIconScreenCoord || screenSpace.y > m_MaxViewportIconScreenCoord || v.w < 0)
 		{
 			return;
 		}
@@ -997,8 +1275,12 @@ namespace ke
 		auto vpSize = m_ViewportSizes[(usize)viewport];
 
 		const auto iconSize = m_InViewportIconSize - v.w;
+		if (iconSize < 0)
+		{
+			return;
+		}
 
-		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f};
+		ImVec2 iconPos = { vpSize.x * posNormalized.x - iconSize * 0.5f, vpSize.y * posNormalized.y - iconSize * 0.5f };
 		ImGui::SetCursorPos(iconPos);
 
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -1009,14 +1291,24 @@ namespace ke
 		bool bDisabled = m_bIsGizmoHovered || m_bIsGizmoUsed;
 		if (bDisabled)
 		{
-			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1,1,1,0.5f));
+			ImGui::Image((ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0.0f, 0.0f), ImVec2(1, 1), ImVec4(1, 1, 1, 0.5f));
 		}
-		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
+		else if (ImGui::ImageButton(id, (ImTextureID)pIcon->GetNativeHandle(), ImVec2(iconSize, iconSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 0.7f)))
 		{
 			m_SelectedEntity = entity;
 		}
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(3);
+	}
+
+	void EditorModule::DrawDirections(GameEntityId id)
+	{
+		if (Subrenderer2D* pS2D = Subrenderer2D::Get())
+		{
+			EntityHandle handle{ m_pEditedWorld, id };
+			static constexpr float drawLineLen = 0.5f;
+			pS2D->AddArrow(handle->GetLocation(), handle->GetForwardVector(), handle->GetRightVector(), 0.5f);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

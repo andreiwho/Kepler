@@ -1,25 +1,36 @@
 #pragma once
 #include "Renderer/World/Material.h"
+#include "EntityComponent.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
+#include "MaterialComponent.gen.h"
 
 namespace ke
 {
-	class TMaterialComponent
+	reflected kmeta(hideindetails)
+	class MaterialComponent : public EntityComponent
 	{
 	public:
-		TMaterialComponent() = default;
-		TMaterialComponent(TRef<TMaterial> InMaterial);
+		MaterialComponent() = default;
+		MaterialComponent(RefPtr<TMaterial> InMaterial);
 
-		inline TRef<TMaterial> GetMaterial() { return Material; }
-		void SetMaterial(TRef<TMaterial> InMaterial);
+		inline RefPtr<TMaterial> GetMaterial() { return Material; }
+		void SetMaterial(RefPtr<TMaterial> InMaterial);
 
-		inline const TString& GetMaterialParentAssetPath() const
+		inline const String& GetMaterialParentAssetPath() const
 		{
 			return Material->GetParentAssetPath();
 		}
 
-		inline bool UsesPrepass() const { return Material->UsesPrepass(); }
+		inline bool UsesPrepass() const { return Material ? Material->UsesPrepass() : false; }
+
+		String MaterialAssetPath;
+		void OnMaterialPathChanged(const String& newPath);
+		
+		reflected kmeta(postchange = OnMaterialAssetChanged, assettype=Material)
+		AssetTreeNode* Asset {nullptr};
+		void OnMaterialAssetChanged(AssetTreeNode* newAsset);
 
 	private:
-		TRef<TMaterial> Material;
+		RefPtr<TMaterial> Material;
 	};
 }

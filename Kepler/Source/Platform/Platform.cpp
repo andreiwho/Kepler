@@ -30,7 +30,7 @@ namespace ke
 		return Instance;
 	}
 
-	bool TPlatform::HandleCrashReported(const TString& msg)
+	bool TPlatform::HandleCrashReported(const String& msg)
 	{
 #ifdef PLATFORM_DESKTOP
 		static TAtomic<bool> bFired = false;

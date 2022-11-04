@@ -5,16 +5,16 @@
 
 namespace ke
 {
-	class TRenderPrimitive
+	class IRenderPrimitive
 	{
 	public:
-		TRenderPrimitive() = default;
-		virtual ~TRenderPrimitive() = default;
+		IRenderPrimitive() = default;
+		virtual ~IRenderPrimitive() = default;
 
 		void AddRef() const;
 		void Release() const;
 
 	private:
-		mutable TAtomic<usize> ReferenceCount{1};
+		mutable TAtomic<usize> m_ReferenceCount{1};
 	};
 }

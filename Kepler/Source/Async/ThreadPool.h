@@ -57,7 +57,7 @@ namespace ke
 		template <typename TFUNC, typename RETVAL = std::invoke_result_t<std::decay_t<TFUNC>>>
 		std::future<RETVAL> SubmitTask(TFUNC&& Task)
 		{
-			TSharedPtr<std::promise<RETVAL>> promise = MakeShared<std::promise<RETVAL>>();
+			SharedPtr<std::promise<RETVAL>> promise = MakeShared<std::promise<RETVAL>>();
 			EnqueueTask(
 				[Func = std::move(Task), promise, this]
 				{

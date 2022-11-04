@@ -3,9 +3,16 @@
 #include "Core/Filesystem/AssetSystem/AssetTree.h"
 #include "Renderer/Elements/Texture.h"
 #include "Platform/Mouse.h"
+#include "Platform/Keyboard.h"
 
 namespace ke
 {
+	enum class EAssetBrowserMode
+	{
+		Explore,
+		Save,
+	};
+
 	class TAssetBrowserPanel
 	{
 	public:
@@ -15,11 +22,16 @@ namespace ke
 
 		inline bool IsHovered() const { return m_bIsHovered || m_bIsAssetTreeHovered || m_bIsAssetGridHovered; }
 		void OnMouseButton(EMouseButton button);
+		void OnKey(EKeyCode key);
 
 	private:
+		void OnAssetManagerRootsUpdated();
+
+		void DrawContents();
+
 		void DrawAddressBar();
 		void ZeroSelectionCache();
-		void DrawAsset(std::string_view label, i32 itemIndex, TRef<TTextureSampler2D> icon);
+		void DrawAsset(std::string_view label, i32 itemIndex, RefPtr<ITextureSampler2D> icon);
 		void OnDoubleClick(i32 itemIndex);
 
 		void OnTreeNavigateUp();
@@ -28,10 +40,11 @@ namespace ke
 		void OnNavOpenSettings();
 		void DrawSettingsPopup();
 
-		void DrawNavButton(TRef<TTextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
+		void DrawNavButton(RefPtr<ITextureSampler2D> pIcon, const char* pId, bool bDisabled, void(TAssetBrowserPanel::* pCallback)());
 		void DrawAssetTree();
 		void DrawAssetTreeNode(const char* pCustomName, AssetTreeNode_Directory* pDirectory);
 		void DrawAddressBarAddressNode(AssetTreeNode_Directory* pDirectory);
+		void UpdateCurrentDirectory(AssetTreeNode_Directory* pDirectory);
 
 	private:
 		// Serialization functions
@@ -40,19 +53,23 @@ namespace ke
 
 	private:
 		// Icons
-		TRef<TTextureSampler2D> m_FolderIcon;
-		TRef<TTextureSampler2D> m_FileIcon;
-		TRef<TTextureSampler2D> m_UnknownIcon;
+		RefPtr<ITextureSampler2D> m_FolderIcon;
+		RefPtr<ITextureSampler2D> m_FileIcon;
+		RefPtr<ITextureSampler2D> m_MapIcon;
+		RefPtr<ITextureSampler2D> m_MaterialIcon;
+		RefPtr<ITextureSampler2D> m_StaticMeshIcon;
+		RefPtr<ITextureSampler2D> m_UnknownIcon;
 
 		// Nav
-		TRef<TTextureSampler2D> m_NavSettingsIcon;
-		TRef<TTextureSampler2D> m_NavUpIcon;
-		TRef<TTextureSampler2D> m_NavBackIcon;
-		TRef<TTextureSampler2D> m_NavFwdIcon;
+		RefPtr<ITextureSampler2D> m_NavSettingsIcon;
+		RefPtr<ITextureSampler2D> m_NavUpIcon;
+		RefPtr<ITextureSampler2D> m_NavBackIcon;
+		RefPtr<ITextureSampler2D> m_NavFwdIcon;
 
 		AssetTreeNode_Directory* m_CurrentDirectory{nullptr};
 		AssetTreeNode_Directory* m_GameRootNode{ nullptr };
 		AssetTreeNode_Directory* m_EngineRootNode{ nullptr };
+		String m_LastPath{};
 		bool m_bShowEngineContent = true;
 
 		float m_IconSize = 80;
@@ -69,5 +86,6 @@ namespace ke
 		bool m_bIsHovered = false;
 		bool m_bIsAssetTreeHovered = false;
 		bool m_bIsAssetGridHovered = false;
+		bool m_bDrawUnknownIcons = false;
 	};
 }

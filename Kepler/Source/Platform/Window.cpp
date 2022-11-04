@@ -2,12 +2,12 @@
 
 namespace ke
 {
-	TWindow::TWindow(i32 width, i32 height, const TString& title, const TWindowParams& params)
+	TWindow::TWindow(i32 width, i32 height, const String& title, const TWindowParams& params)
 		:	m_Width(width), m_Height(height), m_Title(title), m_Name(title)
 	{
 	}
 
-	void TWindow::SetTitle(const TString& newTitle)
+	void TWindow::SetTitle(const String& newTitle)
 	{
 		SetTitle_Impl(newTitle);
 		m_Title = newTitle;

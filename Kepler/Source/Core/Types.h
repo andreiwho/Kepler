@@ -7,9 +7,11 @@
 #include <atomic>
 #include <stdexcept>
 #include <xhash>
+#include <string_view>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <optional>
 
 namespace ke
 {
@@ -31,33 +33,74 @@ namespace ke
 	using isize = i64;
 
 	template<typename T> using TAtomic = std::atomic<T>;
-	using TString = std::string;
+	using String = std::string;
 	using TWideString = std::wstring;
 	using TPath = std::filesystem::path;
+	using StringView = std::string_view;
 
 	using CStr = const char*;
 	using WStr = const wchar_t*;
 
-	TString ConvertToAnsiString(const TWideString& wide);
-	TWideString ConvertToWideString(const TString& ansi);
+	String ConvertToAnsiString(const TWideString& wide);
+	TWideString ConvertToWideString(const String& ansi);
 
+	// FNV-1a constexpr hashing functions 
+	constexpr u64 Hash32(const char* str, usize n, uint32_t basis = UINT32_C(2166136261)) {
+		if (n == 0)
+		{
+			return basis;
+		}
+		return Hash32(str + 1, n - 1, (basis ^ str[0]) * UINT32_C(16777619));
+	}
+
+	constexpr u64 Hash64(const char* str, usize n, uint64_t basis = UINT64_C(14695981039346656037)) {
+		if (n == 0)
+		{
+			return basis;
+		}
+		return Hash64(str + 1, n - 1, (basis ^ str[0]) * UINT64_C(1099511628211));
+	}
+
+	template< usize N >
+	constexpr u64 Hash32(const char(&s)[N]) {
+		return Hash32(s, N - 1);
+	}
+
+	template< usize N >
+	constexpr u64 Hash64(const char(&s)[N]) {
+		return Hash64(s, N - 1);
+	}
+	
 	// a 64 bit identifier, which claims to be unique
-	struct id64
+	struct UUID
 	{
-		id64();
-		id64(u64 InValue) : Value(InValue) {}
-		id64(const TString& HashableString);
-		id64(const id64& Other) noexcept { Value = Other.Value; }
-		id64& operator=(const id64& Other) noexcept { Value = Other.Value; return *this; }
+		static constexpr u64 none = 0;
+
+		UUID();
+		constexpr UUID(u64 InValue) : Value(InValue) {}
+		explicit constexpr UUID(const String& str)
+			:	Value(Hash64(str.c_str(), str.length()))
+		{
+
+		}
+
+		constexpr UUID(const UUID& Other) noexcept { Value = Other.Value; }
+		constexpr UUID& operator=(const UUID& Other) noexcept { Value = Other.Value; return *this; }
+		String ToString() const { return std::to_string(Value); }
 
 		u64 Value;
-		inline operator u64() const { return Value; }
+		inline constexpr operator u64() const { return Value; }
 	};
+
+	using ClassId = UUID;
+#define classid(type) ClassId(#type)
 
 	// Math types
 	using float2 = glm::vec2;
 	using float3 = glm::vec3;
 	using float4 = glm::vec4;
+	using color3 = float3;
+	using color4 = float4;
 
 	using int2 = glm::ivec2;
 	using int3 = glm::ivec3;
@@ -72,13 +115,53 @@ namespace ke
 	using matrix4x3 = glm::mat4x3;
 	using matrix4x4 = glm::mat4x4;
 	using matrix = matrix4x4;
+
+	template<typename T> using Option = std::optional<T>;
+
+	enum class EBaseTypeId : u32
+	{
+		_u8,
+		_u16,
+		_u32,
+		_u64,
+
+		_i8,
+		_i16,
+		_i32,
+		_i64,
+		_usize,
+		_isize,
+
+		_bool,
+		_float,
+		_double,
+		_String,
+
+		_float2,
+		_float3,
+		_float4,
+
+		_int2,
+		_int3,
+		_int4,
+
+		_uint2,
+		_uint3,
+		_uint4,
+
+		_matrix3x3,
+		_matrix3x4,
+		_matrix4x3,
+		_matrix4x4,
+		_matrix = _matrix4x4,
+	};
 }
 
 namespace std
 {
 	template<>
-	struct hash<ke::id64>
+	struct hash<ke::UUID>
 	{
-		[[nodiscard]] size_t operator()(const ke::id64& id) const noexcept { return id.Value; }
+		[[nodiscard]] size_t operator()(const ke::UUID& id) const noexcept { return id.Value; }
 	};
 }

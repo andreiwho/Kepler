@@ -4,6 +4,8 @@
 #include "Renderer/Elements/CommandList.h"
 #include "World/Game/GameWorld.h"
 #include "../LowLevelRenderer.h"
+#include "../Subrenderer/Subrenderer.h"
+#include "WorldRenderer.gen.h"
 
 namespace ke
 {
@@ -13,9 +15,18 @@ namespace ke
 		u32 Width = 0, Height = 0;
 	};
 
-	class TWorldRenderer : public IntrusiveRefCounted
+	enum class ESubrendererOrder
 	{
+		Background,
+		Overlay
+	};
+
+	reflected class WorldRenderer : public IntrusiveRefCounted
+	{
+		static WorldRenderer* Instance;
 	public:
+		static WorldRenderer* Get() { return Instance; }
+
 		enum EReservedSlots
 		{
 			RS_Camera = 0,
@@ -23,38 +34,91 @@ namespace ke
 			RS_User,
 		};
 
-		TWorldRenderer(TRef<TGameWorld> pWorld);
-		~TWorldRenderer();
+		reflected EFormat MeshPassBufferFormat = EFormat::R11G11B10_FLOAT;
+		reflected EFormat PrePassDepthBufferFormat = EFormat::D24_UNORM_S8_UINT;
+		reflected float Gamma = 2.2f;
+
+		WorldRenderer();
+		~WorldRenderer();
 		
+		void InitFrame(RefPtr<GameWorld> pWorld);
 		void Render(TViewport2D ViewportSize);
 		void UpdateRendererMainThread(float deltaTime);
 		void UpdateLightingData_MainThread();
 
-		static TRef<TWorldRenderer> New(TRef<TGameWorld> pWorld);
+		static RefPtr<WorldRenderer> New();
 
-		static void ClearStaticState();
+		template<typename T, ESubrendererOrder TOrder, typename ... Args>
+		inline SharedPtr<T> PushSubrenderer(Args&&... args)
+		{
+			static_assert(std::is_base_of_v<ISubrenderer, T>);
+			auto pSubrenderer = Await(TRenderThread::Submit([&] { return MakeShared<T>(std::forward<Args>(args)...); }));
+
+			switch (TOrder)
+			{
+			case ESubrendererOrder::Background:
+				m_BackgroundSubrenderers.AppendBack(pSubrenderer);
+				break;
+			case ESubrendererOrder::Overlay:
+				m_OverlaySubrenderers.AppendBack(pSubrenderer);
+				break;
+			default:
+				CRASH();
+				break;
+			}
+			return pSubrenderer;
+		}
+
+		template<ESubrendererOrder TOrder>
+		void RenderSubrenderers(RefPtr<ICommandListImmediate> pImmCtx)
+		{
+			for (auto& pSr : GetSubrenderers<TOrder>())
+			{
+				pSr->Render(pImmCtx);
+			}
+		}
+
+		template<ESubrendererOrder TOrder>
+		Array<SharedPtr<ISubrenderer>>& GetSubrenderers()
+		{
+			if constexpr (TOrder == ESubrendererOrder::Overlay)
+			{
+				return m_OverlaySubrenderers;
+			}
+			return m_BackgroundSubrenderers;
+		}
+
+		void UpdateSubrenderersMainThread(float deltaTime)
+		{
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->UpdateRendererMainThread(deltaTime); }
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->UpdateRendererMainThread(deltaTime); }
+		}
+
+		void ClearSubrenderersState()
+		{
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Background>()) { pSr->ClearState(); }
+			for (auto& pSr : GetSubrenderers<ESubrendererOrder::Overlay>()) { pSr->ClearState(); }
+		}
+
+
 	private:
-		void RT_UpdateMaterialComponents(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void RT_UpdateMaterialComponents(RefPtr<ICommandListImmediate> pImmCtx);
 		void CollectRenderableViews();
-		void PrePass(TRef<GraphicsCommandListImmediate> pImmCtx);
-		void MeshPass(TRef<GraphicsCommandListImmediate> pImmCtx);
-		void FlushPass(TRef<GraphicsCommandListImmediate> pImmCtx);
+		void PrePass(RefPtr<ICommandListImmediate> pImmCtx);
+		void MeshPass(RefPtr<ICommandListImmediate> pImmCtx);
+		void TonemappingAndFlushPass(RefPtr<ICommandListImmediate> pImmCtx);
 
 	private:
 		TViewport2D m_CurrentViewport{};
-		TRef<TGameWorld> m_CurrentWorld;
-		TLowLevelRenderer* m_LLR;
+		RefPtr<GameWorld> m_CurrentWorld;
+		LowLevelRenderer* m_LLR;
+		Array<SharedPtr<ISubrenderer>> m_BackgroundSubrenderers;
+		Array<SharedPtr<ISubrenderer>> m_OverlaySubrenderers;
 
-		struct TStaticState
-		{
-			void Init();
-			void Clear();
-
-			bool bInitialized = false;
-			TRef<TParamBuffer> RS_CameraBuffer;
-			TRef<TParamBuffer> RS_LightBuffer;
-			TRef<TGraphicsPipeline> PrePassPipeline;
-		};
+		bool bInitialized = false;
+		RefPtr<IParamBuffer> RS_CameraBuffer;
+		RefPtr<IParamBuffer> RS_LightBuffer;
+		RefPtr<IGraphicsPipeline> PrePassPipeline;
 
 		struct RS_CameraBufferStruct
 		{
@@ -68,7 +132,5 @@ namespace ke
 			float4 DirectionalLightColor;
 			float DirectionalLightIntensity;
 		};
-
-		static TStaticState* StaticState;
 	};
 }

@@ -3,27 +3,48 @@
 
 namespace ke
 {
-	class TWorldRegistry
+	class WorldRegistry
 	{
-		static TWorldRegistry* Instance;
+		static WorldRegistry* Instance;
 
 	public:
-		TWorldRegistry();
-		~TWorldRegistry();
+		WorldRegistry();
+		~WorldRegistry();
 
 		template<typename T, typename... ARGS>
-		TRef<T> CreateWorld(const TString& Name, ARGS&&... InArgs)
+		RefPtr<T> CreateWorld(const String& Name, ARGS&&... InArgs)
 		{
-			TRef<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
+			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
 			LoadedWorlds.EmplaceBack(OutWorld);
 			return OutWorld;
 		}
 
-		void DestroyWorld(TRef<TWorld> World);
+		template<typename T, typename... ARGS>
+		RefPtr<T> CreateWorldAtIndex(usize index, const String& Name, ARGS&&... InArgs)
+		{
+			RefPtr<T> OutWorld = MakeRef(New<T>(Name, std::forward<ARGS>(InArgs)...));
+			if (LoadedWorlds.GetLength() <= index)
+			{
+				LoadedWorlds.Resize(index + 1);
+			}
+			LoadedWorlds[index] = OutWorld;
+			return OutWorld;
+		}
 
-		static TWorldRegistry* Get() { return Instance; }
+		void DestroyWorld(RefPtr<TWorld> World);
+
+		static WorldRegistry* Get() { return Instance; }
+
+		RefPtr<TWorld> GetWorldAt(u32 index)
+		{
+			if (LoadedWorlds.GetLength() <= index)
+			{
+				return nullptr;
+			}
+			return LoadedWorlds[index];
+		}
 
 	private:
-		Array<TRef<TWorld>> LoadedWorlds;
+		Array<RefPtr<TWorld>> LoadedWorlds;
 	};
 }

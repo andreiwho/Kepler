@@ -17,10 +17,10 @@ namespace ke
 		FindGameAssets();
 	}
 
-	TFuture<TRef<AssetTreeNode>> AssetManager::FindAssetNode(const TString& path) const
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(const String& path) const
 	{
 		return Async(
-			[this, Path = path]() -> TRef<AssetTreeNode>
+			[this, Path = path]() -> RefPtr<AssetTreeNode>
 			{
 				auto pRoot = GetRootNodeFor(Path);
 				if (pRoot)
@@ -31,7 +31,22 @@ namespace ke
 			});
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::GetRootNode(const TString& rootPath) const
+	TFuture<RefPtr<AssetTreeNode>> AssetManager::FindAssetNode(UUID assetId) const
+	{
+		return Async([this, assetId]() -> RefPtr<AssetTreeNode>
+			{
+				for (auto& [name, pRoot] : m_Roots)
+				{
+					if (auto pNode = pRoot->FindNodeById(assetId))
+					{
+						return pNode;
+					}
+				}
+				return nullptr;
+			});
+	}
+
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNode(const String& rootPath) const
 	{
 		if (m_Roots.Contains(rootPath))
 		{
@@ -40,7 +55,7 @@ namespace ke
 		return nullptr;
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const TString& rootPath) const
+	RefPtr<AssetTreeNode_Directory> AssetManager::GetRootNodeFor(const String& rootPath) const
 	{
 		if (auto pRoot = GetRootNode(rootPath))
 		{
@@ -57,10 +72,16 @@ namespace ke
 		return nullptr;
 	}
 
+	void AssetManager::RescanAssets()
+	{
+		FindGameAssets();
+		OnRootsUpdated.Invoke();
+	}
+
 	void AssetManager::FindGameAssets()
 	{
 		KEPLER_INFO(AssetManager, " ====== Finding asset files... ======");
-		const Map<TString, TString>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
+		const Map<String, String>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
 		for (const auto& [key, _] : vfsAliases)
 		{
 			auto keyToken = key + "://";
@@ -71,20 +92,20 @@ namespace ke
 		KEPLER_INFO(AssetManager, " ====== Finished finding asset files... ======");
 	}
 
-	TRef<AssetTreeNode_Directory> AssetManager::ReadDirectory(const TString& root, TRef<AssetTreeNode_Directory> pDirectory)
+	RefPtr<AssetTreeNode_Directory> AssetManager::ReadDirectory(const String& root, RefPtr<AssetTreeNode_Directory> pDirectory)
 	{
-		const TString rootPath = VFSResolvePath(root);
+		const String rootPath = VFSResolvePath(root);
 
 		for (const auto& entry : fs::directory_iterator(pDirectory->GetPath_Resolved()))
 		{
 			const fs::path& entryPath = entry.path();
 			const fs::path relativePath = fs::relative(entryPath, rootPath);
-			TString formattedPath = fmt::format("{}{}", root, relativePath.string());
+			String formattedPath = fmt::format("{}{}", root, relativePath.string());
 			std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
 
 			if (fs::is_directory(entryPath))
 			{
-				TRef<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
+				RefPtr<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
 				ReadDirectory(root, pNewDirectory);
 				pDirectory->AddChild(pNewDirectory);
 			}
@@ -93,7 +114,7 @@ namespace ke
 			{
 				if (entryPath.has_extension())
 				{
-					const TString extension = entryPath.extension().string();
+					const String extension = entryPath.extension().string();
 					if (extension == ".meta")
 					{
 						auto pNewAsset = AssetTreeNode_AssetMetadata::New(pDirectory.Raw(), formattedPath);

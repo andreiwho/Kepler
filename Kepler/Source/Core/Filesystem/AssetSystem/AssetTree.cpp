@@ -3,9 +3,9 @@
 
 namespace ke
 {
-	DEFINE_UNIQUE_LOG_CHANNEL(LogAssetTree, All);
+	DEFINE_UNIQUE_LOG_CHANNEL(LogAssetTree, Info);
 
-	AssetTreeNode::AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const TString& path)
+	AssetTreeNode::AssetTreeNode(EAssetNodeType type, AssetTreeNode* pParent, const String& path)
 		: m_Parent(pParent)
 		, m_ResolvedPath(VFSResolvePath(path))
 		, m_UnresolvedPath(path)
@@ -32,7 +32,7 @@ namespace ke
 		}
 	}
 
-	void AssetTreeNode::AddChild(TRef<AssetTreeNode> newChild)
+	void AssetTreeNode::AddChild(RefPtr<AssetTreeNode> newChild)
 	{
 		m_Children.AppendBack(newChild);
 		if (newChild->IsDirectory())
@@ -40,10 +40,10 @@ namespace ke
 			m_bHasDirectories = true;
 		}
 
-		KEPLER_INFO(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
+		KEPLER_TRACE(LogAssetTree, "Added child to '{}' '{}' of type '{}'", m_UnresolvedPath, newChild->GetPath(), newChild->GetNodeType().ToString());
 	}
 
-	void AssetTreeNode::RemoveChild(TRef<AssetTreeNode> child)
+	void AssetTreeNode::RemoveChild(RefPtr<AssetTreeNode> child)
 	{
 		CRASHMSG("Not implemented");
 	}
@@ -59,12 +59,12 @@ namespace ke
 		m_Parent = pParent;
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindNode(const TString& path)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNode(const String& path)
 	{
-		return FindNodeById(path);
+		return FindNodeById(UUID(path));
 	}
 
-	TRef<AssetTreeNode> AssetTreeNode::FindNodeById(id64 id)
+	RefPtr<AssetTreeNode> AssetTreeNode::FindNodeById(UUID id)
 	{
 		if (id == m_UUID)
 		{
@@ -92,7 +92,7 @@ namespace ke
 	namespace
 	{
 		template<EAssetNodeType::EValue CheckedType>
-		static bool SortComparator(const TRef<AssetTreeNode>& lhs, const TRef<AssetTreeNode>& rhs)
+		static bool SortComparator(const RefPtr<AssetTreeNode>& lhs, const RefPtr<AssetTreeNode>& rhs)
 		{
 			if (!lhs || !rhs)
 			{
@@ -108,8 +108,8 @@ namespace ke
 					return true;
 				}
 
-				const TString& lName = lhs->GetName();
-				const TString& rName = rhs->GetName();
+				const String& lName = lhs->GetName();
+				const String& rName = rhs->GetName();
 				const i32 commonLen = (i32)std::min(lName.length(), rName.length());
 				CHECK(commonLen > 0);
 
@@ -125,6 +125,35 @@ namespace ke
 				}
 			}
 			return false;
+		}
+	}
+
+
+	const String& AssetTreeNode_PlainAsset::GetExtension() const
+	{
+		return m_Extension;
+	}
+
+	AssetTreeNode_PlainAsset::AssetTreeNode_PlainAsset(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath) 
+		: AssetTreeNode(type, pParent, unresolvedPath)
+	{
+		std::filesystem::path path{ GetPath_Resolved() };
+		if (path.has_extension())
+		{
+			m_Extension = path.extension().string();
+		}
+
+		if (m_Extension == ".fbx")
+		{
+			m_AssetType = EFieldAssetType::StaticMesh;
+		} 
+		else if (m_Extension == ".kmap")
+		{
+			m_AssetType = EFieldAssetType::Map;
+		}
+		else if (m_Extension == ".kmat")
+		{
+			m_AssetType = EFieldAssetType::Material;
 		}
 	}
 

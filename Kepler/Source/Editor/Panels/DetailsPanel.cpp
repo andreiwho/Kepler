@@ -9,43 +9,40 @@
 #include "World/Game/Components/Light/AmbientLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
 #include "World/Game/Components/Light/DirectionalLightComponent.h"
+#include "World/Scripting/NativeComponentContainer.h"
 
 namespace ke
 {
-
-	TEditorDetailsPanel::TEditorDetailsPanel(TRef<TGameWorld> pWorld, TGameEntityId selectedEntity)
+	EntityDetailsPanel::EntityDetailsPanel(RefPtr<GameWorld> pWorld, GameEntityId selectedEntity)
 		: m_pWorld(pWorld)
 		, m_SelectedEntity(selectedEntity)
 	{
 	}
 
-	void TEditorDetailsPanel::Draw()
+	void EntityDetailsPanel::Draw()
 	{
 		// TEMP
-		ImGui::Begin("Details");
+		if(ImGui::Begin("Details"))
 		{
 			if (m_pWorld && m_pWorld->IsValidEntity(m_SelectedEntity))
 			{
 				DrawEntityInfo();
 				DrawTransformComponentInfo();
 				DrawMaterialComponentInfo();
+				DrawNativeComponentInfo();
 
-				if (m_pWorld->IsCamera(m_SelectedEntity))
+				if (ImGui::Button("Add Component"))
 				{
-					DrawCameraComponentInfo();
+					ImGui::OpenPopup("addcomponent");
 				}
-
-				if (m_pWorld->IsLight(m_SelectedEntity))
-				{
-					DrawLightInfo();
-				}
+				DrawAddComponentPopup();
 			}
+			ImGui::End();
 		}
-		ImGui::End();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawEntityInfo()
+	void EntityDetailsPanel::DrawEntityInfo()
 	{
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("ENTITY"))
@@ -65,9 +62,94 @@ namespace ke
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawTransformComponentInfo()
+	void EntityDetailsPanel::DrawNativeComponentInfo()
 	{
+		KEPLER_PROFILE_SCOPE();
+
+		EntityHandle entity = { m_pWorld, m_SelectedEntity };
+		if (auto pNativeComp = entity.GetComponent<NativeComponentContainer>())
+		{
+			for (const ClassId& id : pNativeComp->GetComponentIds())
+			{
+				auto pNativeComponent = m_pWorld->GetComponentById(id, m_SelectedEntity);
+				if (!pNativeComponent)
+				{
+					return;
+				}
+
+				RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(id);
+				if (!pClass)
+				{
+					return;
+				}
+
+				if (pClass->GetMetadata().bHideInDetails)
+				{
+					continue;
+				}
+
+				const String& filteredName = SplitAndCapitalizeComponentName(pClass->GetName());
+				TEditorElements::DrawReflectedObjectFields(filteredName, id, pNativeComponent);
+			}
+		}
+	}
+
+	void EntityDetailsPanel::DrawAddComponentPopup()
+	{
+		if (ImGui::BeginPopup("addcomponent"))
+		{
+			for (ClassId componentHash : ReflectionDatabase::Get()->GetComponentClasses())
+			{
+				if (RefPtr<ReflectedClass> pClass = GetReflectedClass(componentHash))
+				{
+					if (ImGui::Selectable(pClass->GetName().c_str()))
+					{
+						m_pWorld->AddComponentByTypeHash(m_SelectedEntity, componentHash);
+					}
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+
+	const ke::String& EntityDetailsPanel::SplitAndCapitalizeComponentName(const String& originalName)
+	{
+		KEPLER_PROFILE_SCOPE();
+		if (m_FilteredComponentNames.Contains(originalName))
+		{
+			return m_FilteredComponentNames[originalName];
+		}
+
+		String outString;
+		String token;
+		for (const char symbol : originalName)
+		{
+			if (isupper(symbol))
+			{
+				if (!token.empty())
+				{
+					outString += fmt::format("{} ", token);
+					token.clear();
+				}
+			}
+
+			token += toupper(symbol);
+		}
+
+		if (!token.empty())
+		{
+			outString += fmt::format("{} ", token);
+		}
+
+		m_FilteredComponentNames[originalName] = outString;
+		return m_FilteredComponentNames[originalName];
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void EntityDetailsPanel::DrawTransformComponentInfo()
+	{
+		KEPLER_PROFILE_SCOPE();
 		TGameEntity& entity = m_pWorld->GetEntityFromId(m_SelectedEntity);
 		if (TEditorElements::Container("TRANSFORM"))
 		{
@@ -99,66 +181,34 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawCameraComponentInfo()
+	void EntityDetailsPanel::DrawMaterialComponentInfo()
 	{
-		MathCamera& camera = m_pWorld->GetComponent<CameraComponent>(m_SelectedEntity).GetCamera();
-		if (TEditorElements::Container("CAMERA"))
-		{
-			if (TEditorElements::BeginFieldTable("details", 2))
-			{
-				TEditorElements::NextFieldRow("Field of View");
-				auto fov = camera.GetFOV();
-				if (TEditorElements::DragFloat1("Field Of View", fov, 0.001f))
-				{
-					camera.SetFOV(fov);
-				}
-
-				TEditorElements::NextFieldRow("Near/Far Clip");
-				auto frustomDepth = float2(camera.GetNearClip(), camera.GetFarClip());
-				if (TEditorElements::DragFloat2("Near/Far Clip", frustomDepth, 0.1f))
-				{
-					camera.SetNearClip(frustomDepth.x);
-					camera.SetFarClip(frustomDepth.y);
-				}
-				TEditorElements::EndFieldTable();
-			}
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	void TEditorDetailsPanel::DrawMaterialComponentInfo()
-	{
-		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
+		KEPLER_PROFILE_SCOPE();
+		EntityHandle entity = EntityHandle{ m_pWorld, m_SelectedEntity };
 		if (!entity)
 		{
 			return;
 		}
 
-		if (auto pMaterialComponent = entity.GetComponent<TMaterialComponent>())
+		if (auto pMaterialComponent = entity.GetComponent<MaterialComponent>())
 		{
 			if (TEditorElements::Container("MATERIAL"))
 			{
 				if (TEditorElements::BeginFieldTable("details", 2))
 				{
-					TEditorElements::NextFieldRow("Path");
-					char pathBuffer[TEditorElements::GMaxTextEditSymbols];
-					memset(pathBuffer, 0, sizeof(pathBuffer));
-					if (TEditorElements::EditText("Path",
-						pMaterialComponent->GetMaterialParentAssetPath().c_str(), 
-						pathBuffer))
+					auto pClass = ReflectionDatabase::Get()->GetClass<MaterialComponent>();
+					if (pClass)
 					{
-						pathBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
-
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
+						for (auto& [name, field] : pClass->GetFields())
 						{
-							pMaterialComponent->SetMaterial(pMaterial);
+							TEditorElements::DrawReflectedField(name, field, pMaterialComponent);
 						}
 					}
 
 					TEditorElements::NextFieldRow("Reload");
 					if (ImGui::Button("Reload Material"))
 					{
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pathBuffer, true))
+						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pMaterialComponent->MaterialAssetPath, true))
 						{
 							pMaterialComponent->SetMaterial(pMaterial);
 						}
@@ -169,61 +219,4 @@ namespace ke
 			}
 		}
 	}
-
-	void TEditorDetailsPanel::DrawLightInfo()
-	{
-		TEntityHandle entity = TEntityHandle{ m_pWorld, m_SelectedEntity };
-		if (!entity)
-		{
-			return;
-		}
-
-		if (auto pAmbientLight = entity.GetComponent<AmbientLightComponent>())
-		{
-			if (TEditorElements::Container("AMBIENT LIGHT"))
-			{
-				if (TEditorElements::BeginFieldTable("details", 2))
-				{
-					TEditorElements::NextFieldRow("Color");
-
-					float3 color = pAmbientLight->GetColor();
-					if (TEditorElements::DragFloat3("Ambient Color", color, 0.01f, 0.0f, 100.0f))
-					{
-						pAmbientLight->SetColor(color);
-					}
-
-					TEditorElements::EndFieldTable();
-				}
-			}
-		}
-
-		if (auto pDirLight = entity.GetComponent<DirectionalLightComponent>())
-		{
-			if (TEditorElements::Container("DIRECTIONAL LIGHT"))
-			{
-				if (TEditorElements::BeginFieldTable("details", 2))
-				{
-					TEditorElements::NextFieldRow("Color");
-					float3 color = pDirLight->GetColor();
-					if (TEditorElements::DragFloat3("Color", color, 0.01f, 0.0f, 100.0f))
-					{
-						pDirLight->SetColor(color);
-					}
-
-
-					TEditorElements::NextFieldRow("Intensity");
-					float intensity = pDirLight->GetIntensity();
-					if (TEditorElements::DragFloat1("Intensity", intensity, 0.01f, 0.0f, 100.0f))
-					{
-						pDirLight->SetIntensity(intensity);
-					}
-
-
-
-					TEditorElements::EndFieldTable();
-				}
-			}
-		}
-	}
-
 }

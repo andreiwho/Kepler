@@ -15,5 +15,5 @@ namespace ke
 	extern std::thread::id GRenderThreadID;
 	
 	extern bool IsRenderThread();
-	extern TRef<TRenderDevice> GetRenderDevice();
+	extern RefPtr<TRenderDevice> GetRenderDevice();
 }

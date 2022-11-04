@@ -7,7 +7,7 @@ namespace ke
 	class TSoundMA : public TSound
 	{
 	public:
-		TSoundMA(const TString& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
+		TSoundMA(const String& path, ESoundCreateFlags flags = ESoundCreateFlags::None);
 		~TSoundMA();
 
 		virtual bool IsPlaying() const override;

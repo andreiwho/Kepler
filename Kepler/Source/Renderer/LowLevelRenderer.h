@@ -7,16 +7,17 @@
 #include <vector>
 #include "Pipelines/GraphicsPipeline.h"
 #include "World/StaticMesh.h"
+#include "Subrenderer/Subrenderer.h"
 
 namespace ke
 {
-	class TLowLevelRenderer : public IntrusiveRefCounted
+	class LowLevelRenderer : public IntrusiveRefCounted
 	{
-		static TLowLevelRenderer* Instance;
+		static LowLevelRenderer* Instance;
 
 	public:
-		TLowLevelRenderer();
-		~TLowLevelRenderer();
+		LowLevelRenderer();
+		~LowLevelRenderer();
 
 		void InitRenderStateForWindow(class TWindow* pWindow);
 		void PresentAll();
@@ -33,11 +34,11 @@ namespace ke
 			return m_NextFrameIndex;
 		}
 
-		static TLowLevelRenderer* Get() { return Instance; }
+		static LowLevelRenderer* Get() { return Instance; }
 	public:
-		inline TRef<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
+		inline RefPtr<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
 
-		inline TRef<TSwapChain> GetSwapChain(u32 idx) const
+		inline RefPtr<ISwapChain> GetSwapChain(u32 idx) const
 		{
 			if (m_SwapChains.GetLength() > idx)
 			{
@@ -54,23 +55,23 @@ namespace ke
 		// Screen quad
 		struct TScreenQuad
 		{
-			TRef<TGraphicsPipeline> Pipeline{};
-			TRef<TVertexBuffer> VertexBuffer{};
-			TRef<TIndexBuffer> IndexBuffer{};
-			TRef<TPipelineSamplerPack> Samplers{};
+			RefPtr<IGraphicsPipeline> Pipeline{};
+			RefPtr<IVertexBuffer> VertexBuffer{};
+			RefPtr<IIndexBuffer> IndexBuffer{};
+			RefPtr<PipelineSamplerPack> Samplers{};
 		} m_ScreenQuad{};
 
 	private:
-		TRef<TSwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
+		RefPtr<ISwapChain> FindAssociatedSwapChain(class TWindow* pWindow) const;
 
 	private:
 		TRenderThread m_RenderThread{};
-		TSharedPtr<TShaderCache> m_ShaderCache{};
-		TSharedPtr<TGraphicsPipelineCache> m_PipelineCache{};
-		TSharedPtr<TTargetRegistry> m_TargetRegistry{};
+		SharedPtr<TShaderCache> m_ShaderCache{};
+		SharedPtr<GraphicsPipelineCache> m_PipelineCache{};
+		SharedPtr<RenderTargetRegistry> m_TargetRegistry{};
 
-		TRef<TRenderDevice> m_RenderDevice{};
-		Array<TRef<TSwapChain>> m_SwapChains;
+		RefPtr<TRenderDevice> m_RenderDevice{};
+		Array<RefPtr<ISwapChain>> m_SwapChains;
 		TAtomic<u64> m_FrameCounter = 0;
 		TAtomic<u8> m_SwapChainFrame = 0;
 		u8 m_NextFrameIndex = 1;

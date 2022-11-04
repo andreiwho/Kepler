@@ -6,45 +6,45 @@
 
 namespace ke
 {
-	struct TVertexAttribute
+	struct VertexAttribute
 	{
-		TVertexAttribute() = default;
-		TVertexAttribute(const TString& Name, u32 Id, EShaderInputType Type, usize InOffset)
-			:	AttributeName(Name)
-			,	AttributeId(Id)
-			,	InputType(Type)
-			,	Offset(InOffset)
+		VertexAttribute() = default;
+		VertexAttribute(const String& name, u32 id, EShaderInputType type, usize offset)
+			:	AttributeName(name)
+			,	AttributeId(id)
+			,	InputType(type)
+			,	Offset(offset)
 		{}
 
-		TString AttributeName{};
+		String AttributeName{};
 		u32 AttributeId{};
 		EShaderInputType InputType{EShaderInputType::Float4};
 		usize Offset{};
 	};
 
-	class TVertexLayout
+	class VertexLayout
 	{
 	public:
-		TVertexLayout() = default;
+		VertexLayout() = default;
 
-		TVertexLayout(usize InStride)
-			:	Stride(InStride)
+		VertexLayout(usize stride)
+			:	m_Stride(stride)
 		{}
 
-		inline void AddAttribute(const TString& Name, u32 Id, EShaderInputType Type, usize Offset)
+		inline void AddAttribute(const String& name, u32 id, EShaderInputType type, usize offset)
 		{
-			Attributes.EmplaceBack(Name, Id, Type, Offset);
+			m_Attributes.EmplaceBack(name, id, type, offset);
 		}
 
-		inline void AddAttribute(const TVertexAttribute& Attribute)
+		inline void AddAttribute(const VertexAttribute& attribute)
 		{
-			Attributes.EmplaceBack(Attribute);
+			m_Attributes.EmplaceBack(attribute);
 		}
 
-		const Array<TVertexAttribute>& GetAttributes() const { return Attributes; }
+		const Array<VertexAttribute>& GetAttributes() const { return m_Attributes; }
 
 	protected:
-		Array<TVertexAttribute> Attributes;
-		usize Stride{};
+		Array<VertexAttribute> m_Attributes;
+		usize m_Stride{};
 	};
 }

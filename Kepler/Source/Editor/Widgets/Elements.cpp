@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "imgui_internal.h"
 #include "Platform/Window.h"
+#include "Core/Filesystem/AssetSystem/AssetTree.h"
 
 namespace ImGui
 {
@@ -88,7 +89,7 @@ namespace ke
 	bool TEditorElements::DragFloat3(CStr pLabel, float3& OutFloat, float Speed, float Min, float Max)
 	{
 		const bool bValueChanged = ImGui::DragFloatN_Colored(pLabel, &OutFloat.x, 3, Speed, Min, Max, "%.3f", 1.0f);
-		
+
 		if (bValueChanged)
 		{
 			CheckWrappingCursor();
@@ -117,14 +118,20 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	bool TEditorElements::EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols])
+	bool TEditorElements::EditText(CStr pLabel, CStr pInitialText, char(&pOutBuffer)[GMaxTextEditSymbols], bool bDisabled)
 	{
 		if (pInitialText)
 		{
 			strcpy(pOutBuffer, pInitialText);
 		}
 
-		bool bReturn = ImGui::InputText("##v", pOutBuffer, GMaxTextEditSymbols, ImGuiInputTextFlags_EnterReturnsTrue);
+		u32 flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		if (bDisabled)
+		{
+			flags |= ImGuiInputTextFlags_ReadOnly;
+		}
+
+		bool bReturn = ImGui::InputText(fmt::format("##{}", pLabel).c_str(), pOutBuffer, GMaxTextEditSymbols, flags);
 		return bReturn;
 	}
 
@@ -140,6 +147,215 @@ namespace ke
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		return bBegan;
+	}
+
+	void TEditorElements::DrawReflectedField(const String& name, ReflectedField& field, void* pHandler)
+	{
+
+		bool bNotBaseType = false;
+
+		// Check metadata
+		const auto& md = field.GetMetadata();
+		if (md.bHideInDetails)
+		{
+			return;
+		}
+
+		if (md.bReadOnly)
+		{
+			ImGui::BeginDisabled(true);
+		}
+
+		bool bBeganDragDropTarget = false;
+		switch (field.GetTypeHash())
+		{
+		case ClassId("AssetTreeNode"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			AssetTreeNode* pAsset = field.GetValueFor<AssetTreeNode>(pHandler);
+
+			const ImGuiPayload* pPayload = nullptr;
+
+			if (pAsset)
+			{
+				char outBuffer[TEditorElements::GMaxTextEditSymbols]{};
+				TEditorElements::EditText("asset", pAsset->GetPath().c_str(), outBuffer, false);
+			}
+			else
+			{
+				char outBuffer[TEditorElements::GMaxTextEditSymbols]{};
+				TEditorElements::EditText("asset", "No Asset Defined", outBuffer, false);
+			}
+
+			if (md.bEnableDragDrop)
+			{
+				bBeganDragDropTarget = ImGui::BeginDragDropTarget();
+			}
+
+			if (bBeganDragDropTarget)
+			{
+				StringView assetType{};
+				switch (md.FieldAssetType)
+				{
+					ImGui::EndDragDropTarget();
+				case EFieldAssetType::Material:
+					assetType = "MATERIAL";
+					break;
+				case EFieldAssetType::StaticMesh:
+					assetType = "STATICMESH";
+					break;
+				case EFieldAssetType::Map:
+					assetType = "MAP";
+					break;
+				case EFieldAssetType::None:
+				default:
+					ImGui::EndDragDropTarget();
+					break;
+				}
+
+				if (pPayload = ImGui::AcceptDragDropPayload(assetType.data()))
+				{
+					if (AssetTreeNode** ppData = (AssetTreeNode**)pPayload->Data)
+					{
+						field.SetValueFor(pHandler, *ppData);
+					}
+				}
+			}
+		}
+		break;
+		case ClassId("float"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float>(pHandler);
+			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case ClassId("float2"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float2>(pHandler);
+			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case ClassId("float3"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float3>(pHandler);
+			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case ClassId("float4"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<float4>(pHandler);
+			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed);
+		}
+		break;
+		case ClassId("bool"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<bool>(pHandler);
+			ImGui::Checkbox(name.c_str(), value);
+		}
+		break;
+		case ClassId("String"):
+		{
+			TEditorElements::NextFieldRow(name.c_str());
+			auto value = field.GetValueFor<String>(pHandler);
+			char outBuffer[TEditorElements::GMaxTextEditSymbols];
+			memset(outBuffer, 0, sizeof(outBuffer));
+			if (TEditorElements::EditText(name.c_str(), value->c_str(), outBuffer, md.bReadOnly))
+			{
+				outBuffer[TEditorElements::GMaxTextEditSymbols - 1] = '\0';
+				String newValue = outBuffer;
+				field.SetValueFor(pHandler, &newValue);
+			}
+		}
+		break;
+		default:
+			bNotBaseType = true;
+			break;
+		}
+
+		// End metadata
+		if (field.GetMetadata().bReadOnly)
+		{
+			ImGui::EndDisabled();
+		}
+
+		if (bBeganDragDropTarget)
+		{
+			ImGui::EndDragDropTarget();
+		}
+
+		if (bNotBaseType)
+		{
+			if (md.bIsEnum)
+			{
+				auto pEnumClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash());
+				if (!pEnumClass)
+				{
+					return;
+				}
+
+				if (auto pMyEnum = RefCast<ReflectedEnum>(pEnumClass))
+				{
+					TEditorElements::NextFieldRow(name.c_str());
+					auto& values = pMyEnum->GetEnumValues();
+					i32* pair = field.GetValueFor<i32>(pHandler);
+					if (*pair > values.GetLength())
+					{
+						return;
+					}
+					auto& selectedValue = values[*pair];
+					if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
+					{
+						for (auto& [index, string] : values)
+						{
+							i32 newValue = index;
+							if (ImGui::Selectable(string.c_str()))
+							{
+								field.SetValueFor(pHandler, &newValue);
+							}
+						}
+						ImGui::EndCombo();
+					}
+				}
+			}
+			else
+			{
+				TEditorElements::NextFieldRow(name.c_str());
+				if (RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(field.GetTypeHash()))
+				{
+					for (auto& [fieldName, classField] : pClass->GetFields())
+					{
+						DrawReflectedField(fieldName, classField, field.GetValueFor<void*>(pHandler));
+					}
+				}
+			}
+		}
+	}
+
+	void TEditorElements::DrawReflectedObjectFields(const String& label, ClassId typeHash, void* pHandler)
+	{
+		RefPtr<ReflectedClass> pClass = ReflectionDatabase::Get()->FindClassByTypeHash(typeHash);
+		if (!pClass)
+		{
+			return;
+		}
+
+		if (TEditorElements::Container(label.c_str()))
+		{
+			if (TEditorElements::BeginFieldTable("details", 2))
+			{
+				for (auto& [name, field] : pClass->GetFields())
+				{
+					DrawReflectedField(name, field, pHandler);
+				}
+
+				TEditorElements::EndFieldTable();
+			}
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

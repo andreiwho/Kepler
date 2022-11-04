@@ -8,122 +8,125 @@ namespace ke
 
 
 	//////////////////////////////////////////////////////////////////////////
-	class TPipelineParam
+	class PipelineParam
 	{
 	public:
-		TPipelineParam() = default;
-		TPipelineParam(usize InOffset, usize InSize, EShaderInputType InType = EShaderInputType::Custom)
-			: Offset(InOffset)
-			, Size(InSize)
-			, Type(InType)
+		PipelineParam() = default;
+		PipelineParam(usize offset, usize size, EShaderInputType type = EShaderInputType::Custom)
+			: m_Offset(offset)
+			, m_Size(size)
+			, m_Type(type)
 		{}
 
-		inline usize GetOffset() const { return Offset; }
-		inline usize GetSize() const { return Size; }
-		inline EShaderInputType GetType() const { return Type; }
+		inline usize GetOffset() const { return m_Offset; }
+		inline usize GetSize() const { return m_Size; }
+		inline EShaderInputType GetType() const { return m_Type; }
 
 	private:
-		usize Offset{};
-		usize Size{};
-		EShaderInputType Type{ EShaderInputType::Custom };
+		usize m_Offset{};
+		usize m_Size{};
+		EShaderInputType m_Type{ EShaderInputType::Custom };
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TPipelineParamMapping : public TEnableRefFromThis<TPipelineParamMapping>
+	class PipelineParamMapping : public EnableRefPtrFromThis<PipelineParamMapping>
 	{
 	public:
-		void AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type);
-		void AddTextureSampler(const TString& Name, EShaderStageFlags Stage, u32 Register);
+		void AddParam(const String& name, usize offset, usize size, EShaderStageFlags stage, EShaderInputType type);
+		void AddTextureSampler(const String& name, EShaderStageFlags stage, u32 reg);
 
-		TRef<class TPipelineParamPack> CreateParamPack();
-		TRef<class TPipelineSamplerPack> CreateSamplerPack();
+		RefPtr<class TPipelineParamPack> CreateParamPack();
+		RefPtr<class PipelineSamplerPack> CreateSamplerPack();
 
-		inline const auto& GetParams() const { return Params; }
-		inline EShaderStageFlags GetParamShaderStages() const { return ParamShaderStages; }
+		inline const auto& GetParams() const { return m_Params; }
+		inline EShaderStageFlags GetParamShaderStages() const { return m_ParamShaderStages; }
 
-		inline const auto& GetSamplers() const { return Samplers; }
-		inline EShaderStageFlags GetSamplerShaderStages() const { return SamplerShaderStages; }
+		inline const auto& GetSamplers() const { return m_Samplers; }
+		inline EShaderStageFlags GetSamplerShaderStages() const { return m_SamplerShaderStages; }
 
-		static TRef<TPipelineParamMapping> New()
+		static RefPtr<PipelineParamMapping> New()
 		{
-			return MakeRef(ke::New<TPipelineParamMapping>());
+			return MakeRef(ke::New<PipelineParamMapping>());
 		}
 
-		inline bool HasParam(const TString& name) const { return Params.Contains(name); }
+		inline bool HasParam(const String& name) const { return m_Params.Contains(name); }
+
+		inline bool HasParams() const { return !m_Params.IsEmpty(); }
+		inline bool HasSamplers() const { return !m_Samplers.IsEmpty(); }
 
 	private:
-		Map<TString, TPipelineParam> Params;
-		EShaderStageFlags ParamShaderStages{ 0 };
+		Map<String, PipelineParam> m_Params;
+		EShaderStageFlags m_ParamShaderStages{ 0 };
 
-		Map<TString, u32> Samplers;
-		EShaderStageFlags SamplerShaderStages{ 0 };
+		Map<String, u32> m_Samplers;
+		EShaderStageFlags m_SamplerShaderStages{ 0 };
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 	class TPipelineParamPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineParamPack(TRef<TPipelineParamMapping> Mapping);
+		TPipelineParamPack(RefPtr<PipelineParamMapping> pMapping);
 
 		template<typename T>
-		void Write(const TString& Param, const T* Data)
+		void Write(const String& param, const T* pData)
 		{
-			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param));
+			CHECK(m_Params);
+			CHECK(m_Params->GetParams().Contains(param));
 
-			const auto& ParamRef = Params->GetParams()[Param];
-			memcpy(CPUData.GetData() + ParamRef.GetOffset() + (GetBufferIndex() * SinglePackStride), Data, ParamRef.GetSize());
+			const auto& ParamRef = m_Params->GetParams()[param];
+			memcpy(m_CPUData.GetData() + ParamRef.GetOffset() + (GetBufferIndex() * m_SinglePackStride), pData, ParamRef.GetSize());
 		}
 
 		template<typename T>
-		T& GetParam(const TString& Param)
+		T& GetParam(const String& param)
 		{
-			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param));
-			return *reinterpret_cast<T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset() + (GetBufferIndex() * SinglePackStride));
+			CHECK(m_Params);
+			CHECK(m_Params->GetParams().Contains(param));
+			return *reinterpret_cast<T*>(m_CPUData.GetData() + m_Params->GetParams().Find(param)->GetOffset() + (GetBufferIndex() * m_SinglePackStride));
 		}
 
 		template<typename T>
-		const T& GetParam(const TString& Param) const
+		const T& GetParam(const String& param) const
 		{
-			CHECK(Params);
-			CHECK(Params->GetParams().Contains(Param));
-			return *reinterpret_cast<const T*>(CPUData.GetData() + Params->GetParams().Find(Param)->GetOffset() + (GetBufferIndex() * SinglePackStride));
+			CHECK(m_Params);
+			CHECK(m_Params->GetParams().Contains(param));
+			return *reinterpret_cast<const T*>(m_CPUData.GetData() + m_Params->GetParams().Find(param)->GetOffset() + (GetBufferIndex() * m_SinglePackStride));
 		}
 
-		const ubyte* GetDataPointer() const { return CPUData.GetData() + (GetBufferIndex() * SinglePackStride); }
-		usize GetDataSize() const { return SinglePackStride; }
-		inline EShaderStageFlags GetShaderStages() const { return Params->GetParamShaderStages(); }
+		const ubyte* GetDataPointer() const { return m_CPUData.GetData() + (GetBufferIndex() * m_SinglePackStride); }
+		usize GetDataSize() const { return m_SinglePackStride; }
+		inline EShaderStageFlags GetShaderStages() const { return m_Params->GetParamShaderStages(); }
 
-		inline bool HasParam(const TString& name) const { return Params->HasParam(name); }
+		inline bool HasParam(const String& name) const { return m_Params->HasParam(name); }
 
 	private:
 		static u8 GetBufferIndex() noexcept;
 
 	private:
-		TRef<TPipelineParamMapping> Params;
-		Array<ubyte> CPUData;
-		bool bIsCompiled = false;
-		usize SinglePackStride = 0;
+		RefPtr<PipelineParamMapping> m_Params;
+		Array<ubyte> m_CPUData;
+		bool m_bIsCompiled = false;
+		usize m_SinglePackStride = 0;
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	class TTextureSampler2D;
-	class TPipelineSamplerPack : public IntrusiveRefCounted
+	class ITextureSampler2D;
+	class PipelineSamplerPack : public IntrusiveRefCounted
 	{
 	public:
-		TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping);
+		PipelineSamplerPack(RefPtr<PipelineParamMapping> pMapping);
 
-		void Write(const TString& Name, TRef<TTextureSampler2D> Data);
+		void Write(const String& name, RefPtr<ITextureSampler2D> pData);
 
-		TRef<TTextureSampler2D> GetSampler(const TString& Name);
+		RefPtr<ITextureSampler2D> GetSampler(const String& name);
 
-		TRef<TPipelineParamMapping> GetParamMappings() const { return Params; }
+		RefPtr<PipelineParamMapping> GetParamMappings() const { return m_Params; }
 
-		const Array<TRef<TTextureSampler2D>>& GetSamplers() const { return Samplers; }
+		const Array<RefPtr<ITextureSampler2D>>& GetSamplers() const { return m_Samplers; }
 
 	private:
-		TRef<TPipelineParamMapping> Params;
-		Array<TRef<TTextureSampler2D>> Samplers;
+		RefPtr<PipelineParamMapping> m_Params;
+		Array<RefPtr<ITextureSampler2D>> m_Samplers;
 	};
 }

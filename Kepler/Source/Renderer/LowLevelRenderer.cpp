@@ -7,10 +7,10 @@
 namespace ke
 {
 
-	TLowLevelRenderer* TLowLevelRenderer::Instance;
+	LowLevelRenderer* LowLevelRenderer::Instance;
 
 	//////////////////////////////////////////////////////////////////////////
-	TLowLevelRenderer::TLowLevelRenderer()
+	LowLevelRenderer::LowLevelRenderer()
 	{
 		Instance = this;
 		TRenderThread::Submit([this]
@@ -20,14 +20,14 @@ namespace ke
 			});
 		TRenderThread::Wait();
 		m_ShaderCache = MakeShared<TShaderCache>();
-		m_PipelineCache = MakeShared<TGraphicsPipelineCache>();
+		m_PipelineCache = MakeShared<GraphicsPipelineCache>();
 
 		InitScreenQuad();
-		m_TargetRegistry = MakeShared<TTargetRegistry>();
+		m_TargetRegistry = MakeShared<RenderTargetRegistry>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TLowLevelRenderer::~TLowLevelRenderer()
+	LowLevelRenderer::~LowLevelRenderer()
 	{
 		m_TargetRegistry.reset();
 		m_ShaderCache.reset();
@@ -46,7 +46,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::InitRenderStateForWindow(class TWindow* pWindow)
+	void LowLevelRenderer::InitRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]()
@@ -57,7 +57,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::PresentAll()
+	void LowLevelRenderer::PresentAll()
 	{
 		KEPLER_PROFILE_SCOPE();
 		TRenderThread::Submit(
@@ -84,7 +84,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::DestroyRenderStateForWindow(class TWindow* pWindow)
+	void LowLevelRenderer::DestroyRenderStateForWindow(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]
@@ -105,7 +105,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::OnWindowResized(class TWindow* pWindow)
+	void LowLevelRenderer::OnWindowResized(class TWindow* pWindow)
 	{
 		TRenderThread::Submit(
 			[this, pWindow]
@@ -118,7 +118,7 @@ namespace ke
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TLowLevelRenderer::InitScreenQuad()
+	void LowLevelRenderer::InitScreenQuad()
 	{
 		struct TVertex
 		{
@@ -144,21 +144,21 @@ namespace ke
 				auto pShader = pCompiler->CompileShader("EngineShaders://DefaultScreenQuad.hlsl", EShaderStageFlags::Vertex | EShaderStageFlags::Pixel);
 				CHECK(pShader);
 
-				TGraphicsPipelineConfiguration config{};
+				GraphicsPipelineConfig config{};
 				config.DepthStencil.bDepthEnable = false;
 				config.VertexInput.VertexLayout = pShader->GetReflection()->VertexLayout;
 				config.ParamMapping = pShader->GetReflection()->ParamMapping;
 
-				m_ScreenQuad.Pipeline = MakeRef(New<TGraphicsPipeline>(pShader, config));
-				m_ScreenQuad.VertexBuffer = TVertexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(QuadVertices));
-				m_ScreenQuad.IndexBuffer = TIndexBuffer::New(EBufferAccessFlags::GPUOnly, AsyncDataBlob::New(indices));
+				m_ScreenQuad.Pipeline = MakeRef(New<IGraphicsPipeline>(pShader, config));
+				m_ScreenQuad.VertexBuffer = IVertexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(QuadVertices));
+				m_ScreenQuad.IndexBuffer = IIndexBuffer::New(EBufferAccessFlags::GPUOnly, IAsyncDataBlob::New(indices));
 				m_ScreenQuad.Samplers = m_ScreenQuad.Pipeline->GetParamMapping()->CreateSamplerPack();
 			});
 		Await(task);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TSwapChain> TLowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
+	RefPtr<ISwapChain> LowLevelRenderer::FindAssociatedSwapChain(class TWindow* pWindow) const
 	{
 		auto foundSwapChain = m_SwapChains.Find(
 			[pWindow](const auto& pSwapChain)

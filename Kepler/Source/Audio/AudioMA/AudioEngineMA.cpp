@@ -19,17 +19,17 @@ namespace ke
 		KEPLER_INFO(LogAudio, "MiniAudio Engine terminated");
 	}
 
-	void AudioEngineMA::PlayInline(const TString& path)
+	void AudioEngineMA::PlayInline(const String& path)
 	{
 		ma_engine_play_sound(&m_Engine, VFSResolvePath(path).c_str(), nullptr);
 	}
 
-	void AudioEngineMA::Play(const TString& path, ESoundCreateFlags flags)
+	void AudioEngineMA::Play(const String& path, ESoundCreateFlags flags)
 	{
 		GetOrLoadSound(path, flags)->Play();
 	}
 
-	void AudioEngineMA::PlayAt(const TString& path, float3 position, ESoundCreateFlags flags)
+	void AudioEngineMA::PlayAt(const String& path, float3 position, ESoundCreateFlags flags)
 	{
 		GetOrLoadSound(path, flags)->Play(position);
 	}
@@ -50,7 +50,7 @@ namespace ke
 		}
 	}
 
-	TRef<TSound> AudioEngineMA::GetOrLoadSound(const TString& path, ESoundCreateFlags flags)
+	RefPtr<TSound> AudioEngineMA::GetOrLoadSound(const String& path, ESoundCreateFlags flags)
 	{
 		if (!m_Sounds.Contains(path))
 		{

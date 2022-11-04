@@ -4,13 +4,13 @@
 
 namespace ke
 {
-	TPipelineParamPack::TPipelineParamPack(TRef<TPipelineParamMapping> Mapping)
-		:	Params(Mapping)
+	TPipelineParamPack::TPipelineParamPack(RefPtr<PipelineParamMapping> Mapping)
+		:	m_Params(Mapping)
 	{
 		struct TLocalParam
 		{
-			TString Name;
-			TPipelineParam Param;
+			String Name;
+			PipelineParam Param;
 		};
 
 		Array<TLocalParam> SortedParams;
@@ -32,18 +32,18 @@ namespace ke
 #endif
 
 		// Allocate space
-		const TPipelineParam& LastParam = SortedParams[SortedParams.GetLength() - 1].Param;
-		static constexpr auto FrameCount = TLowLevelRenderer::m_SwapChainFrameCount;
-		CPUData.Resize((LastParam.GetOffset() + LastParam.GetSize()) * FrameCount);	// Enable multi-buffering
-		SinglePackStride = CPUData.GetLength() / FrameCount;
+		const PipelineParam& LastParam = SortedParams[SortedParams.GetLength() - 1].Param;
+		static constexpr auto FrameCount = LowLevelRenderer::m_SwapChainFrameCount;
+		m_CPUData.Resize((LastParam.GetOffset() + LastParam.GetSize()) * FrameCount);	// Enable multi-buffering
+		m_SinglePackStride = m_CPUData.GetLength() / FrameCount;
 	}
 
 	u8 TPipelineParamPack::GetBufferIndex() noexcept
 	{
-		return TLowLevelRenderer::Get()->GetNextFrameIndex();
+		return LowLevelRenderer::Get()->GetNextFrameIndex();
 	}
 
-	void TPipelineParamMapping::AddParam(const TString& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
+	void PipelineParamMapping::AddParam(const String& Name, usize Offset, usize Size, EShaderStageFlags Stage, EShaderInputType Type)
 	{
 		CHECK(!Name.empty());
 
@@ -58,59 +58,59 @@ namespace ke
 		}
 
 		CHECK(ActualSize > 0);
-		Params.Insert(Name, TPipelineParam(Offset, ActualSize, Type));
-		ParamShaderStages |= Stage;
+		m_Params.Insert(Name, PipelineParam(Offset, ActualSize, Type));
+		m_ParamShaderStages |= Stage;
 	}
 
-	void TPipelineParamMapping::AddTextureSampler(const TString& Name, EShaderStageFlags Stage, u32 Register)
+	void PipelineParamMapping::AddTextureSampler(const String& name, EShaderStageFlags stage, u32 reg)
 	{
-		CHECK(!Name.empty());
-		Samplers.Insert(Name, Register);
-		SamplerShaderStages |= Stage;
+		CHECK(!name.empty());
+		m_Samplers.Insert(name, reg);
+		m_SamplerShaderStages |= stage;
 	}
 
-	TRef<TPipelineParamPack> TPipelineParamMapping::CreateParamPack()
+	RefPtr<TPipelineParamPack> PipelineParamMapping::CreateParamPack()
 	{
 		return MakeRef(ke::New<TPipelineParamPack>(RefFromThis()));
 	}
 
-	TRef<TPipelineSamplerPack> TPipelineParamMapping::CreateSamplerPack()
+	RefPtr<PipelineSamplerPack> PipelineParamMapping::CreateSamplerPack()
 	{
-		return MakeRef(ke::New<TPipelineSamplerPack>(RefFromThis()));
+		return MakeRef(ke::New<PipelineSamplerPack>(RefFromThis()));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TPipelineSamplerPack::TPipelineSamplerPack(TRef<TPipelineParamMapping> Mapping)
-		:	Params(Mapping)
+	PipelineSamplerPack::PipelineSamplerPack(RefPtr<PipelineParamMapping> pMapping)
+		:	m_Params(pMapping)
 	{
 		// Get register count and allocate space for the stuff
-		u32 MaxRegister = 0;
-		for (const auto& [_, Register] : Params->GetSamplers())
+		u32 maxRegister = 0;
+		for (const auto& [_, Register] : m_Params->GetSamplers())
 		{
-			if (Register > MaxRegister)
+			if (Register > maxRegister)
 			{
-				MaxRegister = Register;
+				maxRegister = Register;
 			}
 		}
-		Samplers.Resize(1ull + MaxRegister);
+		m_Samplers.Resize(1ull + maxRegister);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	void TPipelineSamplerPack::Write(const TString& Name, TRef<TTextureSampler2D> Data)
+	void PipelineSamplerPack::Write(const String& name, RefPtr<ITextureSampler2D> pData)
 	{
-		CHECK(Params);
-		CHECK(Params->GetSamplers().Contains(Name));
-		const u32 Register = Params->GetSamplers()[Name];
-		Samplers[Register] = Data;
+		CHECK(m_Params);
+		CHECK(m_Params->GetSamplers().Contains(name));
+		const u32 reg = m_Params->GetSamplers()[name];
+		m_Samplers[reg] = pData;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	TRef<TTextureSampler2D> TPipelineSamplerPack::GetSampler(const TString& Name)
+	RefPtr<ITextureSampler2D> PipelineSamplerPack::GetSampler(const String& name)
 	{
-		CHECK(Params);
-		CHECK(Params->GetSamplers().Contains(Name));
-		const u32 Register = Params->GetSamplers()[Name];
-		return Samplers[Register];
+		CHECK(m_Params);
+		CHECK(m_Params->GetSamplers().Contains(name));
+		const u32 Register = m_Params->GetSamplers()[name];
+		return m_Samplers[Register];
 	}
 
 }

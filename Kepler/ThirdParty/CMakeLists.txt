@@ -32,6 +32,8 @@ add_subdirectory(optick)
 add_library(rapidjson INTERFACE)
 target_include_directories(rapidjson INTERFACE rapidjson/include)
 
+add_subdirectory(nativefiledialog-extended)
+
 # IMGUI
 add_library(imgui 
  STATIC
@@ -75,6 +77,7 @@ endif()
 set(THIRD_PARTY_PROJECTS 
  glfw 
  stb_image
+ nfd
  UpdateAssimpLibsDebugSymbolsAndDLLs
  assimp
  imgui

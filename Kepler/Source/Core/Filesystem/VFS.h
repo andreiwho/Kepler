@@ -13,26 +13,26 @@ namespace ke
 		TVirtualFileSystem();
 
 		static TVirtualFileSystem* Get() { return Instance; }
-		inline TString GetCurrentWorkingDirectory() { return m_Cwd.string(); }
-		void RegisterVirtualPathAlias(const TString& name, const TString& path);
-		bool ResolvePath(const TString& PathToResolve, TString& OutPath);
-		const Map<TString, TString>& GetPathAliases() const& { return m_Aliases; }
+		inline String GetCurrentWorkingDirectory() { return m_Cwd.string(); }
+		void RegisterVirtualPathAlias(const String& name, const String& path);
+		bool ResolvePath(const String& PathToResolve, String& OutPath);
+		const Map<String, String>& GetPathAliases() const& { return m_Aliases; }
 
 	private:
 		static constexpr const char* m_VFSToken = "://";
 		TPath m_Cwd = std::filesystem::current_path();
-		Map<TString, TString> m_Aliases;
+		Map<String, String> m_Aliases;
 	};
 
 	// Register a path to use it with the VFS
 	// - Name: must be a sequence of characters, e.g. "Engine", "Game", "Lol"
 	// - Path: must be path relative to the root directory of the project.
-	void VFSRegisterPathAlias(const TString& name, const TString& path);
+	void VFSRegisterPathAlias(const String& name, const String& path);
 
 	// Important note: VFSResolvePath must happen on the lowest level of abstraction right before the function that loads the file.
 	// Other functions higher on the callstack need to deal with unresolved paths.
 	// Thus, resolving paths must happen right before any sort of interaction with the filesystem.
-	TString VFSResolvePath(const TString& path);
+	String VFSResolvePath(const String& path);
 	
-	TString VFSGetParentPath(const TString& path);
+	String VFSGetParentPath(const String& path);
 }
