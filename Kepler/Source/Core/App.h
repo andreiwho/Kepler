@@ -102,6 +102,9 @@ namespace ke
 		reflected kmeta(readonly)
 		float FrameTime = 0.0f;
 
+		reflected kmeta(readonly)
+		float FramesPerSecond = 0.0f;
+
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
 		virtual void OnPlatformEvent(const TPlatformEventBase& event) override;

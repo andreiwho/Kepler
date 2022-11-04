@@ -195,6 +195,7 @@ namespace ke
 				CheckWorldUpdated();
 				mainTimer.End();
 				FrameTime = 1.0f / mainTimer.Delta();
+				FramesPerSecond = mainTimer.Delta() * 1000.0f;
 			}
 		}
 		TerminateModuleStack();
