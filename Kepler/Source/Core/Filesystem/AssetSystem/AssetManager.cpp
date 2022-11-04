@@ -85,7 +85,14 @@ namespace ke
 		for (const auto& [key, _] : vfsAliases)
 		{
 			auto keyToken = key + "://";
-			m_Roots[keyToken] = ReadDirectory(keyToken, AssetTreeNode_Directory::New(nullptr, keyToken));
+			if (m_Roots.Contains(keyToken))
+			{
+				m_Roots[keyToken] = ReadDirectory(keyToken, m_Roots[keyToken]);
+			}
+			else
+			{
+				m_Roots[keyToken] = ReadDirectory(keyToken, AssetTreeNode_Directory::New(nullptr, keyToken));
+			}
 			m_Roots[keyToken]->SetRoot();
 		}
 
@@ -105,13 +112,23 @@ namespace ke
 
 			if (fs::is_directory(entryPath))
 			{
-				RefPtr<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
+				RefPtr<AssetTreeNode> pNewDirectory = pDirectory->FindNode(entryPath.string());
+				bool bIsNewDirectory = false;
+				if(bIsNewDirectory = !pNewDirectory)
+				{
+					pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
+				}
+
 				ReadDirectory(root, pNewDirectory);
-				pDirectory->AddChild(pNewDirectory);
+				if (bIsNewDirectory)
+				{
+					pDirectory->AddChild(pNewDirectory);
+				}
 			}
 
 			if (fs::is_regular_file(entryPath))
 			{
+				// Do not allow files with no extensions, they might be a special case
 				if (entryPath.has_extension())
 				{
 					const String extension = entryPath.extension().string();
