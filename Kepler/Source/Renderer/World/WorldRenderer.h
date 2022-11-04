@@ -21,22 +21,25 @@ namespace ke
 		Overlay
 	};
 
+	reflected enum class EReservedSlots
+	{
+		RS_Renderer = 0,
+		RS_Camera = 1,
+		RS_Light = 2,
+		RS_User = 3,
+	};
+
 	reflected class WorldRenderer : public IntrusiveRefCounted
 	{
 		static WorldRenderer* Instance;
 	public:
 		static WorldRenderer* Get() { return Instance; }
 
-		enum EReservedSlots
-		{
-			RS_Camera = 0,
-			RS_Light = 1,
-			RS_User,
-		};
-
 		reflected EFormat MeshPassBufferFormat = EFormat::R11G11B10_FLOAT;
 		reflected EFormat PrePassDepthBufferFormat = EFormat::D24_UNORM_S8_UINT;
-		reflected float Gamma = 2.2f;
+		
+		reflected kmeta(editspeed=0.01f) float Gamma = 1.0f;
+		reflected kmeta(editspeed=0.01f) float Exposure = 1.0f;
 
 		WorldRenderer();
 		~WorldRenderer();
@@ -45,6 +48,7 @@ namespace ke
 		void Render(TViewport2D ViewportSize);
 		void UpdateRendererMainThread(float deltaTime);
 		void UpdateLightingData_MainThread();
+		void UpdateRendererData_MainThread();
 
 		static RefPtr<WorldRenderer> New();
 
@@ -118,7 +122,15 @@ namespace ke
 		bool bInitialized = false;
 		RefPtr<IParamBuffer> RS_CameraBuffer;
 		RefPtr<IParamBuffer> RS_LightBuffer;
+		RefPtr<IParamBuffer> RS_RendererSetupBuffer;
+
 		RefPtr<IGraphicsPipeline> PrePassPipeline;
+
+		struct RS_RendererSetupStruct
+		{
+			float Gamma{2.2f};
+			float Exposure{ 1.0f };
+		};
 
 		struct RS_CameraBufferStruct
 		{

@@ -37,9 +37,13 @@ namespace ke
 			RS_LightParams->AddParam("DirectionalLightIntensity", OFFSET_PARAM_ARGS(RS_LightBufferStruct, DirectionalLightIntensity), EShaderStageFlags::Pixel, EShaderInputType::Float);
 			RS_LightBuffer = IParamBuffer::New(RS_LightParams);
 
+			RefPtr<PipelineParamMapping> RS_RendererSetupParams = PipelineParamMapping::New();
+			RS_RendererSetupParams->AddParam("Gamma", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, Gamma), EShaderStageFlags::Pixel, EShaderInputType::Float);
+			RS_RendererSetupParams->AddParam("Exposure", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, Exposure), EShaderStageFlags::Pixel, EShaderInputType::Float);
+			RS_RendererSetupBuffer = IParamBuffer::New(RS_RendererSetupParams);
+
 			// Setup pipeline
-			auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()
-				->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
+			auto prePassShader = THLSLShaderCompiler::CreateShaderCompiler()->CompileShader("EngineShaders://DefaultPrePass.hlsl", EShaderStageFlags::Vertex);
 
 			GraphicsPipelineConfig config{};
 			config.VertexInput.Topology = EPrimitiveTopology::TriangleList;
@@ -93,11 +97,10 @@ namespace ke
 
 		// Bind static camera
 		RS_CameraBuffer->RT_UploadToGPU(pImmCtx);
-		pImmCtx->BindParamBuffers(RS_CameraBuffer, RS_Camera);
-
 		RS_LightBuffer->RT_UploadToGPU(pImmCtx);
-		pImmCtx->BindParamBuffers(RS_LightBuffer, RS_Light);
+		RS_RendererSetupBuffer->RT_UploadToGPU(pImmCtx);
 
+		pImmCtx->BindParamBuffers({ RS_RendererSetupBuffer, RS_CameraBuffer, RS_LightBuffer }, (u32)EReservedSlots::RS_Renderer);
 		// Collect renderable objects
 		// ...
 		PrePass(pImmCtx);
@@ -117,6 +120,7 @@ namespace ke
 	{
 		KEPLER_PROFILE_SCOPE();
 		UpdateLightingData_MainThread();
+		UpdateRendererData_MainThread();
 
 		auto camera = m_CurrentWorld->GetMainCamera();
 		if (m_CurrentWorld->IsValidEntity(camera) && m_CurrentWorld->IsCamera(camera))
@@ -165,6 +169,12 @@ namespace ke
 				RS_LightBuffer->Write("DirectionalLightColor", &color);
 				RS_LightBuffer->Write("DirectionalLightIntensity", &intensity);
 			});
+	}
+
+	void WorldRenderer::UpdateRendererData_MainThread()
+	{
+		RS_RendererSetupBuffer->Write("Gamma", &Gamma);
+		RS_RendererSetupBuffer->Write("Exposure", &Exposure);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -222,7 +232,7 @@ namespace ke
 
 				if (MT.UsesPrepass())
 				{
-					pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+					pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), (u32)EReservedSlots::RS_User);
 					for (const auto& Section : SM.GetStaticMesh()->GetSections())
 					{
 						pImmCtx->BindVertexBuffers(Section.VertexBuffer, 0, 0);
@@ -294,7 +304,7 @@ namespace ke
 					return;
 				}
 
-				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), RS_User);
+				pImmCtx->BindParamBuffers(MT.GetMaterial()->GetParamBuffer(), (u32)EReservedSlots::RS_User);
 				pImmCtx->BindPipeline(MT.GetMaterial()->GetPipeline());
 				pImmCtx->BindSamplers(MT.GetMaterial()->GetSamplers());
 				for (const auto& Section : SM.GetStaticMesh()->GetSections())
