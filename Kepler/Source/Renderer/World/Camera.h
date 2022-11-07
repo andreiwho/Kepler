@@ -43,7 +43,7 @@ namespace ke
 	public:
 		reflected ECameraProjectionMode Projection{ECameraProjectionMode::Perspective};
 
-		reflected kmeta(editspeed=0.01f)
+		reflected kmeta(editspeed=0.01f, clampmin=5.0f)
 		float FieldOfView{45.0f};
 		reflected kmeta(editspeed=0.01f)
 		float Width{1024};

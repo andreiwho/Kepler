@@ -42,7 +42,12 @@ namespace ke
 
 	struct FieldMetadata
 	{
+		bool(*EditConditionAccessor)(void* pObject) = nullptr;
+
 		EFieldAssetType FieldAssetType{ EFieldAssetType::None };
+		float EditSpeed = 1.0f;
+		float ClampMin = -FLT_MIN / INT_MIN;
+		float ClampMax = FLT_MAX / INT_MAX;
 
 		bool bReadOnly : 1 = false;
 		bool bIsPointer : 1 = false;
@@ -50,8 +55,7 @@ namespace ke
 		bool bIsEnum : 1 = false;
 		bool bHideInDetails : 1 = false;
 		bool bEnableDragDrop : 1 = false;
-
-		float EditSpeed = 1.0f;
+		bool bHasEditCondition : 1 = false;
 	};
 
 	struct ClassMetadata
@@ -90,6 +94,8 @@ namespace ke
 		}
 
 		const FieldMetadata& GetMetadata() const { return m_Metadata; }
+
+		bool CanEdit(void* pObject) const;
 
 	private:
 		ClassId m_TypeId{0};

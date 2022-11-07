@@ -39,8 +39,11 @@ namespace ke
 		reflected EFormat MeshPassBufferFormat = EFormat::R11G11B10_FLOAT;
 		reflected EFormat PrePassDepthBufferFormat = EFormat::D24_UNORM_S8_UINT;
 		
-		reflected kmeta(editspeed=0.01f) float Gamma = 1.0f;
-		reflected kmeta(editspeed=0.01f) float Exposure = 1.0f;
+		reflected kmeta(editspeed=0.01f, clampmin = 0.1f) 
+		float Gamma = 1.0f;
+		
+		reflected kmeta(editspeed=0.01f, clampmin = 0.1f) 
+		float Exposure = 1.0f;
 
 		WorldRenderer();
 		~WorldRenderer();

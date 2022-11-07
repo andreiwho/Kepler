@@ -292,7 +292,7 @@ namespace KEReflector
             }
         }
 
-        private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field)
+        private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field, ReflectedClass parentClass)
         {
             fileWriter.WriteLine($@"
         FieldMetadata {field.DisplayName}Metadata{{}};");
@@ -306,6 +306,12 @@ namespace KEReflector
                 if (specifier.Key == "hideindetails")
                 {
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "bHideInDetails", "true");
+                }
+
+                if(specifier.Key == "editcond")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bHasEditCondition", "true");
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "EditConditionAccessor", $"[](void* pObject) {{ return (({parentClass.Name}*)pObject)->{specifier.Value}; }};");
                 }
 
                 if (specifier.Key == "editspeed")
@@ -322,6 +328,16 @@ namespace KEReflector
                 {
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "bEnableDragDrop", "true");
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "FieldAssetType", $"EFieldAssetType::{specifier.Value}");
+                }
+
+                if(specifier.Key == "clampmin")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "ClampMin", specifier.Value);
+                }
+
+                if (specifier.Key == "clampmax")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "ClampMax", specifier.Value);
                 }
             }
 
@@ -345,7 +361,7 @@ namespace KEReflector
         {
             foreach (var field in entry.Fields)
             {
-                FillFieldMetadata(fileWriter, field);
+                FillFieldMetadata(fileWriter, field, entry);
 
                 string preChangeHandler = "";
                 string preChangeHandlerPtr = "";

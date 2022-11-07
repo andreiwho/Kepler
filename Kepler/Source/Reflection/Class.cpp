@@ -12,6 +12,15 @@ namespace ke
 		CHECK(setAccessor);
 	}
 
+	bool ReflectedField::CanEdit(void* pObject) const
+	{
+		if (!m_Metadata.bHasEditCondition && !m_Metadata.bReadOnly)
+		{
+			return true;
+		}
+		return m_Metadata.bHasEditCondition ? m_Metadata.EditConditionAccessor(pObject) : false;
+	}
+
 	void ReflectedClass::PushField(const String& name, ReflectedField&& field)
 	{
 		CHECK(!m_Fields.Contains(name));
