@@ -119,9 +119,9 @@ namespace ke
 			return MakeRef(ke::New<T>(type, pParent, unresolvedPath));
 		}
 
+		Array<RefPtr<AssetTreeNode>> m_Children{};
 	private:
 		AssetTreeNode* m_Parent{};
-		Array<RefPtr<AssetTreeNode>> m_Children{};
 		// A resolved asset path
 		String m_ResolvedPath;
 		// An unresolved asset path
@@ -138,6 +138,7 @@ namespace ke
 
 	class AssetTreeNode_Directory : public AssetTreeNode
 	{
+		friend class AssetManager;
 	public:
 		AssetTreeNode_Directory(EAssetNodeType type, AssetTreeNode* pParent, const String& unresolvedPath)
 			:	AssetTreeNode(type, pParent, unresolvedPath)
@@ -147,6 +148,18 @@ namespace ke
 		{
 			return AssetTreeNode::New<AssetTreeNode_Directory>(EAssetNodeType::Directory, pParent, unresolvedPath);
 		}
+
+		void AddDeletedItem(RefPtr<AssetTreeNode> pDeletedItem)
+		{
+			m_DeletedItems.AppendBack(pDeletedItem);
+		}
+
+		inline bool HasDeletedChildren() const { return !m_DeletedItems.IsEmpty(); }
+
+	private:
+		Array<RefPtr<AssetTreeNode>> m_DeletedItems{};
+
+		void FlushDeletedItems();
 	};
 
 	class AssetTreeNode_AssetMetadata : public AssetTreeNode

@@ -45,6 +45,12 @@ namespace ke
 		reflected kmeta(editspeed=0.01f, clampmin = 0.1f) 
 		float Exposure = 1.0f;
 
+		reflected kmeta(editspeed = 0.01f, clampmin = 0.1f)
+		float BloomThereshold = 1.0f;
+
+		reflected kmeta(editspeed = 0.01f, clampmin = 0.1f)
+		float BloomStrength = 10.0f;
+
 		WorldRenderer();
 		~WorldRenderer();
 		
@@ -114,6 +120,7 @@ namespace ke
 		void CollectRenderableViews();
 		void PrePass(RefPtr<ICommandListImmediate> pImmCtx);
 		void MeshPass(RefPtr<ICommandListImmediate> pImmCtx);
+		void PostProcessPass(RefPtr<ICommandListImmediate> pImmCtx);
 		void TonemappingAndFlushPass(RefPtr<ICommandListImmediate> pImmCtx);
 
 	private:
@@ -134,6 +141,8 @@ namespace ke
 		{
 			float Gamma{2.2f};
 			float Exposure{ 1.0f };
+			float BloomThereshold = 1.0f;
+			float BloomStrength = 10.0f;
 		};
 
 		struct RS_CameraBufferStruct

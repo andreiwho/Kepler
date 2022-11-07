@@ -3,6 +3,8 @@ cbuffer TRenderer : register(RS_Renderer)
 {
 	float Gamma;
 	float Exposure;
+	float BloomThereshold;
+	float BloomStrength;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -13,11 +15,13 @@ cbuffer TEntity : register(RS_User)
 	int EntityId;
 };
 
+//////////////////////////////////////////////////////////////////
 cbuffer TCamera : register(RS_Camera)
 {
 	float4x4 ViewProjection;
 };
 
+//////////////////////////////////////////////////////////////////
 cbuffer TLight : register(RS_Light)
 {
 	float4 Ambient;
@@ -26,11 +30,13 @@ cbuffer TLight : register(RS_Light)
 	float DirectionalLightIntensity;
 };
 
+//////////////////////////////////////////////////////////////////
 float3 CalculateAmbient()
 {
 	return Ambient.xyz;
 }
 
+//////////////////////////////////////////////////////////////////
 float3 CalculateDirection(float3 normal, float3 lightDir)
 {
 	// const float3 lightDir = mul(DirectionalLightDirection.xyz, TBN);
@@ -38,7 +44,14 @@ float3 CalculateDirection(float3 normal, float3 lightDir)
 	return diffuseImpact * DirectionalLightColor.xyz * DirectionalLightIntensity;
 }
 
+//////////////////////////////////////////////////////////////////
 float3 CalculateLighting(float3 normal, float3 lightDir)
 {
 	return CalculateAmbient() + CalculateDirection(normal, lightDir);
+}
+
+//////////////////////////////////////////////////////////////////
+float3 MakeFloat3(float scalar)
+{
+	return float3(scalar, scalar, scalar);
 }

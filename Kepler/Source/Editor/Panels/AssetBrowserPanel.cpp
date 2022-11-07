@@ -535,6 +535,7 @@ namespace ke
 					if (pAsset->GetName() != Engine::Get()->WorldAsset->GetName())
 					{
 						std::filesystem::remove(pAsset->GetPath_Resolved());
+						m_CurrentDirectory->AddDeletedItem(pAsset);
 						bAnyFilesRemoved = true;
 					}
 				}

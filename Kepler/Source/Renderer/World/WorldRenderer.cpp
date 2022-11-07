@@ -40,6 +40,8 @@ namespace ke
 			RefPtr<PipelineParamMapping> RS_RendererSetupParams = PipelineParamMapping::New();
 			RS_RendererSetupParams->AddParam("Gamma", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, Gamma), EShaderStageFlags::Pixel, EShaderInputType::Float);
 			RS_RendererSetupParams->AddParam("Exposure", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, Exposure), EShaderStageFlags::Pixel, EShaderInputType::Float);
+			RS_RendererSetupParams->AddParam("BloomThereshold", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, BloomThereshold), EShaderStageFlags::Pixel, EShaderInputType::Float);
+			RS_RendererSetupParams->AddParam("BloomStrength", OFFSET_PARAM_ARGS(RS_RendererSetupStruct, BloomStrength), EShaderStageFlags::Pixel, EShaderInputType::Float);
 			RS_RendererSetupBuffer = IParamBuffer::New(RS_RendererSetupParams);
 
 			// Setup pipeline
@@ -175,6 +177,8 @@ namespace ke
 	{
 		RS_RendererSetupBuffer->Write("Gamma", &Gamma);
 		RS_RendererSetupBuffer->Write("Exposure", &Exposure);
+		RS_RendererSetupBuffer->Write("BloomThereshold", &BloomThereshold);
+		RS_RendererSetupBuffer->Write("BloomStrength", &BloomStrength);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -315,6 +319,47 @@ namespace ke
 				}
 			}
 		);
+		pImmCtx->EndDebugEvent();
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	void WorldRenderer::PostProcessPass(RefPtr<ICommandListImmediate> pImmCtx)
+	{
+		pImmCtx->BeginDebugEvent("Post Process Pass");
+		// Main swap chain
+#ifdef ENABLE_EDITOR
+		auto pTargetGroup = RenderTargetRegistry::Get()->GetRenderTargetGroup(
+			"EditorViewport",
+			m_CurrentViewport.Width,
+			m_CurrentViewport.Height,
+			/*EFormat::R8G8B8A8_UNORM*/ MeshPassBufferFormat,
+			LowLevelRenderer::m_SwapChainFrameCount);
+
+		const u32 frameIndex = m_LLR->GetFrameIndex();
+		RefPtr<IRenderTarget2D> pCurRenderTarget = pTargetGroup->GetRenderTargetAtArrayLayer(frameIndex);
+		pImmCtx->StartDrawingToRenderTargets(pCurRenderTarget, nullptr);
+		pImmCtx->ClearRenderTarget(pCurRenderTarget, float4(0.1f, 0.1f, 0.1f, 1.0f));
+		pImmCtx->SetViewport(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height, 0.0f, 1.0f);
+		pImmCtx->SetScissor(0, 0, (float)m_CurrentViewport.Width, (float)m_CurrentViewport.Height);
+#else
+		auto SwapChain = m_LLR->GetSwapChain(0);
+		pImmCtx->StartDrawingToSwapChainImage(SwapChain);
+		pImmCtx->ClearSwapChainImage(SwapChain, { 0.1f, 0.1f, 0.1f, 1.0f });
+#endif
+		pImmCtx->BindVertexBuffers(m_LLR->m_ScreenQuad.VertexBuffer, 0, 0);
+		pImmCtx->BindIndexBuffer(m_LLR->m_ScreenQuad.IndexBuffer, 0);
+		pImmCtx->BindPipeline(m_LLR->m_ScreenQuad.Pipeline);
+
+		//Write quad sampler
+		auto pTarget = RenderTargetRegistry::Get()->GetRenderTargetGroup("MeshPassTarget");
+		CHECK(pTarget);
+		auto pSampler = pTarget->GetTextureSamplerAtArrayLayer(m_LLR->GetFrameIndex());
+
+		m_LLR->m_ScreenQuad.Samplers->Write("RenderTarget", pSampler);
+		// and
+
+		pImmCtx->BindSamplers(m_LLR->m_ScreenQuad.Samplers);
+		pImmCtx->DrawIndexed(m_LLR->m_ScreenQuad.IndexBuffer->GetCount(), 0, 0);
 		pImmCtx->EndDebugEvent();
 	}
 
