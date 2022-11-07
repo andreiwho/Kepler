@@ -21,7 +21,7 @@ namespace ke
 	// This is a subject to change
 	reflected class TWorld : public EnableRefPtrFromThis<TWorld>
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		TWorld() = default;
 

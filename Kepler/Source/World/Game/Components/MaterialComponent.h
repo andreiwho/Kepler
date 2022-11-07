@@ -9,7 +9,7 @@ namespace ke
 	reflected kmeta(hideindetails)
 	class MaterialComponent : public EntityComponent
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		MaterialComponent() = default;
 		MaterialComponent(RefPtr<TMaterial> InMaterial);

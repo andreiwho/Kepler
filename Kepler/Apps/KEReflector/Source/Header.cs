@@ -172,7 +172,7 @@ namespace KEReflector
                             currentStage = EParseStage.ParseType;
                             continue;
                         }
-                        else if(token == "reflection_info")
+                        else if(token == "reflected_body")
                         {
                             if (currentToken != null)
                             {

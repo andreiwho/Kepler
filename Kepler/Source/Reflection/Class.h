@@ -171,4 +171,4 @@ namespace ke
 
 #define REFL_PASTE_2(a,b,c) a##b##c
 #define REFL_PASTE_UNIQUE(a, b, c) REFL_PASTE_2(a,b,c)
-#define reflection_info() REFL_PASTE_UNIQUE(FILEID,__LINE__,REFL);
+#define reflected_body() REFL_PASTE_UNIQUE(FILEID,__LINE__,REFL);

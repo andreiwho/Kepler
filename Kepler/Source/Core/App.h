@@ -37,7 +37,7 @@ namespace ke
 
 	reflected class TestMovementComponent : public NativeScriptComponent
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		TestMovementComponent();
 
@@ -75,7 +75,7 @@ namespace ke
 	// --------------------------------------------
 	reflected class Engine : public IPlatformEventListener
 	{
-		reflection_info();
+		reflected_body();
 		static Engine* Instance;
 	public:
 		Engine()

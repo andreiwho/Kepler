@@ -9,7 +9,7 @@ namespace ke
 {
 	reflected class StaticMeshComponent : public EntityComponent
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		StaticMeshComponent() = default;
 		StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh);

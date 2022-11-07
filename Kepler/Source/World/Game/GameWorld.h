@@ -33,7 +33,7 @@ namespace ke
 
 	reflected class GameWorld : public TWorld
 	{
-		reflection_info();
+		reflected_body();
 		friend class NativeComponentContainer;
 	public:
 		GameWorld() = default;

@@ -12,7 +12,7 @@ namespace ke
 	reflected kmeta(hideindetails)
 	struct TIdComponent : public EntityComponent
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		reflected UUID Id;
 	};
@@ -20,7 +20,7 @@ namespace ke
 	reflected kmeta(hideindetails)
 	struct TNameComponent : public EntityComponent
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		reflected String Name;
 	};

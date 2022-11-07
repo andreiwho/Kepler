@@ -8,7 +8,7 @@ namespace ke
 
 	reflected class EntityComponent : public Object
 	{
-		reflection_info();
+		reflected_body();
 	public:
 		virtual ~EntityComponent() = default;
 

@@ -6,6 +6,6 @@ namespace ke
 {
 	reflected class Object : public ObjectBase
 	{
-		reflection_info();
+		reflected_body();
 	};
 }
