@@ -51,7 +51,8 @@ float3 CalculateLighting(float3 normal, float3 lightDir)
 }
 
 //////////////////////////////////////////////////////////////////
-float3 MakeFloat3(float scalar)
-{
-	return float3(scalar, scalar, scalar);
-}
+float3 MakeFloat4(float scalar) { return float4(scalar, scalar, scalar, scalar); }
+//////////////////////////////////////////////////////////////////
+float3 MakeFloat3(float scalar) { return float3(scalar, scalar, scalar); }
+//////////////////////////////////////////////////////////////////
+float3 MakeFloat2(float scalar) { return float2(scalar, scalar); }
