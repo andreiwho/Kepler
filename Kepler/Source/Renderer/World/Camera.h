@@ -13,6 +13,7 @@ namespace ke
 
 	reflected class MathCamera
 	{
+		reflection_info();
 	public:
 		MathCamera() = default;
 		MathCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());

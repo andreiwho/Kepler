@@ -15,6 +15,8 @@ namespace KEReflector
         public List<ReflectedField> Fields { get; set; }
         public Dictionary<string, int> EnumValues { get; set; } = new();
         public Dictionary<string, string> MetadataSpecifiers { get; set; } = new();
+        public int ReflLine { get; set; } = 0;
+
 
         public ReflectedClass(string name, string parent)
         {

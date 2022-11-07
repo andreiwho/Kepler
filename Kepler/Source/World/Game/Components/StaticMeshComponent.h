@@ -9,6 +9,7 @@ namespace ke
 {
 	reflected class StaticMeshComponent : public EntityComponent
 	{
+		reflection_info();
 	public:
 		StaticMeshComponent() = default;
 		StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh);
@@ -23,10 +24,10 @@ namespace ke
 
 		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
 
-		reflected kmeta(assettype = StaticMesh, set=Asset_Set, get=Asset_Get)
+		reflected kmeta(assettype = StaticMesh, set=Asset_Set) 
 		AssetTreeNode* Asset {nullptr};
 		void Asset_Set(AssetTreeNode* pAsset);
-		AssetTreeNode* Asset_Get() const { return Asset; }
+
 	private:
 		RefPtr<StaticMesh> m_StaticMesh{};
 	};

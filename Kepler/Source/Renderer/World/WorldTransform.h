@@ -6,6 +6,7 @@ namespace ke
 {
 	reflected class WorldTransform
 	{
+		reflection_info();
 	public:
 		WorldTransform() = default;
 		WorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));

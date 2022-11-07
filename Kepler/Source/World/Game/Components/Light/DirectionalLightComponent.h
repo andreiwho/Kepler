@@ -7,6 +7,7 @@ namespace ke
 {
 	reflected class DirectionalLightComponent : public EntityComponent
 	{
+		reflection_info();
 	public:
 		inline float3 GetColor() const { return Color; }
 		inline float GetIntensity() const { return Intensity; }

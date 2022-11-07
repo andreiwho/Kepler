@@ -1,5 +1,8 @@
 #pragma once
-#include "Core/Core.h"
+#include "Core/Types.h"
+#include "Core/Macros.h"
+#include "Core/Containers/DynArray.h"
+#include "Core/Containers/ChaosMap.h"
 #include <entt/entity/entity.hpp>
 #include <entt/entity/registry.hpp>
 
@@ -165,3 +168,7 @@ namespace ke
 		Map<i32, String> m_EnumValues;
 	};
 }
+
+#define REFL_PASTE_2(a,b,c) a##b##c
+#define REFL_PASTE_UNIQUE(a, b, c) REFL_PASTE_2(a,b,c)
+#define reflection_info() REFL_PASTE_UNIQUE(FILEID,__LINE__,REFL);

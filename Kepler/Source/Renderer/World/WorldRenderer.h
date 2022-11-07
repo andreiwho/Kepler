@@ -31,6 +31,7 @@ namespace ke
 
 	reflected class WorldRenderer : public IntrusiveRefCounted
 	{
+		reflection_info();
 		static WorldRenderer* Instance;
 	public:
 		static WorldRenderer* Get() { return Instance; }

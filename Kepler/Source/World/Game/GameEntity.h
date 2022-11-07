@@ -12,12 +12,16 @@ namespace ke
 	reflected kmeta(hideindetails)
 	struct TIdComponent : public EntityComponent
 	{
+		reflection_info();
+	public:
 		reflected UUID Id;
 	};
 
 	reflected kmeta(hideindetails)
 	struct TNameComponent : public EntityComponent
 	{
+		reflection_info();
+	public:
 		reflected String Name;
 	};
 

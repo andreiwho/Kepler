@@ -46,5 +46,6 @@ namespace ke
 	reflected kmeta(hideindetails)
 	class NativeScriptComponent : public EntityComponent
 	{
+		reflection_info();
 	};
 }

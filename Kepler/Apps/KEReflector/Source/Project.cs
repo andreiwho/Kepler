@@ -75,9 +75,48 @@ namespace KEReflector
             _sourceDb.FlushDatabase();
         }
 
+        void WriteGeneratedClassBody(ParsedHeader header, ref StreamWriter fileWriter)
+        {
+            string fileId = Path.GetRelativePath(ProjectDirectory, header.Path);
+            fileId = fileId.Replace('\\', '_');
+            fileId = fileId.Replace('.', '_');
+            fileId = "FILEID" + fileId.Replace('/', '_');
+            
+            fileWriter.WriteLine($"#undef FILEID");
+            fileWriter.WriteLine($"#define FILEID {fileId}");
+
+            foreach(var cls in header.Classes)
+            {
+                if(cls.Value.bIsEnum)
+                {
+                    continue;
+                }
+                
+                if(cls.Value.ReflLine == -1 && !cls.Value.bIsEnum)
+                {
+                    Console.WriteLine("################# ERROR ######################");
+                    Console.WriteLine($"Class {cls.Key} must have reflected_info() call in it.");
+                    Console.WriteLine("##############################################");
+                }
+                
+                fileWriter.WriteLine($"#define {fileId}{cls.Value.ReflLine}REFL using Self = {cls.Value.Name};\\");
+                if(cls.Value.Parent != null)
+                {
+                    fileWriter.WriteLine($"using Base = {cls.Value.Parent};\\");
+                }
+                fileWriter.WriteLine($"friend class R{cls.Value.Name};\\");
+                fileWriter.WriteLine("public:\\");
+                fileWriter.WriteLine($"static ReflectedClass* GetStaticClass() {{ return R{cls.Value.Name}::Get(); }}\\");
+                fileWriter.WriteLine($"inline ReflectedClass* GetClass() const {{ return R{cls.Value.Name}::Get(); }}\\");
+                fileWriter.WriteLine("private:");
+            }
+        }
+
         void WriteHeaderFileCode(ParsedHeader header)
         {
             var fileName = Path.GetFileNameWithoutExtension(header.Path);
+            
+
             var generatedHeaderPath = $"{_generatedDirectory}/{fileName}.gen.h";
             StreamWriter fileWriter;
             if (!File.Exists(generatedHeaderPath))
@@ -92,6 +131,7 @@ namespace KEReflector
             if (fileWriter != null)
             {
                 fileWriter.WriteLine("#pragma once");
+                WriteGeneratedClassBody(header, ref fileWriter);
                 fileWriter.WriteLine("#include \"Reflection/Class.h\"\n");
                 fileWriter.WriteLine("namespace ke");
                 fileWriter.WriteLine("{");
@@ -113,8 +153,10 @@ namespace KEReflector
     // class {entry.Name};
     class R{entry.Name} : public {reflectedParent}
     {{
+        static R{entry.Name}* Instance;
     public:
         R{entry.Name}();
+        static R{entry.Name}* Get() {{ return Instance; }}
         virtual String GetName() const override {{ return ""{entry.Name}""; }}
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
@@ -185,9 +227,11 @@ namespace KEReflector
                     else
                     {
                         fileWriter.WriteLine("namespace ke\n{");
+                        fileWriter.WriteLine($"\tR{entry.Name}* R{entry.Name}::Instance = nullptr;");
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
 
                         // Recursive parent fields
+                        fileWriter.WriteLine($"\t\tInstance = this;");
                         fileWriter.WriteLine($"\t\tm_ClassId = ClassId(\"{entry.Name}\");");
 
                         FillClassMetadata(fileWriter, entry);
@@ -233,7 +277,6 @@ namespace KEReflector
         private void WriteMetadataSpecifier(StreamWriter fileWriter, string objName, string specifier, string value)
         {
             fileWriter.WriteLine($"\t\t{objName}Metadata.{specifier} = {value};");
-
         }
 
         private void FillClassMetadata(StreamWriter fileWriter, ReflectedClass reflectedClass)
