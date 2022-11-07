@@ -494,7 +494,11 @@ namespace ke
 
 	void TAssetBrowserPanel::Draw()
 	{
-		if (ImGui::Begin("Asset Browser"))
+		if (!ImGui::Begin("Asset Browser"))
+		{
+			ImGui::End();
+		}
+		else
 		{
 			DrawContents();
 			ImGui::End();

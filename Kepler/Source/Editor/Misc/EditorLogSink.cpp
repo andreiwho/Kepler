@@ -3,7 +3,6 @@
 
 namespace ke
 {
-	
 	void TEditorLogSink::sink_it_(const spdlog::details::log_msg& msg)
 	{
 		if (!HasLogReceiver())

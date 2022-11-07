@@ -4,6 +4,10 @@
 #include <cassert>
 #include "Editor/Misc/EditorLogSink.h"
 
+#ifdef WIN32
+# include <spdlog/sinks/msvc_sink.h>
+#endif
+
 namespace ke
 {
 	TLog* TLog::Instance = nullptr;
@@ -40,6 +44,9 @@ namespace ke
 		m_Loggers[name] = pLogger;
 #ifdef ENABLE_EDITOR
 		pLogger->sinks().push_back(m_EditorSink);
+#endif
+#ifdef WIN32
+		pLogger->sinks().push_back(std::make_shared<spdlog::sinks::msvc_sink_mt>());
 #endif
  		return ApplyDefaultLoggerConfig(pLogger, level);
 	}
