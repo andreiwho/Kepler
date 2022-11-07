@@ -312,6 +312,7 @@ namespace KEReflector
                     preChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["prechange"]}(({field.Type}*)pValue);";
                 }
 
+
                 string postChangeHandler = "";
                 string postChangeHandlerPtr = "";
                 if(field.MetadataSpecifiers.ContainsKey("postchange"))
@@ -320,29 +321,45 @@ namespace KEReflector
                     postChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["postchange"]}(({field.Type}*)pValue);";
                 }
 
-                if (field.bIsRefPtr)
+                if (field.bIsPointer)
                 {
+                    string getString = $"return (void*)(({entry.Name}*)pHandler)->{field.Name}";
+                    if (field.MetadataSpecifiers.ContainsKey("get"))
+                    {
+                        getString = $"return (void*)(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["get"]}()";
+                    }
+
+                    string setString = $"(({entry.Name}*)pHandler)->{field.Name} = ({field.Type}*)pValue";
+                    if(field.MetadataSpecifiers.ContainsKey("set"))
+                    {
+                        setString = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["set"]}(({field.Type}*)pValue)";
+                    }
+                    
                     fileWriter.WriteLine($@"
         PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
             {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}.Raw(); }},
-            [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
-                }
-                else if (field.bIsPointer)
-                {
-                    fileWriter.WriteLine($@"
-        PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
-            {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ {preChangeHandlerPtr} (({entry.Name}*)pHandler)->{field.Name} = ({field.Type}*)pValue; {postChangeHandlerPtr} }}}});");
+            [](void* pHandler) {{ {getString}; }},
+            [](void* pHandler, void* pValue) {{ {preChangeHandlerPtr} {setString}; {postChangeHandlerPtr} }}}});");
                 }
                 else
                 {
+                    string getString = $"return (void*)&(({entry.Name}*)pHandler)->{field.Name}";
+                    if (field.MetadataSpecifiers.ContainsKey("get"))
+                    {
+                        getString = $"return (void*)(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["get"]}()";
+                    }
+
+                    string setString = $"(({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue";
+                    if (field.MetadataSpecifiers.ContainsKey("set"))
+                    {
+                        setString = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["set"]}(*({field.Type}*)pValue)";
+                    }
+
                     fileWriter.WriteLine($@"
         PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
             {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ {preChangeHandler} (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; {postChangeHandler} }}}});");
+            [](void* pHandler) {{ {getString}; }},
+            [](void* pHandler, void* pValue) {{ {preChangeHandler} {setString}; {postChangeHandler} }}}});");
                 }
             }
 

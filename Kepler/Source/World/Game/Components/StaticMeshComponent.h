@@ -23,13 +23,10 @@ namespace ke
 
 		void SetStaticMesh(RefPtr<StaticMesh> NewMesh);
 
-		String StaticMeshPath{};
-		void StaticMeshPathChanged(const String& newPath);
-
-		reflected kmeta(postchange = OnMeshAssetChanged, assettype=StaticMesh)
+		reflected kmeta(assettype = StaticMesh, set=Asset_Set, get=Asset_Get)
 		AssetTreeNode* Asset {nullptr};
-		void OnMeshAssetChanged(AssetTreeNode* pAsset);
-
+		void Asset_Set(AssetTreeNode* pAsset);
+		AssetTreeNode* Asset_Get() const { return Asset; }
 	private:
 		RefPtr<StaticMesh> m_StaticMesh{};
 	};

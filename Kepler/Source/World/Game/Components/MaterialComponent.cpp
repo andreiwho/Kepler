@@ -13,30 +13,24 @@ namespace ke
 	void MaterialComponent::SetMaterial(RefPtr<TMaterial> InMaterial)
 	{
 		Material = InMaterial;
-		MaterialAssetPath = Material->GetParentAssetPath();
-
 		if (!Asset)
 		{
-			Asset = Await(AssetManager::Get()->FindAssetNode(MaterialAssetPath));
+			Asset = Await(AssetManager::Get()->FindAssetNode(Material->GetParentAssetPath()));
 		}
 	}
 
-	void MaterialComponent::OnMaterialPathChanged(const String& newPath)
+	void MaterialComponent::Set_Asset(AssetTreeNode* pAsset)
 	{
-		if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(MaterialAssetPath))
+		if (pAsset == Asset || !pAsset)
+		{
+			return;
+		}
+
+		if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pAsset->GetPath()))
 		{
 			Material = pMaterial;
 		}
-	}
-
-	void MaterialComponent::OnMaterialAssetChanged(AssetTreeNode* newAsset)
-	{
-		if (newAsset)
-		{
-			MaterialAssetPath = newAsset->GetPath();
-			OnMaterialPathChanged(MaterialAssetPath);
-		}
-
+		Asset = pAsset;
 	}
 
 }

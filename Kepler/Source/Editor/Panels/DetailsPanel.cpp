@@ -204,16 +204,6 @@ namespace ke
 							TEditorElements::DrawReflectedField(name, field, pMaterialComponent);
 						}
 					}
-
-					TEditorElements::NextFieldRow("Reload");
-					if (ImGui::Button("Reload Material"))
-					{
-						if (auto pMaterial = TMaterialLoader::Get()->LoadMaterial(pMaterialComponent->MaterialAssetPath, true))
-						{
-							pMaterialComponent->SetMaterial(pMaterial);
-						}
-					}
-
 					TEditorElements::EndFieldTable();
 				}
 			}
