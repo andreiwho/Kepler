@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project("KE1" CXX CSharp)
 
 include(Kepler/CMake/Build.cmake)
