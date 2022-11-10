@@ -33,6 +33,7 @@ namespace ke
 				fs::path incPath = parentPath / pFileName;
 				if (fs::exists(incPath))
 				{
+					std::scoped_lock lck{ m_Mutex };
 					String includedPath = incPath.string();
 					if (m_LoadedShaders.Contains(includedPath))
 					{
@@ -51,6 +52,7 @@ namespace ke
 				String includedPath = VFSResolvePath("EngineShaders://"s + pFileName);
 				if (fs::exists(includedPath))
 				{
+					std::scoped_lock lck{ m_Mutex };
 					if (m_LoadedShaders.Contains(includedPath))
 					{
 						GetBufferPointer(includedPath, ppData, pBytes);
@@ -103,7 +105,8 @@ namespace ke
 			return nullptr;
 		}
 
-		const auto Stages = TypeMask.Separate();
+		EShaderStageFlags StageMask = ParseShaderStageFlags(Source);
+		const auto Stages = StageMask.Separate();
 		Array<std::future<ShaderModule>> ModuleFutures;
 		IncludeInterface* pInclude = New<IncludeInterface>(Path);
 		for (const EShaderStageFlags::Type Stage : Stages)
@@ -233,6 +236,24 @@ namespace ke
 	String THLSLShaderCompilerD3D11::MakeBufferSlotString(i32 index)
 	{
 		return fmt::format("b{}", index);
+	}
+
+	EShaderStageFlags THLSLShaderCompilerD3D11::ParseShaderStageFlags(const String& shaderSource)
+	{
+		EShaderStageFlags outFlags{};
+		if (shaderSource.find("VSMain") != String::npos)
+		{
+			outFlags.Mask |= EShaderStageFlags::Vertex;
+		}
+		if (shaderSource.find("PSMain") != String::npos)
+		{
+			outFlags.Mask |= EShaderStageFlags::Pixel;
+		}
+		if (shaderSource.find("CSMain") != String::npos)
+		{
+			outFlags.Mask |= EShaderStageFlags::Compute;
+		}
+		return outFlags;
 	}
 
 }

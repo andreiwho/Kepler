@@ -105,12 +105,13 @@ namespace ke
 	struct EShaderStageFlags
 	{
 		enum Type {
+			None = 0,
 			Vertex = BIT(0),
 			Pixel = BIT(1),
 			Compute = BIT(2),
 		};
 
-		u32 Mask{};
+		u32 Mask{None};
 
 		EShaderStageFlags() = default;
 		EShaderStageFlags(u32 InMask) : Mask(InMask) {}

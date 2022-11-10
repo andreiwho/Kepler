@@ -15,5 +15,6 @@ namespace ke
 		static ShaderModule CreateShaderModule(const String& SourceName, EShaderStageFlags::Type Flags, const String& Source, ID3DInclude* pInclude);
 		static RefPtr<IAsyncDataBlob> CompileHLSLCode(const String& SourceName, const String& EntryPoint, EShaderStageFlags::Type Type, const String& Code, ID3DInclude* pInclude);
 		static String MakeBufferSlotString(i32 index);
+		EShaderStageFlags ParseShaderStageFlags(const String& shaderSource);
 	};
 }
