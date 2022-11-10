@@ -10,7 +10,7 @@ namespace ke
 		ISwapChain(class TWindow* pWindow);
 		virtual ~ISwapChain() = default;
 
-		virtual void Present() = 0;
+		virtual void Present(bool bWaitForVerticalBlank) = 0;
 		virtual void Resize(i32 width, i32 height) = 0;
 		
 		inline TWindow* GetAssociatedWindow() const { return m_Window; }

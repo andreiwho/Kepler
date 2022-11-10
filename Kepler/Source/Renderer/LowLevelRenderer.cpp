@@ -65,7 +65,7 @@ namespace ke
 			{
 				for (const auto& swapChain : m_SwapChains)
 				{
-					swapChain->Present();
+					swapChain->Present(bEnableVSync);
 				}
 
 				if (++m_FrameCounter % m_FlushPendingDeleteResourcesInterval == 0)

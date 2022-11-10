@@ -27,7 +27,7 @@ namespace ke
 		Desc.Scaling = DXGI_SCALING_STRETCH;
 		Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		Desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		Desc.Flags = 0;
+		Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
@@ -75,7 +75,7 @@ namespace ke
 		SAFE_RELEASE(Buffer);
 	}
 
-	void TSwapChainD3D11::Present()
+	void TSwapChainD3D11::Present(bool bWaitForVerticalBlank)
 	{
 		KEPLER_PROFILE_SCOPE();
 		CHECK(IsRenderThread());
@@ -84,7 +84,7 @@ namespace ke
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		CHECK(Device);
 		Device->Internal_InitInfoMessageStartIndex_Debug();
-		const HRESULT Result = SwapChain->Present(1, 0);
+		const HRESULT Result = SwapChain->Present(bWaitForVerticalBlank ? 1 : 0, bWaitForVerticalBlank ? 0 : DXGI_PRESENT_ALLOW_TEARING);
 		if (FAILED(Result))
 		{
 			auto Messages = Device->GetInfoQueueMessages();
@@ -112,7 +112,7 @@ namespace ke
 		
 		m_Width = InWidth > 0 ? InWidth : 1;
 		m_Height = InHeight > 0 ? InHeight : 1;
-		HRCHECK(SwapChain->ResizeBuffers(m_ImageCount, (UINT)m_Width, (UINT)m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		HRCHECK(SwapChain->ResizeBuffers(m_ImageCount, (UINT)m_Width, (UINT)m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING));
 		CreateRenderTargets();
 	}
 }

@@ -8,10 +8,11 @@
 #include "Pipelines/GraphicsPipeline.h"
 #include "World/StaticMesh.h"
 #include "Subrenderer/Subrenderer.h"
+#include "LowLevelRenderer.gen.h"
 
 namespace ke
 {
-	class LowLevelRenderer : public IntrusiveRefCounted
+	reflected class LowLevelRenderer : public IntrusiveRefCounted
 	{
 		static LowLevelRenderer* Instance;
 
@@ -35,6 +36,9 @@ namespace ke
 		}
 
 		static LowLevelRenderer* Get() { return Instance; }
+
+		reflected bool bEnableVSync = false;
+
 	public:
 		inline RefPtr<TRenderDevice> GetRenderDevice() const { return m_RenderDevice; }
 

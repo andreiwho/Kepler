@@ -16,7 +16,7 @@ namespace ke
 		void CreateRenderTargets();
 
 	protected:
-		void Present() override;
+		void Present(bool bWaitForVerticalBlank) override;
 		void Resize(i32 Width, i32 Heigt) override;
 
 	private:

@@ -200,6 +200,12 @@ namespace ke
 			{
 				TEditorElements::DrawReflectedObjectFields("RENDERER", pRendererClass->GetClassId(), WorldRenderer::Get());
 			}
+
+			auto pLLRClass = GetReflectedClass<LowLevelRenderer>();
+			if (pLLRClass)
+			{
+				TEditorElements::DrawReflectedObjectFields("LLR", pLLRClass->GetClassId(), LowLevelRenderer::Get());
+			}
 			ImGui::End();
 		}
 
