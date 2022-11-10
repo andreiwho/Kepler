@@ -10,6 +10,7 @@
 #include "RenderTargetD3D11.h"
 #include "ImageD3D11.h"
 #include "TextureD3D11.h"
+#include "../Elements/Texture.h"
 
 namespace ke
 {
@@ -561,6 +562,12 @@ namespace ke
 		CHECK(IsRenderThread());
 		RefPtr<TImage2D_D3D11> MyImage = RefCast<TImage2D_D3D11>(Image);
 		Context->Unmap(MyImage->GetReadbackImage(), 0);
+	}
+
+	void GraphicsCommandListImmediateD3D11::GenerateMipmaps(RefPtr<ITextureSampler2D> pImage)
+	{
+		CHECK(IsRenderThread());
+		Context->GenerateMips((ID3D11ShaderResourceView*)pImage->GetNativeHandle());
 	}
 
 	void* GraphicsCommandListImmediateD3D11::MapParamBuffer_NextFrame(RefPtr<TParamBufferD3D11> buffer)

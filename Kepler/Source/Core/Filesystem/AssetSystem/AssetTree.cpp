@@ -172,6 +172,10 @@ namespace ke
 		{
 			m_AssetType = EFieldAssetType::Material;
 		}
+		else if (m_Extension == ".png")
+		{
+			m_AssetType = EFieldAssetType::Texture;
+		}
 	}
 
 	void AssetTreeNode::SortChildren(EAssetSortFilter filter)

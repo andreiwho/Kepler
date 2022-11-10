@@ -15,6 +15,7 @@ namespace ke
 		Map,
 		Material,
 		Shader,
+		Texture,
 		StaticMesh
 	};
 

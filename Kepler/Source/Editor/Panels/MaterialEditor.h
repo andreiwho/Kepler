@@ -13,9 +13,16 @@ namespace ke
 	reflected struct SamplerReference
 	{
 		reflected_body();
+	public:
+		ITextureSampler2D* GetTextureSampler() { return pSampler.Raw(); }
+		AssetTreeNode* GetAssetNode() { return SamplerAsset; }
+
 	private:
-		reflected kmeta(AssetType=Texture)
+		reflected kmeta(AssetType=Texture, set=Set_SamplerAsset)
 		AssetTreeNode* SamplerAsset = nullptr;
+		void Set_SamplerAsset(AssetTreeNode* pAsset);
+
+		RefPtr<ITextureSampler2D> pSampler = nullptr;
 	};
 
 	reflected struct MaterialTemplate
@@ -26,6 +33,8 @@ namespace ke
 
 		const Map<String, PipelineParam>& GetParams() const { return m_Params; }
 		void* GetParamAddress(const String& param);
+
+		SamplerReference* GetSamplerAt(const String& name);
 
 	private:
 		reflected kmeta(assettype=Shader, set=Shader_Set)
@@ -47,6 +56,9 @@ namespace ke
 		inline void Open() { m_bIsOpened = true; }
 		void Draw();
 
+
+		void DrawMaterialSampler(const String& name, SamplerReference* pReference);
+
 	private:
 		void TemplateShaderUpdated(RefPtr<IShader> pShader);
 
@@ -55,5 +67,7 @@ namespace ke
 		MaterialTemplate m_Template{};
 
 		RefPtr<IShader> m_Shader;
+
+		RefPtr<ITextureSampler2D> m_EmptySamplerIcon;
 	};
 }

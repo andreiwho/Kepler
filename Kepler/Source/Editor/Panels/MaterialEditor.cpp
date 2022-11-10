@@ -5,6 +5,8 @@
 #include "Renderer/HLSLShaderCompiler.h"
 #include "Renderer/Elements/ShaderReflection.h"
 #include "Renderer/Pipelines/ParamPack.h"
+#include "Tools/ImageLoader.h"
+#include "Renderer/Elements/Texture.h"
 
 namespace ke
 {
@@ -13,6 +15,8 @@ namespace ke
 	MaterialEditor::MaterialEditor()
 	{
 		m_Template.OnShaderUpdated.Bind(this, &MaterialEditor::TemplateShaderUpdated);
+
+		m_EmptySamplerIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_EmptySampler.png");
 	}
 
 
@@ -43,10 +47,6 @@ namespace ke
 			}
 		}
 
-		void DrawMaterialSampler(const String& name)
-		{
-
-		}
 	}
 
 
@@ -91,7 +91,43 @@ namespace ke
 				}
 			}
 
+			if (TEditorElements::Container("Samplers"))
+			{
+				if (TEditorElements::BeginFieldTable("samplers", 2))
+				{
+					if (auto pReflection = m_Shader->GetReflection())
+					{
+						if (auto pParams = pReflection->ParamMapping)
+						{
+							for (auto& [name, slot] : pParams->GetSamplers())
+							{
+								TEditorElements::NextFieldRow(name.c_str());
+								DrawMaterialSampler(name, m_Template.GetSamplerAt(name));
+							}
+						}
+					}
+					TEditorElements::EndFieldTable();
+				}
+			}
+
 			ImGui::End();
+		}
+	}
+
+	void MaterialEditor::DrawMaterialSampler(const String& name, SamplerReference* pReference)
+	{
+		if (!pReference)
+		{
+			return;
+		}
+
+		if (auto pSampler = pReference->GetTextureSampler())
+		{
+			ImGui::Image((ImTextureID)pSampler->GetNativeHandle(), ImVec2(64, 64));
+		}
+		else
+		{
+			ImGui::Image((ImTextureID)m_EmptySamplerIcon->GetNativeHandle(), ImVec2(64, 64));
 		}
 	}
 
@@ -105,6 +141,11 @@ namespace ke
 		CHECK(m_Params.Contains(param));
 		auto& foundParam = m_Params[param];
 		return m_DataStorage.GetData() + foundParam.GetOffset();
+	}
+
+	SamplerReference* MaterialTemplate::GetSamplerAt(const String& name)
+	{
+		return &m_Samplers[name];
 	}
 
 	void MaterialTemplate::Shader_Set(AssetTreeNode* pShader)
@@ -159,4 +200,14 @@ namespace ke
 		}
 	}
 
+	void SamplerReference::Set_SamplerAsset(AssetTreeNode* pAsset)
+	{
+		if (pAsset)
+		{
+			SamplerAsset = pAsset;
+			const String& assetPath = pAsset->GetPath();
+			pSampler = TImageLoader::Get()->LoadSamplerCached(assetPath);
+		}
+
+	}
 }

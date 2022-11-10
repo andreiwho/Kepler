@@ -54,6 +54,7 @@ namespace ke
 
 		virtual void* MapImage2D(RefPtr<IImage2D> Image, usize& OutAlignment) override;
 		virtual void UnmapImage2D(RefPtr<IImage2D> Image) override;
+		virtual void GenerateMipmaps(RefPtr<ITextureSampler2D> pImage) override;
 
 		// Bindings for the d3d11 buffers
 		void* MapParamBuffer_NextFrame(RefPtr<TParamBufferD3D11> Buffer);

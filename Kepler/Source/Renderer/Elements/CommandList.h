@@ -16,6 +16,7 @@ namespace ke
 	class ISwapChain;
 	class IRenderTarget2D;
 	class IDepthStencilTarget2D;
+	class ITextureSampler2D;
 
 	class IGfxCommandList : public EnableRefPtrFromThis<IGfxCommandList>
 	{
@@ -88,5 +89,7 @@ namespace ke
 		virtual void Transfer(RefPtr<ITransferBuffer> pFrom, RefPtr<IBuffer> pTo, usize dstOffset, usize srcOffset, usize size) = 0;
 
 		virtual void Transfer(RefPtr<IImage2D> pInto, usize x, usize y, usize width, usize height, RefPtr<IAsyncDataBlob> pData) = 0;
+
+		virtual void GenerateMipmaps(RefPtr<ITextureSampler2D> pImage) = 0;
 	};
 }
