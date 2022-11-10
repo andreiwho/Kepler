@@ -58,6 +58,7 @@ namespace ke
 		RefPtr<ITextureSampler2D> m_MapIcon;
 		RefPtr<ITextureSampler2D> m_MaterialIcon;
 		RefPtr<ITextureSampler2D> m_StaticMeshIcon;
+		RefPtr<ITextureSampler2D> m_ShaderIcon;
 		RefPtr<ITextureSampler2D> m_UnknownIcon;
 
 		// Nav

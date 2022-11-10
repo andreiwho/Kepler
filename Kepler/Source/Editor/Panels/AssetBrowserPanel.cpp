@@ -24,6 +24,7 @@ namespace ke
 		m_MapIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Map.png");
 		m_MaterialIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Material.png");
 		m_StaticMeshIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_StaticMesh.png");
+		m_ShaderIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Shader.png");
 		m_UnknownIcon = TImageLoader::Get()->LoadSamplerCached("Engine://Editor/Icons/Icon_Unknown.png");
 
 		// Navigation
@@ -433,6 +434,9 @@ namespace ke
 							break;
 						case EFieldAssetType::StaticMesh:
 							DrawAsset(view, itemIndex, m_StaticMeshIcon);
+							break;
+						case EFieldAssetType::Shader:
+							DrawAsset(view, itemIndex, m_ShaderIcon);
 							break;
 						case EFieldAssetType::All:
 						case EFieldAssetType::None:

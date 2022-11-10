@@ -26,6 +26,7 @@ namespace ke
 		usize m_Offset{};
 		usize m_Size{};
 		EShaderInputType m_Type{ EShaderInputType::Custom };
+		EShaderInputType m_DisplayType{ EShaderInputType::Custom };
 	};
 
 	//////////////////////////////////////////////////////////////////////////

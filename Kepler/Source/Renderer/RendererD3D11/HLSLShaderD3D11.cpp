@@ -181,7 +181,15 @@ namespace ke
 			break;
 			case D3D_SHADER_VARIABLE_CLASS::D3D10_SVC_VECTOR:
 			{
-				// TODO: Do we nead other vector types
+				switch (Desc.Columns)
+				{
+				case 2:
+					return EShaderInputType::Float2;
+				case 3:
+					return EShaderInputType::Float3;
+				case 4:
+					return EShaderInputType::Float4;
+				}
 				return EShaderInputType::Float4;
 			}
 			case D3D_SHADER_VARIABLE_CLASS::D3D10_SVC_SCALAR:

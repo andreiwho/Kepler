@@ -156,7 +156,10 @@ namespace ke
 		{
 			m_Extension = path.extension().string();
 		}
-
+		if (m_Extension == ".hlsl")
+		{
+			m_AssetType = EFieldAssetType::Shader;
+		}
 		if (m_Extension == ".fbx")
 		{
 			m_AssetType = EFieldAssetType::StaticMesh;

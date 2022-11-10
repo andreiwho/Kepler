@@ -208,6 +208,9 @@ namespace ke
 				case EFieldAssetType::Map:
 					assetType = "MAP";
 					break;
+				case EFieldAssetType::Shader:
+					assetType = "SHADER";
+					break;
 				case EFieldAssetType::None:
 				default:
 					ImGui::EndDragDropTarget();

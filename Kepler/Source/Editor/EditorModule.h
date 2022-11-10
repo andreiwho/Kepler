@@ -4,6 +4,7 @@
 #include "World/Game/GameWorld.h"
 #include "Panels/AssetBrowserPanel.h"
 #include "Renderer/World/WorldTransform.h"
+#include "Panels/MaterialEditor.h"
 
 namespace ke
 {
@@ -116,6 +117,7 @@ namespace ke
 
 		SharedPtr<TLogPanel> m_LogPanel;
 		SharedPtr<TAssetBrowserPanel> m_AssetBrowserPanel;
+		SharedPtr<MaterialEditor> m_MaterialEditor;
 
 	private:
 		i32 m_EditOperationIndex = 0x7;	// Translate by default

@@ -14,6 +14,7 @@ namespace ke
 		All,
 		Map,
 		Material,
+		Shader,
 		StaticMesh
 	};
 
@@ -33,6 +34,9 @@ namespace ke
 			break;
 		case ke::EFieldAssetType::StaticMesh:
 			return "STATICMESH";
+			break;
+		case EFieldAssetType::Shader:
+			return "SHADER";
 			break;
 		default:
 			break;

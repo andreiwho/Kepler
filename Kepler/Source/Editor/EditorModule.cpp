@@ -104,6 +104,7 @@ namespace ke
 
 		// Asset browser
 		m_AssetBrowserPanel = MakeShared<TAssetBrowserPanel>();
+		m_MaterialEditor = MakeShared<MaterialEditor>();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -168,6 +169,7 @@ namespace ke
 		// m_AssetBrowserPanel->DrawInSaveMode(EFieldAssetType::All);
 		DrawDebugTools();
 		DrawEngineInfo();
+		m_MaterialEditor->Draw();
 		// ImGui::ShowDemoWindow();
 	}
 
@@ -468,8 +470,12 @@ namespace ke
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Edit", false))
+			if (ImGui::BeginMenu("Edit"))
 			{
+				if (ImGui::MenuItem("Open Material Editor", nullptr))
+				{
+					m_MaterialEditor->Open();
+				}
 				ImGui::EndMenu();
 			}
 
