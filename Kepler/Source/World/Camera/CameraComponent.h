@@ -8,6 +8,7 @@ namespace ke
 {
 	reflected class CameraComponent : public EntityComponent
 	{
+		reflected_body();
 	public:
 		CameraComponent() = default;
 		CameraComponent(float InFOVDegrees, u32 InWidth, u32 InHeight, float InNearClip, float InFarClip);
@@ -19,8 +20,11 @@ namespace ke
 		inline void SetRenderTargetName(const String& NewName) { m_RenderTargetName = NewName; }
 		inline const String& GetRenderTargetName() const { return m_RenderTargetName; }
 
-	public:
+	private:
 		reflected MathCamera m_Camera;
-		reflected String m_RenderTargetName{ "MeshPassTarget" };
+		reflected bool m_AllowCustomRenderTarget = false;
+
+		reflected kmeta(editcond = m_AllowCustomRenderTarget)
+		String m_RenderTargetName{ "MeshPassTarget" };
 	};
 }

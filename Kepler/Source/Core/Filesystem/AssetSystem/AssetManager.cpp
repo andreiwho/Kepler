@@ -74,8 +74,77 @@ namespace ke
 
 	void AssetManager::RescanAssets()
 	{
-		FindGameAssets();
+		KEPLER_INFO(AssetManager, " ====== Rescanning asset files... ======");
+		const Map<String, String>& vfsAliases = TVirtualFileSystem::Get()->GetPathAliases();
+		for (const auto& [key, _] : vfsAliases)
+		{
+			const auto keyToken = key + "://";
+			if (m_Roots.Contains(keyToken))
+			{
+				m_Roots[keyToken] = RescanDirectory(keyToken, m_Roots[keyToken]);
+			}
+			else
+			{
+				m_Roots[keyToken] = ReadDirectory(keyToken, AssetTreeNode_Directory::New(nullptr, keyToken));
+				m_Roots[keyToken]->SetRoot();
+			}
+		}
+
+		KEPLER_INFO(AssetManager, " ====== Finished rescanning asset files... ======");
 		OnRootsUpdated.Invoke();
+		KEPLER_INFO(AssetManager, " ====== Finished updating subscribed objects... ======");
+	}
+
+	RefPtr<AssetTreeNode_Directory> AssetManager::RescanDirectory(const String& root, RefPtr<AssetTreeNode_Directory> pDirectory)
+	{
+		const String rootPath = VFSResolvePath(root);
+
+		if (pDirectory->HasDeletedChildren())
+		{
+			pDirectory->FlushDeletedItems();
+		}
+
+		for (const auto& entry : fs::directory_iterator(pDirectory->GetPath_Resolved()))
+		{
+			const fs::path& entryPath = entry.path();
+			const fs::path relativePath = fs::relative(entryPath, rootPath);
+			String formattedPath = fmt::format("{}{}", root, relativePath.string());
+			std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
+
+			if (fs::is_directory(entryPath))
+			{
+				if (auto pChildDirectory = pDirectory->FindNode(formattedPath))
+				{
+					pChildDirectory = RescanDirectory(root, RefCast<AssetTreeNode_Directory>(pChildDirectory));
+				}
+				else
+				{
+					RefPtr<AssetTreeNode_Directory> pNewDirectory = AssetTreeNode_Directory::New(pDirectory.Raw(), formattedPath);
+					ReadDirectory(root, pNewDirectory);
+					pDirectory->AddChild(pNewDirectory);
+				}
+			}
+
+			if (fs::is_regular_file(entryPath))
+			{
+				if (entryPath.has_extension())
+				{
+					if (pDirectory->FindNode(formattedPath))
+					{
+						continue;
+					}
+					else
+					{
+						const String extension = entryPath.extension().string();
+						auto pNewAsset = AssetTreeNode_PlainAsset::New(pDirectory.Raw(), formattedPath);
+						pDirectory->AddChild(pNewAsset);
+					}
+				}
+			}
+		}
+
+		pDirectory->SortChildren(m_DefaultSortingFilter);
+		return pDirectory;
 	}
 
 	void AssetManager::FindGameAssets()

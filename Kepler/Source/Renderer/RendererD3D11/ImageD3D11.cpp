@@ -33,9 +33,14 @@ namespace ke
 		{
 			Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		}
-
+	
 		Desc.CPUAccessFlags = 0;
 		Desc.MiscFlags = 0;
+
+		if (InMipLevels > 1)
+		{
+			Desc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		}
 
 		TRenderDeviceD3D11* Device = TRenderDeviceD3D11::Get();
 		if (Device)

@@ -13,6 +13,7 @@ namespace ke
 
 	reflected class MathCamera
 	{
+		reflected_body();
 	public:
 		MathCamera() = default;
 		MathCamera(float fovd, float width, float height, float nearClip, float farClip, float3 location = float3(), float3 target = float3());
@@ -42,7 +43,7 @@ namespace ke
 	public:
 		reflected ECameraProjectionMode Projection{ECameraProjectionMode::Perspective};
 
-		reflected kmeta(editspeed=0.01f)
+		reflected kmeta(editspeed=0.01f, clampmin=5.0f)
 		float FieldOfView{45.0f};
 		reflected kmeta(editspeed=0.01f)
 		float Width{1024};

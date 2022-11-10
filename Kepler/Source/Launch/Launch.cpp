@@ -77,3 +77,47 @@ extern int main(int argc, char** argv)
 #endif
 	return ke::Main(argc, argv);
 }
+
+#if defined(WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <shellapi.h>
+#include <string>
+#include <filesystem>
+static ke::String GetExecutablePath()
+{
+	CHAR exePath[1024];
+	DWORD len = GetModuleFileNameA(NULL, exePath, ARRAYSIZE(exePath));
+	if (len < 1024)
+	{
+		exePath[len + 1] = 0;
+	}
+	return exePath;
+}
+
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
+{
+	using namespace ke;
+
+	auto wideString = ConvertToWideString(lpCmdLine);
+
+	INT numArgs = 0;
+	LPWSTR* pWCmdLine = CommandLineToArgvW(wideString.c_str(), &numArgs);
+	std::vector<std::string> cxxConvertedParams((usize)numArgs);
+	for (INT index = 0; index < numArgs; ++index)
+	{
+		cxxConvertedParams[index] = ConvertToAnsiString(pWCmdLine[index]);
+	}
+	
+	String exePath = GetExecutablePath();
+	std::vector<char*> cArgv;
+	cArgv.reserve((usize)numArgs + 1);
+	cArgv.emplace_back(exePath.data());
+
+	for (auto& param : cxxConvertedParams)
+	{
+		cArgv.emplace_back(param.data());
+	}
+	return main(numArgs + 1, cArgv.data());
+}
+#endif

@@ -9,6 +9,7 @@ namespace ke
 	reflected kmeta(hideindetails)
 	class MaterialComponent : public EntityComponent
 	{
+		reflected_body();
 	public:
 		MaterialComponent() = default;
 		MaterialComponent(RefPtr<TMaterial> InMaterial);
@@ -22,13 +23,10 @@ namespace ke
 		}
 
 		inline bool UsesPrepass() const { return Material ? Material->UsesPrepass() : false; }
-
-		String MaterialAssetPath;
-		void OnMaterialPathChanged(const String& newPath);
 		
-		reflected kmeta(postchange = OnMaterialAssetChanged, assettype=Material)
+		reflected kmeta(assettype = Material, set = Set_Asset)
 		AssetTreeNode* Asset {nullptr};
-		void OnMaterialAssetChanged(AssetTreeNode* newAsset);
+		void Set_Asset(AssetTreeNode* pAsset);
 
 	private:
 		RefPtr<TMaterial> Material;

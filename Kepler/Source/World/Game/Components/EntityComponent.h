@@ -6,8 +6,9 @@ namespace ke
 {
 	class GameWorld;
 
-	reflected class EntityComponent
+	reflected class EntityComponent : public Object
 	{
+		reflected_body();
 	public:
 		virtual ~EntityComponent() = default;
 

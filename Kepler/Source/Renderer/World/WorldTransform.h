@@ -6,6 +6,7 @@ namespace ke
 {
 	reflected class WorldTransform
 	{
+		reflected_body();
 	public:
 		WorldTransform() = default;
 		WorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));
@@ -22,7 +23,7 @@ namespace ke
 		matrix3x3 GenerateNormalMatrix() const;
 		float3 RotationToEuler() const;
 
-	public:
+	private:
 		reflected float3 Location = float3();
 		reflected float3 Rotation = float3();
 		reflected float3 Scale = float3(1.0f);

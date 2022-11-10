@@ -6,25 +6,24 @@ namespace ke
 {
 
 	StaticMeshComponent::StaticMeshComponent(RefPtr<StaticMesh> InStaticMesh)
-		:	m_StaticMesh(InStaticMesh)
+		: m_StaticMesh(InStaticMesh)
 	{
 		SetStaticMesh(InStaticMesh);
 	}
 
 	StaticMeshComponent::StaticMeshComponent(RefPtr<IVertexBuffer> InVertexBuffer, RefPtr<IIndexBuffer> InIndexBuffer)
-		:	m_StaticMesh(StaticMesh::New(InVertexBuffer, InIndexBuffer))
+		: m_StaticMesh(StaticMesh::New(InVertexBuffer, InIndexBuffer))
 	{
 	}
 
 	StaticMeshComponent::StaticMeshComponent(const Array<TStaticMeshVertex>& Vertices, const Array<u32>& InIndices)
-		:	m_StaticMesh(StaticMesh::New(Vertices, InIndices))
+		: m_StaticMesh(StaticMesh::New(Vertices, InIndices))
 	{
 	}
 
 	StaticMeshComponent::StaticMeshComponent(const Array<TStaticMeshSection>& Sections)
 		: m_StaticMesh(StaticMesh::New(Sections))
 	{
-
 	}
 
 	void StaticMeshComponent::SetStaticMesh(RefPtr<StaticMesh> NewMesh)
@@ -33,30 +32,24 @@ namespace ke
 
 		if (m_StaticMesh->IsLoadedFromAsset())
 		{
-			StaticMeshPath = m_StaticMesh->GetParentAssetPath();
-
 			if (!Asset)
 			{
-				Asset = Await(AssetManager::Get()->FindAssetNode(StaticMeshPath));
+				Asset = Await(AssetManager::Get()->FindAssetNode(NewMesh->GetParentAssetPath()));
 			}
 		}
-
 	}
 
-	void StaticMeshComponent::StaticMeshPathChanged(const String& newPath)
+	void StaticMeshComponent::Asset_Set(AssetTreeNode* pAsset)
 	{
-		if (auto mesh = MeshLoader::Get()->LoadStaticMesh(newPath, true))
+		if (!pAsset || pAsset == Asset)
+		{
+			return;
+		}
+
+		if (auto mesh = MeshLoader::Get()->LoadStaticMesh(pAsset->GetPath(), true))
 		{
 			m_StaticMesh = mesh;
 		}
-	}
-
-	void StaticMeshComponent::OnMeshAssetChanged(AssetTreeNode* pAsset)
-	{
-		if (pAsset)
-		{
-			StaticMeshPath = pAsset->GetPath();
-			StaticMeshPathChanged(StaticMeshPath);
-		}
+		Asset = pAsset;
 	}
 }

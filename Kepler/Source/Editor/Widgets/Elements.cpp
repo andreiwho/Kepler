@@ -161,7 +161,8 @@ namespace ke
 			return;
 		}
 
-		if (md.bReadOnly)
+		bool bCanEdit = field.CanEdit(pHandler);
+		if (!bCanEdit)
 		{
 			ImGui::BeginDisabled(true);
 		}
@@ -227,35 +228,35 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float>(pHandler);
-			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed);
+			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
 		}
 		break;
 		case ClassId("float2"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float2>(pHandler);
-			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed);
+			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
 		}
 		break;
 		case ClassId("float3"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float3>(pHandler);
-			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed);
+			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
 		}
 		break;
 		case ClassId("float4"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float4>(pHandler);
-			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed);
+			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
 		}
 		break;
 		case ClassId("bool"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<bool>(pHandler);
-			ImGui::Checkbox(name.c_str(), value);
+			ImGui::Checkbox(fmt::format("##{}", name).c_str(), value);
 		}
 		break;
 		case ClassId("String"):
@@ -278,7 +279,7 @@ namespace ke
 		}
 
 		// End metadata
-		if (field.GetMetadata().bReadOnly)
+		if (!bCanEdit)
 		{
 			ImGui::EndDisabled();
 		}

@@ -1,19 +1,26 @@
 {
     "Material": {
         "Pipeline": {
-            "Shader": "EngineShaders://DefaultUnlit.hlsl",
+            "Domain": "Lit",
+            "Shader": "EngineShaders://DefaultLit.hlsl",
+            "PrimitiveTopology": "Triangles",
             "Rasterizer": {
-                "CullMode": "Back"
+                "bDisabled": false,
+                "FillMode": "Solid",
+                "CullMode": "Back",
+                "bEnableScissor": false
             },
             "DepthStencil": {
-                "DepthAccess": "Write",
-                "bStencilEnable": true,
-                "StencilAccess": "ReadWrite",
-                "DepthFunc": "LEqual"
+                "bDepthEnable": true,
+                "DepthAccess": "Read",
+                "DepthFunc": "LEqual",
+                "bStencilEnable": false,
+                "StencilAccess": "None"
             }
         },
         "Samplers": {
-            "Albedo": "Game://Ground.png"
+            "Albedo": "Game://Ground.png",
+            "Normal": "Game://CubeNormal.png"
         }
     }
 }

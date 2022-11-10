@@ -75,9 +75,48 @@ namespace KEReflector
             _sourceDb.FlushDatabase();
         }
 
+        void WriteGeneratedClassBody(ParsedHeader header, ref StreamWriter fileWriter)
+        {
+            string fileId = Path.GetRelativePath(ProjectDirectory, header.Path);
+            fileId = fileId.Replace('\\', '_');
+            fileId = fileId.Replace('.', '_');
+            fileId = "FILEID" + fileId.Replace('/', '_');
+            
+            fileWriter.WriteLine($"#undef FILEID");
+            fileWriter.WriteLine($"#define FILEID {fileId}");
+
+            foreach(var cls in header.Classes)
+            {
+                if(cls.Value.bIsEnum)
+                {
+                    continue;
+                }
+                
+                if(cls.Value.ReflLine == -1 && !cls.Value.bIsEnum)
+                {
+                    Console.WriteLine("################# ERROR ######################");
+                    Console.WriteLine($"Class {cls.Key} must have reflected_info() call in it.");
+                    Console.WriteLine("##############################################");
+                }
+                
+                fileWriter.WriteLine($"#define {fileId}{cls.Value.ReflLine}REFL using Self = {cls.Value.Name};\\");
+                if(cls.Value.Parent != null)
+                {
+                    fileWriter.WriteLine($"using Base = {cls.Value.Parent};\\");
+                }
+                fileWriter.WriteLine($"friend class R{cls.Value.Name};\\");
+                fileWriter.WriteLine("public:\\");
+                fileWriter.WriteLine($"static ReflectedClass* GetStaticClass() {{ return R{cls.Value.Name}::Get(); }}\\");
+                fileWriter.WriteLine($"inline ReflectedClass* GetClass() const {{ return R{cls.Value.Name}::Get(); }}\\");
+                fileWriter.WriteLine("private:");
+            }
+        }
+
         void WriteHeaderFileCode(ParsedHeader header)
         {
             var fileName = Path.GetFileNameWithoutExtension(header.Path);
+            
+
             var generatedHeaderPath = $"{_generatedDirectory}/{fileName}.gen.h";
             StreamWriter fileWriter;
             if (!File.Exists(generatedHeaderPath))
@@ -92,6 +131,7 @@ namespace KEReflector
             if (fileWriter != null)
             {
                 fileWriter.WriteLine("#pragma once");
+                WriteGeneratedClassBody(header, ref fileWriter);
                 fileWriter.WriteLine("#include \"Reflection/Class.h\"\n");
                 fileWriter.WriteLine("namespace ke");
                 fileWriter.WriteLine("{");
@@ -113,8 +153,10 @@ namespace KEReflector
     // class {entry.Name};
     class R{entry.Name} : public {reflectedParent}
     {{
+        static R{entry.Name}* Instance;
     public:
         R{entry.Name}();
+        static R{entry.Name}* Get() {{ return Instance; }}
         virtual String GetName() const override {{ return ""{entry.Name}""; }}
         virtual bool HasParent() const override {{ return {hasParent}; }}
         virtual String GetParentName() const override {{ return ""{entryParent}""; }}
@@ -185,9 +227,11 @@ namespace KEReflector
                     else
                     {
                         fileWriter.WriteLine("namespace ke\n{");
+                        fileWriter.WriteLine($"\tR{entry.Name}* R{entry.Name}::Instance = nullptr;");
                         fileWriter.WriteLine($"\tR{entry.Name}::R{entry.Name}()\n\t{{");
 
                         // Recursive parent fields
+                        fileWriter.WriteLine($"\t\tInstance = this;");
                         fileWriter.WriteLine($"\t\tm_ClassId = ClassId(\"{entry.Name}\");");
 
                         FillClassMetadata(fileWriter, entry);
@@ -233,7 +277,6 @@ namespace KEReflector
         private void WriteMetadataSpecifier(StreamWriter fileWriter, string objName, string specifier, string value)
         {
             fileWriter.WriteLine($"\t\t{objName}Metadata.{specifier} = {value};");
-
         }
 
         private void FillClassMetadata(StreamWriter fileWriter, ReflectedClass reflectedClass)
@@ -249,7 +292,7 @@ namespace KEReflector
             }
         }
 
-        private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field)
+        private void FillFieldMetadata(StreamWriter fileWriter, ReflectedField field, ReflectedClass parentClass)
         {
             fileWriter.WriteLine($@"
         FieldMetadata {field.DisplayName}Metadata{{}};");
@@ -263,6 +306,12 @@ namespace KEReflector
                 if (specifier.Key == "hideindetails")
                 {
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "bHideInDetails", "true");
+                }
+
+                if(specifier.Key == "editcond")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "bHasEditCondition", "true");
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "EditConditionAccessor", $"[](void* pObject) {{ return (({parentClass.Name}*)pObject)->{specifier.Value}; }};");
                 }
 
                 if (specifier.Key == "editspeed")
@@ -279,6 +328,16 @@ namespace KEReflector
                 {
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "bEnableDragDrop", "true");
                     WriteMetadataSpecifier(fileWriter, field.DisplayName, "FieldAssetType", $"EFieldAssetType::{specifier.Value}");
+                }
+
+                if(specifier.Key == "clampmin")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "ClampMin", specifier.Value);
+                }
+
+                if (specifier.Key == "clampmax")
+                {
+                    WriteMetadataSpecifier(fileWriter, field.DisplayName, "ClampMax", specifier.Value);
                 }
             }
 
@@ -302,7 +361,7 @@ namespace KEReflector
         {
             foreach (var field in entry.Fields)
             {
-                FillFieldMetadata(fileWriter, field);
+                FillFieldMetadata(fileWriter, field, entry);
 
                 string preChangeHandler = "";
                 string preChangeHandlerPtr = "";
@@ -312,6 +371,7 @@ namespace KEReflector
                     preChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["prechange"]}(({field.Type}*)pValue);";
                 }
 
+
                 string postChangeHandler = "";
                 string postChangeHandlerPtr = "";
                 if(field.MetadataSpecifiers.ContainsKey("postchange"))
@@ -320,29 +380,45 @@ namespace KEReflector
                     postChangeHandlerPtr = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["postchange"]}(({field.Type}*)pValue);";
                 }
 
-                if (field.bIsRefPtr)
+                if (field.bIsPointer)
                 {
+                    string getString = $"return (void*)(({entry.Name}*)pHandler)->{field.Name}";
+                    if (field.MetadataSpecifiers.ContainsKey("get"))
+                    {
+                        getString = $"return (void*)(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["get"]}()";
+                    }
+
+                    string setString = $"(({entry.Name}*)pHandler)->{field.Name} = ({field.Type}*)pValue";
+                    if(field.MetadataSpecifiers.ContainsKey("set"))
+                    {
+                        setString = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["set"]}(({field.Type}*)pValue)";
+                    }
+                    
                     fileWriter.WriteLine($@"
         PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
             {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}.Raw(); }},
-            [](void* pHandler, void* pValue) {{ /* No setter for pointers */ }}}});");
-                }
-                else if (field.bIsPointer)
-                {
-                    fileWriter.WriteLine($@"
-        PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
-            {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ {preChangeHandlerPtr} (({entry.Name}*)pHandler)->{field.Name} = ({field.Type}*)pValue; {postChangeHandlerPtr} }}}});");
+            [](void* pHandler) {{ {getString}; }},
+            [](void* pHandler, void* pValue) {{ {preChangeHandlerPtr} {setString}; {postChangeHandlerPtr} }}}});");
                 }
                 else
                 {
+                    string getString = $"return (void*)&(({entry.Name}*)pHandler)->{field.Name}";
+                    if (field.MetadataSpecifiers.ContainsKey("get"))
+                    {
+                        getString = $"return (void*)(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["get"]}()";
+                    }
+
+                    string setString = $"(({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue";
+                    if (field.MetadataSpecifiers.ContainsKey("set"))
+                    {
+                        setString = $"(({entry.Name}*)pHandler)->{field.MetadataSpecifiers["set"]}(*({field.Type}*)pValue)";
+                    }
+
                     fileWriter.WriteLine($@"
         PushField(""{field.DisplayName}"", ReflectedField{{ ClassId(""{field.Type}""), 
             {field.DisplayName}Metadata,
-            [](void* pHandler) {{ return (void*)&(({entry.Name}*)pHandler)->{field.Name}; }},
-            [](void* pHandler, void* pValue) {{ {preChangeHandler} (({entry.Name}*)pHandler)->{field.Name} = *({field.Type}*)pValue; {postChangeHandler} }}}});");
+            [](void* pHandler) {{ {getString}; }},
+            [](void* pHandler, void* pValue) {{ {preChangeHandler} {setString}; {postChangeHandler} }}}});");
                 }
             }
 

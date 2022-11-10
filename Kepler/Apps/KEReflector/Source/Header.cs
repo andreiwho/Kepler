@@ -15,6 +15,7 @@ namespace KEReflector
         public bool bIsRefPtr { get; set; } = false;
         public bool bIsEnum { get; set; } = false;
         public bool bIsEnumClass { get; set; } = false;
+        public int BloatLine { get; set; } = -1;
         // Change to Dictionary, to be able to pass values after '='
         public Dictionary<string, string> MetaSpecifiers { get; set; } = new();
         public Dictionary<string, int> EnumEntries { get; set; } = new();
@@ -53,7 +54,7 @@ namespace KEReflector
             '"'
         };
 
-        void TokenizeLine(string line, ref List<string> tokens)
+        void TokenizeLine(string line, int lineNum, ref List<UniqueToken> tokens)
         {
             line = line.Trim();
             StringBuilder builder = new StringBuilder();
@@ -70,7 +71,7 @@ namespace KEReflector
                 {
                     if (builder.Length > 0)
                     {
-                        tokens.Add(builder.ToString().Trim());
+                        tokens.Add(new(builder.ToString().Trim(), lineNum));
                         builder.Clear();
                     }
                     continue;
@@ -82,11 +83,11 @@ namespace KEReflector
                     {
                         if (builder.Length > 0)
                         {
-                            tokens.Add(builder.ToString().Trim());
+                            tokens.Add(new(builder.ToString().Trim(), lineNum));
                             builder.Clear();
                         }
 
-                        tokens.Add(c.ToString());
+                        tokens.Add(new(c.ToString(), lineNum));
                         goto end;
                     }
                 }
@@ -98,7 +99,7 @@ namespace KEReflector
 
             if (builder.Length > 0)
             {
-                tokens.Add(builder.ToString().Trim());
+                tokens.Add(new(builder.ToString().Trim(), lineNum));
                 builder.Clear();
             }
         }
@@ -110,6 +111,7 @@ namespace KEReflector
             ParseMetaArgs,
             ParseMetaValue,
             ParseTemplateWrapper,
+            CheckTemplateParent,
             ParseType,
             ParsePointer,
             ParseName,
@@ -120,7 +122,21 @@ namespace KEReflector
             Finished,
         }
 
-        List<ParsedToken> ParseTokens(List<string> tokens)
+        struct UniqueToken
+        {
+            public string Name;
+            public int Line;
+
+            public UniqueToken(string name, int line)
+            {
+                Name = name;
+                Line = line;
+            }
+
+            public static implicit operator string(UniqueToken token) => token.Name;
+        }
+
+        List<ParsedToken> ParseTokens(List<UniqueToken> tokens)
         {
             List<ParsedToken> result = new List<ParsedToken>();
             EParseStage currentStage = EParseStage.None;
@@ -156,6 +172,19 @@ namespace KEReflector
                             currentStage = EParseStage.ParseType;
                             continue;
                         }
+                        else if(token == "reflected_body")
+                        {
+                            if (currentToken != null)
+                            {
+                                result.Add(currentToken);
+                            }
+                            currentToken = new ParsedToken();
+                            currentToken.BloatLine = token.Line + 1;
+                            result.Add(currentToken);
+                            currentToken = null;
+                            currentStage = EParseStage.None;
+                            continue;
+                        }
                         break;
                     case EParseStage.ParseMeta:
                         if (token == "kmeta")
@@ -188,8 +217,8 @@ namespace KEReflector
 
                         if (currentToken != null)
                         {
-                            currentMetaSpecifier = new(token.ToLower(), "");
-                            currentToken.MetaSpecifiers.Add(token.ToLower(), "");
+                            currentMetaSpecifier = new(token.Name.ToLower(), "");
+                            currentToken.MetaSpecifiers.Add(token.Name.ToLower(), "");
                         }
                         break;
                     case EParseStage.ParseMetaValue:
@@ -292,10 +321,20 @@ namespace KEReflector
 
                             // TODO: Do we need to contain enum parents?
                             currentToken.Parent = token;
-                            currentStage = EParseStage.None;
+                            currentStage = EParseStage.CheckTemplateParent;
                             result.Add(currentToken);
                             currentToken = null;
                         }
+                        break;
+                    case EParseStage.CheckTemplateParent:
+                        if(token == "<")
+                        {
+                            if(currentToken != null)
+                            {
+                                currentToken.Parent = null;
+                            }
+                        }
+                        currentStage = EParseStage.None;
                         break;
                     case EParseStage.ParseEnumValues:
                         if (token == "{")
@@ -363,12 +402,14 @@ namespace KEReflector
         private Dictionary<string, ReflectedClass> ParseClasses()
         {
             Dictionary<string, ReflectedClass> classes = new Dictionary<string, ReflectedClass>();
-            List<string> tokens = new List<string>();
+            List<UniqueToken> tokens = new();
 
             var lines = File.ReadAllLines(Path);
+            int lineIndex = 0;
             foreach (var line in lines)
             {
-                TokenizeLine(line, ref tokens);
+                TokenizeLine(line, lineIndex, ref tokens);
+                lineIndex++;
             }
 
             var reflectedTokens = ParseTokens(tokens);
@@ -396,6 +437,12 @@ namespace KEReflector
                 {
                     if (currentClass != null)
                     {
+                        if(token.BloatLine != -1)
+                        {
+                            currentClass.ReflLine = token.BloatLine;
+                            continue;
+                        }
+
                         string DisplayName = "";
                         if (token.Name.StartsWith("m_"))
                         {

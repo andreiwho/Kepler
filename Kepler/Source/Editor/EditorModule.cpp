@@ -182,6 +182,11 @@ namespace ke
 	void EditorModule::DrawEngineInfo()
 	{
 		bool bOpen = ImGui::Begin("Engine Info");
+		if (!bOpen)
+		{
+			ImGui::End();
+		}
+
 		if (bOpen)
 		{
 			auto pEngineClass = GetReflectedClass<Engine>();
@@ -728,6 +733,8 @@ namespace ke
 		{
 			m_LogPanel = MakeShared<TLogPanel>();
 		}
+
+		m_LogPanel->Draw();
 	}
 
 	//////////////////////////////////////////////////////////////////////////

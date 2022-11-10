@@ -23,6 +23,8 @@
 #include "Filesystem/AssetSystem/AssetManager.h"
 #include "Reflection/ReflectionDatabase.h"
 #include "App.gen.h"
+#include "Containers/RingQueue.h"
+#include <functional>
 
 namespace ke
 {
@@ -37,16 +39,17 @@ namespace ke
 
 	reflected class TestMovementComponent : public NativeScriptComponent
 	{
+		reflected_body();
 	public:
 		TestMovementComponent();
 
 		reflected EMovementType m_MovementType = EMovementType::Dynamic;
-		
-		reflected kmeta(readonly)
-		float m_MovementValue = 0.0f;
 
-		reflected kmeta(editspeed=0.01f)
-		float m_Speed = 1.0f;
+		reflected kmeta(readonly)
+			float m_MovementValue = 0.0f;
+
+		reflected kmeta(editspeed = 0.01f)
+			float m_Speed = 1.0f;
 
 		void Update(float deltaTime);
 
@@ -74,6 +77,7 @@ namespace ke
 	// --------------------------------------------
 	reflected class Engine : public IPlatformEventListener
 	{
+		reflected_body();
 		static Engine* Instance;
 	public:
 		Engine()
@@ -91,19 +95,25 @@ namespace ke
 		void SetMainWorld(RefPtr<GameWorld> newWorld);
 
 		reflected kmeta(prechange = OnCurrentWorldStateChange)
-		EWorldUpdateKind CurrentWorldState{};
+			EWorldUpdateKind CurrentWorldState {};
 		void OnCurrentWorldStateChange(EWorldUpdateKind newUpdateKind);
 
 		reflected RefPtr<GameWorld> CurrentWorld;
 
 		reflected kmeta(readonly, assettype = Map)
-		AssetTreeNode* WorldAsset{};
+		AssetTreeNode* WorldAsset {};
 
 		reflected kmeta(readonly)
 		float FrameTime = 0.0f;
 
 		reflected kmeta(readonly)
 		float FramesPerSecond = 0.0f;
+
+		template<typename FUNC>
+		void SubmitMainThreadTask(FUNC func)
+		{
+			m_MainTasks.Enqueue(std::move(func));
+		}
 
 	protected:
 		virtual void ChildSetupModuleStack(TModuleStack& moduleStack) {}
@@ -132,8 +142,10 @@ namespace ke
 		MeshLoader m_MeshLoader;
 
 		RefPtr<WorldRenderer> m_WorldRenderer;
+		TThreadSafeRingQueue<std::function<void()>> m_MainTasks{128};
 
-		
+		void FlushMainThreadTasks();
+
 #ifdef ENABLE_EDITOR
 		RefPtr<class EditorModule> m_Editor;
 #endif

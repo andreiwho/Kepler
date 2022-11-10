@@ -28,7 +28,7 @@ namespace ke
     private:
         void FindGameAssets();
         static RefPtr<AssetTreeNode_Directory> ReadDirectory(const String& root, RefPtr<AssetTreeNode_Directory> pDirectory);
-        
+        static RefPtr<AssetTreeNode_Directory> RescanDirectory(const String& root, RefPtr<AssetTreeNode_Directory> pDirectory);
     private:
         Map<String, RefPtr<AssetTreeNode_Directory>> m_Roots;
 

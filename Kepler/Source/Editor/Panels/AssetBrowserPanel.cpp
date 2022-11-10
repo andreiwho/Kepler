@@ -494,7 +494,11 @@ namespace ke
 
 	void TAssetBrowserPanel::Draw()
 	{
-		if (ImGui::Begin("Asset Browser"))
+		if (!ImGui::Begin("Asset Browser"))
+		{
+			ImGui::End();
+		}
+		else
 		{
 			DrawContents();
 			ImGui::End();
@@ -535,6 +539,7 @@ namespace ke
 					if (pAsset->GetName() != Engine::Get()->WorldAsset->GetName())
 					{
 						std::filesystem::remove(pAsset->GetPath_Resolved());
+						m_CurrentDirectory->AddDeletedItem(pAsset);
 						bAnyFilesRemoved = true;
 					}
 				}

@@ -1,5 +1,9 @@
 #pragma once
-#include "Core/Core.h"
+#include "Core/Malloc.h"
+#include "Core/Types.h"
+#include "Core/Macros.h"
+#include "Core/Containers/DynArray.h"
+#include "Core/Containers/ChaosMap.h"
 #include "Reflection/Class.h"
 
 namespace ke

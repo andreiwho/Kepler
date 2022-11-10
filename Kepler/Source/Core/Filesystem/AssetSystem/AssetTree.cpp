@@ -45,7 +45,11 @@ namespace ke
 
 	void AssetTreeNode::RemoveChild(RefPtr<AssetTreeNode> child)
 	{
-		CRASHMSG("Not implemented");
+		auto iter = m_Children.FindIterator([&](const RefPtr<AssetTreeNode>& lhs) { return lhs.Raw() == child.Raw(); });
+		if (iter != m_Children.end())
+		{
+			m_Children.Remove(iter);
+		}
 	}
 
 	void AssetTreeNode::ClearChildren()
@@ -128,6 +132,16 @@ namespace ke
 		}
 	}
 
+	void AssetTreeNode_Directory::FlushDeletedItems()
+	{
+		while (!m_DeletedItems.IsEmpty())
+		{
+			auto pChild = m_DeletedItems.GetBack();
+			RemoveChild(pChild);
+			m_DeletedItems.PopBack();
+		}
+		m_Children.Shrink();
+	}
 
 	const String& AssetTreeNode_PlainAsset::GetExtension() const
 	{

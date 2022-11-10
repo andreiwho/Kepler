@@ -1,6 +1,7 @@
 # Kepler Game Engine (Temp name)
 
 The engine is built in C++, partially using own C++ parser for reflection code generation.
+Currently supports Windows only, using DirectX 11 as the main renderer API. Vulkan integration is also in the roadmap.
 
 ## Build steps:
 1. Clone the repository using the dev branch

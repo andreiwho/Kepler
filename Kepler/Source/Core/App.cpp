@@ -192,6 +192,7 @@ namespace ke
 					std::this_thread::sleep_for(10ms);
 				}
 
+				FlushMainThreadTasks();
 				CheckWorldUpdated();
 				mainTimer.End();
 				FrameTime = 1.0f / mainTimer.Delta();
@@ -332,6 +333,18 @@ namespace ke
 			m_Editor->SetEditedWorld(CurrentWorld);
 
 			m_ModuleStack.OnPostWorldInit();
+		}
+	}
+
+	void Engine::FlushMainThreadTasks()
+	{
+		std::function<void()> task;
+		while (m_MainTasks.Dequeue(task))
+		{
+			if (task)
+			{
+				task();
+			}
 		}
 	}
 

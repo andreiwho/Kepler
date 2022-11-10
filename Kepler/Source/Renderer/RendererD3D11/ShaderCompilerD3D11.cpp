@@ -183,13 +183,16 @@ namespace ke
 		ID3DBlob* Blob;
 
 		Array<D3D_SHADER_MACRO> shaderMacros;
-		String CameraSlot = MakeBufferSlotString(WorldRenderer::RS_Camera);
-		String LightSlot = MakeBufferSlotString(WorldRenderer::RS_Light);
-		String UserSlot = MakeBufferSlotString(WorldRenderer::RS_User);
-
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_Camera", CameraSlot.c_str() });
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_Light", LightSlot.c_str() });
-		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ "RS_User", UserSlot.c_str() });
+		auto& slotValues = GetReflectedEnum<EReservedSlots>()->GetEnumValues();
+		Array<String> paramValues;
+		paramValues.Reserve(slotValues.GetLength());
+		u32 index = 0;
+		for (auto& [value, name] : slotValues)
+		{
+			paramValues.AppendBack(fmt::format("b{}", value));
+			shaderMacros.AppendBack(D3D_SHADER_MACRO{ name.c_str(), paramValues[index].c_str()});
+			index++;
+		}
 		shaderMacros.EmplaceBack(D3D_SHADER_MACRO{ nullptr, nullptr });
 
 		if (FAILED(D3DCompile(
