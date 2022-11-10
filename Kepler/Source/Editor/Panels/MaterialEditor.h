@@ -10,6 +10,14 @@ namespace ke
 {
 	DEFINE_MULTICAST_DELEGATE_WITH_PARAMS(OnShaderUpdatedDelegate, RefPtr<IShader>);
 
+	reflected struct SamplerReference
+	{
+		reflected_body();
+	private:
+		reflected kmeta(AssetType=Texture)
+		AssetTreeNode* SamplerAsset = nullptr;
+	};
+
 	reflected struct MaterialTemplate
 	{
 		reflected_body();
@@ -25,9 +33,10 @@ namespace ke
 		void Shader_Set(AssetTreeNode* pShader);
 
 		Array<ubyte> m_DataStorage{};
-		void AllocateDataStorate(RefPtr<TShaderModuleReflection> pReflection);
+		void AllocateDataStorage(RefPtr<TShaderModuleReflection> pReflection);
 
 		Map<String, PipelineParam> m_Params{};
+		Map<String, SamplerReference> m_Samplers{};
 	};
 
 	class MaterialEditor

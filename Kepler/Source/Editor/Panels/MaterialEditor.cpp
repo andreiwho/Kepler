@@ -42,6 +42,11 @@ namespace ke
 				break;
 			}
 		}
+
+		void DrawMaterialSampler(const String& name)
+		{
+
+		}
 	}
 
 
@@ -118,14 +123,14 @@ namespace ke
 
 		if (RefPtr<TShaderModuleReflection> pReflection = pLoadedShader->GetReflection())
 		{
-			AllocateDataStorate(pReflection);
+			AllocateDataStorage(pReflection);
 			m_Params = pReflection->ParamMapping->GetParams();
 		}
 
 		OnShaderUpdated.Invoke(std::move(pLoadedShader));
 	}
 
-	void MaterialTemplate::AllocateDataStorate(RefPtr<TShaderModuleReflection> pReflection)
+	void MaterialTemplate::AllocateDataStorage(RefPtr<TShaderModuleReflection> pReflection)
 	{
 		if (auto pMapping = pReflection->ParamMapping)
 		{
