@@ -12,6 +12,7 @@ target_link_libraries("Kepler"
   "rapidjson"
   "imgui"
   "ImGuizmo"
+  "physx"
  PRIVATE 
   "glfw" 
   "stb_image" 
@@ -22,7 +23,7 @@ option(ENABLE_EDITOR "Enables editor layer" ON)
 target_compile_definitions("Kepler"
  PUBLIC
 #  FORCE_REPORT_LIVE_OBJECTS      # Uncomment if you want to see live DXGI objects on shutdown   
-  $<$<CONFIG:Debug>:ENABLE_PROFILING>
+  $<$<CONFIG:Debug>:ENABLE_PROFILING PX_CHECKED>
   $<$<CONFIG:RelWithDebInfo>:ENABLE_PROFILING>
   USE_PMR_ALLOCATORS
 

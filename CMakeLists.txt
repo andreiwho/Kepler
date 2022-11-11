@@ -7,9 +7,10 @@ set(REFLECTED_MODULES)
 
 add_subdirectory(Kepler)
 if(NOT ENABLE_EDITOR)
-    target_compile_definitions("Kepler" PUBLIC "RELEASE_APPLICATION_NAME=\"Testbed\"")
+target_compile_definitions("Kepler" PUBLIC "RELEASE_APPLICATION_NAME=\"Testbed\"")
 endif()
 
+add_subdirectory(Dependencies)
 add_subdirectory(Testbed)
 set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} 
     PROPERTY VS_STARTUP_PROJECT Testbed)

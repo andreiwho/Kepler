@@ -7,6 +7,8 @@
 #include "Timer.h"
 #include "Async/Async.h"
 
+#include "PxPhysicsAPI.h"
+
 // Test
 #include "Renderer/HLSLShaderCompiler.h"
 #include "Core/Filesystem/FileUtils.h"
@@ -87,6 +89,8 @@ namespace ke
 		m_LowLevelRenderer = MakeShared<LowLevelRenderer>();
 		m_LowLevelRenderer->InitRenderStateForWindow(m_MainWindow);
 		m_AudioEngine = AudioEngine::CreateAudioEngine(EAudioEngineAPI::Default);
+		m_PhysicsEngine = MakeShared<PhysicsEngine>();
+
 		// AudioEngine->Play("Game://Startup.mp3");
 
 		m_WorldRegistry = MakeShared<WorldRegistry>();
@@ -113,6 +117,7 @@ namespace ke
 		CurrentWorld.Release();
 
 		m_WorldRegistry.reset();
+		m_PhysicsEngine.reset();
 		m_AudioEngine.reset();
 		m_LowLevelRenderer.reset();
 		m_AssetManager.reset();

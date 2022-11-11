@@ -9,7 +9,7 @@
 #include "Renderer/World/WorldRenderer.h"
 
 #include "Audio/AudioEngine.h"
-
+#include "Physics/PhysxEngine.h"
 #include "Renderer/RenderDevice.h"
 
 #include <string>
@@ -134,6 +134,7 @@ namespace ke
 		TWindow* m_MainWindow{};
 		SharedPtr<LowLevelRenderer> m_LowLevelRenderer{};
 		SharedPtr<AudioEngine> m_AudioEngine{};
+		SharedPtr<PhysicsEngine> m_PhysicsEngine;
 		SharedPtr<WorldRegistry> m_WorldRegistry{};
 		SharedPtr<AssetManager> m_AssetManager{};
 
