@@ -10,6 +10,15 @@ namespace ke
 	{
 	}
 
+	quaternion WorldTransform::RotationToQuat() const
+	{
+		quaternion quat = glm::identity<quaternion>();
+		quat = glm::rotate(quat, glm::radians(Rotation.z + 90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		quat = glm::rotate(quat, glm::radians(-Rotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+		quat = glm::rotate(quat, glm::radians(Rotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
+		return quat;
+	}
+
 	void WorldTransform::SetLocation(float3 location)
 	{
 		Location = location;
@@ -28,11 +37,12 @@ namespace ke
 	matrix4x4 WorldTransform::GenerateWorldMatrix() const
 	{
 		matrix4x4 worldMat = matrix4x4(1.0f);
+		const quaternion quat = RotationToQuat();
+
 		worldMat = glm::translate(worldMat, Location);
-		worldMat = glm::rotate(worldMat, glm::radians(Rotation.z), float3(0.0f, 0.0f, 1.0f));
-		worldMat = glm::rotate(worldMat, glm::radians(Rotation.y), float3(0.0f, 1.0f, 0.0f));
-		worldMat = glm::rotate(worldMat, glm::radians(Rotation.x), float3(1.0f, 0.0f, 0.0f));
+		worldMat *= glm::toMat4(quat);
 		worldMat = glm::scale(worldMat, Scale);
+
 		return worldMat;
 	}
 
@@ -42,17 +52,14 @@ namespace ke
 		return glm::transpose(glm::inverse(worldMat));
 	}
 
+	float3 WorldTransform::RotationToEulerNormalized() const
+	{
+		return glm::normalize(RotationToEuler());
+	}
+
 	float3 WorldTransform::RotationToEuler() const
 	{
-		const float yaw = Rotation.z + 90.0f;
-		const float pitch = Rotation.x;
-		// const float Roll = Vector.y;
-
-		float3 direction{};
-		direction.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-		direction.z = glm::sin(glm::radians(pitch));
-		direction.y = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-		return glm::normalize(direction);
+		return glm::rotate(RotationToQuat(), glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
 }

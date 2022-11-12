@@ -139,7 +139,7 @@ namespace ke
 		float m_MaxViewportIconScreenCoord = 0.9f;
 
 	public:
-		WorldTransform EditorCameraTransform{};
+		WorldTransform EditorCameraTransform{ float3(0.0f, 0.0f, 1.0f) };
 		float EditorCameraSensitivity = 32;
 		float EditorCameraSpeed = 2.0f;
 	};

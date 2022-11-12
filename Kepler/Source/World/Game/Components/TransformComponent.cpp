@@ -31,7 +31,7 @@ namespace ke
 
 	float3 TransformComponent::GetForwardVector() const
 	{
-		return MathCamera::ToEuler(Transform.GetRotation());
+		return Transform.RotationToEulerNormalized();
 	}
 
 	float3 TransformComponent::GetRightVector() const

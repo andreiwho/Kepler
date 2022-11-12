@@ -153,6 +153,7 @@ namespace ke
 
 		if (UpdateKind == EWorldUpdateKind::Play)
 		{
+			m_PhysicsWorld->Simulate(DeltaTime);
 			for (auto& accessor : m_StaticState->m_NativeAccessors)
 			{
 				if (accessor.OnUpdate)

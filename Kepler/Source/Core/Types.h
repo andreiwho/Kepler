@@ -11,6 +11,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <optional>
 
 namespace ke
@@ -101,6 +103,7 @@ namespace ke
 	using float4 = glm::vec4;
 	using color3 = float3;
 	using color4 = float4;
+	using quaternion = glm::quat;
 
 	using int2 = glm::ivec2;
 	using int3 = glm::ivec3;

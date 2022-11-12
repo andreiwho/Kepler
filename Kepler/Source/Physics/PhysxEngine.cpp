@@ -13,6 +13,9 @@
 #include "PhysicsWorld.h"
 #include "extensions/PxDefaultCpuDispatcher.h"
 #include "extensions/PxDefaultSimulationFilterShader.h"
+#include "PxRigidActor.h"
+#include "PxRigidStatic.h"
+#include "PxRigidDynamic.h"
 
 namespace
 {
@@ -151,9 +154,45 @@ namespace ke
 		sceneDesc.filterShader = &physx::PxDefaultSimulationFilterShader;
 		// TODO: Configure the properties needed
 		physx::PxScene* pScene = m_Physics->createScene(sceneDesc);
-		CHECK(pScene);
 
+		CHECK(pScene);
 		return New<PhysicsWorld>(pScene);
+	}
+
+	RefPtr<RigidBody> PhysicsEngine::CreateRigidBody(ERigidBodyDynamics dynamicsMode, const WorldTransform& transform)
+	{
+		physx::PxRigidActor* pActor = nullptr;
+		switch (dynamicsMode)
+		{
+		case ke::ERigidBodyDynamics::Static:
+			pActor = m_Physics->createRigidStatic({});
+			break;
+		case ke::ERigidBodyDynamics::Dynamic:
+			pActor = m_Physics->createRigidDynamic({});
+			break;
+		default:
+			break;
+		}
+		return {};
+	}
+
+	physx::PxTransform PhysicsEngine::KETransformToPxTransform(const WorldTransform& transform)
+	{
+		const float3 location = transform.GetLocation();
+		const physx::PxVec3 pxLocation{ location.x, location.y, location.z };
+		const quaternion rotation = transform.RotationToQuat();
+		const physx::PxQuat pxRotation{ rotation.x, rotation.y, rotation.z, rotation.w };
+		return physx::PxTransform(pxLocation, pxRotation);
+	}
+
+	WorldTransform PhysicsEngine::PxTransformToKETransform(const physx::PxTransform& transform)
+	{
+		const auto& pxPosition = transform.p;
+		const auto& pxQuat = transform.q;
+
+		
+
+		return {};
 	}
 
 }

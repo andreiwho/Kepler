@@ -25,6 +25,8 @@ namespace ke
 			return handle;
 		}
 
+		void Unbind(DelegateHandle handle);
+
 		void Invoke();
 
 	private:

@@ -784,8 +784,15 @@ namespace ke
 			matrix4x4 projMatrix = camera.GenerateProjectionMatrix();
 
 			TransformComponent& transformComp = m_pEditedWorld->GetComponent<TransformComponent>(m_SelectedEntity);
-			matrix4x4 transform = transformComp.GetTransform().GenerateWorldMatrix();
-
+			matrix4x4 transform = std::invoke([&]
+				{
+					matrix4x4 mat;
+					const float3 loc = transformComp.GetLocation();
+					const float3 rot = transformComp.GetRotation();
+					const float3 sc = transformComp.GetScale();
+					ImGuizmo::RecomposeMatrixFromComponents(&loc.x, &rot.x, &sc.x, glm::value_ptr(mat));
+					return mat;
+				});
 			ImGuizmo::SetDrawlist();
 			// Snapping
 			float3 snapVec = CalculateSnapVec();

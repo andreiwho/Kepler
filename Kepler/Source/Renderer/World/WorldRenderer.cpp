@@ -164,7 +164,7 @@ namespace ke
 		m_CurrentWorld->GetComponentView<DirectionalLightComponent, TransformComponent>().each(
 			[&, this](auto, DirectionalLightComponent& DLC, TransformComponent& TC)
 			{
-				auto dir = TC.GetTransform().RotationToEuler();
+				auto dir = TC.GetTransform().RotationToEulerNormalized();
 				auto color = DLC.GetColor();
 				auto intensity = DLC.GetIntensity();
 				RS_LightBuffer->Write("DirectionalLightDirection", &dir);

@@ -14,6 +14,7 @@ namespace ke
 		inline float3 GetLocation() const { return Location; }
 		inline float3 GetRotation() const { return Rotation; }
 		inline float3 GetScale() const { return Scale; }
+		quaternion RotationToQuat() const;
 
 		void SetLocation(float3 location);
 		void SetRotation(float3 rotation);
@@ -21,6 +22,7 @@ namespace ke
 
 		matrix4x4 GenerateWorldMatrix() const;
 		matrix3x3 GenerateNormalMatrix() const;
+		float3 RotationToEulerNormalized() const;
 		float3 RotationToEuler() const;
 
 	private:

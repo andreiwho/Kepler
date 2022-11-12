@@ -10,14 +10,23 @@ namespace physx
 
 namespace ke
 {
-	reflected class RigidBody : public Object
+	reflected 
+	enum class ERigidBodyDynamics
 	{
-		reflected_body();
-	
+		Static,
+		Dynamic,
+	};
+
+	class RigidBody : public IntrusiveRefCounted
+	{
 	public:
-		
+		RigidBody(ERigidBodyDynamics initialDynamics, physx::PxRigidActor* pActor);
+		~RigidBody();
+
+		inline ERigidBodyDynamics GetDynamicsMode() const { return m_DynamicsMode; }
+
 	private:
-		physx::PxScene* m_Scene{};
 		physx::PxRigidActor* m_RigidBody{};
+		ERigidBodyDynamics m_DynamicsMode{ERigidBodyDynamics::Static};
 	};
 }

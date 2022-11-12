@@ -22,6 +22,7 @@ namespace ke
 		if (AccumulateFixedTimeStep(deltaTime))
 		{
 			m_Scene->simulate(m_FixedDelta);
+			m_Scene->fetchResults(true);
 		}
 	}
 

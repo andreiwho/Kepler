@@ -1,5 +1,10 @@
 #pragma once
 #include "Core/Core.h"
+#include "Rigidbody/Rigidbody.h"
+#include "Renderer/World/WorldTransform.h"
+#include "foundation/PxTransform.h"
+
+namespace ke {  }
 
 namespace physx 
 {
@@ -27,6 +32,12 @@ namespace ke
 		inline physx::PxAllocatorCallback* GetPxAllocator() { return m_Allocator; }
 		inline physx::PxErrorCallback* GetPxErrorCallback() { return m_ErrorCallback; }
 		RefPtr<PhysicsWorld> CreateWorld();
+
+		RefPtr<RigidBody> CreateRigidBody(ERigidBodyDynamics dynamicsMode, const WorldTransform& transform);
+
+	private:
+		static physx::PxTransform KETransformToPxTransform(const WorldTransform& transform);
+		static WorldTransform PxTransformToKETransform(const physx::PxTransform& transform);
 
 	private:
 		physx::PxAllocatorCallback* m_Allocator{};
