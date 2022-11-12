@@ -6,6 +6,7 @@
 #include "Components/Light/AmbientLightComponent.h"
 #include "Components/Light/DirectionalLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
+#include "Physics/PhysxEngine.h"
 
 namespace ke
 {
@@ -21,6 +22,8 @@ namespace ke
 
 		KEPLER_INFO(LogGameWorld, "Created GameWorld with name {}", InName);
 		bNeedsUpdate = true;
+
+		m_PhysicsWorld = PhysicsEngine::Get()->CreateWorld();
 	}
 
 	GameWorld::~GameWorld()

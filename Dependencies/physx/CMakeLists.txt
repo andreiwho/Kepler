@@ -11,6 +11,7 @@ if(WIN32)
             PhysXCooking_64.lib
             PhysXFoundation_64.lib
             PVDRuntime_64.lib
+            PhysXExtensions_static_64.lib
         )    
 endif()
 

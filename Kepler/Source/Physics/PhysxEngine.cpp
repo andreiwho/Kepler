@@ -10,6 +10,9 @@
 #include "PxPhysics.h"
 #include "cooking/PxCooking.h"
 #include "PxSceneDesc.h"
+#include "PhysicsWorld.h"
+#include "extensions/PxDefaultCpuDispatcher.h"
+#include "extensions/PxDefaultSimulationFilterShader.h"
 
 namespace
 {
@@ -118,6 +121,9 @@ namespace ke
 		// Initlaize cooking
 		m_Cooking = PxCreateCooking(PX_PHYSICS_VERSION, *m_Foundation, physx::PxCookingParams(physx::PxTolerancesScale()));
 		CHECK(m_Cooking);
+
+		// Initialize physics dispatcher
+		m_PhysicsDispatcher = physx::PxDefaultCpuDispatcherCreate(m_CpuDispatcherThreadCount);
 	}
 
 	PhysicsEngine::~PhysicsEngine()
@@ -139,7 +145,10 @@ namespace ke
 
 	RefPtr<PhysicsWorld> PhysicsEngine::CreateWorld()
 	{
-		physx::PxSceneDesc sceneDesc{physx::PxTolerancesScale()};
+		physx::PxSceneDesc sceneDesc(m_Physics->getTolerancesScale());
+		sceneDesc.gravity = { 0.0f, -9.81f, 0.0f };
+		sceneDesc.cpuDispatcher = m_PhysicsDispatcher;
+		sceneDesc.filterShader = &physx::PxDefaultSimulationFilterShader;
 		// TODO: Configure the properties needed
 		physx::PxScene* pScene = m_Physics->createScene(sceneDesc);
 		CHECK(pScene);

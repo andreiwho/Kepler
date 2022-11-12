@@ -7,6 +7,7 @@
 #include <entt/entt.hpp>
 #include <functional>
 #include "../Scripting/NativeComponentContainer.h"
+#include "Physics/PhysicsWorld.h"
 #include "GameWorld.gen.h"
 
 namespace ke
@@ -244,6 +245,7 @@ namespace ke
 		static StaticState* m_StaticState;
 
 		Map<UUID, GameEntityId> m_UUIDToEntityMap;
+		RefPtr<PhysicsWorld> m_PhysicsWorld{};
 		GameEntityId m_MainCamera{};
 	};
 }

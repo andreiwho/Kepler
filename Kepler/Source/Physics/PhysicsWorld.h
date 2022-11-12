@@ -15,7 +15,7 @@ namespace ke
 		reflected_body();
 
 	public:
-		PhysicsWorld();
+		PhysicsWorld() { CRASH(); }
 		PhysicsWorld(physx::PxScene* pScene);
 		~PhysicsWorld();
 		

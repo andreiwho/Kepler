@@ -8,6 +8,7 @@ namespace physx
 	class PxFoundation;
 	class PxErrorCallback;
 	class PxAllocatorCallback;
+	class PxCpuDispatcher;
 }
 
 namespace ke
@@ -26,6 +27,7 @@ namespace ke
 		inline physx::PxAllocatorCallback* GetPxAllocator() { return m_Allocator; }
 		inline physx::PxErrorCallback* GetPxErrorCallback() { return m_ErrorCallback; }
 		RefPtr<PhysicsWorld> CreateWorld();
+
 	private:
 		physx::PxAllocatorCallback* m_Allocator{};
 		physx::PxErrorCallback* m_ErrorCallback{};
@@ -35,6 +37,9 @@ namespace ke
 		physx::PxPhysics* m_Physics{};
 		physx::PxOmniPvd* m_PvdHost{};
 		physx::PxCooking* m_Cooking{};
+
+		physx::PxCpuDispatcher* m_PhysicsDispatcher{};
+		static constexpr u32 m_CpuDispatcherThreadCount = 2;
 
 	private:
 #ifdef ENABLE_DEBUG
