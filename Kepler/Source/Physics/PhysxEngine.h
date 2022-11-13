@@ -19,6 +19,7 @@ namespace physx
 namespace ke
 {
 	class PhysicsWorld;
+	class BoxShape;
 
 	class PhysicsEngine
 	{
@@ -34,10 +35,11 @@ namespace ke
 		RefPtr<PhysicsWorld> CreateWorld();
 
 		RefPtr<RigidBody> CreateRigidBody(ERigidBodyDynamics dynamicsMode, const WorldTransform& transform);
-
-	private:
+	
 		static physx::PxTransform KETransformToPxTransform(const WorldTransform& transform);
 		static WorldTransform PxTransformToKETransform(const physx::PxTransform& transform);
+	
+		void AddBoxShape(RefPtr<RigidBody> pRigidBody, float3 extent);
 
 	private:
 		physx::PxAllocatorCallback* m_Allocator{};

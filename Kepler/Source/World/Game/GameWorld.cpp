@@ -7,6 +7,7 @@
 #include "Components/Light/DirectionalLightComponent.h"
 #include "glm/gtc/type_ptr.inl"
 #include "Physics/PhysxEngine.h"
+#include "Components/Physics/RigidbodyComponent.h"
 
 namespace ke
 {
@@ -65,12 +66,13 @@ namespace ke
 
 	GameEntityId GameWorld::CreateEntityDeferred()
 	{
-		return m_EntityRegistry.create();
+		auto entity = m_EntityRegistry.create();
+		m_EntityRegistry.emplace<TGameEntity>(entity, this, entity);
+		return entity;
 	}
 
 	void GameWorld::FinishCreatingEntity(GameEntityId entity)
 	{
-		m_EntityRegistry.emplace<TGameEntity>(entity, this, entity);
 		if (HasComponent<CameraComponent>(entity))
 		{
 			if (!IsValidEntity(m_MainCamera))
@@ -131,6 +133,20 @@ namespace ke
 			camera.SetTransform(CameraEntity.GetTransform());
 		}
 
+		if (UpdateKind == EWorldUpdateKind::Play)
+		{
+			m_PhysicsWorld->Simulate(DeltaTime);
+
+			m_EntityRegistry.view<RigidbodyComponent>().each(
+				[](auto e, RigidbodyComponent& RC) 
+				{
+					if (RC.GetDynamicsMode() == ERigidBodyDynamics::Dynamic)
+					{
+						RC.PostSimulate();
+					}
+				});
+		}
+
 		// Update components for entities
 		m_EntityRegistry.view<MaterialComponent, TransformComponent>().each(
 			[this](auto Id, MaterialComponent& MC, TransformComponent& TC)
@@ -153,7 +169,6 @@ namespace ke
 
 		if (UpdateKind == EWorldUpdateKind::Play)
 		{
-			m_PhysicsWorld->Simulate(DeltaTime);
 			for (auto& accessor : m_StaticState->m_NativeAccessors)
 			{
 				if (accessor.OnUpdate)
@@ -211,6 +226,7 @@ namespace ke
 			{
 				pComponent->SetOwner(id);
 				pComponent->SetWorld(this);
+				pComponent->OnAttach();
 				return pComponent;
 			}
 		}

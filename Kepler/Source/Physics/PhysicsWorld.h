@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Core.h"
+#include "Rigidbody/Rigidbody.h"
 #include "PhysicsWorld.gen.h"
 
 namespace physx
@@ -20,6 +21,9 @@ namespace ke
 		~PhysicsWorld();
 		
 		friend class PhysicsEngine;
+
+		void AddRigidBody(RefPtr<RigidBody> pRigidBody);
+		void RemoveRigidBody(RefPtr<RigidBody> pRigidBody);
 
 		void Simulate(float deltaTime);
 

@@ -67,6 +67,8 @@ namespace ke
 		KEPLER_PROFILE_SCOPE();
 
 		EntityHandle entity = { m_pWorld, m_SelectedEntity };
+		Array<ClassId> componentsToRemove;
+
 		if (auto pNativeComp = entity.GetComponent<NativeComponentContainer>())
 		{
 			for (const ClassId& id : pNativeComp->GetComponentIds())
@@ -90,6 +92,11 @@ namespace ke
 
 				const String& filteredName = SplitAndCapitalizeComponentName(pClass->GetName());
 				TEditorElements::DrawReflectedObjectFields(filteredName, id, pNativeComponent);
+			}
+
+			for (const ClassId id : componentsToRemove)
+			{
+				m_pWorld->RemoveComponent(id, m_SelectedEntity);
 			}
 		}
 	}

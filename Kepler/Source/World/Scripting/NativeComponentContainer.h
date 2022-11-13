@@ -35,6 +35,16 @@ namespace ke
 			}
 		}
 
+		void RemoveComponent(ClassId id)
+		{
+			auto iter = m_NativeClassIds.FindIterator([&](const UUID& lhs) { return lhs.Value == id.Value; });
+			if (iter != m_NativeClassIds.end())
+			{
+				m_NativeClassIds.Remove(iter);
+				m_NativeClassIds.Shrink();
+			}
+		}
+
 		const Array<UUID>& GetComponentIds() const& { return m_NativeClassIds; }
 
 	private:

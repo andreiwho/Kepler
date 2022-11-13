@@ -231,28 +231,40 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float>(pHandler);
-			TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
+			if (TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			{
+				field.SetValueFor(pHandler, value);
+			}
 		}
 		break;
 		case ClassId("float2"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float2>(pHandler);
-			TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
+			if(TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			{
+				field.SetValueFor(pHandler, value);
+			}
 		}
 		break;
 		case ClassId("float3"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float3>(pHandler);
-			TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
+			if(TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			{
+				field.SetValueFor(pHandler, value);
+			}
 		}
 		break;
 		case ClassId("float4"):
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float4>(pHandler);
-			TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax);
+			if (TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			{
+				field.SetValueFor(pHandler, value);
+			}
 		}
 		break;
 		case ClassId("bool"):
@@ -356,7 +368,6 @@ namespace ke
 				{
 					DrawReflectedField(name, field, pHandler);
 				}
-
 				TEditorElements::EndFieldTable();
 			}
 		}

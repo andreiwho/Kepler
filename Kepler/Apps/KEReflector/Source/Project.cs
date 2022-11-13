@@ -163,6 +163,8 @@ namespace KEReflector
         virtual bool IsEnum() const override {{ return {isEnum}; }}
         virtual void* Construct(void* pAddress) const override;
         virtual void* RegistryConstruct(entt::entity entity, entt::registry& registry) const override;
+        virtual void RegistryDestroy(entt::entity entity, entt::registry& registry) const override;
+        virtual bool RegistryContains(entt::entity entity, entt::registry& registry) const override;
         virtual bool IsComponentClass() const override {{ return {isComponent}; }}");
                     fileWriter.WriteLine(@"
     };");
@@ -261,6 +263,16 @@ namespace KEReflector
     {{
         {setupComponent};
         return &registry.emplace<{entry.Name}>(entity);
+    }}
+
+    void R{entry.Name}::RegistryDestroy(entt::entity entity, entt::registry& registry) const
+    {{
+        registry.remove<{entry.Name}>(entity);
+    }}
+
+    bool R{entry.Name}::RegistryContains(entt::entity entity, entt::registry& registry) const
+    {{
+        return registry.any_of<{entry.Name}>(entity);
     }}
 ");
 

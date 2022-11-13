@@ -10,6 +10,7 @@ namespace ke
 	public:
 		WorldTransform() = default;
 		WorldTransform(float3 location, float3 rotation = float3(), float3 scale = float3(1.0f));
+		WorldTransform(float3 location, quaternion rotation, float3 scale = float3(1.0f));
 
 		inline float3 GetLocation() const { return Location; }
 		inline float3 GetRotation() const { return Rotation; }

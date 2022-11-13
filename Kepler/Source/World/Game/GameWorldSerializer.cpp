@@ -264,7 +264,6 @@ namespace ke
 				SET_FIELD_VALUE(float3);
 				SET_FIELD_VALUE(float4);
 				SET_FIELD_VALUE(bool);
-				SET_FIELD_VALUE(i32);
 				SET_FIELD_VALUE(int2);
 				SET_FIELD_VALUE(int3);
 				SET_FIELD_VALUE(int4);
@@ -273,6 +272,14 @@ namespace ke
 				SET_FIELD_VALUE(uint3);
 				SET_FIELD_VALUE(uint4);
 				SET_FIELD_VALUE(ClassId);
+			case ClassId("i32"):
+			{
+				if (field.GetTypeHash() == ClassId("i32") || field.GetMetadata().bIsEnum)
+				{
+					field.SetValueFor(pHandler, &std::get<i32>(fieldInfo.Data));
+				}
+			}
+			break;
 			case ClassId("id64"):
 			{
 				switch (field.GetTypeHash())

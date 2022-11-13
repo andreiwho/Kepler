@@ -62,11 +62,15 @@ namespace ke
 		inline bool IsForcedSingleSectionOnLoad() const { return m_bForcedSingleSection; }
 		inline const String& GetParentAssetPath() const& { return m_ParentAssetName; }
 		inline bool IsLoadedFromAsset() const { return !m_ParentAssetName.empty(); }
+		inline float3 GetBoundingBoxSize() const { return m_BoundingBox; }
 
+	private:
+		static float3 CalculateBoundingBox(const Array<TStaticMeshSection>& sections);
 
 	private:
 		Array<TInternalSection> m_Sections;
 		bool m_bForcedSingleSection = false;
 		String m_ParentAssetName{};
+		float3 m_BoundingBox{};
 	};
 }

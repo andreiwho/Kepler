@@ -287,13 +287,13 @@ namespace ke
 			{
 				parent.SerializeSubObject(name, ClassId("float"), value.GetFloat());
 			}
-			else if (value.IsUint64())
-			{
-				parent.SerializeSubObject(name, ClassId("u64"), value.GetUint64());
-			}
 			else if (value.IsInt())
 			{
 				parent.SerializeSubObject(name, ClassId("i32"), value.GetInt());
+			}
+			else if (value.IsUint64())
+			{
+				parent.SerializeSubObject(name, ClassId("u64"), value.GetUint64());
 			}
 			else if (value.IsBool())
 			{

@@ -10,6 +10,13 @@ namespace ke
 	{
 	}
 
+	WorldTransform::WorldTransform(float3 location, quaternion rotation, float3 scale)
+		: Location(location)
+		, Scale(scale)
+	{
+		Rotation = glm::degrees(glm::eulerAngles(rotation));
+	}
+
 	quaternion WorldTransform::RotationToQuat() const
 	{
 		quaternion quat = glm::identity<quaternion>();

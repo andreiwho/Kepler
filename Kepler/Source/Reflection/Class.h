@@ -147,6 +147,8 @@ namespace ke
 		inline const ClassMetadata& GetMetadata() const { return m_Metadata; }
 
 		virtual void* RegistryConstruct(entt::entity id, entt::registry& registry) const = 0;
+		virtual void RegistryDestroy(entt::entity id, entt::registry& registry) const = 0;
+		virtual bool RegistryContains(entt::entity id, entt::registry& registry) const = 0;
 
 	protected:
 		ClassId m_ClassId;

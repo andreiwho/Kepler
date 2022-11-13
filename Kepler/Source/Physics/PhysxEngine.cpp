@@ -16,6 +16,10 @@
 #include "PxRigidActor.h"
 #include "PxRigidStatic.h"
 #include "PxRigidDynamic.h"
+#include "Shapes/Box.h"
+#include "extensions/PxRigidActorExt.h"
+#include "PxMaterial.h"
+#include "extensions/PxRigidBodyExt.h"
 
 namespace
 {
@@ -149,7 +153,7 @@ namespace ke
 	RefPtr<PhysicsWorld> PhysicsEngine::CreateWorld()
 	{
 		physx::PxSceneDesc sceneDesc(m_Physics->getTolerancesScale());
-		sceneDesc.gravity = { 0.0f, -9.81f, 0.0f };
+		sceneDesc.gravity = { 0.0f, 0.0f, -9.81f };
 		sceneDesc.cpuDispatcher = m_PhysicsDispatcher;
 		sceneDesc.filterShader = &physx::PxDefaultSimulationFilterShader;
 		// TODO: Configure the properties needed
@@ -165,15 +169,15 @@ namespace ke
 		switch (dynamicsMode)
 		{
 		case ke::ERigidBodyDynamics::Static:
-			pActor = m_Physics->createRigidStatic({});
+			pActor = m_Physics->createRigidStatic(KETransformToPxTransform(transform));
 			break;
 		case ke::ERigidBodyDynamics::Dynamic:
-			pActor = m_Physics->createRigidDynamic({});
+			pActor = m_Physics->createRigidDynamic(KETransformToPxTransform(transform));
 			break;
 		default:
 			break;
 		}
-		return {};
+		return MakeRef(New<RigidBody>(dynamicsMode, pActor));
 	}
 
 	physx::PxTransform PhysicsEngine::KETransformToPxTransform(const WorldTransform& transform)
@@ -189,10 +193,17 @@ namespace ke
 	{
 		const auto& pxPosition = transform.p;
 		const auto& pxQuat = transform.q;
-
-		
-
-		return {};
+		return WorldTransform(float3(pxPosition.x, pxPosition.y, pxPosition.z), quaternion(pxQuat.w, pxQuat.x, pxQuat.y, pxQuat.z));
 	}
 
+	void PhysicsEngine::AddBoxShape(RefPtr<RigidBody> pRigidBody, float3 extent)
+	{
+		physx::PxMaterial* material = m_Physics->createMaterial(0.1f, 0.1f, 0);
+		physx::PxShape* pShape = physx::PxRigidActorExt::createExclusiveShape(*pRigidBody->m_RigidBody, physx::PxBoxGeometry(extent.x / 2, extent.y / 2, extent.z / 2), *material);
+		
+		if (physx::PxRigidBody* pPxRigidBody = pRigidBody->m_RigidBody->is<physx::PxRigidBody>())
+		{
+			physx::PxRigidBodyExt::updateMassAndInertia(*pPxRigidBody, 10.0f);
+		}
+	}
 }

@@ -44,6 +44,30 @@ namespace ke
 				}));
 			m_Sections.EmplaceBack(std::move(outSection));
 		}
+		m_BoundingBox = CalculateBoundingBox(sections);
+	}
+
+	ke::float3 StaticMesh::CalculateBoundingBox(const Array<TStaticMeshSection>& sections)
+	{
+		float3 minExtent, maxExtent;
+		minExtent = maxExtent = sections[0].Vertices[0].Position;
+
+		for (const auto& section : sections)
+		{
+			for (const auto& vertex : section.Vertices)
+			{
+				if (vertex.Position.x < minExtent.x) minExtent.x = vertex.Position.x;
+				if (vertex.Position.x > maxExtent.x) maxExtent.x = vertex.Position.x;
+
+				if (vertex.Position.y < minExtent.y) minExtent.y = vertex.Position.y;
+				if (vertex.Position.y > maxExtent.y) maxExtent.y = vertex.Position.y;
+
+
+				if (vertex.Position.z < minExtent.z) minExtent.z = vertex.Position.z;
+				if (vertex.Position.z > maxExtent.z) maxExtent.z = vertex.Position.z;
+			}
+		}
+		return maxExtent - minExtent;
 	}
 
 }

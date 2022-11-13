@@ -143,6 +143,7 @@ namespace ke
 				SetupNativeComponent<T>();
 				component.SetOwner(entity);
 				component.SetWorld(this);
+				component.OnAttach();
 				return component;
 			}
 		}
@@ -177,10 +178,27 @@ namespace ke
 			return m_EntityRegistry.any_of<T>(Entity.Entity);
 		}
 
+		inline bool HasComponent(ClassId id, GameEntityId entity)
+		{
+			if (auto pClass = GetReflectedClass(id))
+			{
+				return pClass->RegistryContains(entity, m_EntityRegistry);
+			}
+			return false;
+		}
+
 		template<entity_component_typename T>
 		void RemoveComponent(GameEntityId Entity)
 		{
 			m_EntityRegistry.remove<T>(Entity.Entity);
+		}
+
+		void RemoveComponent(ClassId componentId, GameEntityId entity)
+		{
+			if (auto pClass = GetReflectedClass(componentId))
+			{
+				pClass->RegistryDestroy(entity, m_EntityRegistry);
+			}
 		}
 
 		template<entity_component_typename ... Ts>
@@ -230,6 +248,8 @@ namespace ke
 		}
 
 		static void ClearStaticState();
+
+		inline RefPtr<PhysicsWorld> GetPhysicsWorld() const { return m_PhysicsWorld; }
 
 	private:
 		void FlushPendingDestroys();
