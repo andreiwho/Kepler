@@ -16,6 +16,7 @@ namespace KEReflector
         public bool bIsEnum { get; set; } = false;
         public bool bIsEnumClass { get; set; } = false;
         public int BloatLine { get; set; } = -1;
+        public bool bIsValueSemanticType { get; set; } = false;
         // Change to Dictionary, to be able to pass values after '='
         public Dictionary<string, string> MetaSpecifiers { get; set; } = new();
         public Dictionary<string, int> EnumEntries { get; set; } = new();
@@ -136,6 +137,34 @@ namespace KEReflector
             public static implicit operator string(UniqueToken token) => token.Name;
         }
 
+        private bool IsValueSemanticType(string token)
+        {
+            return token switch
+            {
+                "bool" => true,
+                "i8" => true,
+                "i16" => true,
+                "i32" => true,
+                "i64" => true,
+                "u8" => true,
+                "u16" => true,
+                "u32" => true,
+                "u64" => true,
+                "float" => true,
+                "double" => true,
+                "float2" => true,
+                "float3" => true,
+                "float4" => true,
+                "int2" => true,
+                "int3" => true,
+                "int4" => true,
+                "uint2" => true,
+                "uint3" => true,
+                "uint4" => true,
+                _ => false
+            };
+        }
+
         List<ParsedToken> ParseTokens(List<UniqueToken> tokens)
         {
             List<ParsedToken> result = new List<ParsedToken>();
@@ -248,16 +277,19 @@ namespace KEReflector
                         if (token == "enum")
                         {
                             currentToken.bIsEnum = true;
+                            currentToken.bIsValueSemanticType = true;
                             continue;
                         }
 
                         if (currentToken.bIsEnum && token == "class")
                         {
                             currentStage = EParseStage.ParseName;
+                            currentToken.bIsValueSemanticType = true;
                             continue;
                         }
 
                         currentToken.Type = token;
+                        currentToken.bIsValueSemanticType = IsValueSemanticType(token);
                         currentStage = EParseStage.ParseName;
                         break;
                     case EParseStage.ParseTemplateWrapper:

@@ -3,7 +3,7 @@
 
 namespace physx
 {
-	class PxBoxGeometry;
+	class PxShape;
 }
 
 namespace ke
@@ -11,6 +11,9 @@ namespace ke
 	class BoxShape : public Object
 	{
 	public:
-		BoxShape();
+		BoxShape(physx::PxShape* pShape);
+
+	private:
+		physx::PxShape* m_Shape;
 	};
 }
