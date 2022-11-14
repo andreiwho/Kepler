@@ -26,7 +26,7 @@ endfunction()
 #############################################################################
 macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
     target_compile_features(${ModuleName} PUBLIC cxx_std_20)
-    target_include_directories(${ModuleName} PUBLIC Source Generated)
+    target_include_directories(${ModuleName} PUBLIC Source Generated ${CMAKE_CURRENT_BINARY_DIR}/Generated)
     set_target_properties(${ModuleName} PROPERTIES 
         FOLDER ${ModuleFolder}
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:Debug>DLL"
@@ -40,6 +40,8 @@ macro(SetupDefaultProjectProperties ModuleName ModuleFolder)
     )
     
     add_dependencies(${ModuleName} Reflection CheckNewFiles)
+    string(TOUPPER ${ModuleName} CURRENT_MODULE_NAME)
+    configure_file(${CMAKE_SOURCE_DIR}/Scripts/Configs/ModuleBuild.h.in ${CMAKE_CURRENT_BINARY_DIR}/Generated/${ModuleName}_ModuleConfig.h)
 
     if(WIN32 OR UNIX)
         target_compile_definitions(${ModuleName} PRIVATE PLATFORM_DESKTOP)

@@ -1,0 +1,14 @@
+#pragma once
+#ifdef SHARED_MODULE
+#   ifdef WIN32
+#       define @CURRENT_MODULE_NAME@_API __declspec(dllexport)
+#   else
+#       error Unsupported platform
+#   endif
+#else
+#   ifdef WIN32
+#       define @CURRENT_MODULE_NAME@_API __declspec(dllimport)
+#   else
+#       error Unsupported platform
+#   endif
+#endif
