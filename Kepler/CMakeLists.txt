@@ -1,8 +1,11 @@
 add_subdirectory(ThirdParty)
 add_subdirectory(Shaders)
+add_subdirectory(Modules)
+
 CreateLibrary("Kepler" "Main")
 target_link_libraries("Kepler" 
  PUBLIC 
+  "Core"
   "spdlog" 
   "glm" 
   "EnTT"

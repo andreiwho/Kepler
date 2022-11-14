@@ -7,13 +7,13 @@
 
 namespace ke
 {
-	extern std::unique_ptr<TMemoryPool> GGlobalMemoryPool;
+	CORE_API extern std::unique_ptr<TMemoryPool> GGlobalMemoryPool;
 
 	/**
 	 * Currently the TMalloc class does not hold any kind of state.
 	 * Just in case anyone is wondering, it will.
 	 */
-	class TMalloc
+	class CORE_API TMalloc
 	{
 		static TMalloc* Instance;
 	public:
@@ -47,11 +47,11 @@ namespace ke
 		}
 	}
 
-	usize MemorySize(void* data);
+	CORE_API usize MemorySize(void* data);
 
 	template<typename T> using SharedPtr = std::shared_ptr<T>;
 
-	class IntrusiveRefCounted
+	class CORE_API IntrusiveRefCounted
 	{
 	public:
 		virtual ~IntrusiveRefCounted() = default;
@@ -64,9 +64,9 @@ namespace ke
 		mutable TAtomic<u64> m_RefCount{ 1 };
 	};
 
-	void DoRelease(void* pRefCnt);
-	void DoAddRef(void* pRefCounted);
-	usize DoGetRefCount(void* pRefCounted);
+	CORE_API void DoRelease(void* pRefCnt);
+	CORE_API void DoAddRef(void* pRefCounted);
+	CORE_API usize DoGetRefCount(void* pRefCounted);
 
 	template<typename T>
 	class RefPtr

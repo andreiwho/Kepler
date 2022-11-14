@@ -1,8 +1,6 @@
 #include "Timer.h"
 #include <chrono>
-#ifdef PLATFORM_DESKTOP
-# include <GLFW/glfw3.h>
-#endif
+
 namespace ke
 {
 	TTimer* GGlobalTimer = nullptr;

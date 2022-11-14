@@ -43,8 +43,8 @@ namespace ke
 	using CStr = const char*;
 	using WStr = const wchar_t*;
 
-	String ConvertToAnsiString(const TWideString& wide);
-	TWideString ConvertToWideString(const String& ansi);
+	CORE_API String ConvertToAnsiString(const TWideString& wide);
+	CORE_API TWideString ConvertToWideString(const String& ansi);
 
 	// FNV-1a constexpr hashing functions 
 	constexpr u64 Hash32(const char* str, usize n, uint32_t basis = UINT32_C(2166136261)) {
@@ -74,7 +74,7 @@ namespace ke
 	}
 	
 	// a 64 bit identifier, which claims to be unique
-	struct UUID
+	struct CORE_API UUID
 	{
 		static constexpr u64 none = 0;
 

@@ -1,9 +1,9 @@
 #pragma once
-#include "Types.h"
-#include "Macros.h"
+#include "Core/Types.h"
+#include "Core/Macros.h"
 #include "Malloc.h"
 #include "Log.h"
-#include "Exception.h"
+#include "Core/Exception.h"
 #include "Filesystem/VFS.h"
 #include "Core/Object/Object.h"
 #include "Core/Delegate/Delegate.h"

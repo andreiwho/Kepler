@@ -1,9 +1,10 @@
 #pragma once
+#include "Build.h"
 #include <chrono>
 
 namespace ke
 {
-	class TTimer
+	class CORE_API TTimer
 	{
 		using ClockType = std::chrono::high_resolution_clock;
     public:
@@ -22,5 +23,5 @@ namespace ke
 		float m_DeltaTime{};
 	};
 
-	extern TTimer* GGlobalTimer;
+	CORE_API extern TTimer* GGlobalTimer;
 }

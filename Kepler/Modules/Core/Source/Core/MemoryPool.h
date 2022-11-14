@@ -80,7 +80,7 @@ namespace ke
 	using PoolAllocator = std::pmr::synchronized_pool_resource;
 #endif
 
-	class TMemoryPool
+	class CORE_API TMemoryPool
 	{
 	public:
 		TMemoryPool(usize size);

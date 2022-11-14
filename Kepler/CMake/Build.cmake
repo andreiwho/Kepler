@@ -64,6 +64,14 @@ macro(CreateLibrary ModuleName ModuleFolder)
     source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${PROJECT_FILES})
 endmacro()
 
+macro(CreateSharedModule ModuleName ModuleFolder)
+    file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h Source/**.inl LIST_DIRECTORIES TRUE)
+    add_library(${ModuleName} SHARED ${PROJECT_FILES})
+    SetupDefaultProjectProperties(${ModuleName} ${ModuleFolder})
+    target_compile_definitions(${ModuleName} PRIVATE SHARED_MODULE)
+    source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${PROJECT_FILES})
+endmacro()
+
 #############################################################################
 macro(CreateExecutable ModuleName ModuleFolder)
     file(GLOB_RECURSE PROJECT_FILES Source/**.cpp Source/**.h Source/**.inl LIST_DIRECTORIES TRUE)

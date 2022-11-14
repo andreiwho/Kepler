@@ -1,4 +1,5 @@
 #pragma once
+#include "Build.h"
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -6,7 +7,7 @@
 
 namespace ke
 {
-	class TException : public std::runtime_error
+	class CORE_API TException : public std::runtime_error
 	{
 	public:
 		TException(const std::string& msg, const std::string& name = "Exception");
