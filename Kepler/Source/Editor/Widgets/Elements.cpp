@@ -331,7 +331,7 @@ namespace ke
 							i32 newValue = index;
 							if (ImGui::Selectable(string.c_str()))
 							{
-								field.SetValueFor(pHandler, &newValue);
+								field.SetValueFor(pHandler, newValue);
 							}
 						}
 						ImGui::EndCombo();
