@@ -29,10 +29,9 @@ namespace ke
 			SerializedFieldInfo outInfo;
 			outInfo.TypeHash = field.GetTypeHash();
 
-#define		GET_FIELD_VALUE(Type) case ClassId(#Type): outInfo.Data = *field.GetValueFor<Type>(pObject); break
+#define		GET_FIELD_VALUE(Type) case ClassId(#Type): outInfo.Data = field.GetValueFor<Type>(pObject); break
 			switch (field.GetTypeHash())
 			{
-				GET_FIELD_VALUE(String);
 				GET_FIELD_VALUE(float);
 				GET_FIELD_VALUE(float2);
 				GET_FIELD_VALUE(float3);
@@ -56,6 +55,11 @@ namespace ke
 				outInfo.TypeHash = ClassId("id64");
 			}
 			break;
+			case ClassId("String"):
+			{
+				outInfo.Data = *field.GetValueFor<String>(pObject);
+			}
+			break;
 			default:
 			{
 				// Get subfields
@@ -64,12 +68,12 @@ namespace ke
 				{
 					if (pClass->IsEnum())
 					{
-						outInfo.Data = *field.GetValueFor<i32>(pObject);
+						outInfo.Data = field.GetValueFor<i32>(pObject);
 					}
 
 					for (auto& [name, subField] : pClass->GetFields())
 					{
-						outInfo.SubFields[name] = GetFieldInfoFor(subField, field.GetValueFor<void*>(pObject));
+						outInfo.SubFields[name] = GetFieldInfoFor(subField, field.GetValueFor<void>(pObject));
 					}
 				}
 			}
@@ -255,10 +259,9 @@ namespace ke
 		{
 			bool bIsOfBaseType = true;
 
-#define		SET_FIELD_VALUE(Type) case ClassId(#Type): field.SetValueFor(pHandler, &std::get<Type>(fieldInfo.Data)); break
+#define		SET_FIELD_VALUE(Type) case ClassId(#Type): field.SetValueFor(pHandler, std::get<Type>(fieldInfo.Data)); break
 			switch (fieldInfo.TypeHash)
 			{
-				SET_FIELD_VALUE(String);
 				SET_FIELD_VALUE(float);
 				SET_FIELD_VALUE(float2);
 				SET_FIELD_VALUE(float3);
@@ -272,11 +275,16 @@ namespace ke
 				SET_FIELD_VALUE(uint3);
 				SET_FIELD_VALUE(uint4);
 				SET_FIELD_VALUE(ClassId);
+			case ClassId("String"):
+			{
+				field.SetValueFor(pHandler, &std::get<String>(fieldInfo.Data));
+			}
+			break;
 			case ClassId("i32"):
 			{
 				if (field.GetTypeHash() == ClassId("i32") || field.GetMetadata().bIsEnum)
 				{
-					field.SetValueFor(pHandler, &std::get<i32>(fieldInfo.Data));
+					field.SetValueFor(pHandler, std::get<i32>(fieldInfo.Data));
 				}
 			}
 			break;
@@ -287,7 +295,7 @@ namespace ke
 				case ClassId("id64"):
 				{
 					UUID id = std::get<UUID>(fieldInfo.Data);
-					field.SetValueFor(pHandler, &id);
+					field.SetValueFor(pHandler, id);
 				}
 				break;
 				case ClassId("AssetTreeNode"):
@@ -310,12 +318,12 @@ namespace ke
 				switch (field.GetTypeHash())
 				{
 				case ClassId("u64"):
-					field.SetValueFor(pHandler, &std::get<u64>(fieldInfo.Data));
+					field.SetValueFor(pHandler, std::get<u64>(fieldInfo.Data));
 					break;
 				case ClassId("id64"):
 				{
 					UUID id = std::get<u64>(fieldInfo.Data);
-					field.SetValueFor(pHandler, &id);
+					field.SetValueFor(pHandler, id);
 				}
 				break;
 				case ClassId("AssetTreeNode"):
@@ -345,11 +353,11 @@ namespace ke
 				{
 					if (pClass->IsEnum())
 					{
-						field.SetValueFor(pHandler, &std::get<i32>(fieldInfo.Data));
+						field.SetValueFor(pHandler, std::get<i32>(fieldInfo.Data));
 					}
 					else
 					{
-						void** ppHandledField = field.GetValueFor<void*>(pHandler);
+						void* ppHandledField = field.GetValueFor<void>(pHandler);
 						auto& subFields = pClass->GetFields();
 						for (auto& [name, subField] : fieldInfo.SubFields)
 						{

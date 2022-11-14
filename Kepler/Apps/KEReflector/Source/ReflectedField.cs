@@ -11,6 +11,7 @@ namespace KEReflector
         public bool bIsPointer { get; set; } = false;
         public bool bIsRefPtr { get; set; } = false;
         public bool bIsEnum { get; set; } = false;
+        public bool bIsValueSemanticType { get; set; } = false;
         public Dictionary<string, string> MetadataSpecifiers { get; set; } = new();
     }
 }

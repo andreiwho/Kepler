@@ -68,29 +68,78 @@ namespace ke
 		bool bHideInDetails : 1 = false;
 	};
 
+	static constexpr usize GMaxNumericTypeSize = sizeof(float4);
+
+	template<typename T, typename ... Args>
+	constexpr bool GOneOfTypes = (std::is_same_v<T, Args> || ...);
+	
+	template<typename T>
+	constexpr bool GIsNumericType = std::is_arithmetic_v<T> || std::is_enum_v<T> || GOneOfTypes<T, float2, float3, float4, int2, int3, int4, uint2, uint3, uint4, UUID>;
+
+	template<typename T>
+	concept NumericValue = GIsNumericType<T>;
+
+	template<typename T>
+	concept NotNumericValue = !GIsNumericType<T>;
+
+	struct FieldAny
+	{
+		FieldAny(void* pPtr) : Pointer(pPtr), bIsPointer(true) {}
+
+		template<NumericValue T>
+		FieldAny(T val)
+			:	bIsPointer(false)
+		{
+			memcpy(Numeric, &val, sizeof(val));
+		}
+
+		template<typename T>
+		auto GetValue() const
+		{
+			if constexpr (GIsNumericType<T>)
+			{
+				T numericVal;
+				memcpy(&numericVal, Numeric, sizeof(T));
+				return numericVal;
+			}
+			else
+			{
+				return (T*)Pointer;
+			}
+		}
+
+		union
+		{
+			ubyte Numeric[GMaxNumericTypeSize];
+			void* Pointer;
+		};
+
+		bool bIsPointer = false;
+	};
+
 	class ReflectedField
 	{
 	public:
-		using GetAccessorType = void* (*)(void*);
-		using SetAccessorType = void (*)(void*, void*);
+		using GetAccessorType = FieldAny (*)(void*);
+		using SetAccessorType = void (*)(void*, FieldAny);
 		ReflectedField(ClassId id, const FieldMetadata& fieldMetadata, GetAccessorType getAccessor, SetAccessorType setAccessor);
 		ReflectedField() = default;
 
 		template<typename GetType, typename HandlerType>
-		GetType* GetValueFor(HandlerType* handler)
+		auto GetValueFor(HandlerType* handler)
 		{
-			return (GetType*)m_GetAccessor((void*)handler);
+			return m_GetAccessor((void*)handler).GetValue<GetType>();	
 		}
 
 		template<typename SetType, typename HandlerType>
-		void SetValueFor(HandlerType* pHandler, SetType* pValue)
+		void SetValueFor(HandlerType* pHandler, SetType pValue)
 		{
 			if (m_Metadata.bReadOnly)
 			{
 				return;
 			}
 
-			m_SetAccessor(pHandler, pValue);
+			m_SetAccessor(pHandler, FieldAny(pValue));
 		}
 
 		inline ClassId GetTypeHash() const

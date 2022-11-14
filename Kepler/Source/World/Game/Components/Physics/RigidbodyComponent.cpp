@@ -26,7 +26,7 @@ namespace ke
 
 	void RigidbodyComponent::SetDynamicsMode(ERigidBodyDynamics newMode)
 	{
-		if (m_DynamicsMode == newMode)
+		if (GetDynamicsMode() == newMode)
 		{
 			return;
 		}
@@ -49,6 +49,11 @@ namespace ke
 		}
 
 		m_DynamicsMode = newMode;
+	}
+
+	ERigidBodyDynamics RigidbodyComponent::GetDynamicsMode() const
+	{
+		return m_DynamicsMode;
 	}
 
 	void RigidbodyComponent::SetMass(float newMass)
@@ -98,7 +103,6 @@ namespace ke
 			m_RigidBody->SetMass(m_Mass);
 			m_RigidBody->SetEnableGravity(m_EnableGravity);
 			m_RigidBody->SetAngularDamping(m_AngularDamping);
-
 
 			float3 bounds = { 0.5f, 0.5f, 0.5f };
 			if (GetWorld()->HasComponent<StaticMeshComponent>(GetOwner()))

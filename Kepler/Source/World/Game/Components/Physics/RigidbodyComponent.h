@@ -13,11 +13,12 @@ namespace ke
 		virtual void OnAttach() override;
 
 		void SetDynamicsMode(ERigidBodyDynamics newMode);
+		ERigidBodyDynamics GetDynamicsMode() const;
+		
 		void SetMass(float newMass);
 		void SetEnableGravity(bool bNewEnableGravity);
 		void SetAngularDamping(float newDamping);
 
-		inline ERigidBodyDynamics GetDynamicsMode() const { return m_DynamicsMode; }
 
 		void PostSimulate();
 
@@ -27,7 +28,7 @@ namespace ke
 	private:
 		RefPtr<RigidBody> m_RigidBody;
 
-		reflected kmeta(set = SetDynamicsMode)
+		reflected kmeta(set = SetDynamicsMode, get = GetDynamicsMode)
 		ERigidBodyDynamics m_DynamicsMode {};
 
 		reflected kmeta(set = SetMass) 

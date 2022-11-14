@@ -231,7 +231,7 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float>(pHandler);
-			if (TEditorElements::DragFloat1(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			if (TEditorElements::DragFloat1(name.c_str(), value, md.EditSpeed, md.ClampMin, md.ClampMax))
 			{
 				field.SetValueFor(pHandler, value);
 			}
@@ -241,7 +241,7 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float2>(pHandler);
-			if(TEditorElements::DragFloat2(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			if(TEditorElements::DragFloat2(name.c_str(), value, md.EditSpeed, md.ClampMin, md.ClampMax))
 			{
 				field.SetValueFor(pHandler, value);
 			}
@@ -251,7 +251,7 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float3>(pHandler);
-			if(TEditorElements::DragFloat3(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			if(TEditorElements::DragFloat3(name.c_str(), value, md.EditSpeed, md.ClampMin, md.ClampMax))
 			{
 				field.SetValueFor(pHandler, value);
 			}
@@ -261,7 +261,7 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<float4>(pHandler);
-			if (TEditorElements::DragFloat4(name.c_str(), *value, md.EditSpeed, md.ClampMin, md.ClampMax))
+			if (TEditorElements::DragFloat4(name.c_str(), value, md.EditSpeed, md.ClampMin, md.ClampMax))
 			{
 				field.SetValueFor(pHandler, value);
 			}
@@ -271,7 +271,7 @@ namespace ke
 		{
 			TEditorElements::NextFieldRow(name.c_str());
 			auto value = field.GetValueFor<bool>(pHandler);
-			ImGui::Checkbox(fmt::format("##{}", name).c_str(), value);
+			ImGui::Checkbox(fmt::format("##{}", name).c_str(), &value);
 		}
 		break;
 		case ClassId("String"):
@@ -318,12 +318,12 @@ namespace ke
 				{
 					TEditorElements::NextFieldRow(name.c_str());
 					auto& values = pMyEnum->GetEnumValues();
-					i32* pair = field.GetValueFor<i32>(pHandler);
-					if (*pair > values.GetLength())
+					i32 pair = field.GetValueFor<i32>(pHandler);
+					if (pair > values.GetLength())
 					{
 						return;
 					}
-					auto& selectedValue = values[*pair];
+					auto& selectedValue = values[pair];
 					if (ImGui::BeginCombo(fmt::format("#{}", name).c_str(), selectedValue.c_str()))
 					{
 						for (auto& [index, string] : values)

@@ -161,6 +161,9 @@ namespace KEReflector
                 "uint2" => true,
                 "uint3" => true,
                 "uint4" => true,
+                "UUID" => true,
+                "ClassId" => true,
+                "id64" => true,
                 _ => false
             };
         }
@@ -496,6 +499,7 @@ namespace KEReflector
                             DisplayName = DisplayName,
                             MetadataSpecifiers = token.MetaSpecifiers,
                             bIsPointer = token.bIsPointer,
+                            bIsValueSemanticType = token.bIsValueSemanticType,
                             bIsRefPtr = token.bIsRefPtr,
                             bIsEnum = token.bIsEnum,
                         });
